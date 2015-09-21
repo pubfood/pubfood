@@ -4,13 +4,14 @@
   "description": "Header bidding library",
   "main": "src/pubfood.js",
   "directories": {
-      "test": "test",
-      "src": "src"
+    "test": "test",
+    "src": "src"
   },
   "scripts": {
     "build": "gulp build",
     "test": "gulp test",
-    "start": "gulp serve:test"
+    "start": "gulp serve:test",
+    "clean": "gulp clean"
   },
   "repository": {
     "type": "git",

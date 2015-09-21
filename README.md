@@ -1,8 +1,10 @@
-# pubfood
+# DRAFT: pubfood
 
-A header bidding JavaScript client library a.k.a. "HeaderOS".
+A browser client header bidding JavaScript library.
 
 # What is header bidding?
+
+![Header Bidding Overview](doc/header-bidding-overview.png?raw=true "Header Bidding Overview")
 
 It's what we (YB) do; on pageview:
 
@@ -12,7 +14,29 @@ It's what we (YB) do; on pageview:
 - The publisher ad server has the ultimate decision which partner "wins" the impression
     - `The winner may depend on other business rules defined in the publisher ad server; not just the CPM bid`
 
+## Build Tasks
+
+### Build
+
+`npm install`
+`npm run build`
+
+### Test
+
+```
+npm run test
+```
+
+### Start
+Opens the `test/index.html` file in your default browser.
+
+```
+npm start
+```
+
+# References
 Some reasonable summaries if you're new to header bidding:
 
+- http://prebid.org/
 - http://adexchanger.com/publishers/the-rise-of-header-bidding-and-the-end-of-the-publisher-waterfall/
 - http://www.adopsinsider.com/ad-exchanges/diagramming-the-header-bidding-redirect-path/

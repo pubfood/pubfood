@@ -30,7 +30,7 @@ gulp.task('test', ['jshint', 'jscs', 'mocha']);
 
 gulp.task('doc', function() {
     gulp.src('./src/**/*.js')
-        .pipe(plugins.jsdoc('./doc'));
+        .pipe(plugins.jsdoc('./dist/doc'));
 });
 
 gulp.task('uglify', function() {
@@ -40,7 +40,7 @@ gulp.task('uglify', function() {
 });
 
 gulp.task('clean', function() {
-    del(['dist/', 'doc/']).then(function (paths) {
+    del(['dist/']).then(function (paths) {
         console.log('Cleaned paths:\n', paths.join('\n'));
     });
 });
