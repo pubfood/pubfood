@@ -1,0 +1,52 @@
+{
+  "name": "pubfood",
+  "version": "0.0.1",
+  "description": "Header bidding library",
+  "main": "src/pubfood.js",
+  "directories": {
+      "test": "test",
+      "src": "src"
+  },
+  "scripts": {
+    "build": "gulp build",
+    "test": "gulp test",
+    "start": "gulp serve:test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "ssh://git@github.com/yieldbot/pubfood.git"
+  },
+  "keywords": [
+    "prebid",
+    "header",
+    "bidding",
+    "auction",
+    "advertising",
+    "async",
+    "parallel"
+  ],
+  "author": "elljoh",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/yieldbot/pubfood/issues"
+  },
+  "homepage": "https://github.com/yieldbot/pubfood",
+  "devDependencies": {
+    "browser-sync": "^2.9.4",
+    "chai": "^3.3.0",
+    "del": "^2.0.2",
+    "gulp": "^3.9.0",
+    "gulp-connect": "^2.2.0",
+    "gulp-header": "^1.7.1",
+    "gulp-if": "^1.2.5",
+    "gulp-jscs": "^2.0.0",
+    "gulp-jsdoc": "^0.1.4",
+    "gulp-jshint": "^1.11.2",
+    "gulp-load-plugins": "^1.0.0-rc.1",
+    "gulp-mocha-phantomjs": "^0.10.1",
+    "gulp-open": "^1.0.0",
+    "gulp-uglify": "^1.4.1",
+    "jshint-stylish": "^2.0.1",
+    "mocha": "^2.3.3"
+  }
+}

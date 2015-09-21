@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <link rel="stylesheet" href="../node_modules/mocha/mocha.css" />
+        <title>Pubfood Tests</title>
+    </head>
+    <body>
+        <div id="mocha"></div>
+        <script src="../node_modules/mocha/mocha.js"></script>
+        <script src="../node_modules/chai/chai.js"></script>
+        
+        <script type="text/javascript">
+         mocha.ui('bdd');
+        </script>
+        
+        <!-- Publisher Ad Server - Google Gpt -->
+        <script type='text/javascript'>
+         var googletag = googletag || {};
+         googletag.cmd = googletag.cmd || [];
+         (function() {
+             var gads = document.createElement('script');
+             gads.async = true;
+             gads.type = 'text/javascript';
+             var useSSL = 'https:' == document.location.protocol;
+             gads.src = (useSSL ? 'https:' : 'http:') +
+                        '//www.googletagservices.com/tag/js/gpt.js';
+             var node = document.getElementsByTagName('script')[0];
+             node.parentNode.insertBefore(gads, node);
+         })();
+        </script>
+
+        <script type="text/javascript">
+         var assert = chai.assert;
+         var expect = chai.expect;
+
+         describe('Pubfood - Tests', function () {
+
+             afterEach(function () {
+                 console.log('\t\tmocha.afterEach');
+             });
+
+             describe('Test Dependency Load', function testFalse() {
+                 it('should have googletag', function () {
+                     assert.isDefined(googletag, 'googletag is undefined');
+                 });
+             });
+         });
+         
+        </script>
+
+
+        <script>
+         onload = function() {
+             if (window.debugger) {
+                 eval('debugger;');
+             }
+             mocha.run();
+         };
+        </script>
+
+    </body>
+</html>
