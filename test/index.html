@@ -6,9 +6,16 @@
         <title>Pubfood Tests</title>
     </head>
     <body>
+
         <div id="mocha"></div>
+
         <script src="../node_modules/mocha/mocha.js"></script>
         <script src="../node_modules/chai/chai.js"></script>
+        <!-- jQuery for testing purposes only -->
+        <script src="../test/assets/vendor/jquery.js"></script>
+
+        <!-- For testing sync load pubfood -->
+        <script src="../dist/pubfood.js"></script>
         
         <script type="text/javascript">
          mocha.ui('bdd');
@@ -31,6 +38,8 @@
         </script>
 
         <script type="text/javascript">
+
+         // ToDo: Separate concerns and load tests via script elements
          var assert = chai.assert;
          var expect = chai.expect;
 
@@ -48,7 +57,6 @@
          });
          
         </script>
-
 
         <script>
          onload = function() {

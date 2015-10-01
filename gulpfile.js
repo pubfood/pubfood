@@ -2,41 +2,46 @@
 'use strict';
 
 var gulp = require('gulp'),
+    pkg = require('./package.json'),
+    source = require('vinyl-source-stream'),
     plugins = require('gulp-load-plugins')(),
     browserSync = require('browser-sync'),
+    browserify = require('browserify'), // Consider using watchify
     del = require('del');
 
 gulp.task('mocha', function() {
-    return gulp.src('./test/index.html')
-        .pipe(plugins.mochaPhantomjs({reporter: 'spec'}));
+    return gulp.src('test/index.html')
+        .pipe(plugins.mochaPhantomjs({reporter: 'spec',
+                                      localToRemoteUrlAccessEnabled: true,
+                                      localUrlAccessEnabled: true}));
 });
 
 gulp.task('jshint', function() {
-    return gulp.src(['lib/**/*.js' , 'gulpfile.js'])
-        .pipe(browserSync.reload({stream: true, once: true}))
+    return gulp.src(['src/**/*.js' , 'gulpfile.js'])
         .pipe(plugins.jshint())
-        .pipe(plugins.jshint.reporter('jshint-stylish'))
-        .pipe(plugins.if(!browserSync.active, plugins.jshint.reporter('fail')));
+        .pipe(plugins.jshint.reporter('jshint-stylish'));
 });
 
 gulp.task('jscs', function() {
-    return gulp.src(['lib/**/*.js' , 'gulpfile.js'])
-        .pipe(plugins.jscs())
-        .pipe(browserSync.reload({stream: true, once: true}))
-        .pipe(plugins.if(!browserSync.active, plugins.jshint.reporter('fail')));
+    return gulp.src(['srcs/**/*.js' , 'gulpfile.js'])
+        .pipe(plugins.jscs());
 });
 
 gulp.task('test', ['jshint', 'jscs', 'mocha']);
 
-gulp.task('doc', function() {
-    gulp.src('./src/**/*.js')
-        .pipe(plugins.jsdoc('./dist/doc'));
-});
+gulp.task('doc', plugins.shell.task([
+    'jsdoc -d ./dist/doc ./src/**/*.js ./src/*.js'
+]));
 
-gulp.task('uglify', function() {
-    return gulp.src('src/**/*.js')
-        .pipe(plugins.uglify())
-        .pipe(gulp.dest('dist'));
+gulp.task('browserify', function() {
+    var bundleStream = browserify([], pkg.browserify).bundle();
+
+    bundleStream
+        .pipe(source('pubfood.js'))
+        .pipe(gulp.dest('./dist'))
+        .pipe(plugins.streamify(plugins.uglify()))
+        .pipe(plugins.rename('pubfood.js'.replace('.js', '.min.js')))
+        .pipe(gulp.dest('./dist'));
 });
 
 gulp.task('clean', function() {
@@ -45,15 +50,13 @@ gulp.task('clean', function() {
     });
 });
 
-gulp.task('build', ['clean', 'test', 'doc', 'uglify']);
+gulp.task('build', ['browserify', 'test', 'doc']);
 
-function watch() {
-    gulp.watch(['src/**/*.js', 'src/**/*.html', 'test/**/*.js', 'test/**/*.html'], ['test', 'doc', browserSync.reload]);
-}
+gulp.task('dist-js', ['browserify'], browserSync.reload);
 
-
-gulp.task('serve:test', function() {
+gulp.task('serve', function() {
     browserSync({
+        reloadDelay: 2000,
         notify: false,
         server: {
             baseDir: './',
@@ -61,6 +64,7 @@ gulp.task('serve:test', function() {
         }
     });
 
-    watch();
+    gulp.watch(['src/**/*.js', 'src/**/*.html', 'test/**/*.js', 'test/**/*.html'], ['dist-js']);
+
 });
 

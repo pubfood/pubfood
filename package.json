@@ -2,13 +2,14 @@
   "name": "pubfood",
   "version": "0.0.1",
   "description": "Header bidding library",
-  "main": "src/pubfood.js",
-  "directories": {
-    "test": "test",
-    "src": "src"
-  },
+  "main": "./src/pubfood.js",
+  "files": [
+    "src",
+    "test",
+    "doc"
+  ],
   "scripts": {
-    "build": "gulp build",
+    "build": "npm run clean && gulp build",
     "test": "gulp test",
     "start": "gulp serve:test",
     "clean": "gulp clean"
@@ -32,8 +33,15 @@
     "url": "https://github.com/yieldbot/pubfood/issues"
   },
   "homepage": "https://github.com/yieldbot/pubfood",
+  "browserify": {
+    "standalone": "pubfood",
+    "entries": [
+      "./src/pubfood.js"
+    ]
+  },
   "devDependencies": {
     "browser-sync": "^2.9.4",
+    "browserify": "^11.1.0",
     "chai": "^3.3.0",
     "del": "^2.0.2",
     "gulp": "^3.9.0",
@@ -41,13 +49,18 @@
     "gulp-header": "^1.7.1",
     "gulp-if": "^1.2.5",
     "gulp-jscs": "^2.0.0",
-    "gulp-jsdoc": "^0.1.4",
     "gulp-jshint": "^1.11.2",
     "gulp-load-plugins": "^1.0.0-rc.1",
     "gulp-mocha-phantomjs": "^0.10.1",
     "gulp-open": "^1.0.0",
+    "gulp-rename": "^1.2.2",
+    "gulp-shell": "^0.4.3",
+    "gulp-streamify": "^1.0.2",
     "gulp-uglify": "^1.4.1",
+    "jsdoc": "^3.3.3",
     "jshint-stylish": "^2.0.1",
-    "mocha": "^2.3.3"
+    "mocha": "^2.3.3",
+    "rx": "^4.0.0",
+    "vinyl-source-stream": "^1.1.0"
   }
 }
