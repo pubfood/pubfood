@@ -11,7 +11,7 @@
   "scripts": {
     "build": "npm run clean && gulp build",
     "test": "gulp test",
-    "start": "gulp serve:test",
+    "start": "gulp serve",
     "clean": "gulp clean"
   },
   "repository": {

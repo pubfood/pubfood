@@ -14,6 +14,12 @@ It's what we (YB) do; on pageview:
 - The publisher ad server has the ultimate decision which partner "wins" the impression
     - `The winner may depend on other business rules defined in the publisher ad server; not just the CPM bid`
 
+# Architecture Overview
+
+![Architecture Overview - Requests](doc/pubfood-api-flow-requests.png?raw=true "Architecture Overview - Requests")
+![Architecture Overview - Creative](doc/pubfood-api-flow-creative.png?raw=true "Architecture Overview - Creative")
+![Architecture Overview - Report](doc/pubfood-api-flow-report.png?raw=true "Architecture Overview - Report")
+
 ## Build Tasks
 
 ### Build
@@ -33,6 +39,12 @@ Opens the `test/index.html` file in your default browser.
 ```
 npm start
 ```
+
+### Build Output
+
+`dist/doc/index.html` _(...etc, JSDoc)_
+`dist/pubfood.js`
+`dist/pubfood.min.js`
 
 # References
 Some reasonable summaries if you're new to header bidding:
