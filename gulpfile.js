@@ -23,7 +23,7 @@ gulp.task('jshint', function() {
 });
 
 gulp.task('jscs', function() {
-    return gulp.src(['srcs/**/*.js' , 'gulpfile.js'])
+    return gulp.src(['src/**/*.js' , 'gulpfile.js'])
         .pipe(plugins.jscs());
 });
 
