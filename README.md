@@ -24,8 +24,8 @@ It's what we (YB) do; on pageview:
 
 ### Build
 
-`npm install`
-`npm run build`
+- `npm install`
+- `npm run build`
 
 ### Test
 
@@ -42,9 +42,9 @@ npm start
 
 ### Build Output
 
-`dist/doc/index.html` _(...etc, JSDoc)_
-`dist/pubfood.js`
-`dist/pubfood.min.js`
+- `dist/doc/index.html` _(...etc, JSDoc)_
+- `dist/pubfood.js`
+- `dist/pubfood.min.js`
 
 # References
 Some reasonable summaries if you're new to header bidding:
