@@ -10,35 +10,35 @@ var BaseModelObject = require('./basemodelobject');
  * @memberOf pubfood/model
  */
 function Slot() {
-    if (this.init) {
-        this.init();
-    }
-    this.dimensions_ = [];
+  if (this.init) {
+    this.init();
+  }
+  this.dimensions_ = [];
 }
 
 Slot.prototype.name = function(n) {
-    this.name = n;
-    return this;
-}
+  this.name = n;
+  return this;
+};
 
 Slot.prototype.width = function(w) {
-    this.name = w;
-    return this;
-}
+  this.name = w;
+  return this;
+};
 
 Slot.prototype.height = function(h) {
-    this.name = h;
-    return this;
-}
+  this.name = h;
+  return this;
+};
 
-Slot.prototype.dimension = function(w,h) {
-    this.dimensions_.push([w,h]);
-    return this;
-}
+Slot.prototype.dimension = function(w, h) {
+  this.dimensions_.push([w, h]);
+  return this;
+};
 
 Slot.prototype.getDimensions = function() {
-    return this.dimensions_;
-}
+  return this.dimensions_;
+};
 
 util.inherits(Slot, BaseModelObject);
 

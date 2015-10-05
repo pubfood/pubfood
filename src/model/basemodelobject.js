@@ -9,7 +9,7 @@ var util = require('../util');
  * @memberOf pubfood/model
  */
 function BaseModelObject() {
-    this.id = util.newId();
+  this.id = util.newId();
 }
 
 module.exports = BaseModelObject;

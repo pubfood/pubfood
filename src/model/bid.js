@@ -10,24 +10,24 @@ var BaseModelObject = require('./basemodelobject');
  * @memberOf pubfood/model
  */
 function Bid() {
-    if (this.init) {
-        this.init();
-    }
+  if (this.init) {
+    this.init();
+  }
 }
 
-Bid.prototype.value = function (v) {
-    this.value = v;
-    return this;
+Bid.prototype.value = function(v) {
+  this.value = v;
+  return this;
 };
 
 Bid.prototype.slot = function(s) {
-    this.slot = s;
-    return this;
+  this.slot = s;
+  return this;
 };
 
 Bid.prototype.provider = function(p) {
-    this.provider = p;
-    return this;
+  this.provider = p;
+  return this;
 };
 
 util.inherits(Bid, BaseModelObject);
