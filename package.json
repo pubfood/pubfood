@@ -2,6 +2,15 @@
   "name": "pubfood",
   "version": "0.0.1",
   "description": "Header bidding library",
+  "license": "MIT",
+  "author": {
+    "name": "Yieldbot, Inc.",
+    "url": "http://www.yieldbot.com"
+  },
+  "contributors": [
+    "John Ellis <jellis@yieldbot.com>",
+    "Andrei McMillan <amcmillan@yieldbot.com>"
+  ],
   "main": "./src/pubfood.js",
   "files": [
     "src",
@@ -27,8 +36,6 @@
     "async",
     "parallel"
   ],
-  "author": "elljoh",
-  "license": "MIT",
   "bugs": {
     "url": "https://github.com/yieldbot/pubfood/issues"
   },
