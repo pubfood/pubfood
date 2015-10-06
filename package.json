@@ -65,6 +65,8 @@
     "gulp-shell": "^0.4.3",
     "gulp-streamify": "^1.0.2",
     "gulp-uglify": "^1.4.1",
+    "hapi": "9.3.1",
+    "inert": "3.1.0",
     "jsdoc": "^3.3.3",
     "jshint-stylish": "^2.0.1",
     "mocha": "^2.3.3",

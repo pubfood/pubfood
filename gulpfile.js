@@ -18,13 +18,13 @@ gulp.task('mocha', function() {
 });
 
 gulp.task('jshint', function() {
-  return gulp.src(['src/**/*.js', 'gulpfile.js'])
+  return gulp.src(['src/**/*.js', 'lib/**/*.js', 'gulpfile.js'])
     .pipe(plugins.jshint())
     .pipe(plugins.jshint.reporter('jshint-stylish'));
 });
 
 gulp.task('jscs', function() {
-  return gulp.src(['src/**/*.js', 'gulpfile.js'])
+  return gulp.src(['src/**/*.js', 'lib/**/*.js', 'gulpfile.js'])
     .pipe(plugins.jscs())
     .pipe(plugins.jscs.reporter());
 });
@@ -69,4 +69,3 @@ gulp.task('serve', function() {
   gulp.watch(['src/**/*.js', 'src/**/*.html', 'test/**/*.js', 'test/**/*.html'], ['dist-js']);
 
 });
-
