@@ -16,8 +16,14 @@ var BidProvider = require('./provider/bidprovider');
  * @memberof pubfood
  */
 var provider = {
-  buildBidProvider: function(config) {
+  bidProviderBuilder: function(config) {
     return new BidProvider(config);
+  },
+  creativeProviderBuilder: function(config) {
+    return new CreativeProvider(config);
+  },
+  auctionProviderBuilder: function(config) {
+    return new AuctionProvider(config);
   }
 };
 

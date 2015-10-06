@@ -16,11 +16,14 @@ var ReportMediator = require('./mediator/reportmediator');
  * @memberof pubfood
  */
 var mediator = {
-  AuctionMediatorBuilder: function() {
-    return new AuctionMediator();
+  auctionMediatorBuilder: function(config) {
+    return new AuctionMediator(config);
   },
-  BidMediatorBuilder: function() {
-    return new BidMediator();
+  bidMediatorBuilder: function(config) {
+    return new BidMediator(config);
+  },
+  reportMediatorBuilder: function(config) {
+    return new ReportMediator(config);
   }
 };
 

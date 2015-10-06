@@ -21,15 +21,13 @@
   var pubfood = function(config) {
     return new pubfood.library.init(config);
   };
-  var model = require('./model');
 
   pubfood.library = pubfood.prototype = {
     version: '0.0.1',
     whoAmI: function() {
       console.log('instanceOf \'pubfood\' v' + this.version);
     },
-    model: require('./model'),
-    _pubfoodRx: require('rx/dist/rx.all')
+    model: require('./model')
   };
 
   pubfood.log = function(msg) {

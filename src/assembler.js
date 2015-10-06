@@ -14,8 +14,8 @@ var BidAssembler = require('./assembler/bidassembler');
  * @memberof pubfood
  */
 var assembler = {
-  buildBidAssembler: function() {
-    return new BidAssemler();
+  bidAssemblerBuilder: function() {
+    return new BidAssembler();
   }
 };
 

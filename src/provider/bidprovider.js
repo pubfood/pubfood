@@ -2,7 +2,6 @@
 
 var util = require('../util');
 var BaseProvider = require('./baseprovider');
-var Rx = require('rx/dist/rx.lite');
 
 /**
  * BidProvider implements bidding partner requests

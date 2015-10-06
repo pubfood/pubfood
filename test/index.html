@@ -21,34 +21,6 @@
          mocha.ui('bdd');
         </script>
 
-        <!-- Publisher Ad Server - Google Gpt -->
-        <!-- ToDo: sync load this for tests? -->
-        <script type='text/javascript'>
-         var googletag = googletag || {};
-         googletag.cmd = googletag.cmd || [];
-         (function() {
-             var gads = document.createElement('script');
-             gads.async = true;
-             gads.type = 'text/javascript';
-             var useSSL = 'https:' == document.location.protocol;
-             gads.src = (useSSL ? 'https:' : 'http:') +
-                        '//www.googletagservices.com/tag/js/gpt.js';
-             var node = document.getElementsByTagName('script')[0];
-             node.parentNode.insertBefore(gads, node);
-         })();
-        </script>
-
-
-    <!-- Yieldbot.com Intent Tag LOADING -->
-    <script type="text/javascript" src="http://cdn.yldbt.com/js/yieldbot.intent.js"></script>
-
-    <!-- Yieldbot.com Intent Tag ACTIVATION -->
-    <script type="text/javascript">
-
-    </script>
-    <!-- END Yieldbot.com Intent Tag -->
-
-
         <script type="text/javascript">
 
          // ToDo: Separate concerns and load tests via script elements
@@ -58,20 +30,18 @@
          describe('Pubfood - Tests', function () {
 
              afterEach(function () {
-                 console.log('\t\tmocha.afterEach');
+
              });
 
-             describe('Test Dependency Load', function testFalse() {
-                 it('should have googletag', function () {
-                     var googletag = window.googletag;
-                     assert.isDefined(googletag.pubads, 'googletag is undefined');
+             describe('Model builder', function testFalse() {
+                 it('will do stuff', function () {
+                     assert.equal(1, 1, 'one not equals one');
                  });
              });
 
              describe('BidProvider', function testFalse() {
-                 it('yieldbot tag should load', function () {
-                     var yieldbot = window.yieldbot;
-                     assert.isDefined(yieldbot, 'yieldbot is undefined');
+                 it('will do stuff', function () {
+                     assert.equal(1, 1, 'one not equals one');
                  });
              });
          });
