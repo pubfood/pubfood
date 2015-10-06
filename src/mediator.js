@@ -17,8 +17,11 @@ var ReportMediator = require('./mediator/reportmediator');
  * @memberOf pubfood
  */
 var mediator = {
-    buildMediator: function(type) {
+    AuctionMediatorBuilder: function() {
         return new AuctionMediator();
+    },
+    BidMediatorBuilder: function() {
+        return new BidMediator();
     }
 };
 

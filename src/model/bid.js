@@ -13,7 +13,13 @@ function Bid() {
   if (this.init) {
     this.init();
   }
+  this.dimensions_ = [];
 }
+
+Bid.prototype.type = function(t) {
+  this.type = t;
+  return this;
+};
 
 Bid.prototype.value = function(v) {
   this.value = v;
@@ -23,6 +29,15 @@ Bid.prototype.value = function(v) {
 Bid.prototype.slot = function(s) {
   this.slot = s;
   return this;
+};
+
+Slot.prototype.dimension = function(w,h) {
+  this.dimensions_.push([w,h]);
+  return this;
+};
+
+Slot.prototype.getDimensions = function() {
+  return this.dimensions_;
 };
 
 Bid.prototype.provider = function(p) {

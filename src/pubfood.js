@@ -28,7 +28,9 @@
     whoAmI: function() {
       console.log('instanceOf \'pubfood\' v' + this.version);
     },
-    model: model
+    model: require('./model'),
+    ybprovider: require('./provider/vendor/yieldbotbidprovider'),
+    _pubfoodRx: require('rx/dist/rx.all')
   };
 
   pubfood.log = function(msg) {

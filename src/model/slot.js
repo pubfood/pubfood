@@ -21,18 +21,8 @@ Slot.prototype.name = function(n) {
   return this;
 };
 
-Slot.prototype.width = function(w) {
-  this.name = w;
-  return this;
-};
-
-Slot.prototype.height = function(h) {
-  this.name = h;
-  return this;
-};
-
-Slot.prototype.dimension = function(w, h) {
-  this.dimensions_.push([w, h]);
+Slot.prototype.dimension = function(w,h) {
+  this.dimensions_.push([w,h]);
   return this;
 };
 

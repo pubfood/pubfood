@@ -16,12 +16,13 @@
 
         <!-- For testing sync load pubfood -->
         <script src="../dist/pubfood.js"></script>
-        
+
         <script type="text/javascript">
          mocha.ui('bdd');
         </script>
-        
+
         <!-- Publisher Ad Server - Google Gpt -->
+        <!-- ToDo: sync load this for tests? -->
         <script type='text/javascript'>
          var googletag = googletag || {};
          googletag.cmd = googletag.cmd || [];
@@ -37,6 +38,17 @@
          })();
         </script>
 
+
+    <!-- Yieldbot.com Intent Tag LOADING -->
+    <script type="text/javascript" src="//cdn.yldbt.com/js/yieldbot.intent.js"></script>
+
+    <!-- Yieldbot.com Intent Tag ACTIVATION -->
+    <script type="text/javascript">
+
+    </script>
+    <!-- END Yieldbot.com Intent Tag -->
+
+
         <script type="text/javascript">
 
          // ToDo: Separate concerns and load tests via script elements
@@ -51,11 +63,19 @@
 
              describe('Test Dependency Load', function testFalse() {
                  it('should have googletag', function () {
-                     assert.isDefined(googletag, 'googletag is undefined');
+                     var googletag = window.googletag;
+                     assert.isDefined(googletag.pubads, 'googletag is undefined');
+                 });
+             });
+
+             describe('BidProvider', function testFalse() {
+                 it('yieldbot tag should load', function () {
+                     var yieldbot = window.yieldbot;
+                     assert.isDefined(yieldbot, 'yieldbot is undefined');
                  });
              });
          });
-         
+
         </script>
 
         <script>
