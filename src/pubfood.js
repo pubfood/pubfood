@@ -27,7 +27,8 @@
     whoAmI: function() {
       console.log('instanceOf \'pubfood\' v' + this.version);
     },
-    model: require('./model')
+    model: require('./model'),
+    util: require('./util')
   };
 
   pubfood.log = function(msg) {

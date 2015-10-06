@@ -16,13 +16,9 @@ function Bid() {
   this.dimensions_ = [];
 }
 
-Bid.prototype.type = function(t) {
-  this.type = t;
-  return this;
-};
-
 Bid.prototype.value = function(v) {
-  this.value = v;
+  this.value = v || '';
+  this.type = util.asType(this.value);
   return this;
 };
 
@@ -32,8 +28,13 @@ Bid.prototype.slot = function(s) {
 };
 
 Bid.prototype.dimension = function(w, h) {
-  this.dimensions_.push([w, h]);
+  var width = isNaN(width = parseInt(w)) ? 0 : width;
+  var height  = isNaN(height = parseInt(h)) ? 0 : height;
+
+  this.dimensions_.push([width, height]);
+
   return this;
+
 };
 
 Bid.prototype.getDimensions = function() {

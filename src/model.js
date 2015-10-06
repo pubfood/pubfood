@@ -7,6 +7,7 @@
 
 /** @module */
 
+var BaseModelObject = require('./model/basemodelobject');
 var Slot = require('./model/slot');
 var Bid = require('./model/bid');
 
@@ -21,7 +22,10 @@ var model = {
   },
   bidBuilder: function(data) {
     return new Bid();
-  }
+  },
+  BaseModelObject: BaseModelObject,
+  Slot: Slot,
+  Bid: Bid
 };
 
 module.exports = model;
