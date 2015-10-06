@@ -11,12 +11,12 @@ var BidAssembler = require('./assembler/bidassembler');
  * Coordinates and orchestrates Assembler instances.
  *
  * @module
- * @memberOf pubfood
+ * @memberof pubfood
  */
 var assembler = {
-    buildBidAssembler: function() {
-
-    }
+  buildBidAssembler: function() {
+    return new BidAssemler();
+  }
 };
 
 module.exports = assembler;

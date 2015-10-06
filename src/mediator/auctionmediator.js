@@ -4,10 +4,10 @@ var util = require('../util');
 var BaseMediator = require('./basemediator');
 
 /**
- * AuctionMediator coordiates requests to Publisher Ad Servers. 
+ * AuctionMediator coordiates requests to Publisher Ad Servers.
  *
  * @class
- * @memberOf pubfood/mediator
+ * @memberof pubfood/mediator
  */
 function AuctionMediator() {
 

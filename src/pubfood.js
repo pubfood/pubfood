@@ -15,7 +15,7 @@
 
 }(window || {}, undefined, function(global, config) {
   /**
-   * @memberOf module:pubfood
+   * @memberof module:pubfood
    * @private
    */
   var pubfood = function(config) {
@@ -29,7 +29,6 @@
       console.log('instanceOf \'pubfood\' v' + this.version);
     },
     model: require('./model'),
-    ybprovider: require('./provider/vendor/yieldbotbidprovider'),
     _pubfoodRx: require('rx/dist/rx.all')
   };
 

@@ -4,7 +4,7 @@
  * BaseMediator is a base type for {@link pubfood/mediator} types.
  *
  * @class
- * @memberOf pubfood/mediator
+ * @memberof pubfood/mediator
  */
 function BaseMediator() {
 

@@ -4,10 +4,10 @@ var util = require('../util');
 var BaseMediator = require('./basemediator');
 
 /**
- * BidMediator mediates provider bid requests. 
+ * BidMediator mediates provider bid requests.
  *
  * @class
- * @memberOf pubfood/mediator
+ * @memberof pubfood/mediator
  */
 function BidMediator() {
 

@@ -7,7 +7,7 @@ var BaseModelObject = require('./basemodelobject');
  * Bid is the result of a partner [BidProvider]{@link pubfood/provider.BidProvider} request.
  *
  * @class
- * @memberOf pubfood/model
+ * @memberof pubfood/model
  */
 function Bid() {
   if (this.init) {
@@ -31,12 +31,12 @@ Bid.prototype.slot = function(s) {
   return this;
 };
 
-Slot.prototype.dimension = function(w,h) {
-  this.dimensions_.push([w,h]);
+Bid.prototype.dimension = function(w, h) {
+  this.dimensions_.push([w, h]);
   return this;
 };
 
-Slot.prototype.getDimensions = function() {
+Bid.prototype.getDimensions = function() {
   return this.dimensions_;
 };
 

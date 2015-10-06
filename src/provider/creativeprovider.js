@@ -7,7 +7,7 @@ var BaseProvider = require('./baseprovider');
  * CreativeProvider implements partner creative requests.
  *
  * @class
- * @memberOf pubfood/provider
+ * @memberof pubfood/provider
  */
 function CreativeProvider() {
 

@@ -7,7 +7,7 @@ var BaseProvider = require('./baseprovider');
  * AuctionProvider implements the  publisher ad server requests.
  *
  * @class
- * @memberOf pubfood/provider
+ * @memberof pubfood/provider
  */
 function AuctionProvider() {
 

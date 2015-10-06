@@ -9,11 +9,11 @@ var Rx = require('rx/dist/rx.lite');
  *
  * @class
  * @extends pubfood/provider.BaseProvider
- * @memberOf pubfood/provider
+ * @memberof pubfood/provider
  */
 function BidProvider(bidDelegate) {
-    this.slots_ = [];
-    this.bidDelegate = bidDelegate;
+  this.slots_ = [];
+  this.bidDelegate = bidDelegate;
 }
 
 /**
@@ -23,8 +23,8 @@ function BidProvider(bidDelegate) {
  * @returns {Function} this
  */
 BidProvider.prototype.name = function(name) {
-    this.name = name;
-    return this;
+  this.name = name;
+  return this;
 };
 
 /**
@@ -33,8 +33,8 @@ BidProvider.prototype.name = function(name) {
  * @param {Object} slot - a [Slot]{@link pubfood/model.Slot} object
  */
 BidProvider.prototype.slot = function(slot) {
-    this.slots_.push(slot);
-    return this;
+  this.slots_.push(slot);
+  return this;
 };
 
 /**
@@ -44,15 +44,14 @@ BidProvider.prototype.slot = function(slot) {
  * @param {Function} action - a callback to execute in response to the script [onload]{@linkcode https://developer.mozilla.org/en-US/docs/Web/API/GlobalEventHandlers/onload} event
  */
 BidProvider.prototype.load = function(uri, action) {
-    // insertBefore(uri)
-    // 'onload', action
+  // insertBefore(uri)
+  // 'onload', action
 };
 
 /**
  * Refresh bids for ad slots
  */
 BidProvider.prototype.refresh = function(action) {
-
 
 };
 

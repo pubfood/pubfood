@@ -4,11 +4,12 @@ var util = {
   /**
    * The type of an {Object}.
    *
-   * https://javascriptweblog.wordpress.com/2011/08/08/fixing-the-javascript-typeof-operator/
+   * https://javascriptweblog.wordpress.com/2011/08/08/
+   *         fixing-the-javascript-typeof-operator/
    *
    */
   asType: function(obj) {
-    return ({}).toString.call(obj).match(/\s([a-zA-Z]+)/)[1].toLowerCase()
+    return ({}).toString.call(obj).match(/\s([a-zA-Z]+)/)[1].toLowerCase();
   },
   newId: function() {
     /*jslint bitwise: true */
@@ -45,7 +46,8 @@ var util = {
 
     scriptEl.src = uri || '';
 
-    var beforeEl = document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0] || null;
+    var beforeEl = document.getElementsByTagName('head')[0] ||
+        document.getElementsByTagName('body')[0] || null;
     if (beforeEl) {
       beforeEl.insertBefore(scriptEl, beforeEl.firstChild);
     }

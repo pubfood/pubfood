@@ -7,7 +7,7 @@ var BaseModelObject = require('./basemodelobject');
  * Slot contains a definition of a publisher ad unit.
  *
  * @class
- * @memberOf pubfood/model
+ * @memberof pubfood/model
  */
 function Slot() {
   if (this.init) {
@@ -21,8 +21,8 @@ Slot.prototype.name = function(n) {
   return this;
 };
 
-Slot.prototype.dimension = function(w,h) {
-  this.dimensions_.push([w,h]);
+Slot.prototype.dimension = function(w, h) {
+  this.dimensions_.push([w, h]);
   return this;
 };
 

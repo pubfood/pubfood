@@ -13,7 +13,7 @@ var Bid = require('./model/bid');
 /**
  * Coordinates and orchestrates domain model instances.
  *
- * @memberOf pubfood
+ * @memberof pubfood
  */
 var model = {
   SlotBuilder: function(data) {

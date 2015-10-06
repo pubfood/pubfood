@@ -8,10 +8,10 @@ var Rx = require('rx/dist/rx.lite');
  * BidDelegate defines delegate interface to provide bids.
  *
  * @class
- * @memberOf pubfood/provider
+ * @memberof pubfood/provider
  */
 function BidDelegate(tagUri) {
-    this.tagUri = tagUri;
+  this.tagUri = tagUri;
 }
 
 BidDelegate.prototype.slot = function() {

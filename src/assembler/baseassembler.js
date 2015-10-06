@@ -4,7 +4,7 @@
  * BaseAssembler is a base type for {@link pubfood/mediator} assembler types.
  *
  * @class
- * @memberOf pubfood/mediator
+ * @memberof pubfood/mediator
  */
 function BaseAssembler() {
 
