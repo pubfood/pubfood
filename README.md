@@ -24,7 +24,7 @@ It's what we (YB) do; on pageview:
 
 ### Build
 
-- `npm install`
+- `npm run prepare`
 - `npm run build`
 
 ### Test
