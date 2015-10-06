@@ -4,5 +4,8 @@
   "excludeFiles": [
     "node_modules/**",
     "gulpfile.js"
-  ]
+  ],
+  "jsDoc": {
+    "checkAnnotations": "jsdoc3"
+  }
 }
