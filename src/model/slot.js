@@ -22,7 +22,9 @@ Slot.prototype.name = function(n) {
 };
 
 Slot.prototype.dimension = function(w, h) {
-  this.dimensions_.push([w, h]);
+  var width = Number.parseInt(w) || 0;
+  var height = Number.parseInt(h) || 0;
+  this.dimensions_.push([width, height]);
   return this;
 };
 
