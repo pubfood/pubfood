@@ -18,6 +18,7 @@
     "doc"
   ],
   "scripts": {
+    "prepare": "npm install",
     "build": "npm run clean && gulp build",
     "test": "gulp test",
     "start": "gulp serve",
@@ -54,7 +55,7 @@
     "gulp": "^3.9.0",
     "gulp-connect": "^2.2.0",
     "gulp-header": "^1.7.1",
-    "gulp-if": "^1.2.5",
+    "gulp-if": "^2.0.0",
     "gulp-jscs": "^3.0.1",
     "gulp-jshint": "^1.11.2",
     "gulp-load-plugins": "^1.0.0-rc.1",
