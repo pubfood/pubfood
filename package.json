@@ -22,7 +22,8 @@
     "build": "npm run clean && gulp build",
     "test": "gulp test",
     "start": "gulp serve",
-    "clean": "gulp clean"
+    "clean": "gulp clean",
+    "postinstall": "npm run build"
   },
   "repository": {
     "type": "git",
