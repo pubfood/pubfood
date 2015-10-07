@@ -21,13 +21,15 @@ Slot.prototype.name = function(n) {
   return this;
 };
 
+/*jslint bitwise: true */
 Slot.prototype.dimension = function(w, h) {
-  var width = isNaN(width = parseInt(w)) ? 0 : width;
-  var height  = isNaN(height = parseInt(h)) ? 0 : height;
+  var width = Math.abs(~~w);
+  var height  = Math.abs(~~h);
 
   this.dimensions_.push([width, height]);
   return this;
 };
+/*jslint bitwise: false */
 
 Slot.prototype.getDimensions = function() {
   return this.dimensions_;

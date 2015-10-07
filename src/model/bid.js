@@ -27,15 +27,17 @@ Bid.prototype.slot = function(s) {
   return this;
 };
 
+/*jslint bitwise: true */
 Bid.prototype.dimension = function(w, h) {
-  var width = isNaN(width = parseInt(w)) ? 0 : width;
-  var height  = isNaN(height = parseInt(h)) ? 0 : height;
+  var width = Math.abs(~~w);
+  var height  = Math.abs(~~h);
 
   this.dimensions_.push([width, height]);
 
   return this;
 
 };
+/*jslint bitwise: false */
 
 Bid.prototype.getDimensions = function() {
   return this.dimensions_;

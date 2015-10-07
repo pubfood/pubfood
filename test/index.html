@@ -100,6 +100,15 @@
                                            .dimension('300', '250');
                      assert.deepEqual(slot.getDimensions(), [ [300, 250] ], 'dimensions not equal');
                  });
+
+                 it('will zero for non-numeric and round abs for float dimension arguments', function() {
+                         var slot = pubfood.library.model.slotBuilder()
+                                           .dimension(300, '&')
+                                           .dimension('T', '&')
+                                           .dimension('8:3', '600')
+                                           .dimension('728.999', '-90.2');
+                     assert.deepEqual(slot.getDimensions(), [ [300, 0], [0, 0], [0, 600], [728, 90] ], 'dimensions not equal');
+                 });
              });
 
              describe('Model builder will build a Bid', function testBidBuilder() {
@@ -152,6 +161,15 @@
                      assert.equal(bid.provider, bidModel.provider, 'bid provider incorrect');
                      assert.deepEqual(bid.getDimensions(), bidModel.dimensions, 'bid dimensions incorrect');
 
+                 });
+
+                 it('will zero for non-numeric and round abs for float dimension arguments', function() {
+                         var slot = pubfood.library.model.slotBuilder()
+                                           .dimension(300, '&')
+                                           .dimension('T', '&')
+                                           .dimension('8:3', '600')
+                                           .dimension('728.999', '-90.2');
+                     assert.deepEqual(slot.getDimensions(), [ [300, 0], [0, 0], [0, 600], [728, 90] ], 'dimensions not equal');
                  });
              });
 
