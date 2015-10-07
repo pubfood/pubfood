@@ -1,7 +1,6 @@
 'use strict';
 
-var util = require('../util');
-var BaseMediator = require('./basemediator');
+var BidProvider = require('../provider/bidprovider');
 
 /**
  * BidMediator mediates provider bid requests.
@@ -9,10 +8,39 @@ var BaseMediator = require('./basemediator');
  * @class
  * @memberof pubfood/mediator
  */
-function BidMediator() {
-
+function BidMediator(config) {
+  this.config = config || {};
 }
 
-util.inherits(BidMediator, BaseMediator);
+BidMediator.prototype.init = function() {
+  this.bidProviders = {};
+
+  var callback = function(e) {
+    var scriptSrc = e && e.target && e.target.src || 'null';
+    console.log('Loaded tag: ' + scriptSrc);
+  };
+
+  for (var k in this.config.bidProviders) {
+    var p = new BidProvider(this.config.bidProviders[k]);
+    this.bidProviders[k] = p;
+    p.init({}, callback);
+  }
+};
+
+BidMediator.prototype.load = function() {
+
+  var callback = function(e) {
+    var scriptSrc = e && e.target && e.target.src || 'null';
+    console.log('Loaded tag: ' + scriptSrc);
+  };
+
+  for (var k in this.bidProviders) {
+    this.bidProviders[k].init(callback);
+  }
+};
+
+BidMediator.prototype.requestBids = function() {
+
+};
 
 module.exports = BidMediator;

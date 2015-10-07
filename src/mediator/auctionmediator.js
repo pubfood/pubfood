@@ -1,7 +1,6 @@
 'use strict';
 
-var util = require('../util');
-var BaseMediator = require('./basemediator');
+var BidMediator = require('./bidmediator');
 
 /**
  * AuctionMediator coordiates requests to Publisher Ad Servers.
@@ -9,10 +8,15 @@ var BaseMediator = require('./basemediator');
  * @class
  * @memberof pubfood/mediator
  */
-function AuctionMediator() {
-
+function AuctionMediator(config) {
+  this.config = config || {};
+  this.bidMediator = null;
+  this.auctionProvider = null;
 }
 
-util.inherits(AuctionMediator, BaseMediator);
+AuctionMediator.prototype.init = function() {
+  this.bidMediator = new BidMediator(this.config);
+  this.bidMediator.init();
+};
 
 module.exports = AuctionMediator;

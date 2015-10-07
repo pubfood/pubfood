@@ -71,7 +71,9 @@
     "jsdoc": "^3.3.3",
     "jshint-stylish": "^2.0.1",
     "mocha": "^2.3.3",
-    "rx": "^4.0.0",
     "vinyl-source-stream": "^1.1.0"
+  },
+  "dependencies": {
+    "eventemitter3": "^1.1.1"
   }
 }

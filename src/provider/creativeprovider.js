@@ -1,8 +1,5 @@
 'use strict';
 
-var util = require('../util');
-var BaseProvider = require('./baseprovider');
-
 /**
  * CreativeProvider implements partner creative requests.
  *
@@ -12,7 +9,5 @@ var BaseProvider = require('./baseprovider');
 function CreativeProvider() {
 
 }
-
-util.inherits(CreativeProvider, BaseProvider);
 
 module.exports = CreativeProvider;

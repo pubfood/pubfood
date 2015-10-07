@@ -10,8 +10,8 @@ var BaseModelObject = require('./basemodelobject');
  * @memberof pubfood/model
  */
 function Slot() {
-  if (this.init) {
-    this.init();
+  if (this.init_) {
+    this.init_();
   }
   this.dimensions_ = [];
 }
@@ -33,6 +33,6 @@ Slot.prototype.getDimensions = function() {
   return this.dimensions_;
 };
 
-util.inherits(Slot, BaseModelObject);
+util.extends(Slot, BaseModelObject);
 
 module.exports = Slot;

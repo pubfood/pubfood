@@ -19,7 +19,7 @@ var util = {
       });
     /*jslint bitwise: false */
   },
-  inherits: function(child, parent) {
+  extends: function(child, parent) {
 
     for (var k in parent.prototype) {
       child.prototype[k] = parent.prototype[k];
@@ -30,7 +30,7 @@ var util = {
       return parent;
     });
 
-    child.prototype.init = function() {
+    child.prototype.init_ = function() {
       var parents = this.parents || [];
 
       for (var i in parents) {
@@ -46,13 +46,13 @@ var util = {
 
     scriptEl.src = uri || '';
 
+    if (scriptEl.src && action && typeof action === 'function') {
+      scriptEl.onload = action;
+    }
     var beforeEl = document.getElementsByTagName('head')[0] ||
         document.getElementsByTagName('body')[0] || null;
     if (beforeEl) {
       beforeEl.insertBefore(scriptEl, beforeEl.firstChild);
-    }
-    if (action && typeof action === 'function') {
-      action();
     }
   }
 };

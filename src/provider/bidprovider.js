@@ -1,7 +1,6 @@
 'use strict';
 
 var util = require('../util');
-var BaseProvider = require('./baseprovider');
 
 /**
  * BidProvider implements bidding partner requests
@@ -37,23 +36,29 @@ BidProvider.prototype.slot = function(slot) {
 };
 
 /**
- * Load a bid provider tag.
+ * Initialize a bid provider.
  *
- * @param {String} uri - the provider tag location. Used for [script src=]{@linkcode https://developer.mozilla.org/en-US/docs/Web/HTML/Element/script#Attributes} value
- * @param {Function} action - a callback to execute in response to the script [onload]{@linkcode https://developer.mozilla.org/en-US/docs/Web/API/GlobalEventHandlers/onload} event
+ * The BidProvider delegate javascript tag and other setup is done here.
+ *
+ * @param {Object} options - BidProvider delegate specific options
+ * @param {Function} callback - a callback to execute in response to the script [onload]{@linkcode https://developer.mozilla.org/en-US/docs/Web/API/GlobalEventHandlers/onload} event
  */
-BidProvider.prototype.load = function(uri, action) {
-  // insertBefore(uri)
-  // 'onload', action
+BidProvider.prototype.init = function(options, callback) {
+  if (this.bidDelegate &&
+      this.bidDelegate.init &&
+      util.asType(this.bidDelegate.init) === 'function') {
+
+    var opts = options || {};
+    this.bidDelegate.init(opts, callback);
+
+  }
 };
 
 /**
  * Refresh bids for ad slots
  */
-BidProvider.prototype.refresh = function(action) {
+BidProvider.prototype.refresh = function(callback) {
 
 };
-
-util.inherits(BidProvider, BaseProvider);
 
 module.exports = BidProvider;

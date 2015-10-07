@@ -16,6 +16,7 @@
 
         <!-- For testing sync load pubfood -->
         <script src="../dist/pubfood.js"></script>
+        <script src="../test/fixture/auctionconfig1.js"></script>
 
         <script type="text/javascript">
          mocha.ui('bdd');
@@ -50,6 +51,8 @@
              describe('BaseModelObject', function testBaseModelObject() {
                  it('will have a generated Id', function() {
                      var modelObject = new pubfood.library.model.BaseModelObject();
+                     assert.isDefined(modelObject.id, 'id is not defined');
+                     assert.match(modelObject.id, /[\w]+$/, 'id is not an ascii string');
                  });
              });
              describe('Model builder will build a Slot', function testSlotBuilder() {
@@ -152,9 +155,13 @@
                  });
              });
 
-             describe('BidProvider', function testFalse() {
-                 it('will do stuff', function() {
-                     assert.equal(1, 1, 'one not equals one');
+             describe('Pubfood mediator', function testPubfoodMediator() {
+                 it('TODO: should init BidProviders', function() {
+                     var p = new pubfood(config);
+                     assert.isDefined(p, 'mediator is not defined');
+
+                     p.mediator.init();
+                     //assert.isDefined(yieldbot, 'BidProvider delegate is undefined');
                  });
              });
          });

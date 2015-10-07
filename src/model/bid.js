@@ -10,8 +10,8 @@ var BaseModelObject = require('./basemodelobject');
  * @memberof pubfood/model
  */
 function Bid() {
-  if (this.init) {
-    this.init();
+  if (this.init_) {
+    this.init_();
   }
   this.dimensions_ = [];
 }
@@ -46,6 +46,6 @@ Bid.prototype.provider = function(p) {
   return this;
 };
 
-util.inherits(Bid, BaseModelObject);
+util.extends(Bid, BaseModelObject);
 
 module.exports = Bid;

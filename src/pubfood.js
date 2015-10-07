@@ -28,7 +28,8 @@
       console.log('instanceOf \'pubfood\' v' + this.version);
     },
     model: require('./model'),
-    util: require('./util')
+    util: require('./util'),
+    mediator: require('./mediator')
   };
 
   pubfood.log = function(msg) {
@@ -36,14 +37,15 @@
   };
 
   var api = pubfood.library.init = function(config) {
-    this.config = config;
-
+    this.mediator = pubfood.
+      library.
+      mediator.
+      auctionMediatorBuilder(config);
     return this;
   };
 
   api.prototype = {
     pubfood: pubfood.library,
-    mediator: require('./mediator'),
     provider: require('./provider'),
     assembler: require('./assembler')
 
