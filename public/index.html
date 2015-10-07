@@ -7,16 +7,102 @@
     </head>
     <body>
         <script src="/pubfood.js"></script>
-        <script>var domination = {};</script>
-        <script src="/simulated-provider/p1?delay=400&fuzz=10&global=domination"></script>
-        <script src="/simulated-provider/p2?delay=200&fuzz=10&global=domination"></script>
-        <script src="/simulated-provider/p3?delay=400&fuzz=10&global=domination"></script>
-        <script src="/simulated-provider/p4?delay=550&fuzz=10&global=domination"></script>
-        <script src="/simulated-provider/p5?delay=800&fuzz=10&global=domination"></script>
-        <script src="/simulated-provider/p6?delay=800&fuzz=10&global=domination"></script>
-        <script src="/simulated-provider/p7?delay=800&fuzz=10&global=domination"></script>
-        <script src="/simulated-provider/p8?delay=800&fuzz=10&global=domination"></script>
-        <script src="/simulated-provider/p9?delay=800&fuzz=10&global=domination"></script>
+        <script>
+          window.p1 = window.p1 || {};
+          p1.cmd = p1.cmd || [];
+          p1.cmd.push(function() {
+            var encodedAvailability = encodeURIComponent('a:300x250,b:728x90');
+            p1.init('delay=200&fuzz=10&availability=' + encodedAvailability);
+          });
+          p1.cmd.push(function() {
+            console.log('p1 available:', p1.getAvailable());
+          });
+        </script>
+        <script src="/simulated-provider/p1.js"></script>
+        <script>
+          window.p2 = window.p2 || {};
+          p2.cmd = p2.cmd || [];
+          p2.cmd.push(function() {
+            var encodedAvailability = encodeURIComponent('c:300x250,d:728x90');
+            p2.init('delay=550&fuzz=10&availability=' + encodedAvailability);
+          });
+          p2.cmd.push(function() {
+            console.log('p2 available:', p2.getAvailable());
+          });
+        </script>
+        <script src="/simulated-provider/p2.js"></script>
+        <script>
+          window.p3 = window.p3 || {};
+          p3.cmd = p3.cmd || [];
+          p3.cmd.push(function() {
+            var encodedAvailability = encodeURIComponent('e:300x250,f:728x90');
+            p3.init('delay=400&fuzz=10&availability=' + encodedAvailability);
+          });
+          p3.cmd.push(function() {
+            console.log('p3 available:', p3.getAvailable());
+          });
+        </script>
+        <script src="/simulated-provider/p3.js"></script>
+        <script>
+          window.p4 = window.p4 || {};
+          p4.cmd = p4.cmd || [];
+          p4.cmd.push(function() {
+            var encodedAvailability = encodeURIComponent('g:300x250,h:728x90');
+            p4.init('delay=800&fuzz=10&availability=' + encodedAvailability);
+          });
+          p4.cmd.push(function() {
+            console.log('p4 available:', p4.getAvailable());
+          });
+        </script>
+        <script src="/simulated-provider/p4.js"></script>
+        <script>
+          window.p5 = window.p5 || {};
+          p5.cmd = p5.cmd || [];
+          p5.cmd.push(function() {
+            var encodedAvailability = encodeURIComponent('i:300x250,j:728x90');
+            p5.init('delay=600&fuzz=10&availability=' + encodedAvailability);
+          });
+          p5.cmd.push(function() {
+            console.log('p5 available:', p5.getAvailable());
+          });
+        </script>
+        <script src="/simulated-provider/p5.js"></script>
+        <script>
+          window.p6 = window.p6 || {};
+          p6.cmd = p6.cmd || [];
+          p6.cmd.push(function() {
+            var encodedAvailability = encodeURIComponent('k:300x250,l:728x90');
+            p6.init('delay=800&fuzz=10&availability=' + encodedAvailability);
+          });
+          p6.cmd.push(function() {
+            console.log('p6 available:', p6.getAvailable());
+          });
+        </script>
+        <script src="/simulated-provider/p6.js"></script>
+        <script>
+          window.p7 = window.p7 || {};
+          p7.cmd = p7.cmd || [];
+          p7.cmd.push(function() {
+            var encodedAvailability = encodeURIComponent('a:300x250,b:728x90');
+            p7.init('delay=800&fuzz=10&availability=' + encodedAvailability);
+          });
+          p7.cmd.push(function() {
+            console.log('p7 available:', p7.getAvailable());
+          });
+        </script>
+        <script src="/simulated-provider/p7.js"></script>
+        <script>
+          window.p8 = window.p8 || {};
+          p8.cmd = p8.cmd || [];
+          p8.cmd.push(function() {
+            var encodedAvailability = encodeURIComponent('a:300x250,b:728x90');
+            p8.init('delay=800&fuzz=10&availability=' + encodedAvailability);
+          });
+          p8.cmd.push(function() {
+            console.log('p8 available:', p8.getAvailable());
+          });
+        </script>
+        <script src="/simulated-provider/p8.js"></script>
         <h1>Welcome Publisher People</h1>
         <p>We're here to help.</p>
     </body>

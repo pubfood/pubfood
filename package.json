@@ -45,6 +45,7 @@
     ]
   },
   "dependencies": {
+    "boom": "2.9.0",
     "browser-sync": "^2.9.4",
     "browserify": "^11.1.0",
     "chai": "^3.3.0",

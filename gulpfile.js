@@ -20,7 +20,7 @@ gulp.task('mocha', function() {
 gulp.task('jshint', function() {
   return gulp.src(['src/**/*.js', 'lib/**/*.js', 'gulpfile.js'])
     .pipe(plugins.jshint())
-    .pipe(plugins.jshint.reporter('jshint-stylish'));
+    .pipe(plugins.jshint.reporter('jshint-stylish', { verbose: true }));
 });
 
 gulp.task('jscs', function() {
