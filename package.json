@@ -23,7 +23,7 @@
     "test": "gulp test",
     "start": "gulp serve",
     "clean": "gulp clean",
-    "postinstall": "npm run build"
+    "_postinstall": "npm run build"
   },
   "repository": {
     "type": "git",
@@ -48,7 +48,7 @@
       "./src/pubfood.js"
     ]
   },
-  "devDependencies": {
+  "dependencies": {
     "browser-sync": "^2.9.4",
     "browserify": "^11.1.0",
     "chai": "^3.3.0",
