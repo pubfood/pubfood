@@ -1,4 +1,11 @@
+/**
+ * pubfood
+ * Copyright (c) 2015 Yieldbot, Inc. - All rights reserved.
+ */
+
 'use strict';
+
+/*eslint no-unused-vars: 0*/
 
 /**
  * BidDelegate defines delegate interface to provide bids.

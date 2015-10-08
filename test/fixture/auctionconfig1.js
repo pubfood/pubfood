@@ -1,9 +1,10 @@
 /**
- * pubfood_contrib
+ * pubfood
  * Copyright (c) 2015 Yieldbot, Inc. - All rights reserved.
  */
 
 /* global yieldbot */
+/*eslint no-unused-vars: 0*/
 
 'use strict';
 

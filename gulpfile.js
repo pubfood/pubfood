@@ -18,7 +18,7 @@ gulp.task('mocha', function() {
 });
 
 gulp.task('eslint', function() {
-  return gulp.src(['src/**/*.js', 'lib/**/*.js', 'gulpfile.js'])
+  return gulp.src(['src/**/*.js', 'lib/**/*.js', 'test/**/*.js', 'gulpfile.js'])
     .pipe(plugins.eslint())
     .pipe(plugins.eslint.format())
     .pipe(plugins.eslint.failAfterError());
