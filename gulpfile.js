@@ -6,10 +6,9 @@ var gulp = require('gulp'),
   plugins = require('gulp-load-plugins')(),
   browserSync = require('browser-sync'),
   browserify = require('browserify'), // Consider using watchify
-  del = require('del'),
-  runSequence = require('run-sequence');
+  del = require('del');
 
-gulp.task('mocha', function() {
+gulp.task('test', function() {
   return gulp.src('test/index.html')
     .pipe(plugins.mochaPhantomjs({
       reporter: 'spec',
@@ -18,20 +17,18 @@ gulp.task('mocha', function() {
     }));
 });
 
-gulp.task('eslint', function() {
+gulp.task('lint', function() {
   return gulp.src(['src/**/*.js', 'lib/**/*.js', 'test/**/*.js', 'gulpfile.js'])
     .pipe(plugins.eslint())
     .pipe(plugins.eslint.format())
     .pipe(plugins.eslint.failAfterError());
 });
 
-gulp.task('test', ['eslint', 'mocha']);
-
 gulp.task('doc', plugins.shell.task([
   'jsdoc -d ./dist/doc ./src/**/*.js ./src/*.js'
 ]));
 
-gulp.task('browserify', function() {
+gulp.task('build', function() {
   var bundleStream = browserify([], pkg.browserify).bundle();
 
   bundleStream
@@ -48,11 +45,7 @@ gulp.task('clean', function() {
   });
 });
 
-gulp.task('build', function(cb){
-  runSequence(['browserify', 'test', 'doc'], cb);
-});
-
-gulp.task('dist-js', ['browserify'], browserSync.reload);
+gulp.task('dist-js', ['build'], browserSync.reload);
 
 gulp.task('serve', function() {
   browserSync({

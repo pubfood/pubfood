@@ -18,8 +18,9 @@
   "scripts": {
     "prepare": "npm install",
     "clean": "npm run prepare && gulp clean",
-    "build": "npm run prepare && gulp build",
+    "lint": "gulp lint",
     "test": "gulp test",
+    "build": "npm run prepare && npm run lint && gulp build && npm run test && gulp doc",
     "start": "gulp serve",
     "ybpublish": "publish"
   },
@@ -69,7 +70,6 @@
     "inert": "3.1.0",
     "jsdoc": "^3.3.3",
     "mocha": "^2.3.3",
-    "run-sequence": "^1.1.4",
     "vinyl-source-stream": "^1.1.0",
     "yb-publish": "0.3.3"
   }
