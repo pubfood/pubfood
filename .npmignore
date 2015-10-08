@@ -1,6 +1,6 @@
 ## folders
 # /dist
-# note doc gets repeated in the dist directory so it isn't rooted
+## note doc gets repeated in the dist directory so it isn't rooted
 doc
 /lib
 /node_modules
