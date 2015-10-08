@@ -17,10 +17,10 @@
   "main": "./src/pubfood.js",
   "scripts": {
     "prepare": "npm install",
-    "build": "npm run clean && gulp build",
+    "clean": "npm run prepare && gulp clean",
+    "build": "npm run prepare && npm run clean && gulp build",
     "test": "gulp test",
-    "start": "gulp serve",
-    "clean": "gulp clean"
+    "start": "gulp serve"
   },
   "repository": {
     "type": "git",
