@@ -21,7 +21,7 @@
     "comma-spacing": [2, {"before": false, "after": true}],
     "arrow-parens": 1,
     "valid-jsdoc": 0,
-    "no-unused-vars": 2,
+    "no-unused-vars": 1,
     "no-dupe-args": 2,
     "no-dupe-keys": 2,
     "no-empty": 2,
