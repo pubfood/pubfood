@@ -11,9 +11,8 @@
 var ybotq = ybotq || [];
 
 var config = {
-  slots: [
-    {
-      name: 'right-rail',
+  slots: {
+    'right-rail': {
       sizes: [
         [300, 250],
         [300, 600]
@@ -24,8 +23,7 @@ var config = {
         'amazon'
       ]
     },
-    {
-      name: 'top-leaderboard',
+    'top-leaderboard': {
       sizes: [
         [728, 90]
       ],
@@ -36,39 +34,50 @@ var config = {
         'casale'
       ]
     }
-  ],
+  },
+  auctionProviders: {
+    dfp: {
+      options: {
+      },
+      load: function(options, callback) {
+      },
+      init: function(options, callback) {
+      },
+      fetch: function(options, callback) {
+      },
+      refresh: function(slots, options, callback) {
+      }
+    }
+  },
   bidProviders: {
     yieldbot: {
       options: {
         foo: 'bar'
       },
-      init: function(options, callback) {
+      load: function(options, callback) {
         var js = document.createElement('script');
         js.src = '//cdn.yldbt.com/js/yieldbot.intent.js';
         var node = document.getElementsByTagName('script')[0];
         node.parentNode.insertBefore(js, node);
-
-        js.onload = callback;
+        js.onload = callback; // raise timing event
       },
-      refresh: function(optons, callback) {
+      init: function(slots, options, callback) {
+
         ybotq.push(function() {
           yieldbot.psn('1234');
-          yieldbot.defineSlot('test_slot', {
-            sizes: [
-              [300, 250],
-              [300, 450],
-              [300, 600]
-            ]
-          });
-          yieldbot.defineSlot('sidebar', {
-            sizes: [
-              [300, 250],
-              [300, 600]
-            ]
-          });
+
+          for (var i = 0; i < slots.length; i++) {
+            var slot = slots[i];
+            yieldbot.defineSlot(slot.name, {
+              sizes: slot.sizes
+            });
+          }
           yieldbot.enableAsync();
           yieldbot.go();
         });
+
+      },
+      fetch: function(slots, options, callback) {
 
         ybotq.push(function() {
           var i;
@@ -98,75 +107,30 @@ var config = {
           // submit my bids...
           callback(bidModels);
         });
+      },
+      refresh: function(slots, options, callback) {
+
       }
     },
-    casale: {
-      load: function(callback) {
-
+    carsales: {
+      load: function(options, callback) {
       },
-      refresh: function(callback) {
-        var structure = {
-          //
-        };
-        callback(structure);
+      init: function(options, callback) {
+      },
+      fetch: function(options, callback) {
+      },
+      refresh: function(slots, options, callback) {
       }
     },
-    amazon: {
-      load: function(callback) {
-
+    walkathon: {
+      load: function(options, callback) {
       },
-      refresh: function(callback) {
-        var structure = {
-          //
-        };
-        callback(structure);
+      init: function(options, callback) {
+      },
+      fetch: function(options, callback) {
+      },
+      refresh: function(slots, options, callback) {
       }
     }
   }
 };
-
-
-//fake pubfood library
-function fakepubfood(c) {
-
-  if (c.bidProviders) {
-    for (var key in c.bidProviders) {
-      var bp = c.bidProviders[key];
-      if (typeof bp === 'function') {
-
-        (function(provider) {
-          bp(function(bidStructure) {
-
-            // if bidStructure is an array
-            if (bidStructure.hasOwnProperty('length')) {
-              var j;
-              for(j=0; j< bidStructure.length; j++){
-                bidStructure[j].type = 'number';
-                bidStructure[j].provider = provider;
-              }
-            }
-            // if bidStructure is an object
-            else if(typeof bidStructure === 'object'){
-              bidStructure.type = 'number';
-              bidStructure.provider = provider;
-            }
-
-            console.log('recieved bid from', provider, bidStructure);
-          });
-        }(key));
-
-      }
-    }
-  }
-
-  return {
-    on: function(e, cb) {
-      //
-    }
-  };
-}
-
-var p = new fakepubfood(config);
-p.on('error', function(data) {
-
-});

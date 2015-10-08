@@ -20,15 +20,21 @@ function BidMediator(config) {
 BidMediator.prototype.init = function() {
   this.bidProviders = {};
 
-  var callback = function(e) {
+  var loadCallback = function(e) {
     var scriptSrc = e && e.target && e.target.src || 'null';
     console.log('Loaded tag: ' + scriptSrc);
+  };
+
+  var initCallback = function(data) {
+    console.log('Init data: ' + data);
   };
 
   for (var k in this.config.bidProviders) {
     var p = new BidProvider(this.config.bidProviders[k]);
     this.bidProviders[k] = p;
-    p.init({}, callback);
+
+    p.load({}, loadCallback);
+    p.init({}, initCallback);
   }
 };
 
