@@ -15,6 +15,14 @@ gulp.task('test', function() {
       reporter: 'spec',
       localToRemoteUrlAccessEnabled: true,
       localUrlAccessEnabled: true
+    }))
+    // TODO see if we can avoid the double test run somehow for the report
+    .pipe(plugins.mochaPhantomjs({
+      reporter: 'xunit',
+      dump: 'reports/mocha-xunit.xml',
+      suppressStdout: true,
+      localToRemoteUrlAccessEnabled: true,
+      localUrlAccessEnabled: true
     }));
 });
 
