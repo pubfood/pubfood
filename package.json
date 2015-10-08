@@ -18,8 +18,7 @@
     "build": "npm run clean && gulp build",
     "test": "gulp test",
     "start": "gulp serve",
-    "clean": "gulp clean",
-    "postinstall": "npm run build"
+    "clean": "gulp clean"
   },
   "repository": {
     "type": "git",
@@ -44,7 +43,7 @@
       "./src/pubfood.js"
     ]
   },
-  "dependencies": {
+  "devDependencies": {
     "boom": "2.9.0",
     "browser-sync": "^2.9.4",
     "browserify": "^11.1.0",
@@ -67,9 +66,7 @@
     "mocha": "^2.3.3",
     "vinyl-source-stream": "^1.1.0",
     "eventemitter3": "^1.1.1",
-    "eslint": "^1.0.0"
-  },
-  "devDependencies": {
+    "eslint": "^1.0.0",
     "gulp-eslint": "^1.0.0"
   }
 }

@@ -1,6 +1,24 @@
-dist
-node_modules
+## folders
+/dist
+## note doc gets repeated in the dist directory so it isn't rooted
+# doc
+# /lib
+/node_modules
+# /public
+/reports
+# /src
+# /test
+
+## files
+# .eslintrc
+# .gitignore
+# .npmignore
+# gulpfile.js
+# LICENSE
+# package.json
+# README.md
+
+## generated stuff
 .idea
-npm-debug.log
 .DS_Store
-reports
+npm-debug.log
