@@ -20,7 +20,8 @@
     "clean": "npm run prepare && gulp clean",
     "build": "npm run prepare && npm run clean && gulp build",
     "test": "gulp test",
-    "start": "gulp serve"
+    "start": "gulp serve",
+    "ybpublish": "publish"
   },
   "repository": {
     "type": "git",
@@ -51,8 +52,11 @@
     "browserify": "^11.1.0",
     "chai": "^3.3.0",
     "del": "^2.0.2",
+    "eslint": "^1.0.0",
+    "eventemitter3": "^1.1.1",
     "gulp": "^3.9.0",
     "gulp-connect": "^2.2.0",
+    "gulp-eslint": "^1.0.0",
     "gulp-header": "^1.7.1",
     "gulp-if": "^2.0.0",
     "gulp-load-plugins": "^1.0.0-rc.1",
@@ -67,8 +71,6 @@
     "jsdoc": "^3.3.3",
     "mocha": "^2.3.3",
     "vinyl-source-stream": "^1.1.0",
-    "eventemitter3": "^1.1.1",
-    "eslint": "^1.0.0",
-    "gulp-eslint": "^1.0.0"
+    "yb-publish": "0.3.3"
   }
 }
