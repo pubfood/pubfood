@@ -10,8 +10,8 @@ doc
 /test
 
 ## files
-.eslintrc
 .eslintignore
+.eslintrc
 .gitignore
 .npmignore
 gulpfile.js
@@ -19,10 +19,12 @@ gulpfile.js
 # package.json
 # README.md
 tooth.json
-npm-shrinkwrap.json
-env.properties
 
-## generated stuff
-.idea
+## jenkins generated stuff
+env.properties
+npm-shrinkwrap.json
+
+## other generated stuff
 .DS_Store
+.idea
 npm-debug.log

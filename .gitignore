@@ -10,6 +10,7 @@
 # /test
 
 ## files
+# .eslintignore
 # .eslintrc
 # .gitignore
 # .npmignore
@@ -19,7 +20,11 @@
 # README.md
 # tooth.json
 
-## generated stuff
-.idea
+## jenkins generated stuff
+env.properties
+npm-shrinkwrap.json
+
+## other generated stuff
 .DS_Store
+.idea
 npm-debug.log
