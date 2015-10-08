@@ -9,7 +9,7 @@ var bid = {
 };
 
 
-var bid = new BidBuilder().
+var bid = new BidBuilder()
     .provider('yieldbot')
     .slot('right-rail')
     .dimension(300,250)
