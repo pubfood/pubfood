@@ -17,19 +17,14 @@ gulp.task('mocha', function() {
     }));
 });
 
-gulp.task('jshint', function() {
+gulp.task('eslint', function() {
   return gulp.src(['src/**/*.js', 'lib/**/*.js', 'gulpfile.js'])
-    .pipe(plugins.jshint())
-    .pipe(plugins.jshint.reporter('jshint-stylish', { verbose: true }));
+    .pipe(plugins.eslint())
+    .pipe(plugins.eslint.format())
+    .pipe(plugins.eslint.failAfterError());
 });
 
-gulp.task('jscs', function() {
-  return gulp.src(['src/**/*.js', 'lib/**/*.js', 'gulpfile.js'])
-    .pipe(plugins.jscs())
-    .pipe(plugins.jscs.reporter());
-});
-
-gulp.task('test', ['jshint', 'jscs', 'mocha']);
+gulp.task('test', ['eslint', 'mocha']);
 
 gulp.task('doc', plugins.shell.task([
   'jsdoc -d ./dist/doc ./src/**/*.js ./src/*.js'

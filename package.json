@@ -54,8 +54,6 @@
     "gulp-connect": "^2.2.0",
     "gulp-header": "^1.7.1",
     "gulp-if": "^2.0.0",
-    "gulp-jscs": "^3.0.1",
-    "gulp-jshint": "^1.11.2",
     "gulp-load-plugins": "^1.0.0-rc.1",
     "gulp-mocha-phantomjs": "^0.10.1",
     "gulp-open": "^1.0.0",
@@ -66,9 +64,12 @@
     "hapi": "9.3.1",
     "inert": "3.1.0",
     "jsdoc": "^3.3.3",
-    "jshint-stylish": "^2.0.1",
     "mocha": "^2.3.3",
     "vinyl-source-stream": "^1.1.0",
-    "eventemitter3": "^1.1.1"
+    "eventemitter3": "^1.1.1",
+    "eslint": "^1.0.0"
+  },
+  "devDependencies": {
+    "gulp-eslint": "^1.0.0"
   }
 }
