@@ -6,6 +6,7 @@ var gulp = require('gulp'),
   plugins = require('gulp-load-plugins')(),
   browserSync = require('browser-sync'),
   browserify = require('browserify'), // Consider using watchify
+  fs = require('fs'),
   del = require('del');
 
 gulp.task('test', function() {
@@ -21,6 +22,7 @@ gulp.task('lint', function() {
   return gulp.src(['src/**/*.js', 'lib/**/*.js', 'test/**/*.js', 'gulpfile.js'])
     .pipe(plugins.eslint())
     .pipe(plugins.eslint.format())
+    .pipe(plugins.eslint.format('checkstyle', fs.createWriteStream('reports/jshint-checkstyle.xml')))
     .pipe(plugins.eslint.failAfterError());
 });
 

@@ -16,7 +16,7 @@
   ],
   "main": "./src/pubfood.js",
   "scripts": {
-    "prepare": "npm install",
+    "prepare": "npm install && mkdir -p reports",
     "clean": "npm run prepare && gulp clean",
     "lint": "gulp lint",
     "test": "gulp test",
