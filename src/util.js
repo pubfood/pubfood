@@ -43,6 +43,19 @@ var util = {
       }
     };
   },
+  hasFunctions: function(object, fnNames) {
+    if (!object)  return false;
+
+    var ret = true;
+    for (var i = 0; i < fnNames.length; i++) {
+      var name = fnNames[i];
+      if (!object[name] || !util.asType(object[name]) === 'function') {
+        ret = false;
+        break;
+      }
+    }
+    return ret;
+  },
   loadProviderTag: function(uri, action) {
 
     var scriptEl = document.createElement('script');

@@ -29,7 +29,8 @@ var provider = {
   },
   auctionProviderBuilder: function(config) {
     return new AuctionProvider(config);
-  }
+  },
+  fnNames: ['load', 'init', 'fetch', 'refresh']
 };
 
 module.exports = provider;

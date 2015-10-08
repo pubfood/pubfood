@@ -6,6 +6,7 @@
 'use strict';
 
 var util = require('../util');
+var provider = require('../provider');
 
 /**
  * AuctionProvider implements the  publisher ad server requests.
@@ -48,6 +49,10 @@ AuctionProvider.prototype.slot = function(slot) {
  * @param {Function} callback - a callback to execute in response to the script [onload]{@linkcode https://developer.mozilla.org/en-US/docs/Web/API/GlobalEventHandlers/onload} event
  */
 AuctionProvider.prototype.load = function(options, callback) {
+  if (!util.hasFunctions(this.bidDelegate, provider.fnNames)) {
+    // raise error
+    console.log('auctionDelegate function missing');
+  }
   this.auctionDelegate.load(options || {}, callback);
 };
 
@@ -60,13 +65,11 @@ AuctionProvider.prototype.load = function(options, callback) {
  * @param {Function} callback - a callback to execute on init complete
  */
 AuctionProvider.prototype.init = function(options, callback) {
-  if (this.auctionDelegate &&
-      this.auctionDelegate.init &&
-      util.asType(this.auctionDelegate.init) === 'function') {
-
-    this.auctionDelegate.init(options || {}, callback);
-
+  if (!util.hasFunctions(this.bidDelegate, provider.fnNames)) {
+    // raise error
+    console.log('auctionDelegate function missing');
   }
+  this.auctionDelegate.init(options || {}, callback);
 };
 
 /**

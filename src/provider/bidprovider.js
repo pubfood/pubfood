@@ -6,6 +6,7 @@
 'use strict';
 
 var util = require('../util');
+var provider = require('../provider');
 
 /**
  * BidProvider implements bidding partner requests
@@ -48,6 +49,10 @@ BidProvider.prototype.slot = function(slot) {
  * @param {Function} callback - a callback to execute in response to the script [onload]{@linkcode https://developer.mozilla.org/en-US/docs/Web/API/GlobalEventHandlers/onload} event
  */
 BidProvider.prototype.load = function(options, callback) {
+  if (!util.hasFunctions(this.bidDelegate, provider.fnNames)) {
+    // raise error
+    console.log('bidDelegate function missing');
+  }
   this.bidDelegate.load(options || {}, callback);
 };
 
@@ -60,13 +65,11 @@ BidProvider.prototype.load = function(options, callback) {
  * @param {Function} callback - a callback to execute on init complete
  */
 BidProvider.prototype.init = function(options, callback) {
-  if (this.bidDelegate &&
-      this.bidDelegate.init &&
-      util.asType(this.bidDelegate.init) === 'function') {
-
-    this.bidDelegate.init(options || {}, callback);
-
+  if (!util.hasFunctions(this.bidDelegate, provider.fnNames)) {
+    // raise error
+    console.log('bidDelegate function missing');
   }
+  this.bidDelegate.init(options || {}, callback);
 };
 
 /**
