@@ -18,7 +18,7 @@
   "scripts": {
     "prepare": "npm install",
     "clean": "npm run prepare && gulp clean",
-    "build": "npm run prepare && npm run clean && gulp build",
+    "build": "npm run prepare && gulp build",
     "test": "gulp test",
     "start": "gulp serve",
     "ybpublish": "publish"
