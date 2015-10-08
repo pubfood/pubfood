@@ -69,6 +69,7 @@
     "inert": "3.1.0",
     "jsdoc": "^3.3.3",
     "mocha": "^2.3.3",
+    "run-sequence": "^1.1.4",
     "vinyl-source-stream": "^1.1.0",
     "yb-publish": "0.3.3"
   }

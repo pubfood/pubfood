@@ -6,7 +6,8 @@ var gulp = require('gulp'),
   plugins = require('gulp-load-plugins')(),
   browserSync = require('browser-sync'),
   browserify = require('browserify'), // Consider using watchify
-  del = require('del');
+  del = require('del'),
+  runSequence = require('run-sequence');
 
 gulp.task('mocha', function() {
   return gulp.src('test/index.html')
@@ -47,7 +48,9 @@ gulp.task('clean', function() {
   });
 });
 
-gulp.task('build', ['browserify', 'test', 'doc']);
+gulp.task('build', function(cb){
+  runSequence(['browserify', 'test', 'doc'], cb);
+});
 
 gulp.task('dist-js', ['browserify'], browserSync.reload);
 
