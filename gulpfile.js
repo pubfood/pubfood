@@ -35,7 +35,7 @@ gulp.task('lint', function() {
 });
 
 gulp.task('doc', plugins.shell.task([
-  'jsdoc -d ./dist/doc ./src/**/*.js ./src/*.js'
+  'jsdoc -R API_DOC.md -d ./dist/doc ./src -r'
 ]));
 
 gulp.task('build', function() {
