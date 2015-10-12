@@ -18,8 +18,19 @@ function Bid() {
   if (this.init_) {
     this.init_();
   }
-  this.dimensions_ = [];
+  this.sizes = [];
 }
+
+/**
+ * Create a new [Bid]{@link pubfood/model.Bid} from an object.
+ *
+ * @param {object} config - bid object literal
+ * @returns {object} instance of [Bid]{@link pubfood/model.Bid}
+ */
+Bid.fromObject = function(config) {
+
+};
+
 
 Bid.prototype.value = function(v) {
   this.value = v || '';
@@ -33,20 +44,16 @@ Bid.prototype.slot = function(s) {
 };
 
 /*jslint bitwise: true */
-Bid.prototype.dimension = function(w, h) {
+Bid.prototype.addSize = function(w, h) {
   var width = Math.abs(~~w);
   var height  = Math.abs(~~h);
 
-  this.dimensions_.push([width, height]);
+  this.sizes.push([width, height]);
 
   return this;
 
 };
 /*jslint bitwise: false */
-
-Bid.prototype.getDimensions = function() {
-  return this.dimensions_;
-};
 
 Bid.prototype.provider = function(p) {
   this.provider = p;

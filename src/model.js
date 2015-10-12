@@ -24,10 +24,10 @@ var Bid = require('./model/bid');
  * @memberof pubfood
  */
 var model = {
-  slotBuilder: function(data) {
+  slotBuilder: function() {
     return new Slot();
   },
-  bidBuilder: function(data) {
+  bidBuilder: function() {
     return new Bid();
   },
   BaseModelObject: BaseModelObject,

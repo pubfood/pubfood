@@ -7,11 +7,12 @@
 
 /*eslint no-unused-vars: 0*/
 
-/**
+/* TODO: use module:pubfood/interfaces
  * BidDelegate defines delegate interface to provide bids.
  *
  * @class
  * @memberof pubfood/provider
+ *
  */
 function BidDelegate(tagUri) {
   this.tagUri = tagUri;

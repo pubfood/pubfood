@@ -5,6 +5,7 @@
 
 'use strict';
 
+var util = require('../util');
 var BidProvider = require('../provider/bidprovider');
 
 /**
@@ -13,45 +14,65 @@ var BidProvider = require('../provider/bidprovider');
  * @class
  * @memberof pubfood/mediator
  */
-function BidMediator(config) {
-  this.config = config || {};
+function BidMediator() {
 }
 
-BidMediator.prototype.init = function() {
+/**
+ * Add a [BidProvider]{@link pubfood/provider.BidProvider} objects.
+ *
+ * @param {object[]} bidProviders - [BidProviders]{@link pubfood/provider.BidProvider} to mediate
+ */
+BidMediator.prototype.addBidProviders = function(bidProviders) {
+  if (!bidProviders) return this;
+
+  if (this.bidProviders) {
+    delete this.bidProviders;
+  }
   this.bidProviders = {};
 
-  var loadCallback = function(e) {
-    var scriptSrc = e && e.target && e.target.src || 'null';
-    console.log('Loaded tag: ' + scriptSrc);
-  };
+  for (var i = 0; i < bidProviders.length; i++) {
+    var provider = bidProviders[i];
+    this.bidProviders[provider.name] = provider;
+  }
+  return this;
+};
 
-  var initCallback = function(data) {
-    console.log('Init data: ' + data);
-  };
 
-  for (var k in this.config.bidProviders) {
-    var p = new BidProvider(this.config.bidProviders[k]);
-    this.bidProviders[k] = p;
-
-    p.load({}, loadCallback);
-    p.init({}, initCallback);
+BidMediator.prototype.loadProviders = function() {
+  for (var i = 0; i < this.bidProviders.length; i++) {
+    if (this.bidProviders[i].libUri) {
+      var uri = this.bidProviders[i].libUri();
+      util.loadUri(uri);
+    }
   }
 };
 
-BidMediator.prototype.load = function() {
+BidMediator.prototype.initBids = function(slots) {
+  for (var i = 0; i < slots.length; i++) {
+    var slot = slots[i];
 
-  var callback = function(e) {
-    var scriptSrc = e && e.target && e.target.src || 'null';
-    console.log('Loaded tag: ' + scriptSrc);
-  };
-
-  for (var k in this.bidProviders) {
-    this.bidProviders[k].init(callback);
+    //provider.init();
   }
 };
 
-BidMediator.prototype.requestBids = function() {
+BidMediator.prototype.resolveProviders = function(slots) {
+  var poviderSlots = {};
+  for (var i = 0; i < slots.length; i++) {
+    var slot = slots[i];
+    for (var j = 0; j < slot.bidProviders.length; j++) {
+      var providerName = slot.bidProviders[j];
+      var bidProvider = this.bidProviders[providerName];
 
+    }
+  }
+};
+
+BidMediator.prototype.refreshBids = function(slots) {
+  // resolve bidder slots
+  // then for each bidder, refresh slots
+  for (var i = 0; i < slots.length; i++) {
+    var slot = slots[i];
+  }
 };
 
 module.exports = BidMediator;

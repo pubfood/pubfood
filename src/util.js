@@ -24,6 +24,12 @@ var util = {
       });
     /*jslint bitwise: false */
   },
+  /**
+   * Simple class extension/inheritance
+   *
+   * TODO: refactor to use?
+   * - https://github.com/isaacs/inherits
+   */
   extends: function(child, parent) {
 
     for (var k in parent.prototype) {
@@ -56,7 +62,7 @@ var util = {
     }
     return ret;
   },
-  loadProviderTag: function(uri, action) {
+  loadUri: function(uri, action) {
 
     var scriptEl = document.createElement('script');
     scriptEl.type = 'text/javascript';

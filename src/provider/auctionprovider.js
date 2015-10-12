@@ -21,6 +21,17 @@ function AuctionProvider(auctionDelegate) {
 }
 
 /**
+ * Create a new [AuctionProvider]{@link pubfood/provider.AuctionProvider} from an object.
+ *
+ * @param {object} config - provider object literal
+ * @returns {object} instance of [AuctionProvider]{@link pubfood/provider.AuctionProvider}
+ */
+AuctionProvider.fromObject = function(config) {
+
+
+};
+
+/**
  * Set the provider name.
  *
  * @param {String} name - the auction provider name

@@ -11,8 +11,6 @@
  */
 
 var AuctionMediator = require('./mediator/auctionmediator');
-var BidMediator = require('./mediator/bidmediator');
-var ReportMediator = require('./mediator/reportmediator');
 
 /**
  * Coordinates and orchestrates Mediator and Assembler instances.
@@ -21,14 +19,8 @@ var ReportMediator = require('./mediator/reportmediator');
  * @memberof pubfood
  */
 var mediator = {
-  auctionMediatorBuilder: function(config) {
-    return new AuctionMediator(config);
-  },
-  bidMediatorBuilder: function(config) {
-    return new BidMediator(config);
-  },
-  reportMediatorBuilder: function(config) {
-    return new ReportMediator(config);
+  mediatorBuilder: function() {
+    return new AuctionMediator();
   }
 };
 

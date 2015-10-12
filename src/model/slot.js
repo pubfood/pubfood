@@ -18,26 +18,129 @@ function Slot() {
   if (this.init_) {
     this.init_();
   }
-  this.dimensions_ = [];
+  this.elementId = '';
+  this.bidProviders = [];
+  this.sizes = [];
 }
 
-Slot.prototype.name = function(n) {
-  this.name = n;
+/**
+ * @typedef {array} dimensions
+ * @property {number|string} width
+ * @property {number|string} height
+ * @example
+ * var dimensions = [ [300, 250], [300, 600] ];
+ */
+
+var slotConfig = require('../interfaces').SlotConfig;
+/**
+ * Validate a slot configuration object.
+ *
+ * @param {object} config - slot configuration object
+ * @param {string} config.name - name of the slot/ad unit in [AuctionProvider]{@link pubfood/provider.AuctionProvider} system
+ * @param {string} [config.elementId] - DOM target element id
+ * @param {dimensions} config.sizes - array of slot size dimensions
+ * @param {object[]} config.bidProviders
+ * @param {string} config.bidProviders.provider - bid provider name
+ * @param {string} [config.bidProviders.slot] - external provider system slot name
+ */
+Slot.validate = function(config) {
+  if (!config) return false;
+
+  var err = 0;
+  for (var k in slotConfig) {
+    if (!config.hasOwnProperty(k) || util.asType(config[k]) !== util.asType(slotConfig[k])) {
+      err++;
+    }
+    if (k === 'name' && !config[k]) err++;
+    if (err > 0) break;
+  }
+  return !err;
+};
+
+/**
+ * Create a new [Slot]{@link pubfood/model.Slot} from an object.
+ *
+ * @param {object} config - slot object literal
+ * @returns {object} instance of [Slot]{@link pubfood/model.Slot}. <strong><em>null</em></strong> if invalid.
+ */
+Slot.fromObject = function(config) {
+  if (!Slot.validate(config)) return null;
+  var s = new Slot();
+
+  for (var k in config) {
+    s[k] = config[k];
+  }
+  return s;
+};
+
+/**
+ * Set the slot name.
+ *
+ * @param {string} name - the slot name
+ * @this Slot
+ * @returns {object} [this]{@link pubfood/model.Slot}
+ */
+Slot.prototype.name = function(name) {
+  this.name = name;
+  return this;
+};
+
+/**
+ * Set target DOM elementId.
+ *
+ * @param {string} elementId - the target element Id
+ * @this Slot
+ * @returns {object} [this]{@link pubfood/model.Slot}
+ */
+Slot.prototype.targetId = function(elementId) {
+  this.elementId = elementId;
+  return this;
+};
+
+
+/**
+ * Set the slot sizes.
+ * @example <caption>Example setting slot sizes.</caption>
+ * slot.sizes([ [300, 250], [300, 600] ]);
+ *
+ * @param {array} slotSizes - an array of [{number}, {number}]
+ * @this Slot
+ * @returns {object} [this]{@link pubfood/model.Slot}
+ */
+Slot.prototype.addSizes = function(slotSizes) {
+  Array.prototype.push.apply(this.sizes, slotSizes);
   return this;
 };
 
 /*jslint bitwise: true */
-Slot.prototype.dimension = function(w, h) {
-  var width = Math.abs(~~w);
-  var height  = Math.abs(~~h);
 
-  this.dimensions_.push([width, height]);
+/**
+ * Add a size dimension.
+ *
+ * @param {string|integer} width - the width dimension
+ * @param {string|integer} height - the height dimension
+ * @this Slot
+ * @returns {object} [this]{@link pubfood/model.Slot}
+ */
+Slot.prototype.addSize = function(width, height) {
+  var w = Math.abs(~~width);
+  var h  = Math.abs(~~height);
+
+  this.sizes.push([w, h]);
   return this;
 };
 /*jslint bitwise: false */
 
-Slot.prototype.getDimensions = function() {
-  return this.dimensions_;
+/**
+ * Add bid provider allocated to the slot.
+ *
+ * @param {object} bidProvider - the slot name
+ * @this Slot
+ * @returns {object} [this]{@link pubfood/model.Slot}
+ */
+Slot.prototype.addBidProvider = function(slotBidProvider) {
+  this.bidProviders.push(slotBidProvider);
+  return this;
 };
 
 util.extends(Slot, BaseModelObject);
