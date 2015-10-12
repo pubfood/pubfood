@@ -1,6 +1,8 @@
 /**
  * pubfood
  * Copyright (c) 2015 Yieldbot, Inc. - All rights reserved.
+ *
+ * Pubfood - A browser client header bidding JavaScript library.
  */
 
 'use strict';
@@ -9,12 +11,6 @@
 
 var version = require('../package.json').version;
 
-/**
- * Pubfood.
- *
- * A browser client header bidding JavaScript library.
- * @module pubfood
- */
 (function(global, undefined, ctor) {
 
   if (global) {
@@ -30,14 +26,11 @@ var version = require('../package.json').version;
   pubfood.library = pubfood.prototype = {
     version: version,
     model: require('./model'),
+    provider: require('./provider'),
     util: require('./util'),
     mediator: require('./mediator').mediatorBuilder(),
     interfaces: require('./interfaces'),
     PubfoodError: require('./errors')
-  };
-
-  pubfood.log = function(msg) {
-    console.log(msg);
   };
 
   /**
@@ -47,11 +40,31 @@ var version = require('../package.json').version;
    * @constructor
    * @param {string} [optional_id] Optional ID
    * @return {pubfood}
+   * @example
+   *
+   * var p = new pubfood();
    */
   var api = pubfood.library.init = function(optionalId) {
     return this;
   };
 
+  /**
+   * Console logs a message
+   *
+   * @param {*} msg
+   * @return {undefined}
+   */
+  api.prototype.log = function(msg) {
+    if(console && console.log) {
+      console.log(msg);
+    }
+  };
+
+  /**
+   * Who am I?
+   * @function
+   * @return {undefined}
+   */
   api.prototype.whoAmI = function() {
     console.log('instanceOf \'pubfood.library.constructor\' v' + this.library.version);
   };
@@ -60,20 +73,25 @@ var version = require('../package.json').version;
    * Make this adslot avaialble for bidding
    *
    * @function
-   * @param {object} slot
+   * @param {BidConfig} slot
    * @param {string} slot.name - slot name
-   * @param {string} slot.elementId -
-   * @param {array[]} slot.sizes -
-   * @param {number} slot.sizes[].0 - width
-   * @param {number} slot.sizes[].1 - height
-   * @param {object[]} slot.bidProviders -
-   * @param {string} slot.bidProviders[].provider -
-   * @param {string} slot.bidProviders[].slot -
+   * @param {string} slot.elementId
+   * @param {array.<number, number>} slot.sizes
+   * @param {number} slot.sizes.0 width
+   * @param {number} slot.sizes.1 height
+   * @param {object[]} slot.bidProviders
+   * @param {string} slot.bidProviders[].provider
+   * @param {string} slot.bidProviders[].slot
    * @return {pubfood}
    */
   api.prototype.addSlot = function(slot) {
     this.library.mediator.addSlot(slot);
   };
+
+  /**
+   * Get a list a of all registered slots
+   * @return {MediatorSlot}
+   */
   api.prototype.getSlots = function() {
     return this.library.mediator.slots;
   };
@@ -101,10 +119,10 @@ var version = require('../package.json').version;
    * @param {string} provider.name The name of the BidProvider
    * @param {string} provider.libUrl The URL of the BidProvider's library code
    * @param {object} [provider.options] Optional configuration
-   * @param {module:pubfood~bidProviderInit} provider.init -
-   * @param {module:pubfood~bidProviderRefresh} provider.refresh -
-   * @return {pubfood}
+   * @param {bidProviderInit} provider.init -
+   * @param {bidProviderRefresh} provider.refresh -
    * @throws {PubfoodError}
+   * @return {pubfood}
    * @example
    pubfood.addBidProvider({
    name: 'Yieldbot',
@@ -119,6 +137,11 @@ var version = require('../package.json').version;
   api.prototype.addBidProvider = function(provider) {
     this.library.mediator.addBidProvider(provider);
   };
+
+  /**
+   * Gets a list of bidproviders
+   * @return {MediatorBidProvider[]}
+   */
   api.prototype.getBidProviders = function() {
     return this.library.mediator.bidProviders;
   };
@@ -135,7 +158,7 @@ var version = require('../package.json').version;
   /**
    * Refresh slot bids.
    *
-   * @param {array} [slots] - optional list of slot names to refresh.
+   * @param {string[]} [slotNames] Optional list of slot names to refresh.
    * @return {pubfood}
    */
   api.prototype.refresh = function(slotNames) {

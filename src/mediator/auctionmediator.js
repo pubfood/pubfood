@@ -44,7 +44,7 @@ AuctionMediator.prototype.addSlot = function(slotConfig) {
 
 /**
  * Add a [BidProvider]{@link pubfood/provider.BidProvider} configuration object.
- * @param {object} delegateConfig - configuration for a [BidProvider]{@link pubfood/provider.BidProvider}
+ * @param {BidDelegate} delegateConfig - configuration for a [BidProvider]{@link pubfood/provider.BidProvider}
  */
 AuctionMediator.prototype.addBidProvider = function(delegateConfig) {
   if (BidProvider.validate(delegateConfig)) {

@@ -6,7 +6,6 @@
 'use strict';
 
 var util = require('../util');
-var provider = require('../provider');
 
 /**
  * BidProvider implements bidding partner requests.

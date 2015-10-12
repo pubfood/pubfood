@@ -1,17 +1,11 @@
 /**
  * pubfood
  * Copyright (c) 2015 Yieldbot, Inc. - All rights reserved.
+ *
+ * Events live here..
  */
 
 'use strict';
-
-/** @module events */
-
-/**
- * Events live here..
- * @namespace pubfood/events
- */
-
 
 var EventEmitter = require('eventemitter3');
 
@@ -61,7 +55,5 @@ var events = {
   },
   createBidEvent: BidEvent
 };
-
-
 
 module.exports = events;

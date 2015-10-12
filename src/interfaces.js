@@ -1,15 +1,14 @@
+/**
+ * pubfood
+ * Copyright (c) 2015 Yieldbot, Inc. - All rights reserved.
+ */
 
 'use strict';
 
 /**
- * @module interfaces
- * @namespace pubfood/interfaces
- */
-
-/**
  * Interface for classes that are delegates for the AuctionProvider decorator..
  *
- * @interface AuctionDelegate
+ * @typedef {object} AuctionDelegate
  * @memberof pubfood/interfaces
  */
 var auctionDelegate = {
@@ -31,12 +30,12 @@ var auctionDelegate = {
    * @param {object[]} bids
    * @param {string} bids[].name -
    * @param {string|number} bids[].price -
-   * @param {object.<string, *>} bids[].customTageting -
+   * @param {object} bids[].customTageting -
    * @param {object} bids[].adslot -
    * @param {string} bids[].adslot.name -
    * @param {string} bids[].adslot.elementId -
    * @param {array} bids[].adslot.sizes -
-   * @param {object.<string, *>} options
+   * @param {object} options
    * @param {module:pubfood~doneCallback} done
    * @return {undefined}
    */
@@ -50,7 +49,7 @@ var auctionDelegate = {
    * @function refresh
    * @param {object[]} slots
    * @param {string} slots[].name -
-   * @param {object.<string, *>} options
+   * @param {object} options
    * @param {module:pubfood~doneCallback} done
    * @return {undefined}
    */
@@ -60,16 +59,14 @@ var auctionDelegate = {
 /**
  * Interface for classes that are delegates for the BidProvider decorator..
  *
- * @interface BidDelegate
- * @memberof pubfood/interfaces
+ * @typedef {object} BidDelegate
  */
 var bidDelegate = {
   /**
    * Bid provider delegate name.
    *
    * @type {string}
-   * @memberof pubfood/interfaces.BidDelegate
-   * @instance
+   * @lends BidDelegate
    */
   name: '',
   /**
@@ -77,7 +74,6 @@ var bidDelegate = {
    *
    * @type {string}
    * @memberof pubfood/interfaces.BidDelegate
-   * @instance
    */
   libUri: '',
   /**
@@ -126,6 +122,11 @@ var bidDelegate = {
  * @param {*} data
  * @return {boolean}
  * @memberof pubfood/interfaces
+ * @example
+
+  function(data){
+    return false;
+  }
  */
 
 /**
@@ -145,6 +146,78 @@ var bidDelegate = {
  * @memberof pubfood/interfaces
  */
 
+/**
+ * @typedef {object} MediatorSlot
+ * @property {string} name -
+ */
+
+/**
+ * @typedef {object} MediatorBidProvider
+ * @property {string} name -
+ */
+
+/**
+ * @typedef {object} BidProviderConfig
+ * @property {string} name The provider's name
+ * @property {string|number} price The bid price
+ * @property {object} customTageting Custom targeting parameters to be passed to the AuctionProvider
+ * @property {object} adslot Adslot configuration
+ * @property {string} adslot.name Name
+ * @property {string} adslot.elementId Target element on page
+ * @property {array} adslot.sizes Adslot sizes
+ */
+
+/**
+ * bid provider init
+ * @function bidProviderInit
+ * @param {object[]} bids
+ * @param {string} bids[].name The provider's name
+ * @param {string|number} bids[].price The bid price
+ * @param {object} bids[].customTageting Custom targeting parameters to be passed to the AuctionProvider
+ * @param {object} bids[].adslot Adslot configuration
+ * @param {string} bids[].adslot.name Name
+ * @param {string} bids[].adslot.elementId Target element on page
+ * @param {array} bids[].adslot.sizes Adslot sizes
+ * @param {object} options TBD
+ * @param {doneCallback} done Callback to execute on done
+ * @return {undefined}
+ */
+
+/**
+ * bid provider refresh
+ * @function bidProviderRefresh
+ * @param {object[]} slots
+ * @param {string} slots[].name -
+ * @param {object} options
+ * @param {doneCallback} done
+ * @return {undefined}
+ */
+
+/**
+ * @typedef {object} BidConfig
+ * @property {string} name - slot name
+ * @property {string} elementId -
+ * @property {array.<number, number>} sizes
+ * @property {number} sizes.0 - width
+ * @property {number} sizes.1 - height
+ * @property {object[]} bidProviders
+ * @property {string} bidProviders.provider -
+ * @property {string} bidProviders.slot -
+ */
+
+/**
+ * @typedef Model
+ */
+
+/**
+ * @typedef {object} SlotConfig
+ * @property {string} name name of the slot/ad unit in [AuctionProvider]{@link pubfood/provider.AuctionProvider} system
+ * @property {string} [elementId] DOM target element id
+ * @property {dimensions} sizes array of slot size dimensions
+ * @property {object[]} bidProviders
+ * @property {string} bidProviders.provider bid provider name
+ * @property {string} [bidProviders.slot] external provider system slot name
+ */
 
 var slotConfig = {
   name: '',

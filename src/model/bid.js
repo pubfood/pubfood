@@ -12,7 +12,7 @@ var BaseModelObject = require('./basemodelobject');
  * Bid is the result of a partner [BidProvider]{@link pubfood/provider.BidProvider} request.
  *
  * @class
- * @arguments pubfood/model.BaseModelObject
+ * @memberof pubfood/model
  */
 function Bid() {
   if (this.init_) {

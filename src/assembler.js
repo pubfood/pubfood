@@ -1,21 +1,17 @@
 /**
  * pubfood
  * Copyright (c) 2015 Yieldbot, Inc. - All rights reserved.
+ *
+ * Assemblers live here..
  */
 
 'use strict';
-
-/**
- * Assemblers live here..
- * @namespace pubfood/assembler
- */
 
 var BidAssembler = require('./assembler/bidassembler');
 
 /**
  * Coordinates and orchestrates Assembler instances.
  *
- * @module
  * @memberof pubfood
  */
 var assembler = {
