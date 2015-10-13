@@ -5,25 +5,23 @@
 
 'use strict';
 
-/*eslint no-unused-vars: 0*/
-
 var util = require('../util');
 
 /**
  * BidProvider implements bidding partner requests.
  *
  * @class
- * @memberof pubfood/provider
+ * @memberof pubfood#provider
  */
 function BidProvider() {
   this.name;
 }
 
 /**
- * Create a new [BidProvider]{@link pubfood/provider.BidProvider} from a delegate object.
+ * Create a new [BidProvider]{@link pubfood#provider.BidProvider} from a delegate object.
  *
  * @param {object} delegate - bid provider delegate object literal
- * @returns {object} instance of [BidProvider]{@link pubfood/provider.BidProvider}. <em>null</em> if delegate is invalid.
+ * @returns {object} instance of [BidProvider]{@link pubfood#provider.BidProvider}. <em>null</em> if delegate is invalid.
  */
 BidProvider.withDelegate = function(delegate) {
   if (!BidProvider.validate(delegate)) {
@@ -62,7 +60,7 @@ BidProvider.validate = function(delegate) {
  * @param {string} [uri] location Uri
  * @returns {string} location Uri
  */
-BidProvider.prototype.libUri = function(uri) {
+BidProvider.prototype.libUri = function(/*uri*/) {
   var args = Array.prototype.slice.call(arguments);
   if (args.length > 0 && util.asType(args[0]) === 'string') {
     this.bidDelegate.libUri = args[0];
@@ -75,7 +73,7 @@ BidProvider.prototype.libUri = function(uri) {
  *
  * The BidProvider delegate javascript tag and other setup is done here.
  *
- * Delegates to implementation [BidDelegate.init]{@link pubfood/interfaces.BidDelegate}
+ * Delegates to implementation [BidDelegate.init]{@link pubfood#interfaces.BidDelegate}
  *
  * @param {array} slots - delegate specific options
  * @param {object} options - provider delegate specific bid options

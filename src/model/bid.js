@@ -14,7 +14,7 @@ var BaseModelObject = require('./basemodelobject');
  * Bid is the result of a partner [BidProvider]{@link pubfood/provider.BidProvider} request.
  *
  * @class
- * @memberof pubfood/model
+ * @memberof pubfood#model
  */
 function Bid() {
   if (this.init_) {
@@ -24,10 +24,10 @@ function Bid() {
 }
 
 /**
- * Create a new [Bid]{@link pubfood/model.Bid} from an object.
+ * Create a new [Bid]{@link pubfood#model.Bid} from an object.
  *
  * @param {object} config bid object literal
- * @returns {pubfood/model.Bid} instance of [Bid]{@link pubfood/model.Bid}
+ * @returns {pubfood#model.Bid} instance of [Bid]{@link pubfood#model.Bid}
  */
 Bid.fromObject = function(config) {
 
@@ -36,7 +36,7 @@ Bid.fromObject = function(config) {
 /**
  * Sets the bid value
  * @param {string|number} v
- * @return {pubfood/model.Bid}
+ * @return {pubfood#model.Bid}
  */
 Bid.prototype.value = function(v) {
   this.value = v || '';
@@ -46,8 +46,8 @@ Bid.prototype.value = function(v) {
 
 /**
  * Set the bid's slot
- * @param {pubfood/model.Slot} s
- * @return {pubfood/model.Bid}
+ * @param {pubfood#model.Slot} s
+ * @return {pubfood#model.Bid}
  */
 Bid.prototype.slot = function(s) {
   this.slot = s;
@@ -59,7 +59,7 @@ Bid.prototype.slot = function(s) {
  * Set's the ad
  * @param {string|number} w
  * @param {string|number} h
- * @return {pubfood/model.Bid}
+ * @return {pubfood#model.Bid}
  */
 Bid.prototype.addSize = function(w, h) {
   var width = Math.abs(~~w);
@@ -73,8 +73,8 @@ Bid.prototype.addSize = function(w, h) {
 
 /**
  * Sets the bid's provider
- * @param {pubfood/provider.BidProvider} p
- * @return {pubfood/model.Bid}
+ * @param {pubfood#provider.BidProvider} p
+ * @return {pubfood#model.Bid}
  */
 Bid.prototype.provider = function(p) {
   this.provider = p;

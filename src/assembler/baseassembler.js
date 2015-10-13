@@ -6,10 +6,10 @@
 'use strict';
 
 /**
- * BaseAssembler is a base type for {@link pubfood/mediator} assembler types.
+ * BaseAssembler is a base type for [Assembler]{@link pubfood#assembler} types.
  *
  * @class
- * @memberof pubfood/mediator
+ * @memberof pubfood#assembler
  */
 function BaseAssembler() {
 

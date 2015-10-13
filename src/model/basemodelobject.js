@@ -8,10 +8,10 @@
 var util = require('../util');
 
 /**
- * BaseModelObject is a base type for {@link pubfood/provider} types.
+ * BaseModelObject is a base type for [Model]{@link pubfood#model} types.
  *
  * @class
- * @memberof pubfood/model
+ * @memberof pubfood#model
  */
 function BaseModelObject() {
   this.id = util.newId();

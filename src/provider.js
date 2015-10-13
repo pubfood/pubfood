@@ -7,39 +7,50 @@
 
 'use strict';
 
-var AuctionProvider = require('./provider/auctionprovider');
-var CreativeProvider = require('./provider/creativeprovider');
-var BidProvider = require('./provider/bidprovider');
+var fs = require('fs');
 
 /**
  * Coordinates and orchestrats Provider instances.
+ *
  * @memberof pubfood
- * @inner
- * @property {function} bidProviderBuilder
- * @property {function} creativeProviderBuilder
- * @property {function} auctionProviderBuilder
- * @property {string[]} fnNames
+ * @instance
  */
 var provider = {
   /**
-   * Creates a BidProvider
-   * @memberOf provider
-   * @param {BidProviderConfig} config
-   * @return {BidProvider}
+   * @type {object}
+   * @private
    */
-  bidProviderBuilder: function(config) {
-    return new BidProvider(config);
-  },
-  creativeProviderBuilder: function(config) {
-    return new CreativeProvider(config);
-  },
-  auctionProviderBuilder: function(config) {
-    return new AuctionProvider(config);
-  },
+  _types: (function() {
+    var obj = {};
+    var path = './provider/';
+    fs.readdirSync(path).forEach(function(f) {
+      var name = f.split('.')[0];
+      obj[name] = require(path + f);
+    });
+
+    return obj;
+  })(),
   /**
-   * @type {string[]}
+   *
+   * @param {string} type
+   * @return {Provider|null}
    */
-  fnNames: ['load', 'init', 'fetch', 'refresh']
+  getType: function(type) {
+    type = ('' + type).toLowerCase();
+    return this._types[type] || null;
+  },
 };
+
+//console.log(provider.getType('foo'));
+//console.log('');
+//console.log('auctionprovider', provider.getType('auctionprovider'));
+//console.log('');
+//console.log('baseprovider', provider.getType('baseprovider'));
+//console.log('');
+//console.log('biddelegate', provider.getType('biddelegate'));
+//console.log('');
+//console.log('bidprovider', provider.getType('bidprovider'));
+//console.log('');
+//console.log('creativeprovider', provider.getType('creativeprovider'));
 
 module.exports = provider;

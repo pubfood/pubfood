@@ -9,7 +9,7 @@
  * CreativeProvider implements partner creative requests.
  *
  * @class
- * @memberof pubfood/provider
+ * @memberof pubfood#provider
  */
 function CreativeProvider() {
 

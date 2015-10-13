@@ -8,10 +8,10 @@
 var util = require('../util');
 
 /**
- * BaseProvider is a base type for {@link pubfood/provider} types.
+ * BaseProvider is a base type for {@link pubfood#provider} types.
  *
  * @class
- * @memberof pubfood/provider
+ * @memberof pubfood#provider
  */
 function BaseProvider() {
   this.id = util.newId();

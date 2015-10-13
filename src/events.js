@@ -14,6 +14,7 @@ var EventEmitter = require('eventemitter3');
 /**
  * Events for a BidProvider
  * @class
+ * @memberof pubfood
  */
 function BidEvent() {
 }

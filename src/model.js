@@ -7,15 +7,13 @@
 
 'use strict';
 
-/*eslint no-unused-vars: 0*/
-
 var fs = require('fs');
 
 /**
  * Coordinates and orchestrates domain model instances.
  *
  * @memberof pubfood
- * @inner
+ * @instance
  */
 var model = {
   /**
