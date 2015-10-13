@@ -7,6 +7,8 @@
 
 'use strict';
 
+/*eslint no-unused-vars: 0*/
+
 var EventEmitter = require('eventemitter3');
 
 /**

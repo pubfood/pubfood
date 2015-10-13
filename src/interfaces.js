@@ -5,6 +5,8 @@
 
 'use strict';
 
+/*eslint no-unused-vars: 0*/
+
 /**
  * Interface for classes that are delegates for the AuctionProvider decorator..
  *

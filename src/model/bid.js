@@ -5,6 +5,8 @@
 
 'use strict';
 
+/*eslint no-unused-vars: 0*/
+
 var util = require('../util');
 var BaseModelObject = require('./basemodelobject');
 

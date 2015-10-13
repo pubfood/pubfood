@@ -5,6 +5,8 @@
 
 'use strict';
 
+/*eslint no-unused-vars: 0*/
+
 var Slot = require('../model/slot');
 var BidMediator = require('./bidmediator');
 var AuctionProvider = require('../provider/auctionprovider');
