@@ -7,8 +7,6 @@
 
 'use strict';
 
-var fs = require('fs');
-
 /**
  * Coordinates and orchestrates domain model instances.
  *
@@ -17,27 +15,19 @@ var fs = require('fs');
  */
 var model = {
   /**
-   * @type {object}
-   * @private
-   */
-  _types: (function() {
-    var obj = {};
-    var path = './model/';
-    fs.readdirSync(path).forEach(function(f) {
-      var name = f.split('.')[0];
-      obj[name] = require(path + f);
-    });
-
-    return obj;
-  })(),
-  /**
    *
    * @param {string} type
    * @return {Model|null}
    */
   getType: function(type) {
     type = ('' + type).toLowerCase();
-    return this._types[type] || null;
+    var model = null;
+    try {
+      model = require('./model/' + type);
+    } catch(e){
+      console.log('ERROR', e);
+    }
+    return model;
   },
 };
 

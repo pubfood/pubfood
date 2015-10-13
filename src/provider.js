@@ -7,8 +7,6 @@
 
 'use strict';
 
-var fs = require('fs');
-
 /**
  * Coordinates and orchestrats Provider instances.
  *
@@ -17,40 +15,32 @@ var fs = require('fs');
  */
 var provider = {
   /**
-   * @type {object}
-   * @private
-   */
-  _types: (function() {
-    var obj = {};
-    var path = './provider/';
-    fs.readdirSync(path).forEach(function(f) {
-      var name = f.split('.')[0];
-      obj[name] = require(path + f);
-    });
-
-    return obj;
-  })(),
-  /**
    *
    * @param {string} type
    * @return {Provider|null}
    */
   getType: function(type) {
     type = ('' + type).toLowerCase();
-    return this._types[type] || null;
+    var model = null;
+    try {
+      model = require('./provider/' + type);
+    } catch(e){
+      console.log('ERROR', e);
+    }
+    return model;
   },
 };
 
-//console.log(provider.getType('foo'));
-//console.log('');
-//console.log('auctionprovider', provider.getType('auctionprovider'));
-//console.log('');
-//console.log('baseprovider', provider.getType('baseprovider'));
-//console.log('');
-//console.log('biddelegate', provider.getType('biddelegate'));
-//console.log('');
-//console.log('bidprovider', provider.getType('bidprovider'));
-//console.log('');
-//console.log('creativeprovider', provider.getType('creativeprovider'));
+console.log(provider.getType('foo'));
+console.log('');
+console.log('auctionprovider', provider.getType('auctionprovider'));
+console.log('');
+console.log('baseprovider', provider.getType('baseprovider'));
+console.log('');
+console.log('biddelegate', provider.getType('biddelegate'));
+console.log('');
+console.log('bidprovider', provider.getType('bidprovider'));
+console.log('');
+console.log('creativeprovider', provider.getType('creativeprovider'));
 
 module.exports = provider;
