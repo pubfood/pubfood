@@ -5,10 +5,7 @@
 
 'use strict';
 
-/*eslint no-unused-vars: 0*/
-
 var util = require('../util');
-var provider = require('../provider');
 
 /**
  * AuctionProvider implements the  publisher ad server requests.

@@ -18,7 +18,7 @@ var events = require('../events');
  * AuctionMediator coordiates requests to Publisher Ad Servers.
  *
  * @class
- * @memberof pubfood/mediator
+ * @memberof pubfood#mediator
  */
 function AuctionMediator(optionalId) {
   if (optionalId) {
@@ -66,8 +66,9 @@ AuctionMediator.prototype.auctionDone = function() {
 };
 
 /**
- * Add a [Slot]{@link pubfood/model.Slot} to [AuctionMediator]{@link pubfood/mediator.AuctionMediator} config.
- * @param {object} slotConfig - configuration for a [Slot]{@link pubfood/model.Slot}
+ * Add a [Slot]{@link pubfood#model.Slot} to [AuctionMediator]{@link pubfood#mediator.AuctionMediator} config.
+ * @param {object} slotConfig - configuration for a [Slot]{@link pubfood#model.Slot}
+ * @returns {AuctionMediator}
  */
 AuctionMediator.prototype.addSlot = function(slotConfig) {
 
@@ -101,8 +102,9 @@ AuctionMediator.prototype.updateSlotBidProviders = function(slot) {
 };
 
 /**
- * Add a [BidProvider]{@link pubfood/provider.BidProvider} configuration object.
- * @param {BidDelegate} delegateConfig - configuration for a [BidProvider]{@link pubfood/provider.BidProvider}
+ * Add a [BidProvider]{@link pubfood#provider.BidProvider} configuration object.
+ * @param {BidDelegate} delegateConfig - configuration for a [BidProvider]{@link pubfood#provider.BidProvider}
+ * @returns {pubfood#provider.BidProvider}
  */
 AuctionMediator.prototype.addBidProvider = function(delegateConfig) {
 
@@ -119,8 +121,9 @@ AuctionMediator.prototype.addBidProvider = function(delegateConfig) {
 };
 
 /**
- * Add a [AuctionProvider]{@link pubfood/provider.AuctionProvider} configuration object.
- * @param {object} bidProviderConfig - configuration for a [AuctionProvider]{@link pubfood/provider.AuctionProvider}
+ * Add a [AuctionProvider]{@link pubfood#provider.AuctionProvider} configuration object.
+ * @param {AuctionDelegate} delegateConfig - configuration for a [AuctionProvider]{@link pubfood#provider.AuctionProvider}
+ * @returns {pubfood#provider.AuctionProvider}
  */
 AuctionMediator.prototype.setAuctionProvider = function(delegateConfig) {
   var  auctionProvider = AuctionProvider.withDelegate(delegateConfig);
@@ -155,7 +158,7 @@ AuctionMediator.prototype.setAuctionProvider = function(delegateConfig) {
 /**
  *
  * @param {requestOperatorCallback} cb
- * @return {pubfood}
+ * @returns {pubfood#mediator.AuctionMediator}
  */
 AuctionMediator.prototype.addRequestOperator = function(cb){
 
@@ -164,7 +167,7 @@ AuctionMediator.prototype.addRequestOperator = function(cb){
 /**
  *
  * @param {transformOperatorCallback} cb
- * @return {pubfood}
+ * @returns {pubfood#mediator.AuctionMediator}
  */
 AuctionMediator.prototype.addTransformOperator = function(){
 
@@ -172,9 +175,13 @@ AuctionMediator.prototype.addTransformOperator = function(){
 
 /**
  * Load bid provider JavaScript library/tag.
+ * @params {*} action
+ * @returns {undefined}
  */
 AuctionMediator.prototype.loadProviders = function(action) {
   var loadedBidders = 0;
+  var uri;
+
   function bidderLoaded() {
     loadedBidders++;
   }
@@ -188,9 +195,8 @@ AuctionMediator.prototype.loadProviders = function(action) {
   }
 
   if (this.auctionProvider && this.auctionProvider.libUri()) {
-    var uri = this.auctionProvider.libUri();
+    uri = this.auctionProvider.libUri();
     window.googletag.cmd.push(bidderLoaded);
-
     util.loadUri(uri);
   }
 };
@@ -199,13 +205,16 @@ AuctionMediator.prototype.loadProviders = function(action) {
  * Get bid providers for the given slot name.
  *
  * @param {string} slotName - name of the slot
+ * @returns {pubfood#mediator.AuctionMediator}
  */
 AuctionMediator.prototype.getSlotBidders = function (slotName) {
   return this.slotMap.slots[slotName] || {};
+  return this;
 };
 
 /**
  * Start auction bidding.
+ * @returns {pubfood#mediator.AuctionMediator}
  */
 AuctionMediator.prototype.start = function() {
   this.init();
@@ -214,10 +223,18 @@ AuctionMediator.prototype.start = function() {
 
   this.loadProviders();
   this.bidMediator.initBids(this.slotMap);
+  return this;
 };
 
+/**
+ *
+ * @param {} slotNames
+ * @returns {pubfood#mediator.AuctionMediator}
+ */
 AuctionMediator.prototype.refresh = function(slotNames) {
   var slots = [];
   this.bidMediator.refreshBids(slots);
+  return this;
 };
+
 module.exports = AuctionMediator;

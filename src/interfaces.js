@@ -37,14 +37,14 @@ var auctionDelegate = {
  * @property {string} libUri location of the delegate JavaScript library/tag.
  * @property {function} init Initial bid request for [BidProvider.init]{@link pubfood/provider.BidProvider#init} delegate.
  * <br>Returns {undefined}
- * @property {SlotConfig[]} init.slots Adslot configuration
+ * @property {Slot[]} init.slots Adslot configuration
  * @property {object} init.options
  * @property {string} init.options.externalSlot Provider external system Slot Name
  * @property {string} init.options.other Other properties optional properties added per provider requirement
  * @property {doneCallback} init.done Callback to execute on done
  * @property {function} refresh Refresh bids for [BidProvider.init]{@link pubfood/provider.BidProvider#init} delegate.
  * <br> Return {undefined}
- * @property {SlotConfig[]} refresh.slots Adslot configuration
+ * @property {Slot[]} refresh.slots Adslot configuration
  * @property {object} refresh.options
  * @property {string} refresh.options.externalSlot Provider external system Slot Name
  * @property {string} refresh.options.other Other properties optional properties added per provider requirement
@@ -148,8 +148,10 @@ var Reporter = function(event){
  * @property {string} slot - slot name
  * @property {string} label - publisher adserver targeting label/key for the bid value
  * @property {string} value - publisher adserver targeting bid value
- * @property {array[]} sizes - array of sizes for the slot the bid is for
- * @property {object} customTargeting - key/value pairs for additional adserver targeting
+ * @property {array.<number, number>} sizes - array of sizes for the slot the bid is for
+ * @property {number} sizes.0 width slot width
+ * @property {number} sizes.1 height slot height
+ * @property {object} options - key/value pairs for additional adserver targeting
  */
 var bidObject = {
   slot: '',

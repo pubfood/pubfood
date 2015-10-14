@@ -21,6 +21,7 @@ function Slot() {
   this.elementId = '';
   this.bidProviders = [];
   this.sizes = [];
+  this.bids = [];
 }
 
 /**
