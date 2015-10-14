@@ -8,112 +8,50 @@
 /*eslint no-unused-vars: 0*/
 
 /**
- * Interface for classes that are delegates for the AuctionProvider decorator.
+ * Interface for classes that are delegates for the AuctionProvider decorator..
  *
- * @typedef {object} AuctionDelegate
- * @memberof pubfood/interfaces
+ * @typedef {AuctionDelegate} AuctionDelegate
+ * @property {string} name Auction provider delegate name
+ * @property {function} init Auction provider delegate initial auction request.<br>Called at startup. Returns <i>{undefined}</i>
+ * @property {BidProviderConfig[]} init.bids A list of bid providers
+ * @property {object} init.options Defaults to {}
+ * @property {doneCallback} init.done Callback to execute on done
+ * @property {function} refresh Auction provider delegate refresh auction request.<br>Called at startup. Returns <i>{undefined}</i>
+ * @property {string[]} refresh.slots A list of slots to be refreshed
+ * @property {object} refresh.options Defaults to {}
+ * @property {doneCallback} refresh.done Callback to execute on done
  */
 var auctionDelegate = {
-  /**
-   * Auction provider delegate name.
-   *
-   * @type {string}
-   * @memberof pubfood/interfaces.AuctionDelegate
-   * @instance
-   */
   name: '',
-  libUri: '',
-  /**
-   * Auction provider delegate initial auction request.
-   *
-   * @instance
-   * @memberof pubfood/interfaces.AuctionDelegate
-   *
-   * @function init
-   * @param {object[]} bids
-   * @param {string} bids[].name -
-   * @param {string|number} bids[].price -
-   * @param {object} bids[].customTageting -
-   * @param {object} bids[].adslot -
-   * @param {string} bids[].adslot.name -
-   * @param {string} bids[].adslot.elementId -
-   * @param {array} bids[].adslot.sizes -
-   * @param {object} options
-   * @param {module:pubfood~doneCallback} done
-   * @return {undefined}
-   */
   init: function(bids, options, done) {},
-  /**
-   * Auction provider delegate refresh auction request.
-   *
-   * @instance
-   * @memberof pubfood/interfaces.AuctionDelegate
-   *
-   * @function refresh
-   * @param {object[]} slots
-   * @param {string} slots[].name -
-   * @param {object} options
-   * @param {module:pubfood~doneCallback} done
-   * @return {undefined}
-   */
   refresh: function(bids, options, done) {}
 };
 
 /**
  * Interface for classes that are delegates for the BidProvider decorator..
  *
- * @typedef {object} BidDelegate
+ * @typedef {BidDelegate} BidDelegate
+ * @property {string} name Bid provider delegate name.
+ * @property {string} libUri location of the delegate JavaScript library/tag.
+ * @property {function} init Initial bid request for [BidProvider.init]{@link pubfood/provider.BidProvider#init} delegate.
+ * <br>Returns {undefined}
+ * @property {SlotConfig[]} init.slots Adslot configuration
+ * @property {object} init.options
+ * @property {string} init.options.externalSlot Provider external system Slot Name
+ * @property {string} init.options.other Other properties optional properties added per provider requirement
+ * @property {doneCallback} init.done Callback to execute on done
+ * @property {function} refresh Refresh bids for [BidProvider.init]{@link pubfood/provider.BidProvider#init} delegate.
+ * <br> Return {undefined}
+ * @property {SlotConfig[]} refresh.slots Adslot configuration
+ * @property {object} refresh.options
+ * @property {string} refresh.options.externalSlot Provider external system Slot Name
+ * @property {string} refresh.options.other Other properties optional properties added per provider requirement
+ * @property {doneCallback} refresh.done Callback to execute on done
  */
 var bidDelegate = {
-  /**
-   * Bid provider delegate name.
-   *
-   * @type {string}
-   * @lends BidDelegate
-   */
   name: '',
-  /**
-   * Uri location of the delegate JavaScript library/tag.
-   *
-   * @type {string}
-   * @memberof pubfood/interfaces.BidDelegate
-   */
   libUri: '',
-  /**
-   * Initial bid request for [BidProvider.init]{@link pubfood/provider.BidProvider#init} delegate.
-   *
-   * @function
-   * @instance
-   * @memberof pubfood/interfaces.BidDelegate
-   * @param {object[]} slots
-   * @param {object} slots[].adslot Adslot configuration
-   * @param {string} slots[].adslot.name Name
-   * @param {string} slots[].adslot.elementId Target element on page
-   * @param {array} slots[].adslot.sizes Adslot sizes
-   * @param {object} options
-   * @param {string} [options.externalSlot] Provider external system Slot Name
-   * @param {string} options.others... Other properties optional properties added per provider requirement
-   * @param {module:pubfood~doneCallback} done Callback to execute on done
-   * @return {undefined}
-   */
   init: function(slots, options, done) {},
-  /**
-   * Refresh bids for [BidProvider.init]{@link pubfood/provider.BidProvider#init} delegate.
-   *
-   * @function
-   * @instance
-   * @memberof pubfood/interfaces.BidDelegate
-   * @param {object[]} slots
-   * @param {object} slots[].adslot Adslot configuration
-   * @param {string} slots[].adslot.name Name
-   * @param {string} slots[].adslot.elementId Target element on page
-   * @param {array} slots[].adslot.sizes Adslot sizes
-   * @param {object} options
-   * @param {string} [options.externalSlot] Provider external system Slot Name
-   * @param {string} options.others... Other properties optional properties added per provider requirement
-   * @param {module:pubfood~doneCallback} done Callback to execute on done
-   * @return {undefined}
-   */
   refresh: function(slots, options, done) {}
 };
 
@@ -121,143 +59,112 @@ var bidDelegate = {
  * request operator callback
  *
  * @function requestOperatorCallback
- * @param {*} data
+ * @param {*} data TBD
  * @return {boolean}
- * @memberof pubfood/interfaces
- * @example
-
-  function(data){
-    return false;
-  }
+ * @example {file} ../examples/request-operator.js
  */
+var requestOperatorCallback = function(data){
+  return true;
+};
 
 /**
  * transform operator callback
  *
  * @function transformOperatorCallback
- * @param {*} data
+ * @param {*} data TBD
  * @return {boolean}
- * @memberof pubfood/interfaces
+ * @example {file} ../examples/transport-operator.js
  */
+var transformOperatorCallback = function(data){
+  return true;
+};
 
 /**
  * done callback
  *
  * @function doneCallback
  * @return {undefined}
- * @memberof pubfood/interfaces
  */
+var doneCallback = function(){
 
-/**
- * @typedef {object} MediatorSlot
- * @property {string} name -
- */
-
-/**
- * @typedef {object} MediatorBidProvider
- * @property {string} name -
- */
+};
 
 /**
  * @typedef {object} BidProviderConfig
  * @property {string} name The provider's name
  * @property {string|number} price The bid price
  * @property {object} customTageting Custom targeting parameters to be passed to the AuctionProvider
- * @property {object} adslot Adslot configuration
- * @property {string} adslot.name Name
- * @property {string} adslot.elementId Target element on page
- * @property {array} adslot.sizes Adslot sizes
+ * @property {SlotConfig} adslot Adslot configuration
  */
+var BidProviderConfig = {
+  name: '',
+  price: '',
+  customTageting: {},
+  adslot: {}
+};
 
 /**
  * bid provider init
  * @function bidProviderInit
- * @param {object[]} bids
- * @param {string} bids[].name The provider's name
- * @param {string|number} bids[].price The bid price
- * @param {object} bids[].customTageting Custom targeting parameters to be passed to the AuctionProvider
- * @param {object} bids[].adslot Adslot configuration
- * @param {string} bids[].adslot.name Name
- * @param {string} bids[].adslot.elementId Target element on page
- * @param {array} bids[].adslot.sizes Adslot sizes
- * @param {object} options TBD
+ * @param {BidProviderConfig[]} bids A list of bid providers
+ * @param {object} options Defaults to {}
  * @param {doneCallback} done Callback to execute on done
  * @return {undefined}
  */
+var bidProviderInit = function(bids, options, done){
+
+};
 
 /**
  * bid provider refresh
  * @function bidProviderRefresh
- * @param {object[]} slots
- * @param {string} slots[].name -
- * @param {object} options
- * @param {doneCallback} done
+ * @param {string[]} slots The slots to be refreshed
+ * @param {object} options Defaults to {}
+ * @param {doneCallback} done Callback to execute on done
  * @return {undefined}
  */
+var bidProviderRefresh = function(slots, options, done){
 
-/**
- * @typedef {object} BidConfig
- * @property {string} name - slot name
- * @property {string} elementId -
- * @property {array.<number, number>} sizes
- * @property {number} sizes.0 - width
- * @property {number} sizes.1 - height
- * @property {object[]} bidProviders
- * @property {string} bidProviders.provider -
- * @property {string} bidProviders.slot -
- */
-
-/**
- * nextBid callback
- *
- * @function nextBid
- * @param {BidObject} bid - a bid for a specific slot
- * @return {undefined}
- * @memberof pubfood/interfaces
- */
-
-/**
- * @typedef Model
- */
-
-/**
- * @typedef {object} SlotConfig
- * @property {string} name name of the slot/ad unit in [AuctionProvider]{@link pubfood/provider.AuctionProvider} system
- * @property {string} [elementId] DOM target element id
- * @property {dimensions} sizes array of slot size dimensions
- * @property {object} bidProviders
- * @property {string} bidProviders.provider bid provider name
- * @property {string} [bidProviders.slot] external provider system slot name
- */
-var slotConfig = {
-  name: '',
-  sizes: [],
-  elementId: '',
-  bidProviders: {
-    name: {
-      slot: ''
-    }
-  }
 };
 
 /**
- * Bid object structure for the [nextBid]{@link pubfood/interfaces.nextBid} callback.
+ * Custom reporter
  *
- * @typedef {object} BidObject
- * @property {string} [provider] - bid provider name
- * @property {string} slot - slot name
- * @property {string} label - publisher adserver targeting label/key for the bid value
- * @property {string} value - publisher adserver targeting bid value
- * @property {array[]} sizes - array of sizes for the slot the bid is for
- * @property {object} options - key/value pairs for additional adserver targeting
+ * @function Reporter
+ * @params {PubfoodEvent} event
+ * @return {undefined}
+ */
+var Reporter = function(event){
+
+};
+
+/**
+ * @typedef {BidConfig} BidConfig
  */
 var bidObject = {
-  provider: '',
-  slot: '',
-  label: '',
-  value: '',
+
+};
+
+/**
+ * @typedef {SlotConfig} SlotConfig
+ * @property {string} name name of the slot/ad unit in [AuctionProvider]{@link pubfood/provider.AuctionProvider} system
+ * @property {string} [elementId] DOM target element id
+ * @property {array.<number, number>} sizes array of slot sizes
+ * @property {number} sizes.0 width slot width
+ * @property {number} sizes.1 height slot height
+ * @property {object.<string, object>} bidProviders
+ * @property {object} bidProviders.providerName bid provider name
+ * @property {string} bidProviders.providerName.slot external provider system slot name
+ */
+var slotConfig = {
+  name: '',
+  elementId: '',
   sizes: [],
-  options: {}
+  bidProviders: {
+    providerName: {
+      slot: 'slot-name'
+    }
+  }
 };
 
 module.exports = {

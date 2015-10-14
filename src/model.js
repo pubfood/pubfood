@@ -14,13 +14,9 @@ require('./model/bid');
  *
  * @memberof pubfood
  * @instance
+ * @property {function} getType Returns an instances of [Model]{@link pubfood#model.BaseModelObject}
  */
 var model = {
-  /**
-   *
-   * @param {string} type
-   * @return {Model|null}
-   */
   getType: function(type) {
     type = ('' + type).toLowerCase();
     var model = null;

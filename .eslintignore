@@ -1,1 +1,11 @@
 test/assets/vendor/*
+examples/*.js
+
+# this is a hack for webstorm
+# cwd is not what eslint expect
+# see https://github.com/eslint/eslint/issues/2856
+
+add-bid-provider.js
+request-operator.js
+transport-operator.js
+reporter.js

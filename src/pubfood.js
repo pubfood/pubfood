@@ -40,9 +40,6 @@ var version = require('../package.json').version;
    * @constructor
    * @param {string} [optional_id] Optional ID
    * @return {pubfood}
-   * @example
-   *
-   * var p = new pubfood();
    */
   var api = pubfood.library.init = function(optionalId) {
     return this;
@@ -73,19 +70,12 @@ var version = require('../package.json').version;
    * Make this adslot avaialble for bidding
    *
    * @function
-   * @param {BidConfig} slot
-   * @param {string} slot.name - slot name
-   * @param {string} slot.elementId
-   * @param {array.<number, number>} slot.sizes
-   * @param {number} slot.sizes.0 width
-   * @param {number} slot.sizes.1 height
-   * @param {object[]} slot.bidProviders
-   * @param {string} slot.bidProviders[].provider
-   * @param {string} slot.bidProviders[].slot
+   * @param {SlotConfig} slot Slot configuration
    * @return {pubfood}
    */
   api.prototype.addSlot = function(slot) {
     this.library.mediator.addSlot(slot);
+    return this;
   };
 
   /**
@@ -99,16 +89,13 @@ var version = require('../package.json').version;
    * Set the Auction Provider
    *
    * @function
-   * @param {object} config
-   * @param {string} config.name
-   * @param {string} config.libUrl
-   * @param {object} [config.options]
-   * @param {module:pubfood~auctionProviderInit} config.init
-   * @param {module:pubfood~auctionProviderRefresh} config.refresh
+   * @param {AuctionDelegate} delegate Auction provider configuration
+   * @throws {PubfoodError}
    * @return {pubfood}
    */
   api.prototype.setAuctionProvider = function(provider) {
     this.library.mediator.setAuctionProvider(provider);
+    return this;
   };
 
   api.prototype.getAuctionProvider = function() {
@@ -118,35 +105,33 @@ var version = require('../package.json').version;
    * Add a BidProvider
    *
    * @function
-   * @param {object} provider
-   * @param {string} provider.name The name of the BidProvider
-   * @param {string} provider.libUrl The URL of the BidProvider's library code
-   * @param {object} [provider.options] Optional configuration
-   * @param {bidProviderInit} provider.init -
-   * @param {bidProviderRefresh} provider.refresh -
+   * @param {BidDelegate} delegate Bid provider configuaration
    * @throws {PubfoodError}
    * @return {pubfood}
-   * @example
-   pubfood.addBidProvider({
-   name: 'Yieldbot',
-   options: {},
-   libUrl: '',
-   init: function(options, done) {
-   },
-   refresh: function(slots, options, done) {
-   }
-   });
+   * @example {file} ../examples/add-bid-provider.js
   */
-  api.prototype.addBidProvider = function(provider) {
-    this.library.mediator.addBidProvider(provider);
+  api.prototype.addBidProvider = function(delegate) {
+    this.library.mediator.addBidProvider(delegate);
+    return this;
   };
 
   /**
    * Gets a list of bidproviders
-   * @return {MediatorBidProvider[]}
+   * @return {BidProvider[]}
    */
   api.prototype.getBidProviders = function() {
     return this.library.mediator.bidProviders;
+  };
+
+  /**
+   * Add a custom reporter
+   * @todo hook this up
+   * @param {Reporter} reporter Custom reporter
+   * @return {pubfood}
+   * @example {file} ../examples/reporter.js
+   */
+  api.prototype.addReporter = function(reporter){
+    return this;
   };
 
   /**
@@ -156,6 +141,7 @@ var version = require('../package.json').version;
    */
   api.prototype.start = function() {
     this.library.mediator.start();
+    return this;
   };
 
   /**
@@ -166,6 +152,7 @@ var version = require('../package.json').version;
    */
   api.prototype.refresh = function(slotNames) {
     this.library.mediator.refresh(slotNames);
+    return this;
   };
 
   api.prototype.library = pubfood.library;

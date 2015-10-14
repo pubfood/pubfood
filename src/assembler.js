@@ -13,13 +13,9 @@ require('./assembler/bidassembler');
  *
  * @memberof pubfood
  * @instance
+ * @property {function} getType Returns an instances of [Assembler]{@link pubfood#assembler.BaseAssembler}
  */
 var assembler = {
-  /**
-   *
-   * @param {string} type
-   * @return {Provider|null}
-   */
   getType: function(type) {
     type = ('' + type).toLowerCase();
     var model = null;

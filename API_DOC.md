@@ -22,5 +22,8 @@ p.addBidProvider({name: 'Yieldbot',...});
 // add bid prodider - Amazon
 p.addBidProvider({name: 'Amazon',...});
 
+// add custom reporter
+p.addReporter(function(event){...});
+
 p.start();
 ```
