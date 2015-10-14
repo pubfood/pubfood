@@ -78,6 +78,12 @@ var util = {
     if (beforeEl) {
       beforeEl.insertBefore(scriptEl, beforeEl.firstChild);
     }
+  },
+  bind: function(fn, ctx) {
+
+    return function() {
+      fn.apply(ctx, Array.prototype.slice.call(arguments));
+    };
   }
 };
 

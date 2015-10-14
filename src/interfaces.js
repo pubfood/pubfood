@@ -8,7 +8,7 @@
 /*eslint no-unused-vars: 0*/
 
 /**
- * Interface for classes that are delegates for the AuctionProvider decorator..
+ * Interface for classes that are delegates for the AuctionProvider decorator.
  *
  * @typedef {object} AuctionDelegate
  * @memberof pubfood/interfaces
@@ -22,6 +22,7 @@ var auctionDelegate = {
    * @instance
    */
   name: '',
+  libUri: '',
   /**
    * Auction provider delegate initial auction request.
    *
@@ -116,7 +117,6 @@ var bidDelegate = {
   refresh: function(slots, options, done) {}
 };
 
-
 /**
  * request operator callback
  *
@@ -208,6 +208,15 @@ var bidDelegate = {
  */
 
 /**
+ * nextBid callback
+ *
+ * @function nextBid
+ * @param {BidObject} bid - a bid for a specific slot
+ * @return {undefined}
+ * @memberof pubfood/interfaces
+ */
+
+/**
  * @typedef Model
  */
 
@@ -216,25 +225,39 @@ var bidDelegate = {
  * @property {string} name name of the slot/ad unit in [AuctionProvider]{@link pubfood/provider.AuctionProvider} system
  * @property {string} [elementId] DOM target element id
  * @property {dimensions} sizes array of slot size dimensions
- * @property {object[]} bidProviders
+ * @property {object} bidProviders
  * @property {string} bidProviders.provider bid provider name
  * @property {string} [bidProviders.slot] external provider system slot name
  */
-
 var slotConfig = {
   name: '',
   sizes: [],
   elementId: '',
-  bidProviders: [
-    {
-      name: '',
+  bidProviders: {
+    name: {
       slot: ''
     }
-  ]
+  }
 };
 
+/**
+ * Bid object structure for the [nextBid]{@link pubfood/interfaces.nextBid} callback.
+ *
+ * @typedef {object} BidObject
+ * @property {string} [provider] - bid provider name
+ * @property {string} slot - slot name
+ * @property {string} label - publisher adserver targeting label/key for the bid value
+ * @property {string} value - publisher adserver targeting bid value
+ * @property {array[]} sizes - array of sizes for the slot the bid is for
+ * @property {object} options - key/value pairs for additional adserver targeting
+ */
 var bidObject = {
-
+  provider: '',
+  slot: '',
+  label: '',
+  value: '',
+  sizes: [],
+  options: {}
 };
 
 module.exports = {

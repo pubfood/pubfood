@@ -6,6 +6,8 @@
  */
 
 'use strict';
+require('./model/slot');
+require('./model/bid');
 
 /**
  * Coordinates and orchestrates domain model instances.

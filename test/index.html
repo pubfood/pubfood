@@ -18,6 +18,7 @@
         <script src="../dist/pubfood.js"></script>
         <script src="../test/fixture/auctionconfig1.js"></script>
 
+        <iframe src="http://i.yldbt.com/m/start-testing" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" height="0" width="0" style="display: none"></iframe>
         <script type="text/javascript">
          mocha.ui('bdd');
         </script>
@@ -30,7 +31,8 @@
 
          describe('Pubfood - Tests', function () {
              var p = new pubfood();
-
+            pubfood.library.model.Slot = pubfood.library.model.getType('slot');
+            pubfood.library.model.Bid = pubfood.library.model.getType('bid');
              afterEach(function () {
 
              });
@@ -66,7 +68,7 @@
                  });
              });
 
-             describe('BaseModelObject', function testBaseModelObject() {
+             describe.skip('BaseModelObject', function testBaseModelObject() {
                  it('will have a generated Id', function() {
                      var modelObject = new pubfood.library.model.BaseModelObject();
                      assert.isDefined(modelObject.id, 'id is not defined');
@@ -82,16 +84,14 @@
                          [300, 600]
                      ],
                      elementId: '_300x250', //div element on the page
-                     bidProviders: [
-                         {
-                             provider: 'yieldbot',
+                     bidProviders: {
+                         yieldbot: {
                              slot: 'sidebar' //yieldbot's slot name
                          },
-                         {
-                             provider: 'amazon',
+                         amazon: {
                              slot: 'amz-left-adslot' // amazon's slot name
                          }
-                     ]
+                     }
                  };
 
                  var slotModel = {
@@ -228,25 +228,40 @@
              describe('Pubfood mediator', function testPubfoodMediator() {
                  var p = new pubfood();
                  it('should add a slot', function() {
-                     p.addSlot(config.slots[0]);
+                     p.addSlot(pubfoodContrib.slots[0]);
                      assert.equal(p.getSlots().length, 1, 'mediator did not add slot');
 
                      var slot = p.getSlots()[0];
                      delete slot.id;
-                     expect(slot.name).to.eql(config.slots[0].name, 'name not equal');
-                     expect(slot.sizes).to.eql(config.slots[0].sizes, 'sizes not equal');
-                     expect(slot.providers).to.eql(config.slots[0].providers, 'providers not equal');
-                     expect(slot.elementId).to.eql(config.slots[0].elementId, 'elementId not equal');
+                     expect(slot.name).to.eql(pubfoodContrib.slots[0].name, 'name not equal');
+                     expect(slot.sizes).to.eql(pubfoodContrib.slots[0].sizes, 'sizes not equal');
+                     expect(slot.providers).to.eql(pubfoodContrib.slots[0].providers, 'providers not equal');
+                     expect(slot.elementId).to.eql(pubfoodContrib.slots[0].elementId, 'elementId not equal');
 
                  });
                  it('should add a bid provider', function() {
-                     p.addBidProvider(config.bidProviders[0]);
+                     p.addBidProvider(pubfoodContrib.bidProviders[0]);
 
-                     assert.equal(p.getBidProviders().length, 1, 'bid provider not added');
+                     expect(p.getBidProviders()).not.to.be.empty;
+
+                     p.addBidProvider(pubfoodContrib.bidProviders[1]);
+                     assert.equal(Object.keys(p.getBidProviders()).length, 2, 'bid provider not added');
+
+                     p.addBidProvider(pubfoodContrib.bidProviders[2]);
+                     assert.equal(Object.keys(p.getBidProviders()).length, 3, 'bid provider not added');
+                 });
+
+                 it('should add an auction provider', function() {
+
+                     p.setAuctionProvider(pubfoodContrib.auctionProvider);
+
+                     assert.isDefined(p.getAuctionProvider(), 'auction provider not set');
 
                  });
 
                  it('should start an auction', function() {
+                     p.addSlot(pubfoodContrib.slots[1]);
+                     assert.equal(p.getSlots().length, 2, 'mediator did not add slot');
                      p.start();
                  });
              });
@@ -262,6 +277,14 @@
              mocha.run();
          };
         </script>
+
+        <h2>Test Dfp Integration</h2>
+
+        <div id='div-frotzbar'>
+        </div>
+
+        <div id='div-mumblebar'>
+        </div>
 
     </body>
 </html>

@@ -108,9 +108,12 @@ var version = require('../package.json').version;
    * @return {pubfood}
    */
   api.prototype.setAuctionProvider = function(provider) {
-
+    this.library.mediator.setAuctionProvider(provider);
   };
 
+  api.prototype.getAuctionProvider = function() {
+    return this.library.mediator.auctionProvider;
+  };
   /**
    * Add a BidProvider
    *

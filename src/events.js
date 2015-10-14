@@ -12,20 +12,32 @@
 var EventEmitter = require('eventemitter3');
 
 /**
- * Events for a BidProvider
+ * Pubfood event class
+ * @param {string} type - the event type
+ * @param {object} [data] - event payload
+ * @param {number} [ts] - event timestamp
  * @class
  * @memberof pubfood
  */
-function BidEvent() {
+function PubfoodEvent(type, data, ts) {
+  this.type = type || 'error';
+  this.data = data || {};
+  this.ts = ts || Date.now();
 }
 
 /**
- * Bid started.
- * @event
- * @property {number} timestamp - when the bid started
+ * Set the event timestamp to now().
  */
-BidEvent.prototype.start = function() {
+PubfoodEvent.prototype.now = function() {
+  this.ts = Date.now();
+};
 
+PubfoodEvent.prototype.setTimestamp = function(millis) {
+  this.ts = millis;
+};
+
+PubfoodEvent.prototype.setData = function(data) {
+  this.data = data;
 };
 
 var events = {
@@ -35,28 +47,48 @@ var events = {
    */
   EVENT_TYPE: {
     /**
+     * Bid provider library load started
+     */
+    BID_LIB_START: 'bplibstart',
+    /**
+     * Bid provider library loaded
+     */
+    BID_LIB_LOADED: 'bplibloaded',
+    /**
      * Action started
      *
      * e.g [BidProvider.init]{@link pubfood/provider.BidProvider#init}
      **/
-    START: 'start',
+    BID_START: 'bidstart',
     /**
      * Next item in data stream ready
      *
      * e.g [BidProvider.refresh]{@link pubfood/provider.BidProvider#init} raises a [NEXT]{@link pubfood/events.EVENT_TYPE.NEXT}
      * event for each bid.
      **/
-    NEXT: 'next',
+    BID_NEXT: 'bidnext',
     /**
      * Action is complete
      **/
-    COMPLETE: 'complete',
+    BID_COMPLETE: 'bidcomplete',
+    /**
+     * Auction provider library load started
+     */
+    AUCTION_LIB_START: 'aplibstart',
+    /**
+     * Auction provider library loaded
+     */
+    AUCTION_LIB_LOADED: 'aplibloaded',
+    /**
+     * Start the publisher auction
+     */
+    AUCTION_GO: 'auctiongo',
     /**
      * Error event raised
      **/
     ERROR: 'error'
   },
-  createBidEvent: BidEvent
+  PubfoodEvent: PubfoodEvent
 };
 
 module.exports = events;

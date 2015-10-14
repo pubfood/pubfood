@@ -14,7 +14,9 @@ var util = require('../util');
  * @memberof pubfood#provider
  */
 function BidProvider() {
-  this.name;
+  this.name = '';
+  /** @property {object} - reference to the provider delegate */
+  this.bidDelegate;
 }
 
 /**
@@ -45,8 +47,8 @@ BidProvider.validate = function(delegate) {
   if (!delegate) return false;
 
   var err = 0;
-  for (var k in bidDelegate) {
-    if (!delegate.hasOwnProperty(k) || util.asType(delegate[k]) !== util.asType(bidDelegate[k])) {
+  for (var k in delegate) {
+    if (!delegate.hasOwnProperty(k) || util.asType(delegate[k]) !== util.asType(delegate[k])) {
       err++;
     }
     if (err > 0) break;
@@ -80,8 +82,8 @@ BidProvider.prototype.libUri = function(/*uri*/) {
  * @param {function} done - a callback to execute on init complete
  * @return {undefined}
  */
-BidProvider.prototype.init = function(slots, options, done) {
-  this.bidDelegate.init(slots, options, done);
+BidProvider.prototype.init = function(slots, options, next, done) {
+  this.bidDelegate.init(slots, options, next, done);
 };
 
 /**

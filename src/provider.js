@@ -6,6 +6,11 @@
  */
 
 'use strict';
+require('./provider/baseprovider');
+require('./provider/bidprovider');
+require('./provider/auctionprovider');
+require('./provider/biddelegate');
+require('./provider/creativeprovider');
 
 /**
  * Coordinates and orchestrats Provider instances.
@@ -31,16 +36,16 @@ var provider = {
   },
 };
 
-console.log(provider.getType('foo'));
-console.log('');
-console.log('auctionprovider', provider.getType('auctionprovider'));
-console.log('');
-console.log('baseprovider', provider.getType('baseprovider'));
-console.log('');
-console.log('biddelegate', provider.getType('biddelegate'));
-console.log('');
-console.log('bidprovider', provider.getType('bidprovider'));
-console.log('');
-console.log('creativeprovider', provider.getType('creativeprovider'));
+
+// console.log('');
+// console.log('auctionprovider', provider.getType('auctionprovider'));
+// console.log('');
+// console.log('baseprovider', provider.getType('baseprovider'));
+// console.log('');
+// console.log('biddelegate', provider.getType('biddelegate'));
+// console.log('');
+// console.log('bidprovider', provider.getType('bidprovider'));
+// console.log('');
+// console.log('creativeprovider', provider.getType('creativeprovider'));
 
 module.exports = provider;

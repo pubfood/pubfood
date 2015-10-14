@@ -6,7 +6,8 @@
  */
 
 'use strict';
-
+require('./assembler/baseassembler');
+require('./assembler/bidassembler');
 /**
  * Coordinates and orchestrates Assembler instances.
  *
