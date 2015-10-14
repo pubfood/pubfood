@@ -39,7 +39,7 @@ AuctionProvider.withDelegate = function(delegate) {
   return p;
 };
 
-var auctionDelegate = require('../interfaces').AuctionDelegate;
+var AuctionDelegate = require('../interfaces').AuctionDelegate;
 /**
  * Validate a auction provider delegate.
  *
@@ -50,8 +50,8 @@ AuctionProvider.validate = function(delegate) {
   if (!delegate) return false;
 
   var err = 0;
-  for (var k in delegate) {
-    if (!delegate.hasOwnProperty(k) || util.asType(delegate[k]) !== util.asType(delegate[k])) {
+  for (var k in AuctionDelegate) {
+    if (!delegate.hasOwnProperty(k) || util.asType(delegate[k]) !== util.asType(AuctionDelegate[k])) {
       err++;
     }
     if (err > 0) break;
