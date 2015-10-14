@@ -12,6 +12,7 @@
  *
  * @typedef {AuctionDelegate} AuctionDelegate
  * @property {string} name Auction provider delegate name
+ * @property {string} libUri
  * @property {function} init Auction provider delegate initial auction request.<br>Called at startup. Returns <i>{undefined}</i>
  * @property {BidProviderConfig[]} init.bids A list of bid providers
  * @property {object} init.options Defaults to {}
@@ -23,6 +24,7 @@
  */
 var auctionDelegate = {
   name: '',
+  libUri: '',
   init: function(bids, options, done) {},
   refresh: function(bids, options, done) {}
 };
@@ -139,10 +141,23 @@ var Reporter = function(event){
 };
 
 /**
- * @typedef {BidConfig} BidConfig
+ * Bid object structure for the [nextBid]{@link pubfood/interfaces.nextBid} callback.
+ *
+ * @typedef {object} BidObject
+ * @property {string} [provider] - bid provider name
+ * @property {string} slot - slot name
+ * @property {string} label - publisher adserver targeting label/key for the bid value
+ * @property {string} value - publisher adserver targeting bid value
+ * @property {array[]} sizes - array of sizes for the slot the bid is for
+ * @property {object} options - key/value pairs for additional adserver targeting
  */
 var bidObject = {
-
+  provider: '',
+  slot: '',
+  label: '',
+  value: '',
+  sizes: [],
+  options: {}
 };
 
 /**

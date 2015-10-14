@@ -21,7 +21,7 @@
     "lint": "gulp lint",
     "test": "gulp test",
     "build": "npm run prepare && npm run lint && gulp build && npm run test && gulp doc",
-    "start": "gulp serve",
+    "start": "npm run build && gulp serve",
     "ybpublish": "publish"
   },
   "repository": {
