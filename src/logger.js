@@ -18,13 +18,13 @@ var logger = {
   history: [],
   dumpLog: function() {
     if (console && console.log) {
-      for (var i = 0; i < logger.history.length; i++) {
-        console.log(logger.history[i]);
+      for (var i = 0; i < this.history.length; i++) {
+        console.log(this.history[i]);
       }
     }
   },
   logCall: function(name, args) {
-    history.push({
+    this.history.push({
       functionName: name,
       args: Array.prototype.slice.call(args)
     });

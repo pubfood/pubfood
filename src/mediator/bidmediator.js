@@ -5,7 +5,7 @@
 
 'use strict';
 
-var util = require('../util');
+//var util = require('../util');
 //var BidProvider = require('../provider/bidprovider');
 var Event = require('../event');
 var Bid = require('../model/bid');
@@ -26,7 +26,7 @@ function BidMediator(auctionMediator) {
  * Initialize the bid
  *
  * @param {object} slotMap
- * @return
+ * @return {undefined}
  */
 BidMediator.prototype.initBids = function(slotMap) {
   // TODO: run request operators here
