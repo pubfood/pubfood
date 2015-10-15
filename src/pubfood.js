@@ -30,7 +30,32 @@ var version = require('../package.json').version;
     util: require('./util'),
     mediator: require('./mediator').mediatorBuilder(),
     interfaces: require('./interfaces'),
-    PubfoodError: require('./errors')
+    PubfoodError: require('./errors'),
+    history: []
+  };
+
+  pubfood.library.dumpLog = function(){
+    if(console && console.log){
+      for (var i = 0; i < this.history.length; i++) {
+        console.log(this.history[i]);
+      }
+    }
+  };
+
+  /**
+   * logs api calls
+   *
+   * @param {string} name
+   * @param {function} fn
+   * @return {function}
+   */
+  var logCall = function(name, fn) {
+    return function () {
+      var signature = Array.prototype.slice.call(arguments);
+      signature.unshift(name);
+      this.library.history.push(signature);
+      return fn.apply(api.prototype, arguments);
+    };
   };
 
   /**
@@ -41,30 +66,18 @@ var version = require('../package.json').version;
    * @param {string} [optional_id] Optional ID
    * @return {pubfood}
    */
-  var api = pubfood.library.init = function(optionalId) {
+  var api = pubfood.library.init = logCall('init', function(optionalId) {
     return this;
-  };
-
-  /**
-   * Console logs a message
-   *
-   * @param {*} msg
-   * @return {undefined}
-   */
-  api.prototype.log = function(msg) {
-    if(console && console.log) {
-      console.log(msg);
-    }
-  };
+  });
 
   /**
    * Who am I?
    * @function
    * @return {undefined}
    */
-  api.prototype.whoAmI = function() {
+  api.prototype.whoAmI = logCall('whoAmI', function() {
     console.log('instanceOf \'pubfood.library.constructor\' v' + this.library.version);
-  };
+  });
 
   /**
    * Make this adslot avaialble for bidding
@@ -73,18 +86,19 @@ var version = require('../package.json').version;
    * @param {SlotConfig} slot Slot configuration
    * @return {pubfood}
    */
-  api.prototype.addSlot = function(slot) {
+  api.prototype.addSlot = logCall('addSlot', function(slot) {
     this.library.mediator.addSlot(slot);
     return this;
-  };
+  });
 
   /**
    * Get a list a of all registered slots
    * @return {MediatorSlot}
    */
-  api.prototype.getSlots = function() {
+  api.prototype.getSlots = logCall('getSlots', function() {
     return this.library.mediator.slots;
-  };
+  });
+
   /**
    * Set the Auction Provider
    *
@@ -93,14 +107,15 @@ var version = require('../package.json').version;
    * @throws {PubfoodError}
    * @return {pubfood}
    */
-  api.prototype.setAuctionProvider = function(provider) {
+  api.prototype.setAuctionProvider = logCall('setAuctionProvider', function(provider) {
     this.library.mediator.setAuctionProvider(provider);
     return this;
-  };
+  });
 
-  api.prototype.getAuctionProvider = function() {
+  api.prototype.getAuctionProvider = logCall('getAuctionProvider', function() {
     return this.library.mediator.auctionProvider;
-  };
+  });
+
   /**
    * Add a BidProvider
    *
@@ -110,18 +125,18 @@ var version = require('../package.json').version;
    * @return {pubfood}
    * @example {file} ../examples/add-bid-provider.js
   */
-  api.prototype.addBidProvider = function(delegate) {
+  api.prototype.addBidProvider = logCall('addBidProvider', function(delegate) {
     this.library.mediator.addBidProvider(delegate);
     return this;
-  };
+  });
 
   /**
    * Gets a list of bidproviders
    * @return {BidProvider[]}
    */
-  api.prototype.getBidProviders = function() {
+  api.prototype.getBidProviders = logCall('getBidProviders', function() {
     return this.library.mediator.bidProviders;
-  };
+  });
 
   /**
    * Add a custom reporter
@@ -130,19 +145,19 @@ var version = require('../package.json').version;
    * @return {pubfood}
    * @example {file} ../examples/reporter.js
    */
-  api.prototype.addReporter = function(reporter){
+  api.prototype.addReporter = logCall('addReporter', function(reporter){
     return this;
-  };
+  });
 
   /**
    * Start the bidding process
    *
    * @return {pubfood}
    */
-  api.prototype.start = function() {
+  api.prototype.start = logCall('start', function() {
     this.library.mediator.start();
     return this;
-  };
+  });
 
   /**
    * Refresh slot bids.
@@ -150,10 +165,10 @@ var version = require('../package.json').version;
    * @param {string[]} [slotNames] Optional list of slot names to refresh.
    * @return {pubfood}
    */
-  api.prototype.refresh = function(slotNames) {
+  api.prototype.refresh = logCall('refresh', function(slotNames) {
     this.library.mediator.refresh(slotNames);
     return this;
-  };
+  });
 
   api.prototype.library = pubfood.library;
 
