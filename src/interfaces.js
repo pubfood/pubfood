@@ -188,6 +188,15 @@ var slotConfig = {
   }
 };
 
+/**
+ * @typedef {array} dimensions
+ * @property {number|string} width
+ * @property {number|string} height
+ *
+ * @example
+ * var dimensions = [ [300, 250], [300, 600] ];
+ */
+
 module.exports = {
   BidDelegate: bidDelegate,
   AuctionDelegate: auctionDelegate,

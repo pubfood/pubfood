@@ -6,16 +6,18 @@
 'use strict';
 
 var util = require('../util');
+var AuctionDelegate = require('../interfaces').AuctionDelegate;
 
 /**
- * AuctionProvider implements the  publisher ad server requests.
+ * AuctionProvider implements the publisher ad server requests.
  *
  * @class
  * @memberof pubfood#provider
+ * @param {auctionDelegate} auctionDelegate
  */
 function AuctionProvider(auctionDelegate) {
-  this.name = '';
-  /** @property {object} - reference to the provider delegate */
+  this.name_ = auctionDelegate.name || '';
+  this.slots_ = [];
   this.auctionDelegate = auctionDelegate;
   this.mediator = null;
 }
@@ -32,24 +34,21 @@ AuctionProvider.prototype.setMediator = function(mediator) {
 /**
  * Create a new [AuctionProvider]{@link pubfood#provider.AuctionProvider} from an object.
  *
- * @param {object} delegate - provider object literal
- * @returns {pubfood#provider.AuctionProvider} instance of [AuctionProvider]{@link pubfood#provider.AuctionProvider}
+ * @param {auctionDelegate} delegate - provider object literal
+ * @returns {pubfood#provider.AuctionProvider|null} instance of [AuctionProvider]{@link pubfood#provider.AuctionProvider}. <em>null</em> if delegate is invalid.
  */
 AuctionProvider.withDelegate = function(delegate) {
   if (!AuctionProvider.validate(delegate)) {
     return null;
   }
-  var p = new AuctionProvider();
-  p.name = delegate.name;
-  p.auctionDelegate = delegate;
+  var p = new AuctionProvider(delegate);
   return p;
 };
 
-var AuctionDelegate = require('../interfaces').AuctionDelegate;
 /**
  * Validate a auction provider delegate.
  *
- * @param {object} delegate - bid provider delegate object literal
+ * @param {auctionDelegate} delegate - bid provider delegate object literal
  * @returns {boolean} true if delegate has required functions and properties
  */
 AuctionProvider.validate = function(delegate) {
@@ -66,18 +65,37 @@ AuctionProvider.validate = function(delegate) {
 };
 
 /**
- * Set the provider name.
+ * Set the provider's name.
+ * @todo maybe change to setName
  *
  * @param {String} name - the auction provider name
  * @return {pubfood#provider.AuctionProvider}
  */
 AuctionProvider.prototype.name = function(name) {
-  this.name = name;
+  this.name_ = name;
   return this;
 };
 
+/**
+ * Get the auction provider's libUri
+ * @todo maybe change to getLibUri
+ *
+ * @return {string}
+ */
 AuctionProvider.prototype.libUri = function() {
   return this.auctionDelegate.libUri;
+};
+
+/**
+ * Add a slot.
+ * @todo maybe change to addSlot
+ *
+ * @param {pubfood#model.Slot} slot - a [Slot]{@link pubfood#model.Slot} object
+ * @return {pubfood#provider.AuctionProvider}
+ */
+AuctionProvider.prototype.slot = function(slot) {
+  this.slots_.push(slot);
+  return this;
 };
 
 /**
@@ -97,8 +115,9 @@ AuctionProvider.prototype.init = function(slots, bids, options, done) {
  * Refresh for ad slots
  *
  * @param {string[]} slots
+ * @param {*} bids
  * @param {object} options
- * @param {function} callback
+ * @param {function} done
  * @return {undefined}
  */
 AuctionProvider.prototype.refresh = function(slots, bids, options, done) {

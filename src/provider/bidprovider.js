@@ -6,49 +6,47 @@
 'use strict';
 
 var util = require('../util');
+var bidDelegate = require('../interfaces').BidDelegate;
 
 /**
  * BidProvider implements bidding partner requests.
  *
  * @class
  * @memberof pubfood#provider
+ * @param {BidDelegate} delegate
  */
-function BidProvider() {
-  this.name = '';
-  /** @property {object} - reference to the provider delegate */
-  this.bidDelegate;
+function BidProvider(delegate) {
+  this.name = delegate.name || '';
+  this.bidDelegate = delegate;
 }
 
 /**
  * Create a new [BidProvider]{@link pubfood#provider.BidProvider} from a delegate object.
  *
- * @param {object} delegate - bid provider delegate object literal
- * @returns {object} instance of [BidProvider]{@link pubfood#provider.BidProvider}. <em>null</em> if delegate is invalid.
+ * @param {BidDelegate} delegate - bid provider delegate object literal
+ * @returns {pubfood#provider.BidProvider|null} instance of [BidProvider]{@link pubfood#provider.BidProvider}. <em>null</em> if delegate is invalid.
  */
 BidProvider.withDelegate = function(delegate) {
   if (!BidProvider.validate(delegate)) {
     return null;
   }
-  var p = new BidProvider();
-  p.name = delegate.name;
-  p.bidDelegate = delegate;
+  var p = new BidProvider(delegate);
   return p;
 };
 
 
-var bidDelegate = require('../interfaces').BidDelegate;
 /**
- * Validate a bid provider delegate.
+ * Validate a bid provider's delegate.
  *
- * @param {object} delegate - bid provider delegate object literal
+ * @param {BidDelegate} delegate - bid provider delegate object literal
  * @returns {boolean} true if delegate has required functions and properties
  */
 BidProvider.validate = function(delegate) {
   if (!delegate) return false;
 
   var err = 0;
-  for (var k in delegate) {
-    if (!delegate.hasOwnProperty(k) || util.asType(delegate[k]) !== util.asType(delegate[k])) {
+  for (var k in bidDelegate) {
+    if (!delegate.hasOwnProperty(k) || util.asType(delegate[k]) !== util.asType(bidDelegate[k])) {
       err++;
     }
     if (err > 0) break;
@@ -62,10 +60,9 @@ BidProvider.validate = function(delegate) {
  * @param {string} [uri] location Uri
  * @returns {string} location Uri
  */
-BidProvider.prototype.libUri = function(/*uri*/) {
-  var args = Array.prototype.slice.call(arguments);
-  if (args.length > 0 && util.asType(args[0]) === 'string') {
-    this.bidDelegate.libUri = args[0];
+BidProvider.prototype.libUri = function(uri) {
+  if (uri) {
+    this.bidDelegate.libUri = uri;
   }
   return this.bidDelegate.libUri;
 };

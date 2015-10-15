@@ -6,8 +6,8 @@
 'use strict';
 
 /**
- * TODO: use module:pubfood/interfaces
  * BidDelegate defines delegate interface to provide bids.
+ * @todo add docs
  *
  * @class
  * @memberof pubfood#provider
