@@ -41,7 +41,7 @@ AuctionMediator.prototype.init = function() {
   this.eventEmitter.on(events.EVENT_TYPE.BID_COMPLETE,
              this.checkBids_.bind(this));
   this.eventEmitter.on(events.EVENT_TYPE.BID_NEXT, this.setBid_.bind(this));
-
+  this.eventEmitter.on(events.EVENT_TYPE.AUCTION_COMPLETE, function(data) { console.log(data); });
 };
 
 AuctionMediator.prototype.setBid_ = function(data) {
@@ -57,11 +57,12 @@ AuctionMediator.prototype.checkBids_ = function(data) {
 };
 
 AuctionMediator.prototype.go_ = function() {
-  this.auctionProvider.init(this.slots, this.bids_, {}, this.auctionDone);
+  var ctx = events.bindContext(this.eventEmitter, {provider: this.auctionProvider.name});
+  this.auctionProvider.init(this.slots, this.bids_, {}, util.bind(this.auctionDone, ctx));
 };
 
-AuctionMediator.prototype.auctionDone = function(data) {
-  console.log('Auction done: ' + data);
+AuctionMediator.prototype.auctionDone = function() {
+  this.eventEmitter.emit(events.EVENT_TYPE.AUCTION_COMPLETE, 'Auction done: ' + this.data.provider);
 };
 
 /**
@@ -124,6 +125,7 @@ AuctionMediator.prototype.addBidProvider = function(delegateConfig) {
 AuctionMediator.prototype.setAuctionProvider = function(delegateConfig) {
   var  auctionProvider = AuctionProvider.withDelegate(delegateConfig);
   this.auctionProvider = auctionProvider;
+  this.auctionProvider.setMediator(this);
   return this.auctionProvider;
 };
 

@@ -84,7 +84,8 @@ var pubfoodContrib = {
               }
             }
           }
-          gptslot.setTargeting(bid.label, bid.value);
+          // Publisher sets their adserver targeting key vor the bid value here
+          gptslot.setTargeting('bid', bid.value);
         }
       });
       googletag.cmd.push(function() {
@@ -153,16 +154,14 @@ var pubfoodContrib = {
             // submit my bid...
             var bidObject = {
               slot: slotMap[slot] || 'undefined_slot',
-              label: 'cpm',
               value: bid,
               sizes: sizes,
-              customTargeting: {ybot_ad: 'y', ybot_slot: slot},
-              provider: 'yieldbot'
+              customTargeting: {ybot_ad: 'y', ybot_slot: slot}
             };
             next(bidObject);
           }
 
-          done('yieldbot');
+          done();
         });
       },
       refresh: function(slots, options, done) {
@@ -170,7 +169,7 @@ var pubfoodContrib = {
     },
     {
       name: 'carsales',
-      libUri: '//cdn.carsales.com/lib.js',
+      libUri: './test/fixture/lib.js',
       init: function(slots, options, next, done) {
         done('carsales');
       },
@@ -180,7 +179,7 @@ var pubfoodContrib = {
     {
       name: 'walkathon',
       options: { walk: 'athon'},
-      libUri: '//cdn.walkathon.com/lib.js',
+      libUri: './test/fixture/lib.js',
       init: function(slots, options, next, done) {
         done('walkathon');
       },

@@ -18,10 +18,19 @@ var provider = require('../provider');
  */
 function AuctionProvider(auctionDelegate) {
   this.name = '';
-  this.slots_ = [];
   /** @property {object} - reference to the provider delegate */
   this.auctionDelegate = auctionDelegate;
+  this.mediator = null;
 }
+
+/**
+ * Set the central auction mediator that orchestrates the auctions.
+ *
+ * @param {AuctionMediator} mediator - the auction mediator
+ */
+AuctionProvider.prototype.setMediator = function(mediator) {
+  this.mediator = mediator;
+};
 
 /**
  * Create a new [AuctionProvider]{@link pubfood#provider.AuctionProvider} from an object.
@@ -72,17 +81,6 @@ AuctionProvider.prototype.name = function(name) {
 
 AuctionProvider.prototype.libUri = function() {
   return this.auctionDelegate.libUri;
-};
-
-/**
- * Add a slot.
- *
- * @param {pubfood#model.Slot} slot - a [Slot]{@link pubfood#model.Slot} object
- * @return {pubfood#provider.AuctionProvider}
- */
-AuctionProvider.prototype.slot = function(slot) {
-  this.slots_.push(slot);
-  return this;
 };
 
 /**

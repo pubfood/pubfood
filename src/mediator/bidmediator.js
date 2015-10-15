@@ -48,22 +48,23 @@ BidMediator.prototype.refreshBids = function(slots) {
 
 BidMediator.prototype.getBids_ = function(slotMapItem) {
   var slots = slotMapItem.slots,
-    provider = slotMapItem.provider;
+    provider = slotMapItem.provider,
+    ctx = events.bindContext(this.eventEmitter, {provider: provider.name});
   provider.init(slots,
                 {},
-                util.bind(this.nextBid, this), //this.nextBid.bind(this),
-                util.bind(this.doneBid, this)); //this.doneBid.bind(this));
+                util.bind(this.nextBid, ctx),
+                util.bind(this.doneBid, ctx));
 };
 
 
 BidMediator.prototype.nextBid = function(bid) {
   var b = Bid.fromObject(bid);
+  b.provider = this.data.provider;
   this.eventEmitter.emit(events.EVENT_TYPE.BID_NEXT, b);
-  console.log(''+b);
 };
 
-BidMediator.prototype.doneBid = function(data) {
-  this.eventEmitter.emit(events.EVENT_TYPE.BID_COMPLETE, data);
+BidMediator.prototype.doneBid = function() {
+  this.eventEmitter.emit(events.EVENT_TYPE.BID_COMPLETE, this.data.provider);
 };
 
 module.exports = BidMediator;

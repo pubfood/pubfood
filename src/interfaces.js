@@ -152,12 +152,9 @@ var Reporter = function(event){
  * @property {object} customTargeting - key/value pairs for additional adserver targeting
  */
 var bidObject = {
-  provider: '',
   slot: '',
-  label: '',
   value: '',
-  sizes: [],
-  customTargeting: {}
+  sizes: []
 };
 
 /**

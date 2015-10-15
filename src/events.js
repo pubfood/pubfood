@@ -40,6 +40,10 @@ PubfoodEvent.prototype.setData = function(data) {
   this.data = data;
 };
 
+function bindContext(emitter, data) {
+  return {eventEmitter: emitter, data: data};
+}
+
 var events = {
   /**
    * @enum {string}
@@ -80,6 +84,14 @@ var events = {
      */
     AUCTION_LIB_LOADED: 'aplibloaded',
     /**
+     * Publisher auction complete
+     */
+    AUCTION_COMPLETE: 'auctioncomplete',
+    /**
+     * Publisher auction startede
+     */
+    AUCTION_START: 'auctionstart',
+    /**
      * Start the publisher auction
      */
     AUCTION_GO: 'auctiongo',
@@ -88,7 +100,8 @@ var events = {
      **/
     ERROR: 'error'
   },
-  PubfoodEvent: PubfoodEvent
+  PubfoodEvent: PubfoodEvent,
+  bindContext: bindContext
 };
 
 module.exports = events;
