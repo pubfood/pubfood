@@ -35,14 +35,14 @@ var auctionDelegate = {
  * @typedef {BidDelegate} BidDelegate
  * @property {string} name Bid provider delegate name.
  * @property {string} libUri location of the delegate JavaScript library/tag.
- * @property {function} init Initial bid request for [BidProvider.init]{@link pubfood/provider.BidProvider#init} delegate.
+ * @property {function} init Initial bid request for [BidProvider.init]{@link pubfood#provider.BidProvider#init} delegate.
  * <br>Returns {undefined}
  * @property {Slot[]} init.slots Adslot configuration
  * @property {object} init.options
  * @property {string} init.options.externalSlot Provider external system Slot Name
  * @property {string} init.options.other Other properties optional properties added per provider requirement
  * @property {doneCallback} init.done Callback to execute on done
- * @property {function} refresh Refresh bids for [BidProvider.init]{@link pubfood/provider.BidProvider#init} delegate.
+ * @property {function} refresh Refresh bids for [BidProvider.init]{@link pubfood#provider.BidProvider#init} delegate.
  * <br> Return {undefined}
  * @property {Slot[]} refresh.slots Adslot configuration
  * @property {object} refresh.options
@@ -64,6 +64,7 @@ var bidDelegate = {
  * @param {*} data TBD
  * @return {boolean}
  * @example {file} ../examples/request-operator.js
+ * @ignore
  */
 var requestOperatorCallback = function(data){
   return true;
@@ -76,6 +77,7 @@ var requestOperatorCallback = function(data){
  * @param {*} data TBD
  * @return {boolean}
  * @example {file} ../examples/transport-operator.js
+ * @ignore
  */
 var transformOperatorCallback = function(data){
   return true;
@@ -86,6 +88,7 @@ var transformOperatorCallback = function(data){
  *
  * @function doneCallback
  * @return {undefined}
+ * @ignore
  */
 var doneCallback = function(){
 
@@ -112,6 +115,7 @@ var BidProviderConfig = {
  * @param {object} options Defaults to {}
  * @param {doneCallback} done Callback to execute on done
  * @return {undefined}
+ * @ignore
  */
 var bidProviderInit = function(bids, options, done){
 
@@ -124,6 +128,7 @@ var bidProviderInit = function(bids, options, done){
  * @param {object} options Defaults to {}
  * @param {doneCallback} done Callback to execute on done
  * @return {undefined}
+ * @ignore
  */
 var bidProviderRefresh = function(slots, options, done){
 
@@ -131,17 +136,19 @@ var bidProviderRefresh = function(slots, options, done){
 
 /**
  * Custom reporter
- *
- * @function Reporter
- * @params {PubfoodEvent} event
+ * @function Report
+ * @param {object} event -
+ * @param {string} event.type -
+ * @param {*} event.data -
  * @return {undefined}
+ * @ignore
  */
 var Reporter = function(event){
 
 };
 
 /**
- * Bid object structure for the [nextBid]{@link pubfood/interfaces.nextBid} callback.
+ * Bid object structure for the [nextBid]{@link pubfood#interfaces.nextBid} callback.
  *
  * @typedef {object} BidObject
  * @property {string} [provider] - bid provider name
@@ -161,7 +168,7 @@ var bidObject = {
 
 /**
  * @typedef {SlotConfig} SlotConfig
- * @property {string} name name of the slot/ad unit in [AuctionProvider]{@link pubfood/provider.AuctionProvider} system
+ * @property {string} name name of the slot/ad unit in [AuctionProvider]{@link pubfood#provider.AuctionProvider} system
  * @property {string} [elementId] DOM target element id
  * @property {array.<number, number>} sizes array of slot sizes
  * @property {number} sizes.0 width slot width
