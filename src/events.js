@@ -12,6 +12,81 @@
 var EventEmitter = require('eventemitter3');
 
 /**
+ * Event type
+ *
+ * @typedef {object} ERROR
+ * @property {string} ts
+ * @property {string} message
+ * @property {*} stackTrace
+ */
+
+/**
+ * Event type
+ *
+ * @typedef {object} AUCTION_LIB_START
+ * @property {string} ts
+ * @property {string} auctionProvider
+ */
+
+/**
+ * Event type
+ *
+ * @typedef {object} AUCTION_LIB_LOADED
+ * @property {string} ts
+ * @property {string} auctionProvider
+ */
+
+/**
+ * Event type
+ *
+ * @typedef {object} AUCTION_GO
+ * @property {string} ts
+ */
+
+/**
+ * Event type
+ *
+ * @typedef {object} BID_LIB_START
+ * @property {string} ts
+ * @property {string} bidProvider
+ */
+
+/**
+ * Event type
+ *
+ * @typedef {object} BID_LIB_LOADED
+ * @property {string} ts
+ * @property {string} bidProvider
+ */
+
+/**
+ * Event type
+ *
+ * @typedef {object} BID_NEXT
+ * @property {string} id
+ * @property {string} ts
+ * @property {array.<number, number>} sizes
+ * @property {string} value
+ * @property {object} customTargetting
+ */
+
+/**
+ * Event type
+ *
+ * @typedef {object} BID_START
+ * @property {string} ts
+ * @property {string} bidProvider
+ */
+
+/**
+ * Event type
+ *
+ * @typedef {object} BID_COMPLETE
+ * @property {string} ts
+ * @property {string} bidProvider
+ */
+
+/**
  * Pubfood event class
  * @param {string} type - the event type
  * @param {object} [data] - event payload
