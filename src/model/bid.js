@@ -5,8 +5,6 @@
 
 'use strict';
 
-/*eslint no-unused-vars: 0*/
-
 var util = require('../util');
 var BaseModelObject = require('./basemodelobject');
 var bidObject = require('../interfaces').BidObject;
@@ -24,7 +22,13 @@ function Bid() {
   this.sizes = [];
 }
 
-/** @todo should not require pub to set provider name */
+/**
+ * Validate the bid config
+ * @todo should not require pub to set provider name
+ *
+ * @param {BidObject} config
+ * @return {boolean}
+ */
 Bid.validate = function(config) {
   if (!config) return false;
 
@@ -56,13 +60,18 @@ Bid.fromObject = function(config) {
   return b;
 };
 
+/**
+ * Set the bid's label/name
+ * @param {string} lbl
+ * @return {pubfood#model.Bid}
+ */
 Bid.prototype.label = function(lbl) {
   this.label = lbl || '';
   return this;
 };
 
 /**
- * Sets the bid value
+ * Sets the bid's value
  * @param {string|number} v
  * @return {pubfood#model.Bid}
  */
@@ -82,24 +91,31 @@ Bid.prototype.slot = function(s) {
   return this;
 };
 
-/*jslint bitwise: true */
 /**
- * Set's the ad
+ * Sets the bid's slot size
+ *
+ * @todo maybe combine with Bid.prototype.dimensions
+ *
  * @param {string|number} w
  * @param {string|number} h
  * @return {pubfood#model.Bid}
  */
 Bid.prototype.addSize = function(w, h) {
   var width = Math.abs(~~w);
-  var height  = Math.abs(~~h);
+  var height = Math.abs(~~h);
 
   this.sizes.push([width, height]);
-
   return this;
 };
-/*jslint bitwise: false */
 
-
+/**
+ * Set the sizes for the bid
+ *
+ * @todo maybe combine with Bid.prototype.addSize
+ *
+ * @param {array} szs
+ * @return {pubfood#model.Bid}
+ */
 Bid.prototype.dimensions = function(szs) {
   this.sizes = szs || [];
   return this;
@@ -115,11 +131,15 @@ Bid.prototype.provider = function(p) {
   return this;
 };
 
+/**
+ * Set bid options
+ * @param {object} opt Dib options
+ * @return {pubfood#model.Bid}
+ */
 Bid.prototype.options = function(opt) {
   this.options = opt || {};
   return this;
 };
 
 util.extends(Bid, BaseModelObject);
-
 module.exports = Bid;

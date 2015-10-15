@@ -7,6 +7,7 @@
 
 var util = require('../util');
 var BaseModelObject = require('./basemodelobject');
+var slotConfig = require('../interfaces').SlotConfig;
 
 /**
  * Slot contains a definition of a publisher ad unit.
@@ -23,17 +24,6 @@ function Slot() {
   this.sizes = [];
   this.bids = [];
 }
-
-/**
- * @typedef {array} dimensions
- * @property {number|string} width
- * @property {number|string} height
- *
- * @example
- * var dimensions = [ [300, 250], [300, 600] ];
- */
-
-var slotConfig = require('../interfaces').SlotConfig;
 
 /**
  * Validate a slot configuration object.
@@ -114,8 +104,6 @@ Slot.prototype.addSizes = function(slotSizes) {
   return this;
 };
 
-/*jslint bitwise: true */
-
 /**
  * Add a size dimension.
  *
@@ -130,7 +118,6 @@ Slot.prototype.addSize = function(width, height) {
   this.sizes.push([w, h]);
   return this;
 };
-/*jslint bitwise: false */
 
 /**
  * Add bid provider allocated to the slot.
@@ -146,5 +133,4 @@ Slot.prototype.addBidProvider = function(slotBidProvider) {
 };
 
 util.extends(Slot, BaseModelObject);
-
 module.exports = Slot;
