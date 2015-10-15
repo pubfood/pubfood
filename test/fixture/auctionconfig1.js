@@ -78,9 +78,9 @@ var pubfoodContrib = {
 
           for (var j=0; j<slotBids.length; j++) {
             var bid = slotBids[j];
-            if (bid.options && typeof bid.options === 'object') {
-              for (var p in bid.options) {
-                gptslot.setTargeting(p, bid.options[p]);
+            if (bid.customTargeting && typeof bid.customTargeting === 'object') {
+              for (var p in bid.customTargeting) {
+                gptslot.setTargeting(p, bid.customTargeting[p]);
               }
             }
           }
@@ -97,7 +97,7 @@ var pubfoodContrib = {
       googletag.cmd.push(function() { googletag.display('div-mumblebar'); });
 
     },
-    refresh: function(slots, options, done) {
+    refresh: function(slots, customTargeting, done) {
 
       googletag.cmd.push(function() {
         googletag.refresh();
@@ -118,17 +118,18 @@ var pubfoodContrib = {
         ybotq.push(function() {
           yieldbot.psn('1234');
 
-          for (var i = 0; i < slots.length; i++) {
-            var slot = slots[i];
+          for (var k in slots) {
+            var slot = slots[k];
             var providerSlotName = slot.bidProviders['yieldbot'].slot;
 
             yieldbot.defineSlot(providerSlotName, {
               sizes: slot.sizes
             });
-            slotMap[providerSlotName] = slot.name;
+            slotMap[providerSlotName] = k;
           }
           yieldbot.enableAsync();
           yieldbot.go();
+
         });
 
         ybotq.push(function() {
@@ -155,7 +156,7 @@ var pubfoodContrib = {
               label: 'cpm',
               value: bid,
               sizes: sizes,
-              options: {ybot_ad: 'y', ybot_slot: slot},
+              customTargeting: {ybot_ad: 'y', ybot_slot: slot},
               provider: 'yieldbot'
             };
             next(bidObject);

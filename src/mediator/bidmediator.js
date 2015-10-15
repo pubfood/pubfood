@@ -25,27 +25,14 @@ function BidMediator(auctionMediator) {
   this.eventEmitter = auctionMediator.eventEmitter;
 }
 
-BidMediator.prototype.initBids = function(slots) {
-  var bidderSlots = {};
-  for (var i = 0; i < slots.length; i++) {
-    var slot = slots[i];
-
-    var providers = this.auctionMediator.getSlotBidders(slot.name);
-    for (var k in providers) {
-      bidderSlots[k] = bidderSlots[k] || {};
-      bidderSlots[k].provider = providers[k].provider;
-      bidderSlots[k].slots = bidderSlots[k].slots || [];
-      bidderSlots[k].slots.push(slot);
-    }
-  }
-
+BidMediator.prototype.initBids = function(slotMap) {
   // TODO: run request operators here
 
-  for (k in bidderSlots) {
-    var slots = bidderSlots[k].slots;
+  var providers = slotMap.providers;
+  for (var k in providers) {
 
-    this.loadProvider(bidderSlots[k].provider, {});
-    this.getBids_(bidderSlots[k].provider, slots);
+    this.loadProvider(providers[k], {});
+    this.getBids_(providers[k]);
   }
 };
 
@@ -59,7 +46,9 @@ BidMediator.prototype.refreshBids = function(slots) {
   }
 };
 
-BidMediator.prototype.getBids_ = function(provider, slots) {
+BidMediator.prototype.getBids_ = function(slotMapItem) {
+  var slots = slotMapItem.slots,
+    provider = slotMapItem.provider;
   provider.init(slots,
                 {},
                 util.bind(this.nextBid, this), //this.nextBid.bind(this),

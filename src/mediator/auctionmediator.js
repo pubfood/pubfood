@@ -94,6 +94,8 @@ AuctionMediator.prototype.updateSlotBidProviders = function(slot) {
     this.slotMap.providers[providerName] = this.slotMap.providers[providerName] || {};
 
     this.slotMap.slots[slot.name][providerName] = this.slotMap.providers[providerName];
+    this.slotMap.providers[providerName].slots = this.slotMap.providers[providerName].slots || {};
+    this.slotMap.providers[providerName].slots[slot.name] = slot;
   }
 };
 
@@ -208,7 +210,7 @@ AuctionMediator.prototype.start = function() {
   this.bidMediator = new BidMediator(this);
 
   this.loadProviders();
-  this.bidMediator.initBids(this.slots);
+  this.bidMediator.initBids(this.slotMap);
 };
 
 AuctionMediator.prototype.refresh = function(slotNames) {
