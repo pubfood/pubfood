@@ -7,9 +7,10 @@
 
 'use strict';
 
-/*eslint no-unused-vars: 0*/
-
+var Event = require('./event');
 var version = require('../package.json').version;
+var util = require('./util');
+var logger = require('./logger');
 
 (function(global, undefined, ctor) {
 
@@ -17,7 +18,7 @@ var version = require('../package.json').version;
     module.exports = ctor(global, global.pfConfig || {});
   }
 
-}(window || {}, undefined, function(global, config) {
+}(window || {}, undefined, function(global/*, config*/) {
 
   var pubfood = function(optionalId) {
     return new pubfood.library.init(optionalId);
@@ -27,35 +28,11 @@ var version = require('../package.json').version;
     version: version,
     model: require('./model'),
     provider: require('./provider'),
-    util: require('./util'),
+    util: util,
     mediator: require('./mediator').mediatorBuilder(),
     interfaces: require('./interfaces'),
     PubfoodError: require('./errors'),
-    history: []
-  };
-
-  pubfood.library.dumpLog = function(){
-    if(console && console.log){
-      for (var i = 0; i < this.history.length; i++) {
-        console.log(this.history[i]);
-      }
-    }
-  };
-
-  /**
-   * logs api calls
-   *
-   * @param {string} name
-   * @param {function} fn
-   * @return {function}
-   */
-  var logCall = function(name, fn) {
-    return function () {
-      var signature = Array.prototype.slice.call(arguments);
-      signature.unshift(name);
-      this.library.history.push(signature);
-      return fn.apply(api.prototype, arguments);
-    };
+    logger: logger
   };
 
   /**
@@ -66,18 +43,13 @@ var version = require('../package.json').version;
    * @param {string} [optional_id] Optional ID
    * @return {pubfood}
    */
-  var api = pubfood.library.init = logCall('init', function(optionalId) {
+  var api = pubfood.library.init = function(optionalId) {
+    logger.logCall('api.init', arguments);
+    this.EVENT_TYPE = Event.EVENT_TYPE;
+    this.logger = logger;
+    this.id = optionalId;
     return this;
-  });
-
-  /**
-   * Who am I?
-   * @function
-   * @return {undefined}
-   */
-  api.prototype.whoAmI = logCall('whoAmI', function() {
-    console.log('instanceOf \'pubfood.library.constructor\' v' + this.library.version);
-  });
+  };
 
   /**
    * Make this adslot avaialble for bidding
@@ -86,18 +58,20 @@ var version = require('../package.json').version;
    * @param {SlotConfig} slot Slot configuration
    * @return {pubfood}
    */
-  api.prototype.addSlot = logCall('addSlot', function(slot) {
+  api.prototype.addSlot = function(slot) {
+    logger.logCall('api.addSlot', arguments);
     this.library.mediator.addSlot(slot);
     return this;
-  });
+  };
 
   /**
    * Get a list a of all registered slots
    * @return {MediatorSlot}
    */
-  api.prototype.getSlots = logCall('getSlots', function() {
+  api.prototype.getSlots = function() {
+    logger.logCall('api.getSlots', arguments);
     return this.library.mediator.slots;
-  });
+  };
 
   /**
    * Set the Auction Provider
@@ -107,14 +81,16 @@ var version = require('../package.json').version;
    * @throws {PubfoodError}
    * @return {pubfood}
    */
-  api.prototype.setAuctionProvider = logCall('setAuctionProvider', function(provider) {
+  api.prototype.setAuctionProvider = function(provider) {
+    logger.logCall('api.setAuctionProvider', arguments);
     this.library.mediator.setAuctionProvider(provider);
     return this;
-  });
+  };
 
-  api.prototype.getAuctionProvider = logCall('getAuctionProvider', function() {
+  api.prototype.getAuctionProvider = function() {
+    logger.logCall('api.getAuctionProvider', arguments);
     return this.library.mediator.auctionProvider;
-  });
+  };
 
   /**
    * Add a BidProvider
@@ -124,40 +100,57 @@ var version = require('../package.json').version;
    * @throws {PubfoodError}
    * @return {pubfood}
    * @example {file} ../examples/add-bid-provider.js
-  */
-  api.prototype.addBidProvider = logCall('addBidProvider', function(delegate) {
+   */
+  api.prototype.addBidProvider = function(delegate) {
+    logger.logCall('api.addBidProvider', arguments);
     this.library.mediator.addBidProvider(delegate);
     return this;
-  });
+  };
 
   /**
    * Gets a list of bidproviders
    * @return {BidProvider[]}
    */
-  api.prototype.getBidProviders = logCall('getBidProviders', function() {
+  api.prototype.getBidProviders = function() {
+    logger.logCall('api.getBidProvider', arguments);
     return this.library.mediator.bidProviders;
-  });
+  };
 
   /**
    * Add a custom reporter
-   * @todo hook this up
+   * @param {string} [eventType] the event to bind this reporter to
    * @param {Reporter} reporter Custom reporter
    * @return {pubfood}
    * @example {file} ../examples/reporter.js
    */
-  api.prototype.addReporter = logCall('addReporter', function(reporter){
+  api.prototype.addReporter = function(eventType, reporter) {
+    logger.logCall('api.addReporter', arguments);
+    if (typeof eventType === 'function') {
+      reporter = eventType;
+      eventType = '';
+    }
+
+    if (Event.EVENT_TYPE[eventType]) {
+      Event.on(Event.EVENT_TYPE[eventType], util.bind(reporter, this));
+    } else {
+      // subscribe the reported to all the available events
+      for (var e in Event.EVENT_TYPE) {
+        Event.on(Event.EVENT_TYPE[e], util.bind(reporter, this));
+      }
+    }
     return this;
-  });
+  };
 
   /**
    * Start the bidding process
    *
    * @return {pubfood}
    */
-  api.prototype.start = logCall('start', function() {
+  api.prototype.start = function() {
+    logger.logCall('api.start', arguments);
     this.library.mediator.start();
     return this;
-  });
+  };
 
   /**
    * Refresh slot bids.
@@ -165,10 +158,11 @@ var version = require('../package.json').version;
    * @param {string[]} [slotNames] Optional list of slot names to refresh.
    * @return {pubfood}
    */
-  api.prototype.refresh = logCall('refresh', function(slotNames) {
+  api.prototype.refresh = function(slotNames) {
+    logger.logCall('api.refresh', arguments);
     this.library.mediator.refresh(slotNames);
     return this;
-  });
+  };
 
   api.prototype.library = pubfood.library;
 
