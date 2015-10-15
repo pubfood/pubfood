@@ -5,13 +5,11 @@
 
 'use strict';
 
-/*eslint no-unused-vars: 0*/
-
 var util = require('../util');
-var BidProvider = require('../provider/bidprovider');
-var EventEmitter = require('eventemitter3');
-var events = require('../events');
+//var BidProvider = require('../provider/bidprovider');
+var Event = require('../event');
 var Bid = require('../model/bid');
+
 /**
  * BidMediator mediates provider bid requests.
  *
@@ -22,9 +20,14 @@ var Bid = require('../model/bid');
 function BidMediator(auctionMediator) {
   this.auctionMediator = auctionMediator;
   this.operators = [];
-  this.eventEmitter = auctionMediator.eventEmitter;
 }
 
+/**
+ * Initialize the bid
+ *
+ * @param {object} slotMap
+ * @return
+ */
 BidMediator.prototype.initBids = function(slotMap) {
   // TODO: run request operators here
 
@@ -36,35 +39,63 @@ BidMediator.prototype.initBids = function(slotMap) {
   }
 };
 
-BidMediator.prototype.loadProvider = function(provider, callback) {
+/**
+ * @todo add docs
+ *
+ * @param {object} provider
+ * @param {function} callback
+ */
+BidMediator.prototype.loadProvider = function(/*provider, callback*/) {
 
 };
 
-BidMediator.prototype.refreshBids = function(slots) {
-  for (var i = 0; i < slots.length; i++) {
-    var slot = slots[i];
-  }
+/**
+ * Refresh the bids
+ *
+ * @param {Slot[]} slots
+ */
+BidMediator.prototype.refreshBids = function(/*slots*/) {
+  //for (var i = 0; i < slots.length; i++) {
+  //  var slot = slots[i];
+  //}
 };
 
 BidMediator.prototype.getBids_ = function(slotMapItem) {
-  var slots = slotMapItem.slots,
-    provider = slotMapItem.provider,
-    ctx = events.bindContext(this.eventEmitter, {provider: provider.name});
-  provider.init(slots,
-                {},
-                util.bind(this.nextBid, ctx),
-                util.bind(this.doneBid, ctx));
+  var slots = slotMapItem.slots;
+  var provider = slotMapItem.provider;
+  var self = this;
+  var name = provider.name;
+  
+  var nextBidCb = function(bid){
+    self.nextBid(bid, name);
+  };
+  
+  var doneCb = function(){
+    self.doneBid(name);
+  };
+  
+  provider.init(slots, {}, nextBidCb, doneCb);
 };
 
-
-BidMediator.prototype.nextBid = function(bid) {
+/**
+ * @todo add docs
+ *
+ * @param {number} bid The bid id
+ * @return {undefined}
+ */
+BidMediator.prototype.nextBid = function(bid, providerName) {
   var b = Bid.fromObject(bid);
-  b.provider = this.data.provider;
-  this.eventEmitter.emit(events.EVENT_TYPE.BID_NEXT, b);
+  b.provider = providerName;
+  Event.publish(Event.EVENT_TYPE.BID_NEXT, b);
 };
 
-BidMediator.prototype.doneBid = function() {
-  this.eventEmitter.emit(events.EVENT_TYPE.BID_COMPLETE, this.data.provider);
+/**
+ * Notification that the bid is complete
+ * @param {string} bidProvider The bid prodiver
+ * @return {undefined}
+ */
+BidMediator.prototype.doneBid = function(bidProvider) {
+  Event.publish(Event.EVENT_TYPE.BID_COMPLETE, bidProvider);
 };
 
 module.exports = BidMediator;
