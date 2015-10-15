@@ -30,7 +30,21 @@
          var expect = chai.expect;
 
          describe('Pubfood - Tests', function () {
-             var p = new pubfood();
+           var p = new pubfood();
+           var batch = [];
+           p.addReporter(function(event) {
+             batch.push(event);
+             //console.log('Event:', event.type, '=', event.data);
+           });
+
+           p.addReporter('AUCTION_COMPLETE', function(event) {
+             console.log('AUCTION_COMPLETE:', event.type, '=', event.data);
+             console.log('EVENT', 'DATA');
+             for (var i = 0; i < batch.length; i++) {
+               console.log(batch[i].type, JSON.stringify(batch[i].data));
+             }
+           });
+
             pubfood.library.model.Slot = pubfood.library.model.getType('slot');
             pubfood.library.model.Bid = pubfood.library.model.getType('bid');
              afterEach(function () {
