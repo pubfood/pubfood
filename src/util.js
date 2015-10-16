@@ -69,9 +69,11 @@ var util = {
       if (doc.readyState === 'complete' || doc.readyState === 'loaded') {
         // TODO consider warning of an unsafe attempt to document.write too late
       } else {
+        /*eslint-disable no-empty */
         try {
           doc.write('<script src="' + scriptSrc + '"></script>');
         } catch (e) { }
+        /*eslint-enable no-empty: */
       }
     } else {
       var scriptEl = document.createElement('script');
