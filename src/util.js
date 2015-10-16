@@ -62,21 +62,22 @@ var util = {
     }
     return ret;
   },
-  loadUri: function(uri, action) {
-
-    var scriptEl = document.createElement('script');
-    scriptEl.type = 'text/javascript';
-    scriptEl.async = true;
-
-    scriptEl.src = uri || '';
-
-    if (scriptEl.src && action && typeof action === 'function') {
-      scriptEl.onload = action;
-    }
-    var beforeEl = document.getElementsByTagName('head')[0] ||
-        document.getElementsByTagName('body')[0] || null;
-    if (beforeEl) {
-      beforeEl.insertBefore(scriptEl, beforeEl.firstChild);
+  loadUri: function(uri, sync) {
+    var doc = document;
+    var scriptSrc = uri || '';
+    if (sync) {
+      if (doc.readyState === 'complete' || doc.readyState === 'loaded') {
+        // TODO consider warning of an unsafe attempt to document.write too late
+      } else {
+        try {
+          doc.write('<script src="' + scriptSrc + '"></script>');
+        } catch (e) { }
+      }
+    } else {
+      var scriptEl = document.createElement('script');
+      scriptEl.async = true;
+      scriptEl.src = scriptSrc;
+      (doc.head || doc.body || doc.documentElement).appendChild(scriptEl);
     }
   },
   bind: function(fn, ctx) {

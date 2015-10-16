@@ -71,6 +71,20 @@ BidProvider.prototype.libUri = function(/*uri*/) {
 };
 
 /**
+ * Get or set the provider to load it's library either sync or async.
+ *
+ * @param {boolean} [loadSync] when true load the library in a sync fashion
+ * @returns {boolean} true if the library should load sync
+ */
+BidProvider.prototype.sync = function(/*loadSync*/) {
+  var args = Array.prototype.slice.call(arguments);
+  if (args.length > 0 && util.asType(args[0]) === 'boolean') {
+    this.bidDelegate.sync = args[0];
+  }
+  return !!this.bidDelegate.sync;
+};
+
+/**
  * Initialize a bid provider.
  *
  * The BidProvider delegate javascript tag and other setup is done here.

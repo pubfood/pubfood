@@ -182,7 +182,8 @@ AuctionMediator.prototype.loadProviders = function(action) {
   for (var k in this.bidProviders) {
     if (this.bidProviders[k].libUri) {
       var uri = this.bidProviders[k].libUri() || '';
-      util.loadUri(uri);
+      var sync = this.bidProviders[k].sync();
+      util.loadUri(uri, sync);
     }
   }
 
