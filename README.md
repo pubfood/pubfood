@@ -49,6 +49,5 @@ npm start
 # References
 Some reasonable summaries if you're new to header bidding:
 
-- http://prebid.org/
 - http://adexchanger.com/publishers/the-rise-of-header-bidding-and-the-end-of-the-publisher-waterfall/
 - http://www.adopsinsider.com/ad-exchanges/diagramming-the-header-bidding-redirect-path/
