@@ -8,6 +8,7 @@
 'use strict';
 
 var util = require('./util');
+var logger = require('./logger');
 var EventEmitter = require('eventemitter3');
 
 /**
@@ -67,6 +68,8 @@ PubfoodEvent.prototype.publish = function(eventType, data, providerType) {
   if(eventType === this.EVENT_TYPE.PUBFOOD_API_START && data){
     ts = data;
   }
+
+  logger.logEvent(eventType, arguments);
 
   return this.emit(eventType, {
     ts: ts,
