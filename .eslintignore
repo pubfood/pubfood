@@ -1,4 +1,6 @@
 test/assets/vendor/*
+# browserify generated convenience browser debuging test file
+test/assets/unittest.js
 examples/*.js
 
 # this is a hack for webstorm

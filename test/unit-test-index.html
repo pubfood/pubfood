@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <link rel="stylesheet" href="../node_modules/mocha/mocha.css" />
+        <title>Pubfood Unite Tests</title>
+    </head>
+    <body>
+
+        <div id="mocha"></div>
+
+        <script src="../node_modules/mocha/mocha.js"></script>
+
+        <script type="text/javascript">
+         mocha.ui('bdd');
+        </script>
+
+        <script src="../test/unittests.js"></script>
+
+        <script>
+         onload = function() {
+             if (window.debugger) {
+                 eval('debugger;');
+             }
+             mocha.run();
+         };
+        </script>
+    </body>
+</html>

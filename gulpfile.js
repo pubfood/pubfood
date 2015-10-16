@@ -9,18 +9,38 @@ var gulp = require('gulp'),
   fs = require('fs'),
   del = require('del');
 
-gulp.task('test', function() {
-  return gulp.src('test/index.html')
+gulp.task('browserify-unit-tests', function() {
+  var b = browserify();
+  b.add('./test/unittestindex.js');
+  var bStream = b.bundle();
+  bStream.pipe(source('unittests.js'))
+    .pipe(gulp.dest('./test'));
+});
+
+gulp.task('test-html', function() {
+  return gulp.src('test/unit-test-index.html')
     .pipe(plugins.mochaPhantomjs({
       reporter: 'spec',
       localToRemoteUrlAccessEnabled: true,
       localUrlAccessEnabled: true
-    }))
-    // TODO see if we can avoid the double test run somehow for the report
+    }));
+});
+
+gulp.task('test', ['test-spec', 'test-xunit']);
+
+gulp.task('test-spec', function() {
+  return gulp.src('./test/unittestindex.js')
+    .pipe(plugins.mocha({reporter: 'spec'}));
+});
+
+gulp.task('test-xunit', plugins.shell.task([
+  'mocha -R "xunit" ./test/unittestindex.js > ./reports/mocha-xunit.xml'
+]));
+
+gulp.task('integration-test', function() {
+  return gulp.src('test/index.html')
     .pipe(plugins.mochaPhantomjs({
-      reporter: 'xunit',
-      dump: 'reports/mocha-xunit.xml',
-      suppressStdout: true,
+      reporter: 'spec',
       localToRemoteUrlAccessEnabled: true,
       localUrlAccessEnabled: true
     }));

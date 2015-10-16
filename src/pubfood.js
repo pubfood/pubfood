@@ -26,11 +26,7 @@ var logger = require('./logger');
 
   pubfood.library = pubfood.prototype = {
     version: version,
-    model: require('./model'),
-    provider: require('./provider'),
-    util: util,
     mediator: require('./mediator').mediatorBuilder(),
-    interfaces: require('./interfaces'),
     PubfoodError: require('./errors'),
     logger: logger
   };

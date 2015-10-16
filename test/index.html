@@ -11,8 +11,6 @@
 
         <script src="../node_modules/mocha/mocha.js"></script>
         <script src="../node_modules/chai/chai.js"></script>
-        <!-- jQuery for testing purposes only -->
-        <script src="../test/assets/vendor/jquery.js"></script>
 
         <!-- For testing sync load pubfood -->
         <script src="../dist/pubfood.js"></script>
@@ -29,250 +27,63 @@
          var assert = chai.assert;
          var expect = chai.expect;
 
-         describe('Pubfood - Tests', function () {
-           var p = new pubfood();
-           var batch = [];
+         describe('Pubfood API', function testPubfoodMediator() {
+             var p = new pubfood();
+             var batch = [];
 
-           // this reporter listens on all events and pushes the event data to a queue `batch`
-           p.addReporter(function(event) {
-             batch.push(event);
-             //console.log('Event:', event.type, '=', event.data);
-           });
+             // this reporter listens on all events and pushes the event data to a queue `batch`
+             p.addReporter(function(event) {
+                 batch.push(event);
+                 //console.log('Event:', event.type, '=', event.data);
+             });
 
-           // this reporter only listens on the `AUCTION_COMPLETE` event, then loops over and displays the event data
-           p.addReporter('AUCTION_COMPLETE', function(event) {
-             for (var i = 0; i < batch.length; i++) {
-               console.log('%c' + batch[i].type, 'padding-right:5px;font-weight:bold;display:block;',JSON.stringify(batch[i]));
-             }
-           });
+             // this reporter only listens on the `AUCTION_COMPLETE` event, then loops over and displays the event data
+             p.addReporter('AUCTION_COMPLETE', function(event) {
+                 for (var i = 0; i < batch.length; i++) {
+                     console.log('%c' + batch[i].type, 'padding-right:5px;font-weight:bold;display:block;',JSON.stringify(batch[i]));
+                 }
+             });
 
-            pubfood.library.model.Slot = pubfood.library.model.getType('slot');
-            pubfood.library.model.Bid = pubfood.library.model.getType('bid');
-             afterEach(function () {
+             it('should add a slot', function() {
+                 p.addSlot(pubfoodContrib.slots[0]);
+                 assert.equal(p.getSlots().length, 1, 'mediator did not add slot');
+
+                 var slot = p.getSlots()[0];
+                 delete slot.id;
+                 expect(slot.name).to.eql(pubfoodContrib.slots[0].name, 'name not equal');
+                 expect(slot.sizes).to.eql(pubfoodContrib.slots[0].sizes, 'sizes not equal');
+                 expect(slot.providers).to.eql(pubfoodContrib.slots[0].providers, 'providers not equal');
+                 expect(slot.elementId).to.eql(pubfoodContrib.slots[0].elementId, 'elementId not equal');
+
+             });
+             it('should add a bid provider', function() {
+                 p.addBidProvider(pubfoodContrib.bidProviders[0]);
+
+                 expect(p.getBidProviders()).not.to.be.empty;
+
+                 p.addBidProvider(pubfoodContrib.bidProviders[1]);
+                 assert.equal(Object.keys(p.getBidProviders()).length, 2, 'bid provider not added');
+
+                 p.addBidProvider(pubfoodContrib.bidProviders[2]);
+                 assert.equal(Object.keys(p.getBidProviders()).length, 3, 'bid provider not added');
+             });
+
+             it('should add an auction provider', function() {
+
+                 p.setAuctionProvider(pubfoodContrib.auctionProvider);
+
+                 assert.isDefined(p.getAuctionProvider(), 'auction provider not set');
 
              });
 
-             describe('Pubfood library setup', function testPubfoodSetup() {
-                 it('will have a namespace', function() {
-                     assert.isDefined(window.pubfood, 'pubfood is undefined');
-                 });
+             it('should start an auction', function() {
+                 p.addBidProvider(pubfoodContrib.bidProviders[0]);
+                 p.addBidProvider(pubfoodContrib.bidProviders[1]);
+                 p.addBidProvider(pubfoodContrib.bidProviders[2]);
 
-                 it('will have a library property', function() {
-                     assert.isDefined(window.pubfood.library, 'pubfood.library is undefined');
-                 });
+                 p.addSlot(pubfoodContrib.slots[1]);
 
-                 it('will have a library.model property', function() {
-                     assert.isDefined(window.pubfood.library.model, 'pubfood.library.model is undefined');
-                 });
-             });
-
-             describe('Test Template', function testTmpl() {
-                 it('TEST SOMETHING!', function() {
-
-                 });
-             });
-
-             describe('PubfoodError', function testTmpl() {
-                 it('type can be checked', function() {
-                     var MSG = 'This is a test',
-                         err = new pubfood.library.PubfoodError(MSG),
-                         cmp = new pubfood.library.PubfoodError('Is one of these');
-
-                     assert.isTrue(err.is(cmp), 'not a PubfoodError');
-                     assert.isTrue(err.message === MSG);
-                 });
-             });
-
-             describe.skip('BaseModelObject', function testBaseModelObject() {
-                 it('will have a generated Id', function() {
-                     var modelObject = new pubfood.library.model.BaseModelObject();
-                     assert.isDefined(modelObject.id, 'id is not defined');
-                     assert.match(modelObject.id, /[\w]+$/, 'id is not an ascii string');
-                 });
-             });
-             describe('Model builder will build a Slot', function testSlotBuilder() {
-
-                 var slotConfig = {
-                     name: '/2476204/sidebar-unit', //google ad unit
-                     sizes: [
-                         [300, 250],
-                         [300, 600]
-                     ],
-                     elementId: '_300x250', //div element on the page
-                     bidProviders: {
-                         yieldbot: {
-                             slot: 'sidebar' //yieldbot's slot name
-                         },
-                         amazon: {
-                             slot: 'amz-left-adslot' // amazon's slot name
-                         }
-                     }
-                 };
-
-                 var slotModel = {
-                     name: 'right-rail',
-                     dimensions: [ [300, 250], [300, 600] ]
-                 };
-
-                 it('will not build a slot with invalid config object', function() {
-
-                     var invalidSlotConfig = JSON.parse(JSON.stringify(slotConfig));
-                     invalidSlotConfig.name = '';
-
-                     var slot = pubfood.library.model.Slot.fromObject(invalidSlotConfig);
-                     assert.isNull(slot, 'should not be a valid slot');
-                 });
-
-                 it('will build a slot from a config object', function() {
-                     var slot = pubfood.library.model.Slot.fromObject(slotConfig);
-                     assert.isNotNull(slot, 'invalid slot');
-                 });
-
-
-                 it('with an internal id', function() {
-                     var slot = pubfood.library.model.Slot.fromObject(slotConfig);
-                     assert.isDefined(slot.id, 'id is not defined');
-                     assert.match(slot.id, /[\w]+$/, 'id is not an ascii string');
-                 });
-
-                 it('with a name', function() {
-                     var slot = new pubfood.library.model.Slot().name(slotModel.name);
-                     assert.equal(slot.name, slotModel.name, 'slot name not set');
-                 });
-
-                 it('with a dimensions array', function() {
-                     var slot = new pubfood.library.model.Slot(),
-                         i = 0,
-                         dim = slotModel.dimensions;
-
-                     for (i; i < dim.length; i++) {
-                         var width = dim[i][0];
-                         var height = dim[i][1];
-                         slot.addSize(width, height);
-                     }
-                     assert.deepEqual(slot.sizes, slotModel.dimensions, 'slot dimensions not set');
-                 });
-
-                 it('with a name and dimensions in fluent chain', function() {
-                     var slot = new pubfood.library.model.Slot().
-                                        name('right-rail').
-                                        addSize(300, 250).
-                                        addSize(300, 600);
-                     assert.equal(slot.name, slotModel.name, 'slot name not set');
-                     assert.deepEqual(slot.sizes, slotModel.dimensions, 'slot dimensions not set');
-                 });
-
-                 it('with String dimension arguments', function() {
-                         var slot = new pubfood.library.model.Slot().
-                                               addSize('300', '250');
-                     assert.deepEqual(slot.sizes, [ [300, 250] ], 'dimensions not equal');
-                 });
-
-                 it('will zero for non-numeric and round abs for float dimension arguments', function() {
-                         var slot = new pubfood.library.model.Slot()
-                                           .addSize(300, '&')
-                                           .addSize('T', '&')
-                                           .addSize('8:3', '600')
-                                           .addSize('728.999', '-90.2');
-                     assert.deepEqual(slot.sizes, [ [300, 0], [0, 0], [0, 600], [728, 90] ], 'dimensions not equal');
-                 });
-             });
-
-             describe('Model builder will build a Bid', function testBidBuilder() {
-
-                 var bidModel = {
-                     value: 3.75,
-                     type: 'number',
-                     slot: 'right-rail',
-                     dimensions: [ [300, 250], [300, 600] ],
-                     provider: 'foobar'
-                 };
-
-                 it('with an internal Id', function() {
-                     var slot = new pubfood.library.model.Bid();
-                     assert.isDefined(slot.id, 'id is not defined');
-                     assert.match(slot.id, /[\w]+$/, 'id is not an ascii string');
-                 });
-
-                 it('with a value and type', function() {
-
-                     var bidValues = [
-                         { v: 3, t: 'number' },
-                         { v: 1.76, t: 'number'},
-                         { v: 'xyz123', t: 'string'},
-                         { v: '1.76', t: 'string'}
-                     ];
-
-                     for (var i = 0; i < bidValues.length; i++) {
-
-                         var value = bidValues[i].v,
-                             type = bidValues[i].t,
-                             bid = new pubfood.library.model.Bid().
-                                           value(value);
-
-                         assert.equal(bid.value, value, 'bid value incorrect');
-                         assert.isDefined(bid.type, 'bid type undefined');
-                         assert.equal(bid.type, type, 'bid type incorrect');
-                     }
-                 });
-
-                 it('with a provider, slot name, dimensions and bid value', function() {
-                     var bid = new pubfood.library.model.Bid().
-                                       value(bidModel.value).
-                                       addSize(bidModel.dimensions[0][0], bidModel.dimensions[0][1]).
-                                       addSize(bidModel.dimensions[1][0], bidModel.dimensions[1][1]).
-                                       provider(bidModel.provider);
-
-                     assert.equal(bid.value, bidModel.value, 'bid value incorrect');
-                     assert.equal(bid.type, bidModel.type, 'bid type incorrect');
-                     assert.equal(bid.provider, bidModel.provider, 'bid provider incorrect');
-                     assert.deepEqual(bid.sizes, bidModel.dimensions, 'bid dimensions incorrect');
-
-                 });
-
-                 it('will zero for non-numeric and round abs for float dimension arguments', function() {
-                         var slot = new pubfood.library.model.Slot()
-                                           .addSize(300, '&')
-                                           .addSize('T', '&')
-                                           .addSize('8:3', '600')
-                                           .addSize('728.999', '-90.2');
-                     assert.deepEqual(slot.sizes, [ [300, 0], [0, 0], [0, 600], [728, 90] ], 'dimensions not equal');
-                 });
-             });
-
-             describe('Pubfood mediator', function testPubfoodMediator() {
-                 var p = new pubfood();
-                 it('should add a slot', function() {
-                     p.addSlot(pubfoodContrib.slots[0]);
-                     assert.equal(p.getSlots().length, 1, 'mediator did not add slot');
-
-                     var slot = p.getSlots()[0];
-                     delete slot.id;
-                     expect(slot.name).to.eql(pubfoodContrib.slots[0].name, 'name not equal');
-                     expect(slot.sizes).to.eql(pubfoodContrib.slots[0].sizes, 'sizes not equal');
-                     expect(slot.providers).to.eql(pubfoodContrib.slots[0].providers, 'providers not equal');
-                     expect(slot.elementId).to.eql(pubfoodContrib.slots[0].elementId, 'elementId not equal');
-
-                 });
-                 it('should add a bid provider', function() {
-                     p.addBidProvider(pubfoodContrib.bidProviders[0]);
-
-                     expect(p.getBidProviders()).not.to.be.empty;
-
-                     p.addBidProvider(pubfoodContrib.bidProviders[1]);
-                     assert.equal(Object.keys(p.getBidProviders()).length, 2, 'bid provider not added');
-
-                     p.addBidProvider(pubfoodContrib.bidProviders[2]);
-                     assert.equal(Object.keys(p.getBidProviders()).length, 3, 'bid provider not added');
-                 });
-
-                 it('should add an auction provider', function() {
-
-                     p.setAuctionProvider(pubfoodContrib.auctionProvider);
-
-                     assert.isDefined(p.getAuctionProvider(), 'auction provider not set');
-
-                 });
+                 p.setAuctionProvider(pubfoodContrib.auctionProvider);
 
                  it('should start an auction', function() {
                      p.addSlot(pubfoodContrib.slots[1]);
