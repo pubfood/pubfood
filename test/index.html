@@ -32,16 +32,17 @@
          describe('Pubfood - Tests', function () {
            var p = new pubfood();
            var batch = [];
+
+           // this reporter listens on all events and pushes the event data to a queue `batch`
            p.addReporter(function(event) {
              batch.push(event);
              //console.log('Event:', event.type, '=', event.data);
            });
 
+           // this reporter only listens on the `AUCTION_COMPLETE` event, then loops over and displays the event data
            p.addReporter('AUCTION_COMPLETE', function(event) {
-             console.log('AUCTION_COMPLETE:', event.type, '=', event.data);
-             console.log('EVENT', 'DATA');
              for (var i = 0; i < batch.length; i++) {
-               console.log(batch[i].type, JSON.stringify(batch[i].data));
+               console.log('%c' + batch[i].type, 'padding-right:5px;font-weight:bold;display:block;',JSON.stringify(batch[i]));
              }
            });
 
