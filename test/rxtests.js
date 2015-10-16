@@ -1,5 +1,5 @@
 /*global pubfood*/
-/*eslint no-unused-vars: 0*/
+/*eslint-disable */
 
 var Rx = pubfood.library.Rx;
 
