@@ -277,7 +277,7 @@
                  it('should start an auction', function() {
                      p.addSlot(pubfoodContrib.slots[1]);
                      assert.equal(p.getSlots().length, 2, 'mediator did not add slot');
-                     p.start();
+                     p.start(Date.now());
                  });
              });
          });

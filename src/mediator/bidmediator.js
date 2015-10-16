@@ -86,7 +86,7 @@ BidMediator.prototype.getBids_ = function(slotMapItem) {
 BidMediator.prototype.nextBid = function(bid, providerName) {
   var b = Bid.fromObject(bid);
   b.provider = providerName;
-  Event.publish(Event.EVENT_TYPE.BID_NEXT, b);
+  Event.publish(Event.EVENT_TYPE.BID_NEXT, b, 'bid');
 };
 
 /**
@@ -95,7 +95,7 @@ BidMediator.prototype.nextBid = function(bid, providerName) {
  * @return {undefined}
  */
 BidMediator.prototype.doneBid = function(bidProvider) {
-  Event.publish(Event.EVENT_TYPE.BID_COMPLETE, bidProvider);
+  Event.publish(Event.EVENT_TYPE.BID_COMPLETE, bidProvider, 'bid');
 };
 
 module.exports = BidMediator;

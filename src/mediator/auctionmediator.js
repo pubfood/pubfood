@@ -76,9 +76,11 @@ AuctionMediator.prototype.checkBids_ = function(/*data*/) {
  * @return {undefined}
  */
 AuctionMediator.prototype.go_ = function() {
-  Event.publish(Event.EVENT_TYPE.AUCTION_GO, (+new Date()));
   var self = this;
   var name = self.auctionProvider.name;
+
+  Event.publish(Event.EVENT_TYPE.AUCTION_GO, name, 'auction');
+
   //var ctx = {eventEmitter: this.eventEmitter, data: {provider: this.auctionProvider.name}};
   this.auctionProvider.init(this.slots, this.bids_, {}, function(){
     self.auctionDone(name);
@@ -92,7 +94,7 @@ AuctionMediator.prototype.go_ = function() {
  * @return {undefined}
  */
 AuctionMediator.prototype.auctionDone = function(data) {
-  Event.publish(Event.EVENT_TYPE.AUCTION_COMPLETE, data);
+  Event.publish(Event.EVENT_TYPE.AUCTION_COMPLETE, data, 'auction');
 };
 
 /**
@@ -203,18 +205,19 @@ AuctionMediator.prototype.loadProviders = function(/*action*/) {
 
   for (var k in this.bidProviders) {
     if (this.bidProviders[k].libUri) {
-      var uri = this.bidProviders[k].libUri() || '';
+      uri = this.bidProviders[k].libUri() || '';
       var sync = this.bidProviders[k].sync();
       util.loadUri(uri, sync);
     }
   }
 
   if (this.auctionProvider && this.auctionProvider.libUri()) {
+    Event.publish(Event.EVENT_TYPE.AUCTION_LIB_LOADED, this.auctionProvider.name_, 'auction');
+
     uri = this.auctionProvider.libUri();
     // @todo remove the assumption that google is the auction provider
     window.googletag.cmd.push(bidderLoaded);
     util.loadUri(uri);
-    Event.publish(Event.EVENT_TYPE.AUCTION_LIB_LOADED, this.auctionProvider.name_);
   }
 };
 
@@ -234,8 +237,9 @@ AuctionMediator.prototype.getSlotBidders = function (slotName) {
  * @returns {pubfood#mediator.AuctionMediator}
  */
 AuctionMediator.prototype.start = function() {
-  this.init();
+  Event.publish(Event.EVENT_TYPE.AUCTION_GO, this.auctionProvider.name_, 'auction');
 
+  this.init();
   this.bidMediator = new BidMediator(this);
 
   this.loadProviders();
@@ -249,6 +253,8 @@ AuctionMediator.prototype.start = function() {
  * @returns {pubfood#mediator.AuctionMediator}
  */
 AuctionMediator.prototype.refresh = function(/*slotNames*/) {
+  Event.publish(Event.EVENT_TYPE.AUCTION_REFRESH, this.auctionProvider.name_, 'auction');
+
   var slots = [];
   this.bidMediator.refreshBids(slots);
   return this;

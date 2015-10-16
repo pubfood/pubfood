@@ -44,6 +44,8 @@ var logger = require('./logger');
    * @return {pubfood}
    */
   var api = pubfood.library.init = function(optionalId) {
+    Event.publish(Event.EVENT_TYPE.PUBFOOD_API_LOAD);
+
     logger.logCall('api.init', arguments);
     this.EVENT_TYPE = Event.EVENT_TYPE;
     this.logger = logger;
@@ -87,6 +89,10 @@ var logger = require('./logger');
     return this;
   };
 
+  /**
+   * Get the Auction Provider
+   * @return {pubfood#provider.AuctionProvider}
+   */
   api.prototype.getAuctionProvider = function() {
     logger.logCall('api.getAuctionProvider', arguments);
     return this.library.mediator.auctionProvider;
@@ -143,10 +149,12 @@ var logger = require('./logger');
 
   /**
    * Start the bidding process
-   *
+   * @param {number} [startTimestamp] An optional timestamp that's used for calculating other time deltas.
    * @return {pubfood}
    */
-  api.prototype.start = function() {
+  api.prototype.start = function(startTimestamp) {
+    Event.publish(Event.EVENT_TYPE.PUBFOOD_API_START, startTimestamp);
+
     logger.logCall('api.start', arguments);
     this.library.mediator.start();
     return this;
