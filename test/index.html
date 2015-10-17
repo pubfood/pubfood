@@ -16,7 +16,7 @@
         <script src="../dist/pubfood.js"></script>
         <script src="../test/fixture/auctionconfig1.js"></script>
 
-        <iframe src="http://i.yldbt.com/m/start-testing" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" height="0" width="0" style="display: none"></iframe>
+        <iframe src="//i.yldbt.com/m/start-testing" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" height="0" width="0" style="display: none"></iframe>
         <script type="text/javascript">
          mocha.ui('bdd');
         </script>
@@ -82,14 +82,18 @@
 
                  p.addSlot(pubfoodContrib.slots[1]);
 
-                 p.setAuctionProvider(pubfoodContrib.auctionProvider);
-
+                 assert.equal(p.getSlots().length, 2, 'mediator did not add slot');
              });
 
              it('should start an auction', function() {
-                 p.addSlot(pubfoodContrib.slots[1]);
-                 assert.equal(p.getSlots().length, 3, 'mediator did not add slot');
                  p.start(Date.now());
+                 var targetEl = document.getElementById('div-multi-size');
+                 assert.isDefined(targetEl, 'target div not defined');
+
+                 /**
+                  * @todo use http://chaijs.com/plugins/chai-as-promised for async tests
+                 assert.isTrue(targetEl.childElementCount > 0, 'target div has no ad container elements');
+                  */
              });
          });
 
@@ -106,10 +110,10 @@
 
         <h2>Test Dfp Integration</h2>
 
-        <div id='div-frotzbar'>
+        <div id='div-leaderboard'>
         </div>
 
-        <div id='div-mumblebar'>
+        <div id='div-multi-size'>
         </div>
 
     </body>

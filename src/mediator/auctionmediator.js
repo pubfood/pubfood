@@ -51,8 +51,8 @@ AuctionMediator.prototype.init = function() {
  * @return {AuctionMediator}
  * @private
  */
-AuctionMediator.prototype.setBid_ = function(data) {
-  this.bids_.push(data);
+AuctionMediator.prototype.setBid_ = function(event) {
+  this.bids_.push(event.data);
   return this;
 };
 

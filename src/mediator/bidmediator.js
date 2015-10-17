@@ -65,15 +65,15 @@ BidMediator.prototype.getBids_ = function(slotMapItem) {
   var provider = slotMapItem.provider;
   var self = this;
   var name = provider.name;
-  
+
   var nextBidCb = function(bid){
     self.nextBid(bid, name);
   };
-  
+
   var doneCb = function(){
     self.doneBid(name);
   };
-  
+
   provider.init(slots, {}, nextBidCb, doneCb);
 };
 

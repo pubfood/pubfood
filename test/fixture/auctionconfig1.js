@@ -20,7 +20,7 @@ var pubfoodContrib = {
         [300, 250],
         [300, 600]
       ],
-      elementId: 'div-mumblebar',
+      elementId: 'div-multi-size',
       bidProviders: {
         yieldbot: {
           slot: 'medrec' // yieldbot's slot name
@@ -35,7 +35,7 @@ var pubfoodContrib = {
       sizes: [
         [728, 90]
       ],
-      elementId: 'div-frotzbar',
+      elementId: 'div-leaderboard',
       bidProviders: {
         yieldbot: {
           slot: 'leaderboard' // yieldbot's slot name
@@ -91,11 +91,11 @@ var pubfoodContrib = {
       googletag.cmd.push(function() {
         googletag.pubads().enableSingleRequest();
         googletag.enableServices();
-        done('dfp');
+        done();
       });
 
-      googletag.cmd.push(function() { googletag.display('div-frotzbar'); });
-      googletag.cmd.push(function() { googletag.display('div-mumblebar'); });
+      googletag.cmd.push(function() { googletag.display('div-leaderboard'); });
+      googletag.cmd.push(function() { googletag.display('div-multi-size'); });
 
     },
     refresh: function(slots, customTargeting, done) {
@@ -169,9 +169,9 @@ var pubfoodContrib = {
     },
     {
       name: 'carsales',
-      libUri: './test/fixture/lib.js',
+      libUri: '../test/fixture/lib.js',
       init: function(slots, options, next, done) {
-        done('carsales');
+        done();
       },
       refresh: function(slots, options, next, done) {
       }
@@ -179,9 +179,9 @@ var pubfoodContrib = {
     {
       name: 'walkathon',
       options: { walk: 'athon'},
-      libUri: './test/fixture/lib.js',
+      libUri: '../test/fixture/lib.js',
       init: function(slots, options, next, done) {
-        done('walkathon');
+        done();
       },
       refresh: function(slots, options, next, done) {
       }

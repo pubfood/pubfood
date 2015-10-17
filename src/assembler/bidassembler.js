@@ -18,11 +18,27 @@ function BidAssembler(auctionMediator) {
   this.operators = [];
 }
 
-BidAssembler.prototype.process = function(bids) {
+/**
+ * Add a transform operator to the assembler processing pipeline.
+ *
+ * @param {function} transformFunc - function to transfomr bids
+ *
+ */
+BidAssembler.prototype.addOperator = function(transformOperator) {
+  this.operators.push(transformOperator);
+};
+
+/**
+ * Process bids.
+ *
+ * @param {BidObject[]} bids - bids to process.
+ * @returns {BidObject[]} - processed output bids
+ */
+BidAssembler.prototype.process = function(bids, params) {
   var result = bids;
 
   for (var i = 0; i < this.operators.length; i++) {
-    result = this.operators[i].process(result);
+    result = this.operators[i].process(result, params);
   }
 
   return result;
