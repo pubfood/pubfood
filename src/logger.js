@@ -6,8 +6,7 @@
 'use strict';
 
 /**
- * @type {object}
- * @name Logger
+ * @memberof pubfood
  * @property {array} history Store the logs
  * @property {function} dumpLog console.logs the history
  * @property {function} logCall Logs every time a given function is called
