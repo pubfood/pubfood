@@ -2,6 +2,7 @@ test/assets/vendor/*
 # browserify generated convenience browser debuging test file
 test/assets/unittest.js
 examples/*.js
+tpl/*
 
 # this is a hack for webstorm
 # cwd is not what eslint expect
