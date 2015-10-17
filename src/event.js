@@ -24,34 +24,74 @@ function PubfoodEvent() {
 /**
  * @type {object}
  * @description Available event types
- * @name pubfood.PubfoodEvent.EVENT_TYPE
- * @property {string} PUBFOOD_API_LOAD Api library load
- * @property {string} PUBFOOD_API_START Api library start
- * @property {string} BID_LIB_START Bid provider library load started
- * @property {string} BID_LIB_LOADED Bid provider library loaded
- * @property {string} BID_START Action started.<br>e.g [BidProvider.init]{@link pubfood/provider.BidProvider#init}
- * @property {string} BID_NEXT Next item in data stream ready.<br>e.g [BidProvider.refresh]{@link pubfood/provider.BidProvider#init} raises a [NEXT]{@link pubfood/events.EVENT_TYPE.NEXT} event for each bid.
- * @property {string} BID_COMPLETE Action is complete
- * @property {string} AUCTION_LIB_START Auction provider library load started
- * @property {string} AUCTION_LIB_LOADED Auction provider library loaded
- * @property {string} AUCTION_GO Start the publisher auction
- * @property {string} AUCTION_REFRESH The auction was restarted
- * @property {string} AUCTION_COMPLETE The auction has completed
- * @property {string} ERROR Error event raised
  */
 PubfoodEvent.prototype.EVENT_TYPE = {
+  /**
+   * Api library load
+   * @event pubfood.PubfoodEvent.PUBFOOD_API_LOAD
+   */
   PUBFOOD_API_LOAD: 'pubfoodapiload',
+  /**
+   * Api library start
+   * @event pubfood.PubfoodEvent.PUBFOOD_API_START
+   */
   PUBFOOD_API_START: 'pubfoodapistart',
+  /**
+   * Bid provider library load started
+   * @event pubfood.PubfoodEvent.BID_LIB_START
+   */
   BID_LIB_START: 'bplibstart',
+  /**
+   * Bid provider library loaded
+   * @event pubfood.PubfoodEvent.BID_LIB_LOADED
+   */
   BID_LIB_LOADED: 'bplibloaded',
+  /**
+   * Action started.<br>e.g [BidProvider.init]{@link pubfood/provider.BidProvider#init}
+   * @event pubfood.PubfoodEvent.BID_START
+   */
   BID_START: 'bidstart',
+  /**
+   *  Next item in data stream ready.<br>
+   *  e.g [BidProvider.refresh]{@link pubfood/provider.BidProvider#init} raises
+   *  a [NEXT]{@link pubfood/events.EVENT_TYPE.NEXT} event for each bid.
+   * @event pubfood.PubfoodEvent.BID_NEXT
+   */
   BID_NEXT: 'bidnext',
+  /**
+   * Action is complete
+   * @event pubfood.PubfoodEvent.BID_COMPLETE
+   */
   BID_COMPLETE: 'bidcomplete',
+  /**
+   * Auction provider library load started
+   * @event pubfood.PubfoodEvent.AUCTION_LIB_START
+   */
   AUCTION_LIB_START: 'aplibstart',
+  /**
+   * Auction provider library loaded
+   * @event pubfood.PubfoodEvent.AUCTION_LIB_LOADED
+   */
   AUCTION_LIB_LOADED: 'aplibloaded',
+  /**
+   * Start the publisher auction
+   * @event pubfood.PubfoodEvent.AUCTION_GO
+   */
   AUCTION_GO: 'auctiongo',
+  /**
+   * The auction was restarted
+   * @event pubfood.PubfoodEvent.AUCTION_REFRESH
+   */
   AUCTION_REFRESH: 'auctionrefresh',
+  /**
+   * The auction has completed
+   * @event pubfood.PubfoodEvent.AUCTION_COMPLETE
+   */
   AUCTION_COMPLETE: 'auctioncomplete',
+  /**
+   * Error event raised
+   * @event pubfood.PubfoodEvent.ERROR
+   */
   ERROR: 'error'
 };
 
@@ -122,8 +162,7 @@ PubfoodEvent.prototype.publish = function(eventType, data, providerType) {
  */
 
 /**
- * @type {object}
- * @name pubfood.PubfoodEvent.EventStructure
+ * @typedef {object} EventStructure
  * @memberof pubfood.PubfoodEvent
  * @property {string} ts The timestamp of the event
  * @property {string} type The event type
