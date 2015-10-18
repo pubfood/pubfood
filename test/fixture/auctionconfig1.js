@@ -121,6 +121,7 @@ var pubfoodContrib = {
 
           for (var k in slots) {
             var slot = slots[k];
+            /** @todo: should not need to reference oneself here */
             var providerSlotName = slot.bidProviders['yieldbot'].slot;
 
             yieldbot.defineSlot(providerSlotName, {

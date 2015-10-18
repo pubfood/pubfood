@@ -79,6 +79,12 @@ PubfoodEvent.prototype.EVENT_TYPE = {
    */
   AUCTION_GO: 'auctiongo',
   /**
+   * Start the publisher auction from a business rule.
+   * e.g. a bidder timeout
+   * @event pubfood.PubfoodEvent.AUCTION_TRIGGER
+   */
+  AUCTION_TRIGGER: 'auctiontrigger',
+  /**
    * The auction was restarted
    * @event pubfood.PubfoodEvent.AUCTION_REFRESH
    */
@@ -92,7 +98,17 @@ PubfoodEvent.prototype.EVENT_TYPE = {
    * Error event raised
    * @event pubfood.PubfoodEvent.ERROR
    */
-  ERROR: 'error'
+  ERROR: 'error',
+  /**
+   * Warn event raised
+   * @event pubfood.PubfoodEvent.WARN
+   */
+  WARN: 'warn',
+  /**
+   * Invalid operation or data event raise
+   * @event pubfood.PubfoodEvent.INVALID
+   */
+  INVALID: 'invalid'
 };
 
 /**
@@ -172,11 +188,14 @@ PubfoodEvent.prototype.publish = function(eventType, data, providerType) {
  * @property {string} data.PUBFOOD_API_START
  * @property {object} data.ERROR
  * @property {*} data.ERROR.stackTrace
+ * @property {string} data.WARN warning message
+ * @property {string} data.INVALID validation message
  * @property {object} data.AUCTION_LIB_START
  * @property {string} data.AUCTION_LIB_START.auctionProvider
  * @property {object} data.AUCTION_LIB_LOADED
  * @property {string} data.AUCTION_LIB_LOADED.auctionProvider
  * @property {string} data.AUCTION_GO
+ * @property {string} data.AUCTION_TRIGGER
  * @property {string} data.AUCTION_REFRESH
  * @property {string} data.AUCTION_COMPLETE
  * @property {string} data.BID_LIB_START

@@ -30,6 +30,7 @@ function AuctionMediator(optionalId) {
   this.bidMediator = null;
   this.slotMap = { slots: {}, providers: {} };
   this.bids_ = [];
+  this.inAuction = false;
 }
 
 /**
@@ -41,8 +42,84 @@ AuctionMediator.prototype.init = function() {
   Event.on(Event.EVENT_TYPE.BID_COMPLETE, this.checkBids_.bind(this));
   Event.on(Event.EVENT_TYPE.BID_NEXT, this.setBid_.bind(this));
   Event.on(Event.EVENT_TYPE.AUCTION_COMPLETE, function(data) { console.log(data); });
+  Event.on(Event.EVENT_TYPE.AUCTION_TRIGGER, this.triggerAuction_.bind(this));
   return this;
 };
+
+/**
+ * Validate provider and slot dependencies.
+ *
+ * @return {AuctionMediator}
+ */
+AuctionMediator.prototype.validate = function(isRefresh) {
+  var isValid = true;
+  var refresh = isRefresh || false;
+
+  var tst = {
+    hasAuctionProvider: function () {
+      return !!this.auctionProvider;
+    },
+    hasBidProviders: function() {
+      var ret = false;
+      for (var v in this.bidProviders) {
+        ret = true;
+        break;
+      }
+      if (!ret) {
+        Event.publish(Event.EVENT_TYPE.WARN, {msg: 'Warn: no bid providers'}, 'validation');
+      }
+      return ret;
+    },
+    hasSlots: function() {
+      return this.slots.length !== 0;
+    },
+    hasAllSlotsBidder: function() {
+      var noBidders = [];
+      for (var i = 0; i < this.slots.length; i++) {
+        var slot = this.slots[i];
+        if (!slot.bidProviders || !slot.bidProviders[0]) {
+          noBidders.push(slot.name);
+        }
+      }
+      if (noBidders.length > 0) {
+        Event.publish(Event.EVENT_TYPE.WARN, {msg: 'Warn: no bidders - ' + noBidders.join(', ')}, 'validation');
+      }
+      return noBidders.length === 0;
+    }
+  };
+  /** @todo has >0 bidders per slot on if !isRefresh
+   *  @todo warn slot with no bidders
+  */
+
+  tst.hasBidProviders.warn = true;
+  for (var k in tst) {
+    isValid = tst[k].call(this);
+    isValid = tst[k].warn ? true : isValid;
+    if (!isValid) {
+      Event.publish(Event.EVENT_TYPE.INVALID, {msg: 'Failed: ' + k}, 'validation');
+      break;
+    }
+  }
+
+  return isValid;
+};
+
+/**
+ * Force auction provider to init
+ *
+ * @param {object}  event
+ * @return {AuctionMediator}
+ * @private
+ */
+AuctionMediator.prototype.triggerAuction_ = function(event) {
+  if (this.inAuction) return this;
+
+  this.inAuction = true;
+  this.go_();
+
+  return this;
+};
+
 
 /**
  * @todo add docs
@@ -77,6 +154,10 @@ AuctionMediator.prototype.checkBids_ = function(/*data*/) {
  */
 AuctionMediator.prototype.go_ = function() {
   var self = this;
+
+  if (self.inAuction) return;
+  self.inAuction = true;
+
   var name = self.auctionProvider.name;
 
   Event.publish(Event.EVENT_TYPE.AUCTION_GO, name, 'auction');
@@ -237,6 +318,8 @@ AuctionMediator.prototype.getSlotBidders = function (slotName) {
  * @returns {pubfood#mediator.AuctionMediator}
  */
 AuctionMediator.prototype.start = function() {
+  Event.publish(Event.EVENT_TYPE.AUCTION_TRIGGER);
+
   Event.publish(Event.EVENT_TYPE.AUCTION_GO, this.auctionProvider.name_, 'auction');
 
   this.init();
