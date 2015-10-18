@@ -37,6 +37,11 @@ var auctionexample1 = {
 
     },
     refresh: function(slots, customTargeting, done) {
+    },
+    trigger: function(done) {
+      setTimeout(function() {
+        done();
+      }, 100);
     }
   },
   bidProviders: [

@@ -8,6 +8,11 @@
 /*eslint no-unused-vars: 0*/
 
 /**
+ * @typedef {AuctionMediator} AuctionMediator
+ * @see [AuctionMediator]{@link pubfood#mediator.AuctionMediator}
+ */
+
+/**
  * Interface for classes that are delegates for the AuctionProvider decorator..
  *
  * @typedef {AuctionDelegate} AuctionDelegate
@@ -21,14 +26,18 @@
  * @property {string[]} refresh.slots A list of slots to be refreshed
  * @property {object} refresh.options Defaults to {}
  * @property {doneCallback} refresh.done Callback to execute on done
+ * @property {function} [trigger] Auction provider delegate function to trigger the auction. Default: [pubfood.setTimeout]{@link pubfood#setTimeout}
+ * @property {boolean} [trigger.optional] Optional property for [AuctionProvider.validate]{@link pubfood#provider.AuctionProvider.validate} validation
+ * @property {doneCallback} trigger.done Callback to initialize the auction provider
  */
 var auctionDelegate = {
   name: '',
   libUri: '',
   init: function(bids, options, done) {},
-  refresh: function(bids, options, done) {}
+  refresh: function(bids, options, done) {},
+  trigger: function(done) {}
 };
-
+auctionDelegate.trigger.optional = true;
 /**
  * Interface for classes that are delegates for the BidProvider decorator..
  *

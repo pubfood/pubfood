@@ -11,6 +11,7 @@ var assert = require('chai').assert;
 var AuctionMediator = require('../../src/mediator/auctionmediator');
 var Event = require('../../src/event');
 
+/** @todo generalize fixture config to improve readability of tests */
 describe('Pubfood AuctionMediator', function testPubfoodMediator() {
   it('should be valid to start auction', function() {
     var m = new AuctionMediator();
@@ -69,7 +70,7 @@ describe('Pubfood AuctionMediator', function testPubfoodMediator() {
     assert.isTrue(onEvent === true, 'should raise validation event');
   });
 
-  it('should slots with at least one bidder', function() {
+  it('should have slots with at least one bidder', function() {
     var m = new AuctionMediator();
     m.setAuctionProvider({
       name: 'Google',
@@ -124,4 +125,36 @@ describe('Pubfood AuctionMediator', function testPubfoodMediator() {
     assert.isTrue(onEvent === true, 'should raise validation event');
   });
 
+  it('should invoke an auction trigger', function() {
+    var m = new AuctionMediator();
+    m.setAuctionProvider({
+      name: 'Google',
+      libUri: '//www.googletagservices.com/tag/js/gpt.js',
+      init: function(slots, bids, options, done) {
+
+      },
+      refresh: function(slots, customTargeting, done) {
+      }
+    });
+
+    m.addSlot({
+      name: '/2476204/multi-size',
+      sizes: [
+        [300, 250],
+        [300, 600]
+      ],
+      elementId: 'div-multi-size',
+      bidProviders: {
+        yieldbot: {
+          slot: 'medrec'
+        },
+        bidderFast: {
+          slot: 'fastSlot'
+        },
+        bidderSlow: {
+          slot: 'slowSlot'
+        }
+      }
+    });
+  });
 });

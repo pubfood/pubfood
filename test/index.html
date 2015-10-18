@@ -86,6 +86,8 @@
              });
 
              it('should start an auction', function() {
+                 p.setAuctionTrigger(pubfoodContrib.auctionProvider.trigger);
+                 //p.setTimeout(140);
                  p.start(Date.now());
                  var targetEl = document.getElementById('div-multi-size');
                  assert.isDefined(targetEl, 'target div not defined');

@@ -31,6 +31,8 @@ function AuctionMediator(optionalId) {
   this.slotMap = { slots: {}, providers: {} };
   this.bids_ = [];
   this.inAuction = false;
+  this.timeout_ = -1;
+  this.trigger_ = null;
 }
 
 /**
@@ -39,10 +41,10 @@ function AuctionMediator(optionalId) {
  * @return {AuctionMediator}
  */
 AuctionMediator.prototype.init = function() {
-  Event.on(Event.EVENT_TYPE.BID_COMPLETE, this.checkBids_.bind(this));
-  Event.on(Event.EVENT_TYPE.BID_NEXT, this.setBid_.bind(this));
+  Event.on(Event.EVENT_TYPE.BID_COMPLETE, util.bind(this.checkBids_, this));
+  Event.on(Event.EVENT_TYPE.BID_NEXT, util.bind(this.setBid_, this));
   Event.on(Event.EVENT_TYPE.AUCTION_COMPLETE, function(data) { console.log(data); });
-  Event.on(Event.EVENT_TYPE.AUCTION_TRIGGER, this.triggerAuction_.bind(this));
+  Event.on(Event.EVENT_TYPE.AUCTION_TRIGGER, util.bind(this.triggerAuction_, this));
   return this;
 };
 
@@ -87,9 +89,6 @@ AuctionMediator.prototype.validate = function(isRefresh) {
       return noBidders.length === 0;
     }
   };
-  /** @todo has >0 bidders per slot on if !isRefresh
-   *  @todo warn slot with no bidders
-  */
 
   tst.hasBidProviders.warn = true;
   for (var k in tst) {
@@ -105,24 +104,75 @@ AuctionMediator.prototype.validate = function(isRefresh) {
 };
 
 /**
- * Force auction provider to init
+ * Sets the time in which bid providers must supply bids.
+ *
+ * @param {number} millis - milliseconds to set the timeout
+ */
+AuctionMediator.prototype.setTimeout = function(millis) {
+  this.timeout_ = millis;
+};
+
+/**
+ * Gets the time in which bid providers must supply bids.
+ *
+ * @return {number} the timeout in milliseconds
+ */
+AuctionMediator.prototype.getTimeout = function() {
+  return this.timeout_;
+};
+
+/**
+ * Force auction provider to init.
  *
  * @param {object}  event
  * @return {AuctionMediator}
  * @private
  */
-AuctionMediator.prototype.triggerAuction_ = function(event) {
-  if (this.inAuction) return this;
+AuctionMediator.prototype.setAuctionTrigger = function(triggerFn) {
+  this.trigger = triggerFn;
+};
 
+AuctionMediator.prototype.startAuction_ = function() {
   this.inAuction = true;
   this.go_();
+};
+
+/**
+ * Start the bid provider timeout.
+ *
+ * @return {AuctionMediator}
+ */
+AuctionMediator.prototype.startTimeout_ = function() {
+  if (this.timeout_ !== -1 && this.timeout_ >= 0) {
+    setTimeout(util.bind(this.startAuction_, this), this.timeout_);
+  }
+  return this;
+};
+
+/**
+ * Force auction provider to init.
+ *
+ * @return {AuctionMediator}
+ */
+AuctionMediator.prototype.triggerAuction_ = function() {
+  if (this.inAuction) return this;
+
+  if (!this.trigger) {
+    this.startTimeout_();
+    return;
+  }
+
+  function done() {
+    this.startAuction_();
+  }
+
+  this.trigger(util.bind(done, this));
 
   return this;
 };
 
-
 /**
- * @todo add docs
+ * Adds bid on {pubfood.PubfoodEvent.BID_NEXT} event.
  *
  * @param {object} data
  * @return {AuctionMediator}
@@ -318,11 +368,12 @@ AuctionMediator.prototype.getSlotBidders = function (slotName) {
  * @returns {pubfood#mediator.AuctionMediator}
  */
 AuctionMediator.prototype.start = function() {
-  Event.publish(Event.EVENT_TYPE.AUCTION_TRIGGER);
 
   Event.publish(Event.EVENT_TYPE.AUCTION_GO, this.auctionProvider.name_, 'auction');
 
   this.init();
+  Event.publish(Event.EVENT_TYPE.AUCTION_TRIGGER);
+
   this.bidMediator = new BidMediator(this);
 
   this.loadProviders();
@@ -344,3 +395,5 @@ AuctionMediator.prototype.refresh = function(/*slotNames*/) {
 };
 
 module.exports = AuctionMediator;
+
+

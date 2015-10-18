@@ -144,6 +144,28 @@ var logger = require('./logger');
   };
 
   /**
+   * Sets the time in which bid providers must supply bids.
+   *
+   * @param {number} millis - milliseconds to set the timeout
+   */
+  api.prototype.setTimeout = function(millis) {
+    logger.logCall('api.setTimeout', arguments);
+    this.library.mediator.setTimeout(millis);
+    return this;
+  };
+
+  /**
+   * @todo add documentation
+   *
+   *
+   */
+  api.prototype.setAuctionTrigger = function(delegate) {
+    logger.logCall('api.setAuctionTrigger', arguments);
+    this.library.mediator.setAuctionTrigger(delegate);
+    return this;
+  };
+
+  /**
    * Start the bidding process
    * @param {number} [startTimestamp] An optional timestamp that's used for calculating other time deltas.
    * @return {pubfood}

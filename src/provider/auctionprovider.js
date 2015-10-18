@@ -13,7 +13,7 @@ var AuctionDelegate = require('../interfaces').AuctionDelegate;
  *
  * @class
  * @memberof pubfood#provider
- * @param {auctionDelegate} auctionDelegate
+ * @param {AuctionDelegate} auctionDelegate
  */
 function AuctionProvider(auctionDelegate) {
   this.name_ = auctionDelegate.name || '';
@@ -34,7 +34,7 @@ AuctionProvider.prototype.setMediator = function(mediator) {
 /**
  * Create a new [AuctionProvider]{@link pubfood#provider.AuctionProvider} from an object.
  *
- * @param {auctionDelegate} delegate - provider object literal
+ * @param {AuctionDelegate} delegate - provider object literal
  * @returns {pubfood#provider.AuctionProvider|null} instance of [AuctionProvider]{@link pubfood#provider.AuctionProvider}. <em>null</em> if delegate is invalid.
  */
 AuctionProvider.withDelegate = function(delegate) {
@@ -48,7 +48,9 @@ AuctionProvider.withDelegate = function(delegate) {
 /**
  * Validate a auction provider delegate.
  *
- * @param {auctionDelegate} delegate - bid provider delegate object literal
+ * Checks that the delegate has the require properties specified by {@link AuctionDelegate}
+ *
+ * @param {AuctionDelegate} delegate - bid provider delegate object literal
  * @returns {boolean} true if delegate has required functions and properties
  */
 AuctionProvider.validate = function(delegate) {
@@ -56,7 +58,8 @@ AuctionProvider.validate = function(delegate) {
 
   var err = 0;
   for (var k in AuctionDelegate) {
-    if (!delegate.hasOwnProperty(k) || util.asType(delegate[k]) !== util.asType(AuctionDelegate[k])) {
+    if (!AuctionDelegate[k].optional &&
+        (!delegate.hasOwnProperty(k) || util.asType(delegate[k]) !== util.asType(AuctionDelegate[k]))) {
       err++;
     }
     if (err > 0) break;
