@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Pubfood World Simulator</title>
+        <style>body { font-family:'Helvetica Neue', Helvetica, Arial, sans-serif; }</style>
+    </head>
+    <body>
+        <script src="/pubfood.js"></script>
+        <script>
+          // global for the auction provider
+          // TODO make this use somethine like a simulated ap1 vs. googletag
+          window.googletag = window.googletag || {};
+          googletag.cmd = googletag.cmd || [];
+          // globals for all bid providers
+          window.bp1 = window.bp1 || {};
+          bp1.cmd = bp1.cmd || [];
+          window.bp2 = window.bp2 || {};
+          bp2.cmd = bp2.cmd || [];
+          window.bp3 = window.bp3 || {};
+          bp3.cmd = bp3.cmd || [];
+          // setup pubfood and hook it up to providers
+          var food = new pubfood();
+          food.addSlot({
+            name: '/2476204/multi-size',
+            sizes: [
+              [300, 250],
+              [300, 600]
+            ],
+            elementId: 'div-multi-size',
+            bidProviders: {
+              bp1: {
+                slot: 'multi'
+              },
+              bp2: {
+                slot: 'multi'
+              },
+              bp3: {
+                slot: 'multi'
+              }
+            }
+          });
+          food.addSlot({
+            name: '/2476204/rail',
+            sizes: [
+              [300, 250]
+            ],
+            elementId: 'div-rail',
+            bidProviders: {
+              bp1: {
+                slot: 'rail'
+              },
+              bp2: {
+                slot: 'rail'
+              },
+              bp3: {
+                slot: 'rail'
+              }
+            }
+          });
+          food.setAuctionProvider({
+            name: 'google',
+            libUri: '//www.googletagservices.com/tag/js/gpt.js',
+            init: function(slots, bids, options, done) {
+              // set targeting for slots either in an independent or dependent nature
+              console.log(bids);
+              done();
+            },
+            refresh: function(slots, customTargeting, done) {
+              done();
+            }
+          })
+          food.addBidProvider({
+            name: 'bp1',
+            libUri: '/simulated-bid-provider/bp1.js',
+            sync: true,
+            init: function(slots, options, next, done) {
+              bp1.cmd.push(function() {
+                var encodedAvailability = encodeURIComponent('multi:300x250|300x600:400,rail:300x250:650');
+                bp1.init('delay=200&fuzz=10&availability=' + encodedAvailability);
+              });
+              bp1.cmd.push(function() {
+                var i;
+                var slotMap = {};
+                // TODO decide if slots are an array or an object
+                for (key in slots) {
+                  /** @todo: should not need to reference oneself here */
+                  slotMap[slots[key].bidProviders.bp1.slot] = key;
+                }
+                var getSizes = function (raw) {
+                  var i;
+                  var sizeSplit;
+                  var sizes = [];
+                  var sizesRaw = raw.split('|');
+                  for (i = 0; i < sizesRaw.length; i++) {
+                    sizeSplit = sizesRaw[i].split('x');
+                    sizes[i] = [parseInt(sizeSplit[0], 10), parseInt(sizeSplit[1], 10)];
+                  }
+                  return sizes;
+                };
+                var parts;
+                var availableSlots = bp1.getAvailable().split(',');
+                for (i = 0; i < availableSlots.length; i++) {
+                  parts = availableSlots[i].split(':');
+                  // TODO consider different bids for different sizes
+                  next({
+                    slot: slotMap[parts[0]],
+                    value: parts[2],
+                    sizes: getSizes(parts[1]),
+                    customTargeting: { bp1_ad: 'y' }
+                  });
+                }
+                console.log('bp1 available:', bp1.getAvailable());
+                done();
+              });
+            },
+            refresh: function(slots, options, done) {
+            }
+          })
+          food.addBidProvider({
+            name: 'bp2',
+            libUri: '/simulated-bid-provider/bp2.js',
+            sync: true,
+            init: function(slots, options, next, done) {
+              bp2.cmd.push(function() {
+                var encodedAvailability = encodeURIComponent('a:300x250,b:728x90');
+                bp2.init('delay=200&fuzz=10&availability=' + encodedAvailability);
+              });
+              bp2.cmd.push(function() {
+                console.log('bp2 available:', bp2.getAvailable());
+                done();
+              });
+            },
+            refresh: function(slots, options, done) {
+            }
+          })
+          food.addBidProvider({
+            name: 'bp3',
+            libUri: '/simulated-bid-provider/bp3.js',
+            sync: true,
+            init: function(slots, options, next, done) {
+              bp3.cmd.push(function() {
+                var encodedAvailability = encodeURIComponent('a:300x250,b:728x90');
+                bp3.init('delay=200&fuzz=10&availability=' + encodedAvailability);
+              });
+              bp3.cmd.push(function() {
+                console.log('bp3 available:', bp3.getAvailable());
+                done();
+              });
+            },
+            refresh: function(slots, options, done) {
+            }
+          })
+          // food.setTimeout(900)
+          food.addReporter(function(ev) {
+            console.log(ev);
+          });
+          food.start(+new Date());
+          console.log(food);
+        </script>
+        <h1>Welcome Publisher People</h1>
+        <p>We're here to help.</p>
+        <!-- TODO see about async and div being defined later than code -->
+        <div id="div-multi-size"></div>
+        <div id="div-rail"></div>
+    </body>
+</html>
