@@ -146,29 +146,75 @@
           food.setAuctionProvider({
             name: 'auctionProviderOne',
             libUri: '/simulated-auction-provider/auctionProviderOne.js',
-            init: function(slots, bids, options, done) {
+            init: function(targets, bids, options, done) {
+              console.log('>>', targets, bids);
+
+              // proposed `targets` param structure
+              targets = [
+                {
+                  type: 'page',
+                  targeting: {
+                    yb_ad: 'y'
+                  }
+                },
+                {
+                  type: 'slot',
+                  name: '/2476204/multi-size',
+                  id: '',
+                  sizes: [
+                    [300, 250],
+                    [300, 600]
+                  ],
+                  // a flattened list from all bidders
+                  targeting: {
+                    foo: ['bar', 'foo.bar'], // from bidder 1 & 2
+                    foooo: ['bar'], // from bidder 2
+                    bid: ['400', '200']
+                  },
+                  bids: [
+                    {
+                      provider: 'provider1',
+                      id: '1212121',
+                      targeting: {
+                        bid: '400',
+                        foo: 'bar'
+                      }
+                    },
+                    {
+                      provider: 'provider2',
+                      id: '34542312',
+                      targeting: {
+                        bid: '200',
+                        foooo: 'bar',
+                        foo: 'foo.bar'
+                      }
+                    }
+                  ],
+                }
+                // ...
+              ];
 
               auctionProviderOne.cmd.push(function() {
-                var i;
-                for (i = 0; i < slots.length; i++) {
-                  var slot = slots[i];
-                  var slotBids = bids.filter(function(bid) {
-                    return bid.slot === slot.name;
-                  });
+                var i, t;
+                for (i = 0; i < targets.length; i++) {
+                  var target = targets[i];
 
-                  // call the auction provider's define slots
-                  var apSlot = auctionProviderOne.defineSlot(slot.name, slot.sizes, slot.elementId);
-
-                  for (var j = 0; j < slotBids.length; j++) {
-                    var bid = slotBids[j];
-                    for (var p in bid.customTargeting) {
-                      apSlot.setTargeting(p, bid.customTargeting[p]);
+                  if(target.type === 'page'){
+                    // set page level targeting
+                    for(t in target.targeting){
+                      auctionProviderOne.setTargeting(t, target.targeting[t]);
                     }
-
-                    // Publisher sets their adserver targeting key vor the bid value here
-                    apSlot.setTargeting('bid', bid.value);
                   }
 
+                  if(target.type === 'slot'){
+                    var apSlot = auctionProviderOne.defineSlot(target.name, target.sizes, target.elementId);
+
+                    // set slot level targeting
+                    for(t in target.targeting){
+                      apSlot.setTargeting(t, target.targeting[t]);
+                    }
+
+                  }
                 }
               });
 
