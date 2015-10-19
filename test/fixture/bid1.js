@@ -1,21 +1,75 @@
 /* global BidBuilder */
 /*eslint no-unused-vars: 0*/
 
-var bid_1 = {
-  provider: 'yieldbot',
-  slot: 'right-rail',
-  dimensions: [
-    [300, 250]
+module.exports = {
+  valid: [
+    {
+      sizes: [300, 250],
+      slot: '1',
+      value: 1
+    },
+    {
+      customTargeting: {
+      },
+      sizes: [300, 250],
+      slot: '/this/is/a/slot',
+      value: '1'
+    },
+    {
+      customTargeting: {
+        yes: 'yes',
+      },
+      sizes: [[300, 600], [300, 250]],
+      slot: '/this/is/a/slot',
+      value: 1
+    },
+    {
+      customTargeting: {
+        no: 'no'
+      },
+      sizes: [[728, 90]],
+      slot: '/this/is/a/slot',
+      value: .2
+    },
+    {
+      customTargeting: {
+        yes: 'yes'
+      },
+      sizes: [300, 250],
+      slot: '/this/is/a/slot',
+      value: '1.75'
+    }
   ],
-  value: '3',
-  type: Number
+  invalid: [
+    {
+      sizes: [300, 250],
+      slot: '/this/is/a/slot',
+      value: null
+    },
+    {
+      customTargeting: {
+        yes: 'yes',
+        no: 'no'
+      },
+      sizes: [],
+      slot: '/this/is/a/slot',
+      value: 1
+    },
+    {
+      customTargeting: {
+        yes: 'yes',
+        no: 'no'
+      },
+      slot: '/this/is/a/slot',
+      value: 1
+    },
+    {
+      customTargeting: {
+        yes: 'yes',
+        no: 'no'
+      },
+      sizes: [300, 250],
+      value: 1
+    }
+  ]
 };
-
-
-var bid_2 = new BidBuilder()
-    .provider('yieldbot')
-    .slot('right-rail')
-    .dimension(300, 250)
-    .value('3')
-    .type(Number);
-

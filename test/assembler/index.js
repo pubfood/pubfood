@@ -10,4 +10,5 @@
 describe('Assembler - Tests', function () {
   require('./bidassembler');
   require('./requestassembler');
+  require('./transformoperator');
 });

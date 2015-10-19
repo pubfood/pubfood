@@ -166,6 +166,18 @@ var logger = require('./logger');
   };
 
   /**
+   * Add bid transformation operator.
+   *
+   * @param {TransformDelegate} delegate - the delegate function
+   * @return {pubfood}
+   */
+  api.prototype.addBidTransform = function(delegate) {
+    logger.logCall('api.setAuctionTrigger', arguments);
+    this.library.mediator.setAuctionTrigger(delegate);
+    return this;
+  };
+
+  /**
    * Start the bidding process
    * @param {number} [startTimestamp] An optional timestamp that's used for calculating other time deltas.
    * @return {pubfood}

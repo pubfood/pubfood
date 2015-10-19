@@ -10,7 +10,7 @@
  * publisher ad server request [AuctionProvider]{@link pubfood#provider.AuctionProvider}.
  *
  * @class
- * @param {object} auctionMediator - bidder and publisher request coordination
+ * @param {AuctionMediator} - bidder and publisher request coordination
  * @memberof pubfood#assembler
  */
 function BidAssembler(auctionMediator) {
@@ -21,11 +21,11 @@ function BidAssembler(auctionMediator) {
 /**
  * Add a transform operator to the assembler processing pipeline.
  *
- * @param {function} transformFunc - function to transfomr bids
+ * @param {TransformOperator} operator - function to transfomr bids
  *
  */
-BidAssembler.prototype.addOperator = function(transformOperator) {
-  this.operators.push(transformOperator);
+BidAssembler.prototype.addOperator = function(operator) {
+  this.operators.push(operator);
 };
 
 /**

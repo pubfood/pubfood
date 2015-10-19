@@ -16,7 +16,7 @@ var AuctionDelegate = require('../interfaces').AuctionDelegate;
  * @param {AuctionDelegate} auctionDelegate
  */
 function AuctionProvider(auctionDelegate) {
-  this.name_ = auctionDelegate.name || '';
+  this.name = auctionDelegate.name || '';
   this.slots_ = [];
   this.auctionDelegate = auctionDelegate;
   this.mediator = null;
@@ -69,13 +69,12 @@ AuctionProvider.validate = function(delegate) {
 
 /**
  * Set the provider's name.
- * @todo maybe change to setName
  *
- * @param {String} name - the auction provider name
+ * @param {string} name - the auction provider name
  * @return {pubfood#provider.AuctionProvider}
  */
-AuctionProvider.prototype.name = function(name) {
-  this.name_ = name;
+AuctionProvider.prototype.setName = function(name) {
+  this.name = name;
   return this;
 };
 

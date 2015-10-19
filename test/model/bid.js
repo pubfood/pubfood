@@ -9,8 +9,9 @@
 /*eslint no-undef: 0*/
 var assert = require('chai').assert;
 var Bid = require('../../src/model/bid.js');
+var bid1 = require('../fixture/bid1.js');
 
-describe('Model builder will build a Bid', function testBidBuilder() {
+describe('Bid', function testBidBuilder() {
 
   var bidModel = {
     value: 3.75,
@@ -20,10 +21,28 @@ describe('Model builder will build a Bid', function testBidBuilder() {
     provider: 'foobar'
   };
 
-  it('with an internal Id', function() {
+  it('should have an internal Id', function() {
     var bid = new Bid();
     assert.isDefined(bid.id, 'id is not defined');
     assert.match(bid.id, /[\w]+$/, 'id is not an ascii string');
+  });
+
+  it('should be created from object', function() {
+    var bids = bid1.valid;
+    for (var i = 0; i < bids.length; i++) {
+      var bid = Bid.fromObject(bids[i]);
+      assert.isDefined(bid, 'bid is not defined');
+      assert.isDefined(bid.id, 'id is not defined');
+      assert.match(bid.id, /[\w]+$/, 'id is not an ascii string');
+    }
+  });
+
+  it('should be valid', function() {
+    var bids = bid1.invalid;
+    for (var i = 0; i < bids.length; i++) {
+      var bid = Bid.fromObject(bids[i]);
+      assert.isNull(bid, 'bid should be null');
+    }
   });
 
   it('with a value and type', function() {

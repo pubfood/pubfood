@@ -14,7 +14,7 @@ var Bid = require('../model/bid');
  * BidMediator mediates provider bid requests.
  *
  * @class
- * @param {object} auctionMediator - auction mediator object
+ * @param {AuctionMediator} auctionMediator - auction mediator object
  * @memberof pubfood/mediator
  */
 function BidMediator(auctionMediator) {
@@ -23,7 +23,7 @@ function BidMediator(auctionMediator) {
 }
 
 /**
- * Initialize the bid
+ * Initialize the bidders.
  *
  * @param {object} slotMap
  * @return {undefined}

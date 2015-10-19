@@ -10,6 +10,10 @@ var BaseModelObject = require('./basemodelobject');
 var bidObject = require('../interfaces').BidObject;
 
 /**
+ * @typedef {Bid} Bid [Bid]{@link pubfood#model.Bid}
+ */
+
+/**
  * Bid is the result of a partner [BidProvider]{@link pubfood/provider.BidProvider} request.
  *
  * @class
@@ -24,7 +28,6 @@ function Bid() {
 
 /**
  * Validate the bid config
- * @todo should not require pub to set provider name
  *
  * @param {BidObject} config
  * @return {boolean}
@@ -34,12 +37,12 @@ Bid.validate = function(config) {
 
   var err = 0;
   for (var k in bidObject) {
-    if (!config.hasOwnProperty(k)) {
+    if (!config.hasOwnProperty(k) && !bidObject[k].optional) {
       err++;
     }
     if (k === 'slot' && !config[k]) err++;
     if (k === 'value' && !config[k]) err++;
-    if (k === 'label' && !config[k]) err++;
+    if (!err && k === 'sizes' && !config[k].length) err++;
     if (err > 0) break;
   }
   return !err;
@@ -48,7 +51,7 @@ Bid.validate = function(config) {
 /**
  * Create a new [Bid]{@link pubfood#model.Bid} from an object.
  *
- * @param {object} config bid object literal
+ * @param {BidObject} config bid object literal
  * @returns {pubfood#model.Bid} instance of [Bid]{@link pubfood#model.Bid}
  */
 Bid.fromObject = function(config) {

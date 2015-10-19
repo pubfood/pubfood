@@ -8,9 +8,14 @@
 var util = require('../util');
 var Slot = require('../model/slot');
 var BidMediator = require('./bidmediator');
+var BidAssembler = require('../assembler/bidassembler');
 var AuctionProvider = require('../provider/auctionprovider');
 var BidProvider = require('../provider/bidprovider');
 var Event = require('../event');
+
+/**
+ * @typedef {AuctionMediator} AuctionMediator [AuctionMediator]{@link pubfood#mediator.AuctionMediator}
+ */
 
 /**
  * AuctionMediator coordiates requests to Publisher Ad Servers.
@@ -28,6 +33,7 @@ function AuctionMediator(optionalId) {
   this.bidProviders = {};
   this.auctionProvider = null;
   this.bidMediator = null;
+  this.bidAssembler = null;
   this.slotMap = { slots: {}, providers: {} };
   this.bids_ = [];
   this.inAuction = false;
@@ -41,6 +47,9 @@ function AuctionMediator(optionalId) {
  * @return {AuctionMediator}
  */
 AuctionMediator.prototype.init = function() {
+  this.bidMediator = new BidMediator(this);
+  this.bidAssembler = new BidAssembler(this);
+
   Event.on(Event.EVENT_TYPE.BID_COMPLETE, util.bind(this.checkBids_, this));
   Event.on(Event.EVENT_TYPE.BID_NEXT, util.bind(this.setBid_, this));
   Event.on(Event.EVENT_TYPE.AUCTION_COMPLETE, function(data) { console.log(data); });
@@ -230,8 +239,8 @@ AuctionMediator.prototype.auctionDone = function(data) {
 
 /**
  * Add a [Slot]{@link pubfood#model.Slot} to [AuctionMediator]{@link pubfood#mediator.AuctionMediator} config.
- * @param {object} slotConfig - configuration for a [Slot]{@link pubfood#model.Slot}
- * @returns {AuctionMediator}
+ * @param {SlotConfig} slotConfig - configuration for a [Slot]{@link pubfood#model.Slot}
+ * @returns {pubfood#mediator.AuctionMediator}
  */
 AuctionMediator.prototype.addSlot = function(slotConfig) {
 
@@ -353,17 +362,6 @@ AuctionMediator.prototype.loadProviders = function(/*action*/) {
 };
 
 /**
- * Get bid providers for the given slot name.
- *
- * @param {string} slotName - name of the slot
- * @returns {pubfood#mediator.AuctionMediator}
- */
-AuctionMediator.prototype.getSlotBidders = function (slotName) {
-  return this.slotMap.slots[slotName] || {};
-  return this;
-};
-
-/**
  * Start auction bidding.
  * @returns {pubfood#mediator.AuctionMediator}
  */
@@ -373,8 +371,6 @@ AuctionMediator.prototype.start = function() {
 
   this.init();
   Event.publish(Event.EVENT_TYPE.AUCTION_TRIGGER);
-
-  this.bidMediator = new BidMediator(this);
 
   this.loadProviders();
   this.bidMediator.initBids(this.slotMap);
