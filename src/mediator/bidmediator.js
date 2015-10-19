@@ -66,15 +66,15 @@ BidMediator.prototype.getBids_ = function(slotMapItem) {
   var self = this;
   var name = provider.name;
 
-  var nextBidCb = function(bid){
-    self.nextBid(bid, name);
+  var pushBidCb = function(bid){
+    self.pushBid(bid, name);
   };
 
   var doneCb = function(){
     self.doneBid(name);
   };
 
-  provider.init(slots, {}, nextBidCb, doneCb);
+  provider.init(slots, {}, pushBidCb, doneCb);
 };
 
 /**
@@ -83,10 +83,10 @@ BidMediator.prototype.getBids_ = function(slotMapItem) {
  * @param {number} bid The bid id
  * @return {undefined}
  */
-BidMediator.prototype.nextBid = function(bid, providerName) {
+BidMediator.prototype.pushBid = function(bid, providerName) {
   var b = Bid.fromObject(bid);
   b.provider = providerName;
-  Event.publish(Event.EVENT_TYPE.BID_NEXT, b, 'bid');
+  Event.publish(Event.EVENT_TYPE.BID_PUSH_NEXT, b, 'bid');
 };
 
 /**

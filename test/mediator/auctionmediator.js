@@ -13,6 +13,12 @@ var Event = require('../../src/event');
 
 /** @todo generalize fixture config to improve readability of tests */
 describe('Pubfood AuctionMediator', function testPubfoodMediator() {
+  it('should set a timeout', function() {
+    var m = new AuctionMediator();
+    m.timeout(1000);
+    assert.isTrue(m.getTimeout() === 1000, 'timeout not set');
+  });
+
   it('should be valid to start auction', function() {
     var m = new AuctionMediator();
 

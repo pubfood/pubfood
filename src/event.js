@@ -54,10 +54,10 @@ PubfoodEvent.prototype.EVENT_TYPE = {
   /**
    *  Next item in data stream ready.<br>
    *  e.g [BidProvider.refresh]{@link pubfood/provider.BidProvider#init} raises
-   *  a [NEXT]{@link pubfood/events.EVENT_TYPE.NEXT} event for each bid.
-   * @event pubfood.PubfoodEvent.BID_NEXT
+   *  a [BID_PUSH_NEXT]{@link pubfood/events.EVENT_TYPE.BID_PUSH_NEXT} event for each bid.
+   * @event pubfood.PubfoodEvent.BID_PUSH_NEXT
    */
-  BID_NEXT: 'bidnext',
+  BID_PUSH_NEXT: 'bidpushnext',
   /**
    * Action is complete
    * @event pubfood.PubfoodEvent.BID_COMPLETE
@@ -205,11 +205,11 @@ PubfoodEvent.prototype.publish = function(eventType, data, providerType) {
  * @property {string} data.AUCTION_COMPLETE
  * @property {string} data.BID_LIB_START
  * @property {string} data.BID_LIB_LOADED
- * @property {object} data.BID_NEXT
- * @property {string} data.BID_NEXT.id
- * @property {array.<number, number>} data.BID_NEXT.sizes
- * @property {string} data.BID_NEXT.value
- * @property {object} data.BID_NEXT.customTargetting
+ * @property {object} data.BID_PUSH_NEXT
+ * @property {string} data.BID_PUSH_NEXT.id
+ * @property {array.<number, number>} data.BID_PUSH_NEXT.sizes
+ * @property {string} data.BID_PUSH_NEXT.value
+ * @property {object} data.BID_PUSH_NEXT.customTargetting
  * @property {string} data.BID_START
  * @property {string} data.BID_COMPLETE
  * @property {string} data.BID_ASSEMBLER

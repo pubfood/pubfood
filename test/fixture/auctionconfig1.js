@@ -118,7 +118,7 @@ var pubfoodContrib = {
         foo: 'bar'
       },
       libUri: '//cdn.yldbt.com/js/yieldbot.intent.js',
-      init: function(slots, options, next, done) {
+      init: function(slots, options, pushBid, done) {
 
         var slotMap = {};
         ybotq.push(function() {
@@ -164,7 +164,7 @@ var pubfoodContrib = {
               sizes: sizes,
               customTargeting: {ybot_ad: 'y', ybot_slot: slot}
             };
-            next(bidObject);
+            pushBid(bidObject);
           }
 
           done();
@@ -176,20 +176,20 @@ var pubfoodContrib = {
     {
       name: 'carsales',
       libUri: '../test/fixture/lib.js',
-      init: function(slots, options, next, done) {
+      init: function(slots, options, pushBid, done) {
         done();
       },
-      refresh: function(slots, options, next, done) {
+      refresh: function(slots, options, pushBid, done) {
       }
     },
     {
       name: 'walkathon',
       options: { walk: 'athon'},
       libUri: '../test/fixture/lib.js',
-      init: function(slots, options, next, done) {
+      init: function(slots, options, pushBid, done) {
         done();
       },
-      refresh: function(slots, options, next, done) {
+      refresh: function(slots, options, pushBid, done) {
       }
     }
   ]

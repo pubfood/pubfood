@@ -8,7 +8,6 @@
 'use strict';
 
 var Event = require('./event');
-var version = require('../package.json').version;
 var util = require('./util');
 var logger = require('./logger');
 
@@ -25,7 +24,7 @@ var logger = require('./logger');
   };
 
   pubfood.library = pubfood.prototype = {
-    version: version,
+    version: '0.0.3',
     mediator: require('./mediator').mediatorBuilder(),
     PubfoodError: require('./errors'),
     logger: logger
@@ -148,9 +147,9 @@ var logger = require('./logger');
    *
    * @param {number} millis - milliseconds to set the timeout
    */
-  api.prototype.setTimeout = function(millis) {
-    logger.logCall('api.setTimeout', arguments);
-    this.library.mediator.setTimeout(millis);
+  api.prototype.timeout = function(millis) {
+    logger.logCall('api.timeout', arguments);
+    this.library.mediator.timeout(millis);
     return this;
   };
 

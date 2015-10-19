@@ -50,7 +50,7 @@ function AuctionMediator(optionalId) {
  */
 AuctionMediator.prototype.init = function() {
   Event.on(Event.EVENT_TYPE.BID_COMPLETE, util.bind(this.checkBids_, this));
-  Event.on(Event.EVENT_TYPE.BID_NEXT, util.bind(this.setBid_, this));
+  Event.on(Event.EVENT_TYPE.BID_PUSH_NEXT, util.bind(this.pushBid_, this));
   Event.on(Event.EVENT_TYPE.AUCTION_COMPLETE, function(data) { console.log(data); });
   Event.on(Event.EVENT_TYPE.AUCTION_TRIGGER, util.bind(this.triggerAuction_, this));
   return this;
@@ -116,7 +116,7 @@ AuctionMediator.prototype.validate = function(isRefresh) {
  *
  * @param {number} millis - milliseconds to set the timeout
  */
-AuctionMediator.prototype.setTimeout = function(millis) {
+AuctionMediator.prototype.timeout = function(millis) {
   this.timeout_ = millis;
 };
 
@@ -182,13 +182,13 @@ AuctionMediator.prototype.triggerAuction_ = function() {
 };
 
 /**
- * Adds bid on {pubfood.PubfoodEvent.BID_NEXT} event.
+ * Adds bid on {pubfood.PubfoodEvent.BID_PUSH_NEXT} event.
  *
  * @param {object} data
  * @return {AuctionMediator}
  * @private
  */
-AuctionMediator.prototype.setBid_ = function(event) {
+AuctionMediator.prototype.pushBid_ = function(event) {
   this.bids_.push(event.data);
   return this;
 };

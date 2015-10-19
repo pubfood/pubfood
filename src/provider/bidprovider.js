@@ -90,11 +90,12 @@ BidProvider.prototype.sync = function(/*loadSync*/) {
  *
  * @param {array} slots - delegate specific options
  * @param {object} options - provider delegate specific bid options
+ * @param {function} pushBid - callback that registers the bid; execute callback for each bid object
  * @param {function} done - a callback to execute on init complete
  * @return {undefined}
  */
-BidProvider.prototype.init = function(slots, options, next, done) {
-  this.bidDelegate.init(slots, options, next, done);
+BidProvider.prototype.init = function(slots, options, pushBid, done) {
+  this.bidDelegate.init(slots, options, pushBid, done);
 };
 
 /**
@@ -103,11 +104,12 @@ BidProvider.prototype.init = function(slots, options, next, done) {
  * @param {object[]} slots - delegate specific options
  * @param {string} slots[].name -
  * @param {object.<string, *>} options -  - provider delegate specific bid options
- * @param {module:pubfood~doneCallback} done - a callback to execute on init complete
+ * @param {function} pushBid - callback that registers the bid; execute callback for each bid object
+ * @param {function} done - a callback to execute on init complete
  * @return {undefined}
  */
-BidProvider.prototype.refresh = function(slots, options, next, done) {
-  this.bidDelegate.refresh(slots, options, next, done);
+BidProvider.prototype.refresh = function(slots, options, pushBid, done) {
+  this.bidDelegate.refresh(slots, options, pushBid, done);
 };
 
 module.exports = BidProvider;

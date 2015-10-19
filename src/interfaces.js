@@ -110,6 +110,17 @@ var doneCallback = function(){
 };
 
 /**
+ * pushBid callback
+ *
+ * @function pushBidCallback
+ * @return {undefined}
+ * @ignore
+ */
+var pushBidCallback = function(){
+
+};
+
+/**
  * @typedef {object} BidProviderConfig
  * @property {string} name The provider's name
  * @property {string|number} price The bid price
@@ -163,7 +174,7 @@ var Reporter = function(event){
 };
 
 /**
- * Bid object structure for the [nextBid]{@link pubfood#interfaces.nextBid} callback.
+ * Bid object structure for the [pushBid]{@link pubfood#interfaces.pushBid} callback.
  *
  * @typedef {object} BidObject
  * @property {string} [provider] - bid provider name
