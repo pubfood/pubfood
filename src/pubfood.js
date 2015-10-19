@@ -172,8 +172,8 @@ var logger = require('./logger');
    * @return {pubfood}
    */
   api.prototype.addBidTransform = function(delegate) {
-    logger.logCall('api.setAuctionTrigger', arguments);
-    this.library.mediator.setAuctionTrigger(delegate);
+    logger.logCall('api.addBidTransform', arguments);
+    this.library.mediator.addBidTransform(delegate);
     return this;
   };
 

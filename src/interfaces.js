@@ -66,7 +66,7 @@ var bidDelegate = {
  * @typedef {TransformDelegate} TransformDelegate
  * @function
  * @property {Bid[]} bids array of bids to transform @returns {Bid[]}
- * @property {object} params parameters as required by delegate function
+ * @property {object} params parameters as required by delegate function. Future use.
  * @returns {Bid[]}
  */
 var transformDelegate = function(bids, params) {

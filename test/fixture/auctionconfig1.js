@@ -108,7 +108,7 @@ var pubfoodContrib = {
     trigger: function(done) {
       setTimeout(function() {
         done();
-      }, 140);
+      }, 1000);
     }
   },
   bidProviders: [

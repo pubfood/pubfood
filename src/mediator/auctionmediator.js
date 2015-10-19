@@ -9,6 +9,7 @@ var util = require('../util');
 var Slot = require('../model/slot');
 var BidMediator = require('./bidmediator');
 var BidAssembler = require('../assembler/bidassembler');
+var TransformOperator = require('../assembler/transformoperator');
 var AuctionProvider = require('../provider/auctionprovider');
 var BidProvider = require('../provider/bidprovider');
 var Event = require('../event');
@@ -32,13 +33,14 @@ function AuctionMediator(optionalId) {
   this.slots = [];
   this.bidProviders = {};
   this.auctionProvider = null;
-  this.bidMediator = null;
-  this.bidAssembler = null;
   this.slotMap = { slots: {}, providers: {} };
   this.bids_ = [];
   this.inAuction = false;
   this.timeout_ = -1;
   this.trigger_ = null;
+  this.bidMediator = new BidMediator(this);
+  this.bidAssembler = new BidAssembler(this);
+
 }
 
 /**
@@ -47,9 +49,6 @@ function AuctionMediator(optionalId) {
  * @return {AuctionMediator}
  */
 AuctionMediator.prototype.init = function() {
-  this.bidMediator = new BidMediator(this);
-  this.bidAssembler = new BidAssembler(this);
-
   Event.on(Event.EVENT_TYPE.BID_COMPLETE, util.bind(this.checkBids_, this));
   Event.on(Event.EVENT_TYPE.BID_NEXT, util.bind(this.setBid_, this));
   Event.on(Event.EVENT_TYPE.AUCTION_COMPLETE, function(data) { console.log(data); });
@@ -143,6 +142,8 @@ AuctionMediator.prototype.setAuctionTrigger = function(triggerFn) {
 
 AuctionMediator.prototype.startAuction_ = function() {
   this.inAuction = true;
+  Event.publish(Event.EVENT_TYPE.BID_ASSEMBLER, 'AuctionMediator', 'assembler');
+  this.bidAssembler.process(this.bids_);
   this.go_();
 };
 
@@ -201,7 +202,7 @@ AuctionMediator.prototype.setBid_ = function(event) {
 AuctionMediator.prototype.checkBids_ = function(/*data*/) {
   this.bidCount++;
   if (this.bidCount === Object.keys(this.bidProviders).length) {
-    this.go_();
+    this.startAuction_();
   }
 };
 
@@ -214,7 +215,7 @@ AuctionMediator.prototype.checkBids_ = function(/*data*/) {
 AuctionMediator.prototype.go_ = function() {
   var self = this;
 
-  if (self.inAuction) return;
+  //if (self.inAuction) return;
   self.inAuction = true;
 
   var name = self.auctionProvider.name;
@@ -311,23 +312,24 @@ AuctionMediator.prototype.setAuctionProvider = function(delegateConfig) {
 };
 
 /**
- * @todo add docs
+ * Adds a function to transform provider bid request parameters.
  *
- * @param {requestOperatorCallback} cb
+ * @param {TransformDelegate} delegate the transformation delegate function
  * @returns {pubfood#mediator.AuctionMediator}
  */
-AuctionMediator.prototype.addRequestOperator = function(/*cb*/){
+AuctionMediator.prototype.addRequestTransform = function(delegate){
 
 };
 
 /**
- * @todo add docs
+ * Adds a function to transform provider bid results.
  *
- * @param {transformOperatorCallback} cb
+ * @param {TransformDelegate} delegate the transformation delegate function
  * @returns {pubfood#mediator.AuctionMediator}
  */
-AuctionMediator.prototype.addTransformOperator = function(/*cb*/){
-
+AuctionMediator.prototype.addBidTransform = function(delegate){
+  this.bidAssembler.addOperator(new TransformOperator(delegate));
+  return this;
 };
 
 /**
@@ -378,18 +380,16 @@ AuctionMediator.prototype.start = function() {
 };
 
 /**
+ * Refresh bids for listed slot names.
  *
- * @param {string[]} slotNames
+ * @param {string[]} slotNames slots to refresh
  * @returns {pubfood#mediator.AuctionMediator}
  */
-AuctionMediator.prototype.refresh = function(/*slotNames*/) {
+AuctionMediator.prototype.refresh = function(slotNames) {
   Event.publish(Event.EVENT_TYPE.AUCTION_REFRESH, this.auctionProvider.name_, 'auction');
 
-  var slots = [];
-  this.bidMediator.refreshBids(slots);
+  this.bidMediator.refreshBids(slotNames);
   return this;
 };
 
 module.exports = AuctionMediator;
-
-

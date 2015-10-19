@@ -64,6 +64,11 @@ PubfoodEvent.prototype.EVENT_TYPE = {
    */
   BID_COMPLETE: 'bidcomplete',
   /**
+   * Start bid assembler
+   * @event pubfood.PubfoodEvent.BID_ASSEMBLER
+   */
+  BID_ASSEMBLER: 'bidassembler',
+  /**
    * Auction provider library load started
    * @event pubfood.PubfoodEvent.AUCTION_LIB_START
    */
@@ -207,6 +212,7 @@ PubfoodEvent.prototype.publish = function(eventType, data, providerType) {
  * @property {object} data.BID_NEXT.customTargetting
  * @property {string} data.BID_START
  * @property {string} data.BID_COMPLETE
+ * @property {string} data.BID_ASSEMBLER
  */
 
 util.extends(PubfoodEvent, EventEmitter);

@@ -29,13 +29,15 @@ describe('BidAssembler', function testBidAssembler() {
   it('should process an object property', function() {
     var assembler = new BidAssembler();
 
-    function transform(bid, params) {
-      bid.value = parseInt(bid.value) + 1;
-      return bid;
+    function transform(bids, params) {
+      for (var i = 0; i < bids.length; i++) {
+        bids[i].value = parseInt(bids[i].value) + 1;
+      }
+      return bids;
     }
     assembler.addOperator(new TransformOperator(transform));
-    var bids = assembler.process({value: '12'});
-    assert.isTrue(bids.value === 13, 'bid value not transformed');
+    var bids = assembler.process([{value: '12'}]);
+    assert.isTrue(bids[0].value === 13, 'bid value not transformed');
   });
 
   it('should process array of bids', function() {
