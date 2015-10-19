@@ -338,12 +338,7 @@ AuctionMediator.prototype.addBidTransform = function(delegate){
  * @returns {undefined}
  */
 AuctionMediator.prototype.loadProviders = function(/*action*/) {
-  var loadedBidders = 0;
   var uri;
-
-  function bidderLoaded() {
-    loadedBidders++;
-  }
 
   for (var k in this.bidProviders) {
     if (this.bidProviders[k].libUri) {
@@ -357,8 +352,6 @@ AuctionMediator.prototype.loadProviders = function(/*action*/) {
     Event.publish(Event.EVENT_TYPE.AUCTION_LIB_LOADED, this.auctionProvider.name_, 'auction');
 
     uri = this.auctionProvider.libUri();
-    // @todo remove the assumption that google is the auction provider
-    window.googletag.cmd.push(bidderLoaded);
     util.loadUri(uri);
   }
 };
