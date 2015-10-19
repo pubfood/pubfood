@@ -96,6 +96,7 @@
                     slot: slotMap[parts[0]],
                     value: parts[2],
                     sizes: getSizes(parts[1]),
+                    bidLabel: 'bid',
                     customTargeting: { bp1_ad: 'y' }
                   });
                 }
@@ -169,7 +170,9 @@
                   targeting: {
                     foo: ['bar', 'foo.bar'], // from bidder 1 & 2
                     foooo: ['bar'], // from bidder 2
-                    bid: ['400', '200']
+                    provider1_bid: '400',
+                    provider2_bid: '200',
+                    bid: '50',
                   },
                   bids: [
                     {
@@ -185,6 +188,16 @@
                       id: '34542312',
                       targeting: {
                         bid: '200',
+                        foooo: 'bar',
+                        foo: 'foo.bar'
+                      }
+                    },
+                    {
+                      provider: 'provider3',
+                      id: '34542312',
+                      bidLabel: 'bid',
+                      targeting: {
+                        bid: '50',
                         foooo: 'bar',
                         foo: 'foo.bar'
                       }
