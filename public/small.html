@@ -9,9 +9,13 @@
         <script src="/pubfood.js"></script>
         <script>
           // global for the auction provider
+          window.auctionProviderOne = window.auctionProviderOne || {};
+          auctionProviderOne.cmd = auctionProviderOne.cmd || [];
+
           // TODO make this use somethine like a simulated ap1 vs. googletag
           window.googletag = window.googletag || {};
           googletag.cmd = googletag.cmd || [];
+
           // globals for all bid providers
           window.bp1 = window.bp1 || {};
           bp1.cmd = bp1.cmd || [];
@@ -19,6 +23,7 @@
           bp2.cmd = bp2.cmd || [];
           window.bp3 = window.bp3 || {};
           bp3.cmd = bp3.cmd || [];
+
           // setup pubfood and hook it up to providers
           var food = new pubfood();
           food.addSlot({
@@ -58,18 +63,6 @@
               }
             }
           });
-          food.setAuctionProvider({
-            name: 'google',
-            libUri: '//www.googletagservices.com/tag/js/gpt.js',
-            init: function(slots, bids, options, done) {
-              // set targeting for slots either in an independent or dependent nature
-              console.log(bids);
-              done();
-            },
-            refresh: function(slots, customTargeting, done) {
-              done();
-            }
-          })
           food.addBidProvider({
             name: 'bp1',
             libUri: '/simulated-bid-provider/bp1.js',
@@ -116,7 +109,8 @@
             },
             refresh: function(slots, options, done) {
             }
-          })
+          });
+
           food.addBidProvider({
             name: 'bp2',
             libUri: '/simulated-bid-provider/bp2.js',
@@ -133,7 +127,8 @@
             },
             refresh: function(slots, options, done) {
             }
-          })
+          });
+
           food.addBidProvider({
             name: 'bp3',
             libUri: '/simulated-bid-provider/bp3.js',
@@ -150,7 +145,50 @@
             },
             refresh: function(slots, options, done) {
             }
-          })
+          });
+
+          food.setAuctionProvider({
+            name: 'auctionProviderOne',
+            libUri: '/simulated-auction-provider/auctionProviderOne.js',
+            init: function(slots, bids, options, done) {
+
+              auctionProviderOne.cmd.push(function() {
+                var i;
+                for (i = 0; i < slots.length; i++) {
+                  var slot = slots[i];
+                  var slotBids = bids.filter(function(bid) {
+                    return bid.slot === slot.name;
+                  });
+
+                  // call the auction provider's define slots
+                  var apSlot = auctionProviderOne.defineSlot(slot.name, slot.sizes, slot.elementId);
+
+                  for (var j = 0; j < slotBids.length; j++) {
+                    var bid = slotBids[j];
+                    for (var p in bid.customTargeting) {
+                      apSlot.setTargeting(p, bid.customTargeting[p]);
+                    }
+
+                    // Publisher sets their adserver targeting key vor the bid value here
+                    apSlot.setTargeting('bid', bid.value);
+                  }
+
+                }
+              });
+
+              auctionProviderOne.cmd.push(function() {
+                auctionProviderOne
+                  .enableSingleRequest()
+                  .enableServices();
+              });
+
+              done();
+            },
+            refresh: function(slots, customTargeting, done) {
+              done();
+            }
+          });
+
           // food.setTimeout(900)
           food.addReporter(function(ev) {
             console.log(ev);
@@ -163,5 +201,10 @@
         <!-- TODO see about async and div being defined later than code -->
         <div id="div-multi-size"></div>
         <div id="div-rail"></div>
+        <script>
+          auctionProviderOne.cmd.push(function() {
+            auctionProviderOne.display('div-rail');
+          });
+        </script>
     </body>
 </html>
