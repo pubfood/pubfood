@@ -306,6 +306,7 @@ AuctionMediator.prototype.addBidProvider = function(delegateConfig) {
  */
 AuctionMediator.prototype.setAuctionProvider = function(delegateConfig) {
   var auctionProvider = AuctionProvider.withDelegate(delegateConfig);
+  Event.publish(Event.EVENT_TYPE.WARN, 'Warning: auction provider exists: ' + auctionProvider.name, 'auctionmediator');
   this.auctionProvider = auctionProvider;
   this.auctionProvider.setMediator(this);
   return this.auctionProvider;
@@ -349,7 +350,7 @@ AuctionMediator.prototype.loadProviders = function(/*action*/) {
   }
 
   if (this.auctionProvider && this.auctionProvider.libUri()) {
-    Event.publish(Event.EVENT_TYPE.AUCTION_LIB_LOADED, this.auctionProvider.name_, 'auction');
+    Event.publish(Event.EVENT_TYPE.AUCTION_LIB_LOADED, this.auctionProvider.name, 'auction');
 
     uri = this.auctionProvider.libUri();
     util.loadUri(uri);
@@ -362,7 +363,7 @@ AuctionMediator.prototype.loadProviders = function(/*action*/) {
  */
 AuctionMediator.prototype.start = function() {
 
-  Event.publish(Event.EVENT_TYPE.AUCTION_GO, this.auctionProvider.name_, 'auction');
+  Event.publish(Event.EVENT_TYPE.AUCTION_GO, this.auctionProvider.name, 'auction');
 
   this.init();
   Event.publish(Event.EVENT_TYPE.AUCTION_TRIGGER);
@@ -379,7 +380,7 @@ AuctionMediator.prototype.start = function() {
  * @returns {pubfood#mediator.AuctionMediator}
  */
 AuctionMediator.prototype.refresh = function(slotNames) {
-  Event.publish(Event.EVENT_TYPE.AUCTION_REFRESH, this.auctionProvider.name_, 'auction');
+  Event.publish(Event.EVENT_TYPE.AUCTION_REFRESH, this.auctionProvider.name, 'auction');
 
   this.bidMediator.refreshBids(slotNames);
   return this;

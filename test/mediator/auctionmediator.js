@@ -10,6 +10,7 @@
 var assert = require('chai').assert;
 var AuctionMediator = require('../../src/mediator/auctionmediator');
 var Event = require('../../src/event');
+var logger = require('../../src/logger');
 
 /** @todo generalize fixture config to improve readability of tests */
 describe('Pubfood AuctionMediator', function testPubfoodMediator() {
@@ -131,9 +132,10 @@ describe('Pubfood AuctionMediator', function testPubfoodMediator() {
     assert.isTrue(onEvent === true, 'should raise validation event');
   });
 
-  it('should invoke an auction trigger', function() {
+  it('should raise warning on setAuctionProvider with existing provider', function() {
     var m = new AuctionMediator();
-    m.setAuctionProvider({
+
+    var providerDelegate = {
       name: 'Google',
       libUri: '//www.googletagservices.com/tag/js/gpt.js',
       init: function(slots, bids, options, done) {
@@ -141,26 +143,15 @@ describe('Pubfood AuctionMediator', function testPubfoodMediator() {
       },
       refresh: function(slots, customTargeting, done) {
       }
-    });
+    };
 
-    m.addSlot({
-      name: '/2476204/multi-size',
-      sizes: [
-        [300, 250],
-        [300, 600]
-      ],
-      elementId: 'div-multi-size',
-      bidProviders: {
-        yieldbot: {
-          slot: 'medrec'
-        },
-        bidderFast: {
-          slot: 'fastSlot'
-        },
-        bidderSlow: {
-          slot: 'slowSlot'
-        }
-      }
-    });
+    m.setAuctionProvider(providerDelegate);
+    m.setAuctionProvider(providerDelegate);
+
+    var log = logger.history[logger.history.length - 1];
+    assert.isTrue(log.args[0] === 'warn');
+    assert.isTrue(log.args[1] === 'Warning: auction provider exists: Google');
+    assert.isTrue(log.args[2] === 'auctionmediator');
+
   });
 });
