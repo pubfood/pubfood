@@ -29,12 +29,7 @@ function Slot() {
  * Validate a slot configuration object.
  *
  * @param {SlotConfig} config slot configuration object
- * @param {string} config.name name of the slot/ad unit in [AuctionProvider]{@link pubfood#provider.AuctionProvider} system
- * @param {string} [config.elementId] DOM target element id
- * @param {dimensions} config.sizes array of slot size dimensions
- * @param {object[]} config.bidProviders
- * @param {string} config.bidProviders.provider bid provider name
- * @param {string} [config.bidProviders.slot] external provider system slot name
+ * @return {boolean}
  */
 Slot.validate = function(config) {
   if (!config) return false;
