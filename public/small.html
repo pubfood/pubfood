@@ -161,7 +161,8 @@
                 {
                   type: 'slot',
                   name: '/2476204/multi-size',
-                  id: '',
+                  id: 'somerandomid',
+                  elementId: 'div-multi-size',
                   sizes: [
                     [300, 250],
                     [300, 600]
@@ -203,6 +204,23 @@
                       }
                     }
                   ],
+                },
+                {
+                  type: 'slot',
+                  name: '/2476204/rail',
+                  id: 'somerandomid',
+                  elementId: 'div-rail',
+                  sizes: [
+                    [300, 250]
+                  ],
+                  // a flattened list from all bidders
+                  targeting: {
+                    foo: ['bar', 'foo.bar'], // from bidder 1 & 2
+                    foooo: ['bar'], // from bidder 2
+                    provider1_bid: '400',
+                    provider2_bid: '200',
+                    bid: '1150',
+                  }
                 }
                 // ...
               ];
@@ -253,11 +271,11 @@
         </script>
         <h1>Welcome Publisher People</h1>
         <p>We're here to help.</p>
-        <!-- TODO see about async and div being defined later than code -->
         <div id="div-multi-size"></div>
         <div id="div-rail"></div>
         <script>
           auctionProviderOne.cmd.push(function() {
+            auctionProviderOne.display('div-multi-size');
             auctionProviderOne.display('div-rail');
           });
         </script>
