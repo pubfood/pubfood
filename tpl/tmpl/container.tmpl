@@ -17,9 +17,9 @@
     <?js= self.partial('source.tmpl', doc) ?>
 <?js } else { ?>
 
-<section>
+<section id="<?js= (doc.kind + '-' +doc.scope + '-' + doc.longname) ?>">
 
-<header>
+<header id="<?js= self.generateLink(doc) ?>">
     <?js if (!doc.longname || doc.kind !== 'module') { ?>
         <h2><?js if (doc.ancestors && doc.ancestors.length) { ?>
             <span class="ancestors"><?js= doc.ancestors.join('') ?></span>
@@ -79,7 +79,7 @@
           <h3 class="subsection-title">Requires (<?js= doc.requires.length ?>)</h3>
 
           <ul><?js doc.requires.forEach(function(r) { ?>
-              <li><?js= self.linkto(r, r) ?></li>
+              <li><?js= r ?></li>
           <?js }); ?></ul>
         </div>
     <?js } ?>
@@ -92,7 +92,7 @@
           <h3 class="subsection-title">Classes (<?js= classes.length ?>)</h3>
 
           <dl><?js classes.forEach(function(c) { ?>
-              <dt><?js= self.linkto(c.longname, c.name) ?></dt>
+              <dt><?js= self.linkTo(c) ?></dt>
               <dd><?js if (c.summary) { ?><?js= c.summary ?><?js } ?></dd>
           <?js }); ?></dl>
         </div>
@@ -106,7 +106,7 @@
           <h3 class="subsection-title">Mixins (<?js= mixins.length ?>)</h3>
 
           <dl><?js mixins.forEach(function(m) { ?>
-              <dt><?js= self.linkto(m.longname, m.name) ?></dt>
+              <dt><?js= self.linkTo(m) ?></dt>
               <dd><?js if (m.summary) { ?><?js= m.summary ?><?js } ?></dd>
           <?js }); ?></dl>
         </div>
@@ -120,7 +120,7 @@
           <h3 class="subsection-title">Namespaces</h3>
 
           <dl><?js namespaces.forEach(function(n) { ?>
-              <dt><?js= self.linkto(n.longname, n.name) ?></dt>
+              <dt><?js= self.linkTo(n) ?></dt>
               <dd><?js if (n.summary) { ?><?js= n.summary ?><?js } ?></dd>
           <?js }); ?></dl>
         </div>
