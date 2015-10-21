@@ -1,4 +1,15 @@
 # Hapi Simulation Server
+
+## Requirements
+
+- nodejs (see https://nodejs.org/en/download/package-manager/ for install instructions)
+
+## Start the server
+
+- node lib/server.js
+- point yout browser to `http://localhost:3002/small.html` 
+
+
 This allows test scenarios to be hosted locally and is meant to serve as a
 reference to allow more easily slipping into testing things by yourself.
 
