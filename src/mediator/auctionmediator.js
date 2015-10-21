@@ -63,7 +63,9 @@ AuctionMediator.prototype.init = function() {
  */
 AuctionMediator.prototype.validate = function(isRefresh) {
   var isValid = true;
+  /* eslint-disable no-unused-vars */
   var refresh = isRefresh || false;
+  /* eslint-enable no-unused-vars */
 
   var tst = {
     hasAuctionProvider: function () {
@@ -71,10 +73,12 @@ AuctionMediator.prototype.validate = function(isRefresh) {
     },
     hasBidProviders: function() {
       var ret = false;
+      /* eslint-disable no-unused-vars */
       for (var v in this.bidProviders) {
         ret = true;
         break;
       }
+      /* eslint-enable no-unused-vars */
       if (!ret) {
         Event.publish(Event.EVENT_TYPE.WARN, {msg: 'Warn: no bid providers'}, 'validation');
       }
@@ -318,7 +322,7 @@ AuctionMediator.prototype.setAuctionProvider = function(delegateConfig) {
  * @param {TransformDelegate} delegate the transformation delegate function
  * @returns {pubfood#mediator.AuctionMediator}
  */
-AuctionMediator.prototype.addRequestTransform = function(delegate){
+AuctionMediator.prototype.addRequestTransform = function(/*delegate*/){
 
 };
 
