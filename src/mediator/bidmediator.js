@@ -28,25 +28,13 @@ function BidMediator(auctionMediator) {
  * @param {object} slotMap
  * @return {undefined}
  */
-BidMediator.prototype.initBids = function(slotMap) {
+BidMediator.prototype.initBids = function(auctionState) {
   // TODO: run request operators here
 
-  var providers = slotMap.providers;
+  var providers = auctionState.providers;
   for (var k in providers) {
-
-    this.loadProvider(providers[k], {});
-    this.getBids_(providers[k]);
+    this.getBids_(providers[k].provider, providers[k].slots);
   }
-};
-
-/**
- * @todo add docs
- *
- * @param {object} provider
- * @param {function} callback
- */
-BidMediator.prototype.loadProvider = function(/*provider, callback*/) {
-
 };
 
 /**
@@ -55,14 +43,10 @@ BidMediator.prototype.loadProvider = function(/*provider, callback*/) {
  * @param {Slot[]} slots
  */
 BidMediator.prototype.refreshBids = function(/*slots*/) {
-  //for (var i = 0; i < slots.length; i++) {
-  //  var slot = slots[i];
-  //}
+
 };
 
-BidMediator.prototype.getBids_ = function(slotMapItem) {
-  var slots = slotMapItem.slots;
-  var provider = slotMapItem.provider;
+BidMediator.prototype.getBids_ = function(provider, slots) {
   var self = this;
   var name = provider.name;
 

@@ -10,14 +10,7 @@
 var assert = require('chai').assert;
 var Slot = require('../../src/model/slot.js');
 
-describe.skip('BaseModelObject', function testBaseModelObject() {
-  it('will have a generated Id', function() {
-    var modelObject = new BaseModelObject();
-    assert.isDefined(modelObject.id, 'id is not defined');
-    assert.match(modelObject.id, /[\w]+$/, 'id is not an ascii string');
-  });
-});
-describe('Model builder will build a Slot', function testSlotBuilder() {
+describe('Slot', function testSlotBuilder() {
   var slotConfig = {
     name: '/2476204/sidebar-unit', //google ad unit
     sizes: [

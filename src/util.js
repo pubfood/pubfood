@@ -83,11 +83,52 @@ var util = {
     }
   },
   bind: function(fn, ctx) {
-
     return function() {
       fn.apply(ctx, Array.prototype.slice.call(arguments));
     };
+  },
+  mergeToObject: function(o1, o2) {
+    for (var p in o2) {
+      if (o2.hasOwnProperty(p)) {
+        if (this.isObject(o2[p])) {
+          if (!o1[p]) {
+            o1[p] = {};
+          }
+          this.mergeToObject(o1[p], o2[p]);
+        } else if (this.isArray(o2[p])) {
+          if (!o1[p]) {
+            o1[p] = [];
+          }
+          this.mergeToArray(o1[p], o2[p]);
+        } else {
+          o1[p] = o2[p];
+        }
+      }
+    }
+    return o1;
+  },
+  mergeToArray: function(a1, a2) {
+    for (var i = 0; i < a2.length; i++) {
+      a1.push(this.clone(a2[i]));
+    }
+    return a1;
+  },
+  isArray: function(o) {
+    return !!o && this.asType(o) === 'array';
+  },
+  isObject: function(o) {
+    return !!o && this.asType(o) === 'object';
+  },
+  clone: function(v) {
+    return this.isObject(v) ? this.cloneObject(v) : this.isArray(v) ? this.cloneArray(v) : v;
+  },
+  cloneArray: function(a) {
+    return this.mergeToArray([], a);
+  },
+  cloneObject: function(o) {
+    return this.mergeToObject({}, o);
   }
 };
 
 module.exports = util;
+

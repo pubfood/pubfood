@@ -9,14 +9,14 @@ module.exports = {
       value: 1
     },
     {
-      customTargeting: {
+      targeting: {
       },
       sizes: [300, 250],
       slot: '/this/is/a/slot',
       value: '1'
     },
     {
-      customTargeting: {
+      targeting: {
         yes: 'yes',
       },
       sizes: [[300, 600], [300, 250]],
@@ -24,7 +24,7 @@ module.exports = {
       value: 1
     },
     {
-      customTargeting: {
+      targeting: {
         no: 'no'
       },
       sizes: [[728, 90]],
@@ -32,7 +32,7 @@ module.exports = {
       value: .2
     },
     {
-      customTargeting: {
+      targeting: {
         yes: 'yes'
       },
       sizes: [300, 250],
@@ -47,7 +47,7 @@ module.exports = {
       value: null
     },
     {
-      customTargeting: {
+      targeting: {
         yes: 'yes',
         no: 'no'
       },
@@ -56,7 +56,7 @@ module.exports = {
       value: 1
     },
     {
-      customTargeting: {
+      targeting: {
         yes: 'yes',
         no: 'no'
       },
@@ -64,7 +64,7 @@ module.exports = {
       value: 1
     },
     {
-      customTargeting: {
+      targeting: {
         yes: 'yes',
         no: 'no'
       },

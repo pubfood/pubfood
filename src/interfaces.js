@@ -184,13 +184,13 @@ var Reporter = function(event){
  * @property {array.<number, number>} sizes - array of sizes for the slot the bid is for
  * @property {number} sizes.0 width slot width
  * @property {number} sizes.1 height slot height
- * @property {object} [customTargeting] - key/value pairs for additional adserver targeting
+ * @property {object} [targeting] - key/value pairs for additional adserver targeting
  */
 var bidObject = {
   slot: '',
   value: '',
   sizes: [],
-  customTargeting: { optional: true }
+  targeting: { optional: true }
 };
 
 /**

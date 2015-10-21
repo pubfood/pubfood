@@ -85,12 +85,12 @@
                  assert.equal(p.getSlots().length, 2, 'mediator did not add slot');
              });
 
-             it('should start an auction', function() {
+             it('should augment auction bids', function() {
                  p.setAuctionTrigger(pubfoodContrib.auctionProvider.trigger);
 
                  function augmentBids(bids, params) {
                      for (var i = 0; i < bids.length; i++) {
-                         bids[i]['customTargeting'].code = (0 | Math.random() * 36).toString(36);
+                         bids[i]['targeting'].code = (0 | Math.random() * 36).toString(36);
 
                          bids[i].value = bids[i].value + 9;
                      }

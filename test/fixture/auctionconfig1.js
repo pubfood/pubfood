@@ -49,38 +49,24 @@ var pubfoodContrib = {
       }
     }
   ],
-  auctionProviderOff: {
-    name: 'dfp',
-    libUri: '',
-    options: {
-    },
-    init: function(slots, options, done) {
-    },
-    refresh: function(slots, options, done) {
-    }
-  },
   auctionProvider: {
     name: 'Google',
     libUri: '//www.googletagservices.com/tag/js/gpt.js',
-    init: function(slots, bids, options, done) {
+    init: function(targeting, options, done) {
       var i;
       googletag.cmd.push(function() {
-        for (i=0; i<slots.length; i++) {
-          var slot = slots[i];
-
-          var slotBids = bids.filter(function(bid) {
-            return bid.slot === slot.name;
-          });
+        for (var k in targeting.slots) {
+          var slot = targeting.slots[k];
 
           var gptslot = googletag.defineSlot(slot.name, slot.sizes, slot.elementId)
               .addService(googletag.pubads());
 
-
-          for (var j=0; j<slotBids.length; j++) {
-            var bid = slotBids[j];
-            if (bid.customTargeting && typeof bid.customTargeting === 'object') {
-              for (var p in bid.customTargeting) {
-                gptslot.setTargeting(p, bid.customTargeting[p]);
+          var bids = slot.bids || [];
+          for (var j=0; j<bids.length; j++) {
+            var bid = bids[j];
+            if (bid.targeting && typeof bid.targeting === 'object') {
+              for (var p in bid.targeting) {
+                gptslot.setTargeting(p, bid.targeting[p]);
               }
             }
           }
@@ -98,7 +84,7 @@ var pubfoodContrib = {
       googletag.cmd.push(function() { googletag.display('div-multi-size'); });
 
     },
-    refresh: function(slots, customTargeting, done) {
+    refresh: function(slots, targeting, done) {
 
       googletag.cmd.push(function() {
         googletag.refresh();
@@ -115,7 +101,7 @@ var pubfoodContrib = {
     {
       name: 'yieldbot',
       options: {
-        foo: 'bar'
+        prefix: 'ybot'
       },
       libUri: '//cdn.yldbt.com/js/yieldbot.intent.js',
       init: function(slots, options, pushBid, done) {
@@ -162,7 +148,11 @@ var pubfoodContrib = {
               slot: slotMap[slot] || 'undefined_slot',
               value: bid,
               sizes: sizes,
-              customTargeting: {ybot_ad: 'y', ybot_slot: slot}
+              targeting: {
+                value: bid,
+                ybot_ad: 'y',
+                ybot_slot: slot
+              }
             };
             pushBid(bidObject);
           }

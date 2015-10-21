@@ -105,25 +105,25 @@ AuctionProvider.prototype.slot = function(slot) {
  *
  * The AuctionProvider delegate javascript tag and other setup is done here.
  *
- * @param {Object} options - AuctionProvider delegate specific options
- * @param {Function} callback - a callback to execute on init complete
+ * @param {object[]} targeting - slot objects with bids and page level targeting
+ * @param {object} options - AuctionProvider delegate specific options
+ * @param {function} done - a callback to execute on init complete
  * @return {undefined}
  */
-AuctionProvider.prototype.init = function(slots, bids, options, done) {
-  this.auctionDelegate.init(slots, bids, options, done);
+AuctionProvider.prototype.init = function(targeting, options, done) {
+  this.auctionDelegate.init(targeting, options, done);
 };
 
 /**
  * Refresh for ad slots
  *
- * @param {string[]} slots
- * @param {*} bids
- * @param {object} options
- * @param {function} done
+ * @param {object[]} slot objects with bids and page level targeting
+ * @param {object} options AuctionProvider delegate specific options
+ * @param {function} done a callback to execute on init complete
  * @return {undefined}
  */
-AuctionProvider.prototype.refresh = function(slots, bids, options, done) {
-  this.auctionDelegate.refresh(slots || {}, options || {}, done);
+AuctionProvider.prototype.refresh = function(targeting, options, done) {
+  this.auctionDelegate.refresh(targeting, options, done);
 };
 
 module.exports = AuctionProvider;

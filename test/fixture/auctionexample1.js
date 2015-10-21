@@ -36,7 +36,7 @@ var auctionexample1 = {
     init: function(slots, bids, options, done) {
 
     },
-    refresh: function(slots, customTargeting, done) {
+    refresh: function(slots, targeting, done) {
     },
     trigger: function(done) {
       setTimeout(function() {

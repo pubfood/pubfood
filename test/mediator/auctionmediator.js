@@ -11,7 +11,7 @@ var assert = require('chai').assert;
 var AuctionMediator = require('../../src/mediator/auctionmediator');
 var Event = require('../../src/event');
 var logger = require('../../src/logger');
-
+var Bid = require('../../src/model/bid');
 /** @todo generalize fixture config to improve readability of tests */
 describe('Pubfood AuctionMediator', function testPubfoodMediator() {
   it('should set a timeout', function() {
@@ -43,7 +43,7 @@ describe('Pubfood AuctionMediator', function testPubfoodMediator() {
       init: function(slots, bids, options, done) {
 
       },
-      refresh: function(slots, customTargeting, done) {
+      refresh: function(slots, targeting, done) {
       }
     });
 
@@ -85,7 +85,7 @@ describe('Pubfood AuctionMediator', function testPubfoodMediator() {
       init: function(slots, bids, options, done) {
 
       },
-      refresh: function(slots, customTargeting, done) {
+      refresh: function(slots, targeting, done) {
       }
     });
 
@@ -118,7 +118,7 @@ describe('Pubfood AuctionMediator', function testPubfoodMediator() {
       init: function(slots, bids, options, done) {
 
       },
-      refresh: function(slots, customTargeting, done) {
+      refresh: function(slots, targeting, done) {
       }
     });
 
@@ -141,7 +141,7 @@ describe('Pubfood AuctionMediator', function testPubfoodMediator() {
       init: function(slots, bids, options, done) {
 
       },
-      refresh: function(slots, customTargeting, done) {
+      refresh: function(slots, targeting, done) {
       }
     };
 
@@ -153,5 +153,87 @@ describe('Pubfood AuctionMediator', function testPubfoodMediator() {
     assert.isTrue(log.args[1] === 'Warning: auction provider exists: Google');
     assert.isTrue(log.args[2] === 'auctionmediator');
 
+  });
+
+  it('should create an auctionState map', function() {
+    delete Event._events;
+    Event._events = {};
+
+    var m = new AuctionMediator();
+
+    m.addSlot({
+      name: '/abc/123',
+      sizes: [
+        [728, 90]
+      ],
+      elementId: 'div-leaderboard',
+      bidProviders: {
+        p1: {
+          slot: 's1'
+        }
+      }
+    });
+
+    m.addBidProvider({
+      name: 'p1',
+      libUri: '',
+      init: function(slots, options, pushBid, done) {
+
+      },
+      refresh: function(slots, options, pushBid, done) {
+      }
+    });
+
+    m.init();
+
+    var b = Bid.fromObject({
+      slot: '/abc/123',
+      value: '235',
+      sizes: [728, 90],
+      targeting: { foo: 'bar' }
+    });
+    Event.publish(Event.EVENT_TYPE.BID_PUSH_NEXT, b, 'p1');
+
+  });
+
+  it('should handle push next', function() {
+    delete Event._events;
+    Event._events = {};
+    var m = new AuctionMediator();
+
+    m.addSlot({
+      name: '/abc/123',
+      sizes: [
+        [728, 90]
+      ],
+      elementId: 'div-leaderboard',
+      bidProviders: {
+        p1: {
+          slot: 's1'
+        }
+      }
+    });
+
+    m.addBidProvider({
+      name: 'p1',
+      libUri: '',
+      init: function(slots, options, pushBid, done) {
+
+      },
+      refresh: function(slots, options, pushBid, done) {
+      }
+    });
+
+    m.init();
+    var b = Bid.fromObject({
+      slot: '/abc/123',
+      value: '235',
+      sizes: [728, 90],
+      targeting: { foo: 'bar' }
+    });
+    Event.publish(Event.EVENT_TYPE.BID_PUSH_NEXT, b, 'p1');
+
+    var log = logger.history[logger.history.length - 1];
+    assert.isTrue(log.args[2] === 'p1');
   });
 });

@@ -74,7 +74,7 @@ describe('BidAssembler', function testBidAssembler() {
     function filter(bids, params) {
       var filteredBids = [];
       for (var k = 0; k < bids.length; k++) {
-        if (bids[k].customTargeting && bids[k].customTargeting.yes && bids[k].customTargeting.yes === 'yes') {
+        if (bids[k].targeting && bids[k].targeting.yes && bids[k].targeting.yes === 'yes') {
           bids[k].value = parseFloat(bids[k].value);
           filteredBids.push(bids[k]);
         }

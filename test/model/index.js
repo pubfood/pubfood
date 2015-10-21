@@ -7,7 +7,8 @@
 
 /*eslint no-unused-vars: 0*/
 /*eslint no-undef: 0*/
-describe('Model - Tests', function () {
+describe('Model', function () {
+  require('./basemodelobject');
   require('./slot');
   require('./bid');
 });
