@@ -29,7 +29,7 @@ var classHtmlData = [];
 var otherApiHtmlData = [];
 
 function updateOutputFileContent(html, title, filename){
-  var trimHtml = '<!-- '+filename + ' -->\n' +html.replace(/(\s|\t)+(\n)+(\s|\t)+/g, '\n').trim();
+  var trimHtml = html.replace(/(\s|\t)+(\n)+(\s|\t)+/g, '\n').trim();
 
   if(title.match(/home/i)){
     homeHtmlData.push(trimHtml);
