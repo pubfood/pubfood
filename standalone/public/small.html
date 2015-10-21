@@ -147,8 +147,8 @@
           food.setAuctionProvider({
             name: 'auctionProviderOne',
             libUri: '/simulated-auction-provider/auctionProviderOne.js',
-            init: function(targets, bids, options, done) {
-              console.log('>>', targets, bids);
+            init: function(targets, options, done) {
+              console.log('>>', targets);
 
               // proposed `targets` param structure
               targets = [

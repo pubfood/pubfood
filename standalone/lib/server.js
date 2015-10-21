@@ -6,7 +6,7 @@ var boom = require('boom');
 var querystring = require('querystring');
 var fs = require('fs');
 
-var DIST_DIR = path.join(__dirname, '..', 'dist');
+var WEB_DIR = path.join(__dirname, '..', 'public');
 var BID_PROVIDER_BASE_TAG_FILE = path.join(__dirname, 'bid-provider-base-tag.js');
 var AUCTION_PROVIDER_BASE_TAG_FILE = path.join(__dirname, 'auction-provider-base-tag.js');
 
@@ -14,7 +14,7 @@ var server = new hapi.Server({
   connections: {
     routes: {
       files: {
-        relativeTo: path.join(__dirname, '..', 'public')
+        relativeTo: WEB_DIR
       }
     }
   }
@@ -29,15 +29,7 @@ server.route({
   method: 'GET',
   path: '/pubfood.{ext}',
   handler: function routeHandler(request, reply) {
-    if (request.params.ext === 'js') {
-      reply.file(path.join(DIST_DIR, 'pubfood.js'));
-      return;
-    }
-    if (request.params.ext === 'min.js') {
-      reply.file(path.join(DIST_DIR, 'pubfood.min.js'));
-      return;
-    }
-    reply(boom.notFound());
+    return reply.file(path.join(WEB_DIR, request.url.path));
   }
 });
 
