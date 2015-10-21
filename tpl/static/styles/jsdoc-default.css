@@ -365,3 +365,8 @@ h6 {
 .members .name {
     margin: 0;
 }
+
+.back-to-top, .back-to-top:hover {
+    float: right;
+    text-decoration: none;
+}

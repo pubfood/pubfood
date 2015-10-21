@@ -28,8 +28,9 @@ var homeHtmlData = [];
 var classHtmlData = [];
 var otherApiHtmlData = [];
 
-function updateOutputFileContent(html, title){
-  var trimHtml = html.replace(/(\s|\t)+(\n)+(\s|\t)+/g, '\n').trim();
+function updateOutputFileContent(html, title, filename){
+  var trimHtml = '<!-- '+filename + ' -->\n' +html.replace(/(\s|\t)+(\n)+(\s|\t)+/g, '\n').trim();
+
   if(title.match(/home/i)){
     homeHtmlData.push(trimHtml);
   } else if(title.match(/^class/i)){
@@ -309,16 +310,27 @@ function generate(title, docs, filename, resolveLinks) {
     docs: docs
   };
 
-  //var outpath = path.join(outdir, filename);
   var html = view.render('container.tmpl', docData);
 
-  //if (resolveLinks) {
-  //  html = helper.resolveLinks(html); // turn {@link foo} into <a href="foodoc.html">foo</a>
-  //}
+  if (resolveLinks) {
+    // turn {@link foo} into <a href="foodoc.html">foo</a>
+    html = helper.resolveLinks(html);
 
-  updateOutputFileContent(html, title);
+    // update links to use hash tag relative to the current page
+    var links = html.match(/(")([^\s]+)?(\.html)(\#[^\"]+)?(")/ig);
+    if(links){
+      links.forEach(function(link){
+        var hash = link
+          .replace(/\.html/, '')
+          .replace(/([^\a-z"]+)/gi, '-')
+          .replace(/^"/, '"#');
 
-  //fs.writeFileSync(outpath, html, 'utf8');
+        html = html.replace(link, hash).replace(/global-/, '');
+      });
+    }
+  }
+
+  updateOutputFileContent(html, title, filename);
 }
 
 /**
