@@ -96,4 +96,12 @@ describe('Util - Tests', function () {
     assert.isTrue(c3.f === 'g' && c3.z[0] === 'w', 'should not be a reference');
 
   });
+
+  it('should overwrite with the source object', function() {
+    var target = { prefix: 'foo' };
+    var source = { prefix: 'bar' };
+
+    target = util.mergeToObject(target, source);
+    assert.isTrue(target.prefix === 'bar', 'source should overwrite target property');
+  });
 });

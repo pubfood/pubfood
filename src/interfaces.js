@@ -14,11 +14,11 @@
  * @property {string} name Auction provider delegate name
  * @property {string} libUri
  * @property {function} init Auction provider delegate initial auction request.<br>Called at startup. Returns <i>{undefined}</i>
- * @property {BidProviderConfig[]} init.bids A list of bid providers
+ * @property {BidProviderConfig[]} init.targeting A list of slots with targeting objects
  * @property {object} init.options Defaults to {}
  * @property {doneCallback} init.done Callback to execute on done
  * @property {function} refresh Auction provider delegate refresh auction request.<br>Called at startup. Returns <i>{undefined}</i>
- * @property {string[]} refresh.slots A list of slots to be refreshed
+ * @property {string[]} refresh.targeting A list of slots with targeting to be refreshed
  * @property {object} refresh.options Defaults to {}
  * @property {doneCallback} refresh.done Callback to execute on done
  * @property {function} [trigger] Auction provider delegate function to trigger the auction. Default: [pubfood.setTimeout]{@link pubfood#setTimeout}
@@ -26,13 +26,18 @@
  * @property {doneCallback} trigger.done Callback to initialize the auction provider
  */
 var auctionDelegate = {
+  options: {},
   name: '',
   libUri: '',
-  init: function(bids, options, done) {},
-  refresh: function(bids, options, done) {},
+  init: function(targeting, options, done) {},
+  refresh: function(targeting, options, done) {},
   trigger: function(done) {}
 };
-auctionDelegate.trigger.optional = true;
+auctionDelegate.optional = {
+  trigger: true,
+  options: true
+};
+
 /**
  * Interface for classes that are delegates for the BidProvider decorator..
  *
@@ -55,10 +60,14 @@ auctionDelegate.trigger.optional = true;
  * @property {doneCallback} refresh.done Callback to execute on done
  */
 var bidDelegate = {
+  options: {},
   name: '',
   libUri: '',
   init: function(slots, options, done) {},
   refresh: function(slots, options, done) {}
+};
+bidDelegate.optional = {
+  options: true
 };
 
 /**
@@ -177,9 +186,7 @@ var Reporter = function(event){
  * Bid object structure for the [pushBid]{@link pubfood#interfaces.pushBid} callback.
  *
  * @typedef {object} BidObject
- * @property {string} [provider] - bid provider name
  * @property {string} slot - slot name
- * @property {string} label - publisher adserver targeting label/key for the bid value
  * @property {string} value - publisher adserver targeting bid value
  * @property {array.<number, number>} sizes - array of sizes for the slot the bid is for
  * @property {number} sizes.0 width slot width
@@ -190,7 +197,10 @@ var bidObject = {
   slot: '',
   value: '',
   sizes: [],
-  targeting: { optional: true }
+  targeting: {}
+};
+bidObject.optional = {
+  targeting: true
 };
 
 /**

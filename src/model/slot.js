@@ -32,16 +32,7 @@ function Slot() {
  */
 Slot.validate = function(config) {
   if (!config) return false;
-
-  var err = 0;
-  for (var k in slotConfig) {
-    if (!config.hasOwnProperty(k) || util.asType(config[k]) !== util.asType(slotConfig[k])) {
-      err++;
-    }
-    if (k === 'name' && !config[k]) err++;
-    if (err > 0) break;
-  }
-  return !err;
+  return util.validate(slotConfig, config);
 };
 
 /**

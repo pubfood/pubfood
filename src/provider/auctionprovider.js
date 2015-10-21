@@ -54,17 +54,15 @@ AuctionProvider.withDelegate = function(delegate) {
  * @returns {boolean} true if delegate has required functions and properties
  */
 AuctionProvider.validate = function(delegate) {
-  if (!delegate) return false;
+  return util.validate(AuctionDelegate, delegate);
+};
 
-  var err = 0;
-  for (var k in AuctionDelegate) {
-    if (!AuctionDelegate[k].optional &&
-        (!delegate.hasOwnProperty(k) || util.asType(delegate[k]) !== util.asType(AuctionDelegate[k]))) {
-      err++;
-    }
-    if (err > 0) break;
-  }
-  return !err;
+/**
+ * Auction provider delegate options.
+ * @returns {object} options
+ */
+AuctionProvider.prototype.getOptions = function() {
+  return this.auctionDelegate.options || {};
 };
 
 /**

@@ -7,7 +7,7 @@
 
 var util = require('../util');
 var BaseModelObject = require('./basemodelobject');
-var bidObject = require('../interfaces').BidObject;
+var BidObject = require('../interfaces').BidObject;
 
 /**
  * @typedef {Bid} Bid [Bid]{@link pubfood#model.Bid}
@@ -34,18 +34,7 @@ function Bid() {
  */
 Bid.validate = function(config) {
   if (!config) return false;
-
-  var err = 0;
-  for (var k in bidObject) {
-    if (!config.hasOwnProperty(k) && !bidObject[k].optional) {
-      err++;
-    }
-    if (k === 'slot' && !config[k]) err++;
-    if (k === 'value' && !config[k]) err++;
-    if (!err && k === 'sizes' && !config[k].length) err++;
-    if (err > 0) break;
-  }
-  return !err;
+  return util.validate(BidObject, config);
 };
 
 /**

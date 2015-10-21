@@ -185,13 +185,14 @@ AuctionMediator.prototype.triggerAuction_ = function() {
 /**
  * Adds bid on {pubfood.PubfoodEvent.BID_PUSH_NEXT} event.
  *
- * @param {object} data
+s   * @param {object} data
  * @return {AuctionMediator}
  * @private
  */
 AuctionMediator.prototype.pushBid_ = function(event) {
   if (!this.inAuction) {
     var bid = event.data;
+    bid.type = 'slot';
     bid.provider = event.provider;
     this.bids_.push(bid);
 
@@ -236,9 +237,55 @@ AuctionMediator.prototype.go_ = function() {
   Event.publish(Event.EVENT_TYPE.AUCTION_GO, name, 'auction');
 
   var options = this.auctionProvider.options || {};
-  this.auctionProvider.init(this.auctionState_, options, function(){
+
+  var targeting = this.buildTargeting_();
+  this.auctionProvider.init(targeting, options, function(){
     self.auctionDone(name);
   });
+};
+
+AuctionMediator.prototype.getBidKey = function(bid) {
+  var opts = this.auctionProvider.getOptions();
+
+  return (opts.prefix ? bid.provider + '_' : '') + (opts.bidKey || 'bid');
+};
+
+AuctionMediator.prototype.mergeKeys = function(slotTargeting, bidTargeting) {
+  slotTargeting = util.mergeToObject(slotTargeting, bidTargeting);
+};
+
+/**
+ * Builds targeting objects for {AuctionDelegate} requests.
+ * @private
+ * @return {object[]} targeting objects
+ */
+AuctionMediator.prototype.buildTargeting_ = function() {
+  var auctionTargeting = [];
+  var slots = this.auctionState_.slots || [];
+  for (var k in slots) {
+    var s = slots[k];
+    var t = { type: 'slot',
+              name: s.name,
+              id: s.id,
+              elementId: s.elementId || '',
+              sizes: s.sizes,
+              bids: [],
+              targeting: {}
+            };
+    var bids = slots[k].bids;
+    for (var b in bids) {
+      var bid = bids[b];
+      t.bids.push({
+        provider: bid.provider,
+        id: bid.id,
+        targeting: bid.targeting
+      });
+      this.mergeKeys(t.targeting, bid.targeting);
+    }
+
+    auctionTargeting.push(t);
+  }
+  return auctionTargeting;
 };
 
 /**

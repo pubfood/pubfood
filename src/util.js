@@ -127,6 +127,36 @@ var util = {
   },
   cloneObject: function(o) {
     return this.mergeToObject({}, o);
+  },
+  values: function(obj) {
+    var arr = [];
+    for (var k in obj) {
+      arr.push(obj[k]);
+    }
+    return arr;
+  },
+  validate: function(type, obj) {
+    if (!obj) return false;
+    var err = 0;
+    for (var k in type) {
+      if (k === 'optional') continue;
+
+      var isOpt = !!type.optional &&!!type.optional[k],
+        hasProp = obj.hasOwnProperty(k),
+        isSet = !!obj[k],
+        isModel = !obj['init'];
+
+      if (!isOpt && (!hasProp || !isSet)) ++err;
+
+      if (isSet && isModel &&
+        (util.isArray(obj[k]) && obj[k].length === 0)) ++err;
+
+      if (isSet && !isModel &&
+        (util.asType(obj[k]) !== util.asType(type[k]))) ++err;
+
+      if (err > 0) break;
+    }
+    return !err;
   }
 };
 

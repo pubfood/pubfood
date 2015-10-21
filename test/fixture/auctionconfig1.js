@@ -38,7 +38,7 @@ var pubfoodContrib = {
       elementId: 'div-leaderboard',
       bidProviders: {
         yieldbot: {
-          slot: 'leaderboard' // yieldbot's slot name
+          slot: 'leaderboard', // yieldbot's slot name
         },
         walkathon: {
           slot: 'amz-top-adslot' // walkathoon's slot name
@@ -50,13 +50,17 @@ var pubfoodContrib = {
     }
   ],
   auctionProvider: {
+    options: {
+    },
     name: 'Google',
     libUri: '//www.googletagservices.com/tag/js/gpt.js',
     init: function(targeting, options, done) {
-      var i;
+
       googletag.cmd.push(function() {
-        for (var k in targeting.slots) {
-          var slot = targeting.slots[k];
+        console.log('there');
+        var i;
+        for (i = 0; i < targeting.length; i++) {
+          var slot = targeting[i];
 
           var gptslot = googletag.defineSlot(slot.name, slot.sizes, slot.elementId)
               .addService(googletag.pubads());
@@ -84,7 +88,7 @@ var pubfoodContrib = {
       googletag.cmd.push(function() { googletag.display('div-multi-size'); });
 
     },
-    refresh: function(slots, targeting, done) {
+    refresh: function(targeting, options, done) {
 
       googletag.cmd.push(function() {
         googletag.refresh();
@@ -101,7 +105,6 @@ var pubfoodContrib = {
     {
       name: 'yieldbot',
       options: {
-        prefix: 'ybot'
       },
       libUri: '//cdn.yldbt.com/js/yieldbot.intent.js',
       init: function(slots, options, pushBid, done) {

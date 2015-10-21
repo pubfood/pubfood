@@ -96,8 +96,10 @@
                     slot: slotMap[parts[0]],
                     value: parts[2],
                     sizes: getSizes(parts[1]),
-                    bidLabel: 'bid',
-                    customTargeting: { bp1_ad: 'y' }
+                      targeting: {
+                          provider1_ad: 'y',
+                          provider1_bid: parts[2]
+                      }
                   });
                 }
                 console.log('bp1 available:', bp1.getAvailable());
@@ -132,7 +134,7 @@
             sync: true,
             init: function(slots, options, next, done) {
               bp3.cmd.push(function() {
-                var encodedAvailability = encodeURIComponent('a:300x250,b:728x90');
+                var encodedAvailability = encodeURIComponent('multi:300x250,b:728x90');
                 bp3.init('delay=200&fuzz=10&availability=' + encodedAvailability);
               });
               bp3.cmd.push(function() {
@@ -149,81 +151,6 @@
             libUri: '/simulated-auction-provider/auctionProviderOne.js',
             init: function(targets, options, done) {
               console.log('>>', targets);
-
-              // proposed `targets` param structure
-              targets = [
-                {
-                  type: 'page',
-                  targeting: {
-                    yb_ad: 'y'
-                  }
-                },
-                {
-                  type: 'slot',
-                  name: '/2476204/multi-size',
-                  id: 'somerandomid',
-                  elementId: 'div-multi-size',
-                  sizes: [
-                    [300, 250],
-                    [300, 600]
-                  ],
-                  // a flattened list from all bidders
-                  targeting: {
-                    foo: ['bar', 'foo.bar'], // from bidder 1 & 2
-                    foooo: ['bar'], // from bidder 2
-                    provider1_bid: '400',
-                    provider2_bid: '200',
-                    bid: '50',
-                  },
-                  bids: [
-                    {
-                      provider: 'provider1',
-                      id: '1212121',
-                      targeting: {
-                        bid: '400',
-                        foo: 'bar'
-                      }
-                    },
-                    {
-                      provider: 'provider2',
-                      id: '34542312',
-                      targeting: {
-                        bid: '200',
-                        foooo: 'bar',
-                        foo: 'foo.bar'
-                      }
-                    },
-                    {
-                      provider: 'provider3',
-                      id: '34542312',
-                      bidLabel: 'bid',
-                      targeting: {
-                        bid: '50',
-                        foooo: 'bar',
-                        foo: 'foo.bar'
-                      }
-                    }
-                  ],
-                },
-                {
-                  type: 'slot',
-                  name: '/2476204/rail',
-                  id: 'somerandomid',
-                  elementId: 'div-rail',
-                  sizes: [
-                    [300, 250]
-                  ],
-                  // a flattened list from all bidders
-                  targeting: {
-                    foo: ['bar', 'foo.bar'], // from bidder 1 & 2
-                    foooo: ['bar'], // from bidder 2
-                    provider1_bid: '400',
-                    provider2_bid: '200',
-                    bid: '1150',
-                  }
-                }
-                // ...
-              ];
 
               auctionProviderOne.cmd.push(function() {
                 var i, t;

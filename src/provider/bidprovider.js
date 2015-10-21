@@ -6,7 +6,7 @@
 'use strict';
 
 var util = require('../util');
-var bidDelegate = require('../interfaces').BidDelegate;
+var BidDelegate = require('../interfaces').BidDelegate;
 
 /**
  * BidProvider implements bidding partner requests.
@@ -42,16 +42,7 @@ BidProvider.withDelegate = function(delegate) {
  * @returns {boolean} true if delegate has required functions and properties
  */
 BidProvider.validate = function(delegate) {
-  if (!delegate) return false;
-
-  var err = 0;
-  for (var k in bidDelegate) {
-    if (!delegate.hasOwnProperty(k) || util.asType(delegate[k]) !== util.asType(bidDelegate[k])) {
-      err++;
-    }
-    if (err > 0) break;
-  }
-  return !err;
+  return util.validate(BidDelegate, delegate);
 };
 
 /**
