@@ -2,9 +2,8 @@
 # /dist
 ## note doc gets repeated in the dist directory so it isn't rooted
 doc
-/lib
+/standalone
 /node_modules
-/public
 /reports
 /src
 /test

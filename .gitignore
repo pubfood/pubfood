@@ -20,6 +20,9 @@
 # README.md
 # tooth.json
 
+/standalone/public/pubfood.js
+/standalone/public/pubfood.min.js
+
 ## jenkins generated stuff
 env.properties
 npm-shrinkwrap.json
