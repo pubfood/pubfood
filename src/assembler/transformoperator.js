@@ -7,7 +7,7 @@
 
 var util = require('../util');
 var Event = require('../event');
-var transformDelegate = require('../interfaces').TransformDelegate;
+//var transformDelegate = require('../interfaces').TransformDelegate;
 
 /**
  * @typedef {TransformOperator} TransformOperator [TransformOperator]{@link pubfood#assembler.TransformOperator}
