@@ -23,6 +23,10 @@
     "doc": "gulp doc",
     "build": "npm run prepare && npm run lint && gulp build && npm run test && npm run doc",
     "start": "npm run build && gulp serve",
+    "copy_lib": "cp dist/pubfood.* standalone/public",
+    "run_standalone": "npm run copy_lib && node standalone/lib/server.js",
+    "copy_standalone_to_example": "rm -fr ../example/standalone && cp standalone ../example",
+    "copy_docs_to_example": "rm -fr ../example/static/doc && cp dist/doc ../example/static/doc",
     "ybpublish": "publish"
   },
   "repository": {
