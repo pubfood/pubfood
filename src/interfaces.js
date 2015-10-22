@@ -85,8 +85,7 @@ bidDelegate.optional = {
 
 /**
  * Function delegates for the [TransformOperator]{@link pubfood#assembler.TransformOperator} decorator.
- * @typedef {TransformDelegate} TransformDelegate
- * @function
+ * @typedef {function} TransformDelegate
  * @property {Bid[]} bids array of bids to transform @returns {Bid[]}
  * @property {object} params parameters as required by delegate function. Future use.
  * @returns {Bid[]}
@@ -102,8 +101,7 @@ var transformDelegate = function(bids, params) {
  * A custom function that can be registered with an [AuctionProvider]{@link pubfood#provider.AuctionProvider} that
  * will determine when the publisher ad server request should be initiated.
  *
- * @typedef {AuctionTriggerFn} AuctionTriggerFn
- * @function
+ * @typedef {function} AuctionTriggerFn
  * @property {startAuctionCallback} start callback to initiate the publisher ad server request
  */
 var auctionTriggerFunction = function(startAuctionCallback) {
@@ -114,13 +112,13 @@ var auctionTriggerFunction = function(startAuctionCallback) {
  *
  * This is the callback passed into the {@link AuctionTriggerFn}.
  *
- * @function startAuctionCallback
+ * @typedef {function} startAuctionCallback
  */
 
 /**
- * done callback
+ * Callback to notify of {@link pubfood#provider.BidProvider} has its completed bidding process.
  *
- * @function bidDoneCallback
+ * @typedef {function} bidDoneCallback
  * @fires pubfood.PubfoodEvent.BID_COMPLETE
  */
 var bidDoneCallback = function(){
@@ -130,7 +128,7 @@ var bidDoneCallback = function(){
 /**
  * Publisher ad server request processing is done.
  *
- * @function auctionDoneCallback
+ * @typedef {function} auctionDoneCallback
  * @fires pubfood.PubfoodEvent.AUCTION_COMPLETE
  */
 var auctionDoneCallback = function(){
@@ -139,9 +137,8 @@ var auctionDoneCallback = function(){
 
 
 /**
- * pushBid callback
- *
- * @function pushBidCallback
+ * Callback to push bids into the list for publisher ad server auction.
+ * @typedef {function} pushBidCallback
  * @fires pubfood.PubfoodEvent.BID_PUSH_NEXT
  */
 var pushBidCallback = function(){
@@ -150,8 +147,7 @@ var pushBidCallback = function(){
 
 /**
  * Custom reporter.
- * @typedef {Reporter} Reporter
- * @function Reporter
+ * @typedef {function} Reporter
  * @param {object} event -
  * @param {string} event.type -
  * @param {*} event.data -
