@@ -28,6 +28,7 @@
     "copy_standalone_to_example": "npm run copy_lib && rm -fr ../example/standalone && cp -fr standalone ../example",
     "copy_docs_to_example": "rm -fr ../example/static/doc && cp -fr dist/doc ../example/static/doc",
     "postcopy_docs_to_example":"s=`git log -1 --pretty=format:%H`;echo '<!--' $s '-->' >> ../example/static/doc/api_content_only.html;echo '<!--' $s '-->' >> ../example/static/doc/index.html",
+    "create_diagram":"jsdoc -t jsdoc2diagram -r ./src -d ./dist/doc",
     "ybpublish": "publish"
   },
   "repository": {
