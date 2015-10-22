@@ -6,7 +6,7 @@
 'use strict';
 
 /**
- * BidAssembler builds the set of [Bids]{@link pubfood#model.Bid} for a
+ * Builds the set of [Bids]{@link pubfood#model.Bid} for a
  * publisher ad server request [AuctionProvider]{@link pubfood#provider.AuctionProvider}.
  *
  * @class
@@ -31,8 +31,8 @@ BidAssembler.prototype.addOperator = function(operator) {
 /**
  * Process bids.
  *
- * @param {BidObject[]} bids - bids to process.
- * @returns {BidObject[]} - processed output bids
+ * @param {Bid[]} bids - bids to process.
+ * @returns {Bid[]} - processed output bids
  */
 BidAssembler.prototype.process = function(bids, params) {
   var result = bids;

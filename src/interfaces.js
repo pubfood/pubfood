@@ -14,27 +14,32 @@
  * @property {string} name Auction provider delegate name
  * @property {string} libUri
  * @property {function} init Auction provider delegate initial auction request.<br>Called at startup. Returns <i>{undefined}</i>
- * @property {BidProviderConfig[]} init.targeting A list of slots with targeting objects
+ * @property {object[]} init.slots - slot objects with bids and page level targeting
+ * @property {string} init.slots.name slot name
+ * @property {string} init.slots.elementId target DOM elementId
+ * @property {array} init.slots.sizes slot sizes
+ * @property {object} init.slots.targeting slot targeting key value pairs
  * @property {object} init.options Defaults to {}
- * @property {doneCallback} init.done Callback to execute on done
+ * @property {auctionDoneCallback} init.done Callback to execute on done
  * @property {function} refresh Auction provider delegate refresh auction request.<br>Called at startup. Returns <i>{undefined}</i>
- * @property {string[]} refresh.targeting A list of slots with targeting to be refreshed
+ * @property {object[]} refresh.slots - slot objects with bids and page level targeting
+ * @property {string} refresh.slots.name slot name
+ * @property {string} refresh.slots.elementId target DOM elementId
+ * @property {array} refresh.slots.sizes slot sizes
+ * @property {object} refresh.slots.targeting slot targeting key value pairs
  * @property {object} refresh.options Defaults to {}
- * @property {doneCallback} refresh.done Callback to execute on done
- * @property {function} [trigger] Auction provider delegate function to trigger the auction. Default: [pubfood.setTimeout]{@link pubfood#setTimeout}
- * @property {boolean} [trigger.optional] Optional property for [AuctionProvider.validate]{@link pubfood#provider.AuctionProvider.validate} validation
- * @property {doneCallback} trigger.done Callback to initialize the auction provider
+ * @property {auctionDoneCallback} refresh.done Callback to execute on done
+ * @property {function} [trigger] Auction provider delegate function to trigger the auction. Default: [pubfood.timeout]{@link pubfood#timeout}
+ * @property {auctionDoneCallback} trigger.done Callback to initialize the auction provider
  */
 var auctionDelegate = {
   options: {},
   name: '',
   libUri: '',
   init: function(targeting, options, done) {},
-  refresh: function(targeting, options, done) {},
-  trigger: function(done) {}
+  refresh: function(targeting, options, done) {}
 };
 auctionDelegate.optional = {
-  trigger: true,
   options: true
 };
 
@@ -46,18 +51,26 @@ auctionDelegate.optional = {
  * @property {string} libUri location of the delegate JavaScript library/tag.
  * @property {function} init Initial bid request for [BidProvider.init]{@link pubfood#provider.BidProvider#init} delegate.
  * <br>Returns {undefined}
- * @property {Slot[]} init.slots Adslot configuration
+ * @property {object} init.slots
+ * @property {string} init.slots.name - @todo in process ralionalization of slot object structure
+ * @property {array} init.slots.name.sizes
+ * @property {object} init.slots.name.bidProviders
  * @property {object} init.options
- * @property {string} init.options.externalSlot Provider external system Slot Name
+ * @property {string} init.options.slot Provider external system Slot Name
  * @property {string} init.options.other Other properties optional properties added per provider requirement
- * @property {doneCallback} init.done Callback to execute on done
- * @property {function} refresh Refresh bids for [BidProvider.init]{@link pubfood#provider.BidProvider#init} delegate.
+ * @property {pushBidCallback} init.pushBid Callback to execute on next bid available
+ * @property {bidDoneCallback} init.done Callback to execute on done
+ * @property {function} refresh Refresh bids for [BidProvider.refresh]{@link pubfood#provider.BidProvider#refresh} delegate.
  * <br> Return {undefined}
- * @property {Slot[]} refresh.slots Adslot configuration
+ * @property {object} refresh.slots
+ * @property {string} refresh.slots.name - @todo in process ralionalization of slot object structure
+ * @property {array} refresh.slots.name.sizes
+ * @property {object} refresh.slots.name.bidProviders
  * @property {object} refresh.options
- * @property {string} refresh.options.externalSlot Provider external system Slot Name
+ * @property {string} refresh.options.slot Provider external system Slot Name
  * @property {string} refresh.options.other Other properties optional properties added per provider requirement
- * @property {doneCallback} refresh.done Callback to execute on done
+ * @property {pushBidCallback} refresh.pushBid Callback to execute on next bid available
+ * @property {bidDoneCallback} refresh.done Callback to execute on done
  */
 var bidDelegate = {
   options: {},
@@ -71,124 +84,90 @@ bidDelegate.optional = {
 };
 
 /**
- * Interface for classes that are delegates for the [TransformOperator]{@link pubfood#assembler.TransformOperator} decorator.
+ * Function delegates for the [TransformOperator]{@link pubfood#assembler.TransformOperator} decorator.
  * @typedef {TransformDelegate} TransformDelegate
  * @function
  * @property {Bid[]} bids array of bids to transform @returns {Bid[]}
  * @property {object} params parameters as required by delegate function. Future use.
  * @returns {Bid[]}
+ * @example
+ *   var transformDelegate = function(bids, params) { console.log('operate on bids'); };
  */
 var transformDelegate = function(bids, params) {
 };
 
 /**
- * request operator callback
+ * Auction trigger function.
  *
- * @function requestOperatorCallback
- * @param {*} data TBD
- * @return {boolean}
- * @example {file} ../examples/request-operator.js
- * @ignore
+ * A custom function that can be registered with an [AuctionProvider]{@link pubfood#provider.AuctionProvider} that
+ * will determine when the publisher ad server request should be initiated.
+ *
+ * @typedef {AuctionTriggerFn} AuctionTriggerFn
+ * @function
+ * @property {startAuctionCallback} start callback to initiate the publisher ad server request
  */
-var requestOperatorCallback = function(data){
-  return true;
+var auctionTriggerFunction = function(startAuctionCallback) {
 };
 
 /**
- * transform operator callback
+ * Start Publisher Ad Server auction request callback.
  *
- * @function transformOperatorCallback
- * @param {*} data TBD
- * @return {boolean}
- * @example {file} ../examples/transform-operator.js
- * @ignore
+ * This is the callback passed into the {@link AuctionTriggerFn}.
+ *
+ * @function startAuctionCallback
  */
-var transformOperatorCallback = function(data){
-  return true;
-};
 
 /**
  * done callback
  *
- * @function doneCallback
- * @return {undefined}
- * @ignore
+ * @function bidDoneCallback
+ * @fires pubfood.PubfoodEvent.BID_COMPLETE
  */
-var doneCallback = function(){
+var bidDoneCallback = function(){
 
 };
+
+/**
+ * Publisher ad server request processing is done.
+ *
+ * @function auctionDoneCallback
+ * @fires pubfood.PubfoodEvent.AUCTION_COMPLETE
+ */
+var auctionDoneCallback = function(){
+
+};
+
 
 /**
  * pushBid callback
  *
  * @function pushBidCallback
- * @return {undefined}
- * @ignore
+ * @fires pubfood.PubfoodEvent.BID_PUSH_NEXT
  */
 var pushBidCallback = function(){
 
 };
 
 /**
- * @typedef {object} BidProviderConfig
- * @property {string} name The provider's name
- * @property {string|number} price The bid price
- * @property {object} customTageting Custom targeting parameters to be passed to the AuctionProvider
- * @property {SlotConfig} adslot Adslot configuration
- */
-var BidProviderConfig = {
-  name: '',
-  price: '',
-  customTageting: {},
-  adslot: {}
-};
-
-/**
- * bid provider init
- * @function bidProviderInit
- * @param {BidProviderConfig[]} bids A list of bid providers
- * @param {object} options Defaults to {}
- * @param {doneCallback} done Callback to execute on done
- * @return {undefined}
- * @ignore
- */
-var bidProviderInit = function(bids, options, done){
-
-};
-
-/**
- * bid provider refresh
- * @function bidProviderRefresh
- * @param {string[]} slots The slots to be refreshed
- * @param {object} options Defaults to {}
- * @param {doneCallback} done Callback to execute on done
- * @return {undefined}
- * @ignore
- */
-var bidProviderRefresh = function(slots, options, done){
-
-};
-
-/**
- * Custom reporter
- * @function Report
+ * Custom reporter.
+ * @typedef {Reporter} Reporter
+ * @function Reporter
  * @param {object} event -
  * @param {string} event.type -
  * @param {*} event.data -
  * @return {undefined}
- * @ignore
  */
 var Reporter = function(event){
 
 };
 
 /**
- * Bid object structure for the [pushBid]{@link pubfood#interfaces.pushBid} callback.
+ * Bid object structure for the {@link pushBidCallback}.
  *
  * @typedef {object} BidObject
  * @property {string} slot - slot name
  * @property {string} value - publisher adserver targeting bid value
- * @property {array.<number, number>} sizes - array of sizes for the slot the bid is for
+ * @property {array.array.<number, number>} sizes - array of sizes for the slot the bid is for
  * @property {number} sizes.0 width slot width
  * @property {number} sizes.1 height slot height
  * @property {object} [targeting] - key/value pairs for additional adserver targeting
@@ -213,6 +192,17 @@ bidObject.optional = {
  * @property {object.<string, object>} bidProviders
  * @property {object} bidProviders.providerName bid provider name
  * @property {string} bidProviders.providerName.slot external provider system slot name
+ * @example
+ * var slotConfig = {
+ *       name: '/abc/123/rectangle',
+ *       elementId: 'div-left',
+ *       sizes: [ [300, 250], [300, 600] ],
+ *       bidProviders: {
+ *                       p1: {
+ *                        slot: 'p1-rectangle-slot'
+ *                       }
+ *                     }
+ *     };
  */
 var slotConfig = {
   name: '',
@@ -224,15 +214,6 @@ var slotConfig = {
     }
   }
 };
-
-/**
- * @typedef {array} dimensions
- * @property {number|string} width
- * @property {number|string} height
- *
- * @example
- * var dimensions = [ [300, 250], [300, 600] ];
- */
 
 module.exports = {
   BidDelegate: bidDelegate,

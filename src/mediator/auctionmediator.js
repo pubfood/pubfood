@@ -173,11 +173,11 @@ AuctionMediator.prototype.triggerAuction_ = function() {
     return;
   }
 
-  function done() {
+  function triggerAuction() {
     this.startAuction_();
   }
 
-  this.trigger(util.bind(done, this));
+  this.trigger(util.bind(triggerAuction, this));
 
   return this;
 };
@@ -292,7 +292,7 @@ AuctionMediator.prototype.buildTargeting_ = function() {
  * Notification of acution complete
  *
  * @param {string} data The auction mediator's name
- * @return {undefined}
+ * @fires pubfood.PubfoodEvent.AUCTION_COMPLETE
  */
 AuctionMediator.prototype.auctionDone = function(data) {
   Event.publish(Event.EVENT_TYPE.AUCTION_COMPLETE, data, 'auction');

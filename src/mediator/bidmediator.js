@@ -46,6 +46,9 @@ BidMediator.prototype.refreshBids = function(/*slots*/) {
 
 };
 
+/**
+ * @private
+ */
 BidMediator.prototype.getBids_ = function(provider, slots) {
   var self = this;
   var name = provider.name;
@@ -54,18 +57,19 @@ BidMediator.prototype.getBids_ = function(provider, slots) {
     self.pushBid(bid, name);
   };
 
-  var doneCb = function(){
+  var bidDoneCb = function(){
     self.doneBid(name);
   };
 
-  provider.init(slots, {}, pushBidCb, doneCb);
+  provider.init(slots, {}, pushBidCb, bidDoneCb);
 };
 
 /**
- * @todo add docs
+ * Raises an event to notify listeners of a [Bid]{@link pubfood#model.Bid} available.
  *
- * @param {number} bid The bid id
- * @return {undefined}
+ * @param {Bid} bid The bid id
+ * @param {string} providerName the name of the [BidProvider]{@link pubfood#provider.BidProvider}
+ * @fires pubfood.PubfoodEvent.BID_PUSH_NEXT
  */
 BidMediator.prototype.pushBid = function(bid, providerName) {
   var b = Bid.fromObject(bid);
@@ -74,9 +78,10 @@ BidMediator.prototype.pushBid = function(bid, providerName) {
 };
 
 /**
- * Notification that the bid is complete
- * @param {string} bidProvider The bid prodiver
- * @return {undefined}
+ * Notification that the [BidProvider]{@link pubfood#provider.BidProvider} bidding is complete.
+ *
+ * @param {string} bidProvider The [BidProvider]{@link pubfood#provider.BidProvider} name
+ * @fires pubfood.PubfoodEvent.BID_COMPLETE
  */
 BidMediator.prototype.doneBid = function(bidProvider) {
   Event.publish(Event.EVENT_TYPE.BID_COMPLETE, bidProvider, 'bid');

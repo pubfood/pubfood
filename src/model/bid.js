@@ -41,7 +41,7 @@ Bid.validate = function(config) {
  * Create a new [Bid]{@link pubfood#model.Bid} from an object.
  *
  * @param {BidObject} config bid object literal
- * @returns {pubfood#model.Bid} instance of [Bid]{@link pubfood#model.Bid}
+ * @returns {pubfood#model.Bid|null} instance of [Bid]{@link pubfood#model.Bid}
  */
 Bid.fromObject = function(config) {
   if (!Bid.validate(config)) return null;
@@ -56,6 +56,7 @@ Bid.fromObject = function(config) {
  * Set the bid's label/name
  * @param {string} lbl
  * @return {pubfood#model.Bid}
+ * @ignore
  */
 Bid.prototype.label = function(lbl) {
   this.label = lbl || '';
@@ -120,16 +121,6 @@ Bid.prototype.dimensions = function(szs) {
  */
 Bid.prototype.provider = function(p) {
   this.provider = p;
-  return this;
-};
-
-/**
- * Set bid options
- * @param {object} opt Dib options
- * @return {pubfood#model.Bid}
- */
-Bid.prototype.options = function(opt) {
-  this.options = opt || {};
   return this;
 };
 

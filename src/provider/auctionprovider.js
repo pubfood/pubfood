@@ -87,41 +87,37 @@ AuctionProvider.prototype.libUri = function() {
 };
 
 /**
- * Add a slot.
- * @todo maybe change to addSlot
- *
- * @param {pubfood#model.Slot} slot - a [Slot]{@link pubfood#model.Slot} object
- * @return {pubfood#provider.AuctionProvider}
- */
-AuctionProvider.prototype.slot = function(slot) {
-  this.slots_.push(slot);
-  return this;
-};
-
-/**
  * Initialize a auction provider.
  *
  * The AuctionProvider delegate javascript tag and other setup is done here.
  *
- * @param {object[]} targeting - slot objects with bids and page level targeting
+ * @param {object[]} slots - slot objects with bids and page level targeting
+ * @param {string} slots.name slot name
+ * @param {string} slots.elementId target DOM elementId
+ * @param {array} slots.sizes slot sizes
+ * @param {object} slots.targeting slot targeting key value pairs
  * @param {object} options - AuctionProvider delegate specific options
- * @param {function} done - a callback to execute on init complete
+ * @param {auctionDoneCallback} done - a callback to execute on init complete
  * @return {undefined}
  */
-AuctionProvider.prototype.init = function(targeting, options, done) {
-  this.auctionDelegate.init(targeting, options, done);
+AuctionProvider.prototype.init = function(slots, options, done) {
+  this.auctionDelegate.init(slots, options, done);
 };
 
 /**
  * Refresh for ad slots
  *
- * @param {object[]} slot objects with bids and page level targeting
+ * @param {object[]} slots objects with bids and page level targeting
+ * @param {string} slots.name slot name
+ * @param {string} slots.elementId target DOM elementId
+ * @param {array} slots.sizes slot sizes
+ * @param {object} slots.targeting slot targeting key value pairs
  * @param {object} options AuctionProvider delegate specific options
- * @param {function} done a callback to execute on init complete
+ * @param {auctionDoneCallback} done a callback to execute on init complete
  * @return {undefined}
  */
-AuctionProvider.prototype.refresh = function(targeting, options, done) {
-  this.auctionDelegate.refresh(targeting, options, done);
+AuctionProvider.prototype.refresh = function(slots, options, done) {
+  this.auctionDelegate.refresh(slots, options, done);
 };
 
 module.exports = AuctionProvider;

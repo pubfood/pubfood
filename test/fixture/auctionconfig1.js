@@ -94,11 +94,6 @@ var pubfoodContrib = {
         googletag.refresh();
         done();
       });
-    },
-    trigger: function(done) {
-      setTimeout(function() {
-        done();
-      }, 1000);
     }
   },
   bidProviders: [

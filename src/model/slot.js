@@ -38,8 +38,8 @@ Slot.validate = function(config) {
 /**
  * Create a new [Slot]{@link pubfood#model.Slot} from an object.
  *
- * @param {object} config slot object literal
- * @returns {object} instance of [Slot]{@link pubfood#model.Slot}. <strong><em>null</em></strong> if invalid.
+ * @param {SlotConfig} config slot object literal
+ * @returns {Slot|null} instance of [Slot]{@link pubfood#model.Slot}. <strong><em>null</em></strong> if invalid.
  */
 Slot.fromObject = function(config) {
   if (!Slot.validate(config)) return null;

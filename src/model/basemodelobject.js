@@ -12,6 +12,7 @@ var util = require('../util');
  *
  * @class
  * @memberof pubfood#model
+ * @ignore
  */
 function BaseModelObject() {
   this.id = util.newId();

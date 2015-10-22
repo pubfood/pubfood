@@ -205,11 +205,11 @@ PubfoodEvent.prototype.publish = function(eventType, data, providerType) {
  * @property {string} data.AUCTION_COMPLETE
  * @property {string} data.BID_LIB_START
  * @property {string} data.BID_LIB_LOADED
- * @property {object} data.BID_PUSH_NEXT
+ * @property {object} data.BID_PUSH_NEXT @see [Bid]{@link pubfood#model.Bid}
  * @property {string} data.BID_PUSH_NEXT.id
  * @property {array.<number, number>} data.BID_PUSH_NEXT.sizes
  * @property {string} data.BID_PUSH_NEXT.value
- * @property {object} data.BID_PUSH_NEXT.customTargetting
+ * @property {object} data.BID_PUSH_NEXT.targetting
  * @property {string} data.BID_START
  * @property {string} data.BID_COMPLETE
  * @property {string} data.BID_ASSEMBLER
