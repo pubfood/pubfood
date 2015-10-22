@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Pubfood World Simulator</title>
+        <style>body { font-family:'Helvetica Neue', Helvetica, Arial, sans-serif; }</style>
+    </head>
+    <body>
+        <script src="/pubfood.js"></script>
+        <script>
+          // global for the auction provider
+          window.auctionProviderOne = window.auctionProviderOne || {};
+          auctionProviderOne.cmd = auctionProviderOne.cmd || [];
+
+          // globals for all bid providers
+          window.bidProviderOne = window.bidProviderOne || {};
+          bidProviderOne.cmd = bidProviderOne.cmd || [];
+
+          // setup pubfood and hook it up to providers
+          var food = new pubfood();
+          food.addSlot({
+            name: '/2476204/multi-size',
+            elementId: 'div-multi-size',
+            sizes: [
+              [300, 250],
+              [300, 600]
+            ],
+            bidProviders: {
+              // bidProvideOne
+              bidProviderOne: {
+                slot: 'multi'
+              }
+            }
+          });
+          food.addSlot({
+            name: '/2476204/rail',
+            elementId: 'div-rail',
+            sizes: [
+              [300, 250]
+            ],
+            bidProviders: {
+              bidProviderOne: {
+                slot: 'rail'
+              }
+            }
+          });
+          food.addBidProvider({
+            name: 'bidProviderOne',
+            libUri: '/simulated-bid-provider/bidProviderOne.js',
+            sync: true,
+            init: function(slots, options, next, done) {
+              bidProviderOne.cmd.push(function() {
+                var encodedAvailability = encodeURIComponent('multi:300x250|300x600:400,rail:300x250:650');
+                bidProviderOne.init('delay=200&fuzz=10&availability=' + encodedAvailability);
+              });
+              bidProviderOne.cmd.push(function() {
+                var i;
+                var slotMap = {};
+                // TODO decide if slots are an array or an object
+                for (key in slots) {
+                  /** @todo: should not need to reference oneself here */
+                  slotMap[slots[key].bidProviders.bidProviderOne.slot] = key;
+                }
+                var getSizes = function (raw) {
+                  var i;
+                  var sizeSplit;
+                  var sizes = [];
+                  var sizesRaw = raw.split('|');
+                  for (i = 0; i < sizesRaw.length; i++) {
+                    sizeSplit = sizesRaw[i].split('x');
+                    sizes[i] = [parseInt(sizeSplit[0], 10), parseInt(sizeSplit[1], 10)];
+                  }
+                  return sizes;
+                };
+                var parts;
+                var availableSlots = bidProviderOne.getAvailable().split(',');
+                for (i = 0; i < availableSlots.length; i++) {
+                  parts = availableSlots[i].split(':');
+                  // TODO consider different bids for different sizes
+                  next({
+                    slot: slotMap[parts[0]],
+                    value: parts[2],
+                    sizes: getSizes(parts[1]),
+                      targeting: {
+                          provider1_ad: 'y',
+                          provider1_bid: parts[2]
+                      }
+                  });
+                }
+                console.log('bidProviderOne available:', bidProviderOne.getAvailable());
+                done();
+              });
+            },
+            refresh: function(slots, options, done) {
+            }
+          });
+
+          // could add more bidProviders here as needed
+
+          food.setAuctionProvider({
+            name: 'auctionProviderOne',
+            libUri: '/simulated-auction-provider/auctionProviderOne.js',
+            init: function(targets, options, done) {
+              auctionProviderOne.cmd.push(function() {
+                var i, t;
+                for (i = 0; i < targets.length; i++) {
+                  var target = targets[i];
+
+                  if(target.type === 'page'){
+                    // set page level targeting
+                    for(t in target.targeting){
+                      auctionProviderOne.setTargeting(t, target.targeting[t]);
+                    }
+                  }
+
+                  if(target.type === 'slot'){
+                    var apSlot = auctionProviderOne.defineSlot(target.name, target.sizes, target.elementId);
+
+                    // set slot level targeting
+                    for(t in target.targeting){
+                      apSlot.setTargeting(t, target.targeting[t]);
+                    }
+
+                  }
+                }
+              });
+
+              auctionProviderOne.cmd.push(function() {
+                auctionProviderOne
+                  .enableSingleRequest()
+                  .enableServices();
+              });
+
+              done();
+            },
+            refresh: function(slots, customTargeting, done) {
+              done();
+            }
+          });
+
+          food.timeout(1000)
+          food.addReporter(function(ev) {
+            console.log(ev);
+          });
+          food.start(+new Date());
+        </script>
+        <h1>Welcome Publisher People</h1>
+        <p>We're here to help.</p>
+        <p>Here are a couple of slots on a simulated page.</p>
+        <p>Instead of an ad they show the pubfood information.</p>
+        <p>All information shown is available to the auction.</p>
+        <div style="position:relative;height:250px">
+          <div style="position:absolute" id="div-multi-size"></div>
+          <div style="position:absolute;left:310px" id="div-rail"></div>
+        </div>
+        <script>
+          auctionProviderOne.cmd.push(function() {
+            auctionProviderOne.display('div-multi-size');
+            auctionProviderOne.display('div-rail');
+          });
+        </script>
+        <p>Please open up the devtools for more information in the console</p>
+        <p>Feedback is warmly welcome be it questions, comments or concerns.</p>
+        <p>Join us on slack to continue the conversation.</p>
+        <p>We're all trying to make this the best we can.</p>
+    </body>
+</html>

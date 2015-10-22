@@ -108,11 +108,11 @@ server.route({
     var encodedCalls = names.map(function (name, i) {
       var selectedSize = sizes[i][0];
       var encodedContents = [
-        '<div style="width: ' + (selectedSize[0] - 12) + 'px; height: ' + (selectedSize[1] - 12) + 'px;border:solid 1px #aaa;padding:5px">',
-        '<h3>name: ' + htmlSafe(name) + '</h3>',
-        '<h4>id: <code>' + htmlSafe(elIds[i]) + '</code></h4>',
-        '<p>sizes: <code>' + JSON.stringify(sizes[i]) + '</code></p>',
-        '<p>target: <code>' + htmlSafe(target[i]) + '</code></p>',
+        '<div style="width: ' + (selectedSize[0] - 42) + 'px; height: ' + (selectedSize[1] - 2) + 'px;border:solid 1px #aaa;padding:0 20px">',
+        '<h3><div style="color:#666">name</div><code>' + htmlSafe(name) + '</code></h3>',
+        '<h4><div style="color:#666">elementId</div><code>' + htmlSafe(elIds[i]) + '</code></h4>',
+        '<p><div style="color:#666">sizes</div><code>' + JSON.stringify(sizes[i]) + '</code></p>',
+        '<p><div style="color:#666">targeting</div><code>' + htmlSafe(target[i]) + '</code></p>',
         '</div>'
       ]
       .join('')
