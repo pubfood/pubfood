@@ -92,12 +92,13 @@ function greedyMatchLink(text) {
   // test for Array.<type>
   if (text.match(/(.*)(\<)([^\>]+)(\>)/i)) {
     var links = [];
+    var prefix = RegExp.$1;
     var types = RegExp.$3.replace(/\s/g, '').split(',');
     types.forEach(function(type) {
       links.push( linkTo(type) );
     });
 
-    link = RegExp.$1 + '&lt;' + links.join(', ') + '&gt;';
+    link = prefix + '&lt;' + links.join(', ') + '&gt;';
   }
 
   return link;
