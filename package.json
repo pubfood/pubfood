@@ -21,14 +21,14 @@
     "lint": "gulp lint",
     "test": "gulp test",
     "doc": "gulp doc",
-    "build": "npm run prepare && npm run lint && gulp build && npm run test && npm run doc",
+    "create_diagram":"jsdoc -t jsdoc2diagram -r ./src -d ./dist/doc",
+    "build": "npm run prepare && npm run lint && gulp build && npm run test && npm run doc && npm run create_diagram",
     "start": "npm run build && gulp serve",
     "copy_lib": "cp dist/pubfood.* standalone/public",
     "run_standalone": "npm run copy_lib && node standalone/lib/server.js",
     "copy_standalone_to_example": "npm run copy_lib && rm -fr ../example/standalone && cp -fr standalone ../example",
     "copy_docs_to_example": "rm -fr ../example/static/doc && cp -fr dist/doc ../example/static/doc",
     "postcopy_docs_to_example":"s=`git log -1 --pretty=format:%H`;echo '<!--' $s '-->' >> ../example/static/doc/api_content_only.html;echo '<!--' $s '-->' >> ../example/static/doc/index.html",
-    "create_diagram":"jsdoc -t jsdoc2diagram -r ./src -d ./dist/doc",
     "ybpublish": "publish"
   },
   "repository": {
