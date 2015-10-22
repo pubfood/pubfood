@@ -6,8 +6,9 @@
 
 ## Start the server
 
+- npm install
 - node lib/server.js
-- point yout browser to `http://localhost:3002/small.html` 
+- point your browser to `http://localhost:3002/minimal.html`
 
 
 This allows test scenarios to be hosted locally and is meant to serve as a
