@@ -63,9 +63,10 @@ gulp.task('build', function() {
 
   bundleStream
     .pipe(source('pubfood.js'))
+    .pipe(plugins.replace('APP_VERSION', pkg.version))
     .pipe(gulp.dest('./dist'))
     .pipe(plugins.streamify(plugins.uglify()))
-    .pipe(plugins.rename('pubfood.js'.replace('.js', '.min.js')))
+    .pipe(plugins.rename('pubfood.min.js'))
     .pipe(gulp.dest('./dist'));
 });
 
