@@ -2,9 +2,9 @@
   "coordinates": {
     "org": "com.yieldbot.node",
     "name": "pubfood",
-    "type": "npm",
-    "publish": [
-      "echo not publishing"
-    ]
-  }
+    "type": "npm"
+  },
+  "publish": [
+    "echo not publishing"
+  ]
 }
