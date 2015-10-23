@@ -20,27 +20,32 @@ It's what we (YB) do; on pageview:
 ![Architecture Overview - Creative](doc/pubfood-api-flow-creative.png?raw=true "Architecture Overview - Creative")
 ![Architecture Overview - Report](doc/pubfood-api-flow-report.png?raw=true "Architecture Overview - Report")
 
-## Build Tasks
+# Design Models
 
-### Build
+## Auction State
+![Auction State](doc/pubfood-bid-slot.png?raw=true "Internal Auction State")
+
+# Build Tasks
+
+## Build
 
 - `npm run prepare`
 - `npm run build`
 
-### Test
+## Test
 
 ```
 npm run test
 ```
 
-### Start
+## Start
 Opens the `test/index.html` file in your default browser.
 
 ```
 npm start
 ```
 
-### Build Output
+## Build Output
 
 - `dist/doc/index.html` _(...etc, JSDoc)_
 - `dist/pubfood.js`
