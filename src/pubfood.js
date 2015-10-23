@@ -177,6 +177,18 @@ var logger = require('./logger');
   };
 
   /**
+   * Add request transformation operator.
+   *
+   * @param {TransformDelegate} delegate - the delegate function
+   * @return {pubfood}
+   */
+  api.prototype.addRequestTransform = function(delegate) {
+    logger.logCall('api.addRequestTransform', arguments);
+    this.library.mediator.addRequestTransform(delegate);
+    return this;
+  };
+
+  /**
    * Start the bidding process
    * @param {number} [startTimestamp] An optional timestamp that's used for calculating other time deltas.
    * @return {pubfood}

@@ -9,6 +9,7 @@ var util = require('../util');
 var Slot = require('../model/slot');
 var BidMediator = require('./bidmediator');
 var BidAssembler = require('../assembler/bidassembler');
+var RequestAssembler = require('../assembler/requestassembler');
 var TransformOperator = require('../assembler/transformoperator');
 var AuctionProvider = require('../provider/auctionprovider');
 var BidProvider = require('../provider/bidprovider');
@@ -41,6 +42,7 @@ function AuctionMediator(optionalId) {
   this.trigger_ = null;
   this.bidMediator = new BidMediator(this);
   this.bidAssembler = new BidAssembler(this);
+  this.requestAssembler = new RequestAssembler();
 }
 
 /**
@@ -375,13 +377,14 @@ AuctionMediator.prototype.setAuctionProvider = function(delegateConfig) {
 };
 
 /**
- * Adds a function to transform provider bid request parameters.
+ * Adds a function to transform provider bid request parameters, before auction provider request
  *
  * @param {TransformDelegate} delegate the transformation delegate function
  * @returns {pubfood#mediator.AuctionMediator}
  */
-AuctionMediator.prototype.addRequestTransform = function(/*delegate*/){
-
+AuctionMediator.prototype.addRequestTransform = function(delegate){
+  this.requestAssembler.addOperator(new TransformOperator(delegate));
+  return this;
 };
 
 /**
