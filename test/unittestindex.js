@@ -13,3 +13,4 @@ require('./mediator');
 require('./provider');
 require('./assembler');
 require('./report');
+require('./api-callbacks');
