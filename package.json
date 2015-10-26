@@ -10,7 +10,8 @@
   },
   "contributors": [
     "John Ellis <jellis@yieldbot.com>",
-    "Andrei McMillan <amcmillan@yieldbot.com>"
+    "Andrei McMillan <amcmillan@yieldbot.com>",
+    "Erik Solen <esolen@yieldbot.com>"
   ],
   "main": "./src/pubfood.js",
   "scripts": {
