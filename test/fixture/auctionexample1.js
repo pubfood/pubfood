@@ -55,7 +55,7 @@ var auctionexample1 = {
       }
     },
     {
-      name: 'partnerFast',
+      name: 'bidderFast',
       libUri: '../test/fixture/lib.js',
       init: function(slots, options, pushBid, done) {
         done();
@@ -64,7 +64,7 @@ var auctionexample1 = {
       }
     },
     {
-      name: 'partnerSlow',
+      name: 'bidderSlow',
       libUri: '../test/fixture/lib.js',
       init: function(slots, options, pushBid, done) {
         done();
