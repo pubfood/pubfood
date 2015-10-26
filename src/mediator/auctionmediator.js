@@ -418,6 +418,7 @@ AuctionMediator.prototype.loadProviders = function(/*action*/) {
     Event.publish(Event.EVENT_TYPE.AUCTION_LIB_LOADED, this.auctionProvider.name, 'auction');
 
     uri = this.auctionProvider.libUri();
+    // @todo get sync going here
     util.loadUri(uri);
   }
 };
