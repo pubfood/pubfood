@@ -53,7 +53,7 @@ function AuctionMediator(optionalId) {
 AuctionMediator.prototype.init = function() {
   Event.on(Event.EVENT_TYPE.BID_COMPLETE, util.bind(this.checkBids_, this));
   Event.on(Event.EVENT_TYPE.BID_PUSH_NEXT, util.bind(this.pushBid_, this));
-  Event.on(Event.EVENT_TYPE.AUCTION_COMPLETE, function(data) { console.log(data); });
+  // Event.on(Event.EVENT_TYPE.AUCTION_COMPLETE, function(data) { console.log(data); });
   Event.on(Event.EVENT_TYPE.AUCTION_TRIGGER, util.bind(this.triggerAuction_, this));
   return this;
 };
