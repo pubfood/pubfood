@@ -19,6 +19,7 @@
     "clean": "npm run prepare && gulp clean",
     "lint": "gulp lint",
     "test": "gulp test",
+    "docco": "docco --output=dist/doc examples/literate.js",
     "doc": "gulp doc",
     "create_diagram": "jsdoc -t jsdoc2diagram -r ./src -d ./dist/doc",
     "build": "npm run prepare && npm run lint && gulp build && npm run test && npm run doc && npm run create_diagram",
