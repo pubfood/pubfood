@@ -1,14 +1,12 @@
 {
   "name": "pubfood",
   "version": "0.0.3",
+  "prvate": true,
   "description": "Header bidding library",
   "license": "MIT",
   "author": {
     "name": "Yieldbot, Inc.",
     "url": "http://www.yieldbot.com"
-  },
-  "publishConfig": {
-    "registry": "https://artifactory.yb0t.cc/artifactory/api/npm/yieldbot-npm"
   },
   "contributors": [
     "John Ellis <jellis@yieldbot.com>",
