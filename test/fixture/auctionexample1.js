@@ -74,3 +74,7 @@ var auctionexample1 = {
     }
   ]
 };
+
+if(module && module.exports){
+  module.exports = auctionexample1;
+}
