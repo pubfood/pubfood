@@ -358,7 +358,7 @@ AuctionMediator.prototype.addBidProvider = function(delegateConfig) {
     }
     this.auctionState_.providers[bidProvider.name].provider = bidProvider;
   }
-  return this.bidProvider;
+  return bidProvider;
 };
 
 /**
