@@ -234,16 +234,29 @@ AuctionMediator.prototype.go_ = function() {
   if (this.inAuction) return;
   this.inAuction = true;
 
+  var doneCalled = false;
   var name = self.auctionProvider.name;
+
+  var doneCb = function(){
+    if(!doneCalled) {
+      doneCalled = true;
+      self.auctionDone(name);
+    }
+  };
+
+  setTimeout(function(){
+    if(!doneCalled) {
+      Event.publish(Event.EVENT_TYPE.WARN, 'Warning: The auction done callback for "'+name+'" hasn\'t been called within the allotted time (2sec)', 'bidmediator');
+      doneCb();
+    }
+  }, 2000);
 
   Event.publish(Event.EVENT_TYPE.AUCTION_GO, name, 'auction');
 
   var options = this.auctionProvider.options || {};
 
   var targeting = this.buildTargeting_();
-  this.auctionProvider.init(targeting, options, function(){
-    self.auctionDone(name);
-  });
+  this.auctionProvider.init(targeting, options, doneCb);
 };
 
 AuctionMediator.prototype.getBidKey = function(bid) {

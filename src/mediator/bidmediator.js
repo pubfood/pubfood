@@ -52,14 +52,25 @@ BidMediator.prototype.refreshBids = function(/*slots*/) {
 BidMediator.prototype.getBids_ = function(provider, slots) {
   var self = this;
   var name = provider.name;
+  var doneCalled = false;
 
   var pushBidCb = function(bid){
     self.pushBid(bid, name);
   };
 
   var bidDoneCb = function(){
-    self.doneBid(name);
+    if(!doneCalled) {
+      doneCalled = true;
+      self.doneBid(name);
+    }
   };
+
+  setTimeout(function(){
+    if(!doneCalled) {
+      Event.publish(Event.EVENT_TYPE.WARN, 'Warning: The bid done callback for "'+name+'" hasn\'t been called within the allotted time (2sec)', 'bidmediator');
+      bidDoneCb();
+    }
+  }, 2000);
 
   provider.init(slots, {}, pushBidCb, bidDoneCb);
 };
