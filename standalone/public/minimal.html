@@ -81,10 +81,9 @@
                     slot: slotMap[parts[0]],
                     value: parts[2],
                     sizes: getSizes(parts[1]),
-                      targeting: {
-                          provider1_ad: 'y',
-                          provider1_bid: parts[2]
-                      }
+                    targeting: {
+                      provider1_bid: parts[2]
+                    }
                   });
                 }
                 console.log('bidProviderOne available:', bidProviderOne.getAvailable());

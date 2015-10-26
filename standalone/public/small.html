@@ -95,10 +95,12 @@
                   next({
                     slot: slotMap[parts[0]],
                     value: parts[2],
-                    sizes: getSizes(parts[1])
+                    sizes: getSizes(parts[1]),
+                    targeting: {
+                      bp1_bid: parts[2]
+                    }
                   });
                 }
-                console.log('bp1 available:', bp1.getAvailable());
                 done();
               });
             },
@@ -112,11 +114,42 @@
             sync: true,
             init: function(slots, options, next, done) {
               bp2.cmd.push(function() {
-                var encodedAvailability = encodeURIComponent('a:300x250,b:728x90');
+                var encodedAvailability = encodeURIComponent('multi:300x250|300x600:800,rail:300x250:950');
                 bp2.init('delay=200&fuzz=10&availability=' + encodedAvailability);
               });
               bp2.cmd.push(function() {
-                console.log('bp2 available:', bp2.getAvailable());
+                var i;
+                var slotMap = {};
+                // TODO decide if slots are an array or an object
+                for (key in slots) {
+                  /** @todo: should not need to reference oneself here */
+                  slotMap[slots[key].bidProviders.bp2.slot] = key;
+                }
+                var getSizes = function (raw) {
+                  var i;
+                  var sizeSplit;
+                  var sizes = [];
+                  var sizesRaw = raw.split('|');
+                  for (i = 0; i < sizesRaw.length; i++) {
+                    sizeSplit = sizesRaw[i].split('x');
+                    sizes[i] = [parseInt(sizeSplit[0], 10), parseInt(sizeSplit[1], 10)];
+                  }
+                  return sizes;
+                };
+                var parts;
+                var availableSlots = bp2.getAvailable().split(',');
+                for (i = 0; i < availableSlots.length; i++) {
+                  parts = availableSlots[i].split(':');
+                  // TODO consider different bids for different sizes
+                  next({
+                    slot: slotMap[parts[0]],
+                    value: parts[2],
+                    sizes: getSizes(parts[1]),
+                    targeting: {
+                      bp2_bid: parts[2]
+                    }
+                  });
+                }
                 done();
               });
             },
@@ -130,11 +163,42 @@
             sync: true,
             init: function(slots, options, next, done) {
               bp3.cmd.push(function() {
-                var encodedAvailability = encodeURIComponent('multi:300x250,b:728x90');
+                var encodedAvailability = encodeURIComponent('multi:300x250|300x600:900,rail:300x250:975');
                 bp3.init('delay=200&fuzz=10&availability=' + encodedAvailability);
               });
               bp3.cmd.push(function() {
-                console.log('bp3 available:', bp3.getAvailable());
+                var i;
+                var slotMap = {};
+                // TODO decide if slots are an array or an object
+                for (key in slots) {
+                  /** @todo: should not need to reference oneself here */
+                  slotMap[slots[key].bidProviders.bp3.slot] = key;
+                }
+                var getSizes = function (raw) {
+                  var i;
+                  var sizeSplit;
+                  var sizes = [];
+                  var sizesRaw = raw.split('|');
+                  for (i = 0; i < sizesRaw.length; i++) {
+                    sizeSplit = sizesRaw[i].split('x');
+                    sizes[i] = [parseInt(sizeSplit[0], 10), parseInt(sizeSplit[1], 10)];
+                  }
+                  return sizes;
+                };
+                var parts;
+                var availableSlots = bp3.getAvailable().split(',');
+                for (i = 0; i < availableSlots.length; i++) {
+                  parts = availableSlots[i].split(':');
+                  // TODO consider different bids for different sizes
+                  next({
+                    slot: slotMap[parts[0]],
+                    value: parts[2],
+                    sizes: getSizes(parts[1]),
+                    targeting: {
+                      bp3_bid: parts[2]
+                    }
+                  });
+                }
                 done();
               });
             },
