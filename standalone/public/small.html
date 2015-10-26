@@ -248,10 +248,12 @@
           });
 
           food.timeout(1000)
+          var timeReference = +new Date();
           food.addReporter(function(ev) {
             console.log(ev);
+            console.log(ev.type, 'delay in ms:', ev.ts - timeReference);
           });
-          food.start(+new Date());
+          food.start(timeReference);
         </script>
         <h1>Welcome Publisher People</h1>
         <p>We're here to help.</p>
