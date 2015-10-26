@@ -364,15 +364,19 @@ AuctionMediator.prototype.addBidProvider = function(delegateConfig) {
 /**
  * Add a [AuctionProvider]{@link pubfood#provider.AuctionProvider} configuration object.
  * @param {AuctionDelegate} delegateConfig - configuration for a [AuctionProvider]{@link pubfood#provider.AuctionProvider}
- * @returns {pubfood#provider.AuctionProvider}
+ * @returns {null|pubfood#provider.AuctionProvider}
  */
 AuctionMediator.prototype.setAuctionProvider = function(delegateConfig) {
   if (this.auctionProvider) {
     Event.publish(Event.EVENT_TYPE.WARN, 'Warning: auction provider exists: ' + this.auctionProvider.name, 'auctionmediator');
   }
   var auctionProvider = AuctionProvider.withDelegate(delegateConfig);
-  this.auctionProvider = auctionProvider;
-  this.auctionProvider.setMediator(this);
+  if(!auctionProvider){
+    Event.publish(Event.EVENT_TYPE.WARN, 'Warning: invalid auction provider: ' + this.auctionProvider.name, 'auctionmediator');
+  } else {
+    this.auctionProvider = auctionProvider;
+    this.auctionProvider.setMediator(this);
+  }
   return this.auctionProvider;
 };
 
