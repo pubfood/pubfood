@@ -127,18 +127,18 @@ var logger = require('./logger');
   api.prototype.addReporter = function(eventType, reporter) {
     logger.logCall('api.addReporter', arguments);
     if (typeof eventType === 'function') {
-      reporter = eventType;
-      eventType = '';
-    }
-
-    if (Event.EVENT_TYPE[eventType]) {
-      Event.on(Event.EVENT_TYPE[eventType], util.bind(reporter, this));
-    } else {
       // subscribe the reported to all the available events
       for (var e in Event.EVENT_TYPE) {
-        Event.on(Event.EVENT_TYPE[e], util.bind(reporter, this));
+        Event.on(Event.EVENT_TYPE[e], util.bind(eventType, this));
+      }
+    } else if (typeof eventType === 'string') {
+      if (Event.EVENT_TYPE[eventType]) {
+        Event.on(Event.EVENT_TYPE[eventType], util.bind(reporter, this));
+      } else {
+        Event.publish(Event.EVENT_TYPE.WARN, 'Warning: Invalid event type "' + eventType + '"', 'pubfood');
       }
     }
+
     return this;
   };
 
