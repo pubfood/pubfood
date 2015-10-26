@@ -33,10 +33,10 @@ var auctionexample1 = {
   auctionProvider: {
     name: 'Google',
     libUri: '//www.googletagservices.com/tag/js/gpt.js',
-    init: function(slots, bids, options, done) {
-
+    init: function(targets, options, done) {
+      done();
     },
-    refresh: function(slots, targeting, done) {
+    refresh: function(slots, customTargeting, done) {
     },
     trigger: function(done) {
       setTimeout(function() {
@@ -51,7 +51,7 @@ var auctionexample1 = {
       init: function(slots, options, pushBid, done) {
         done();
       },
-      refresh: function(slots, options, done) {
+      refresh: function(slots, options, pushBid, done) {
       }
     },
     {
