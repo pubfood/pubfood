@@ -3,9 +3,9 @@
 ```js
 var p = new pubfood();
 
-p.addBidOperator(function(bids){...});
+p.addBidTransform(function(bids){...});
 
-p.addRequestOperator(function(slots){...});
+p.addRequestTransform(function(slots){...});
 
 // add sidebar-unit slot
 p.addSlot({name: '/2476204/sidebar-unit',...});
