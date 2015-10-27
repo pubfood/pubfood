@@ -30,8 +30,6 @@ function BidMediator(auctionMediator) {
  * @return {undefined}
  */
 BidMediator.prototype.initBids = function(auctionState) {
-  // TODO: run request operators here
-
   var providers = auctionState.providers;
   for (var k in providers) {
     this.getBids_(providers[k].provider, providers[k].slots);
