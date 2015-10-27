@@ -162,7 +162,7 @@ var logger = require('./logger');
 
   /**
    * Gets a list of bidproviders
-   * @return {provider1: {...}, provider2: {...}, provider3: {...}}
+   * @return {{provider1: {}, provider2: {}, provider3: {}}}
    */
   api.prototype.getBidProviders = function() {
     logger.logCall('api.getBidProvider', arguments);
