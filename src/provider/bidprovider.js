@@ -7,6 +7,7 @@
 
 var util = require('../util');
 var BidDelegate = require('../interfaces').BidDelegate;
+var Event = require('../event');
 
 /**
  * BidProvider implements bidding partner requests.
@@ -28,6 +29,7 @@ function BidProvider(delegate) {
  */
 BidProvider.withDelegate = function(delegate) {
   if (!BidProvider.validate(delegate)) {
+    Event.publish(Event.EVENT_TYPE.WARN, {msg: 'Warn: invalid bidder delegate - ' + delegate || ''}, 'validation');
     return null;
   }
   var p = new BidProvider(delegate);

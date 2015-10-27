@@ -7,6 +7,7 @@
 
 var util = require('../util');
 var AuctionDelegate = require('../interfaces').AuctionDelegate;
+var Event = require('../event');
 
 /**
  * AuctionProvider implements the publisher ad server requests.
@@ -39,6 +40,7 @@ AuctionProvider.prototype.setMediator = function(mediator) {
  */
 AuctionProvider.withDelegate = function(delegate) {
   if (!AuctionProvider.validate(delegate)) {
+    Event.publish(Event.EVENT_TYPE.INVALID, {msg: 'Warn: invalid auction delegate - ' + (delegate && JSON.stringify(delegate)) || ''}, 'validation');
     return null;
   }
   var p = new AuctionProvider(delegate);
