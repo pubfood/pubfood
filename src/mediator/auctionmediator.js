@@ -40,6 +40,7 @@ function AuctionMediator(optionalId) {
   this.inAuction = false;
   this.timeout_ = -1;
   this.trigger_ = null;
+  this.initDoneTimeout_ = 2000;
   this.bidMediator = new BidMediator(this);
   this.bidAssembler = new BidAssembler(this);
   this.requestAssembler = new RequestAssembler();
@@ -123,7 +124,7 @@ AuctionMediator.prototype.validate = function(isRefresh) {
  * @param {number} millis - milliseconds to set the timeout
  */
 AuctionMediator.prototype.timeout = function(millis) {
-  this.timeout_ = millis;
+  this.timeout_ = typeof millis === 'number' ? millis : 2000;
 };
 
 /**
@@ -133,6 +134,16 @@ AuctionMediator.prototype.timeout = function(millis) {
  */
 AuctionMediator.prototype.getTimeout = function() {
   return this.timeout_;
+};
+
+/**
+ * The maximum time the acution provider has before calling `done` inside the `init` method
+ *
+ * @param {number} millis timeout in milliseconds
+ * @return {undefined}
+ */
+AuctionMediator.prototype.setAuctionProviderTimeout = function(millis){
+  this.initDoneTimeout_ = typeof millis === 'number' ? millis : 2000;
 };
 
 /**
@@ -249,7 +260,7 @@ AuctionMediator.prototype.go_ = function() {
       Event.publish(Event.EVENT_TYPE.WARN, 'Warning: The auction done callback for "'+name+'" hasn\'t been called within the allotted time (2sec)', 'bidmediator');
       doneCb();
     }
-  }, 2000);
+  }, this.initDoneTimeout_);
 
   Event.publish(Event.EVENT_TYPE.AUCTION_GO, name, 'auction');
 
@@ -370,8 +381,20 @@ AuctionMediator.prototype.addBidProvider = function(delegateConfig) {
       this.auctionState_.providers[bidProvider.name] = {};
     }
     this.auctionState_.providers[bidProvider.name].provider = bidProvider;
+  } else {
+    Event.publish(Event.EVENT_TYPE.WARN, 'Warning: invalid bid provider: ' + delegateConfig.name, 'auctionmediator');
   }
   return bidProvider;
+};
+
+/**
+ * The maximum time the bid provider has before calling `done` inside the `init` method
+ *
+ * @param {number} millis timeout in milliseconds
+ * @return {undefined}
+ */
+AuctionMediator.prototype.setBidProviderTimeout = function(millis){
+  this.bidMediator.setInitDoneTimeout(millis);
 };
 
 /**
@@ -384,13 +407,13 @@ AuctionMediator.prototype.setAuctionProvider = function(delegateConfig) {
     Event.publish(Event.EVENT_TYPE.WARN, 'Warning: auction provider exists: ' + this.auctionProvider.name, 'auctionmediator');
   }
   var auctionProvider = AuctionProvider.withDelegate(delegateConfig);
-  if(!auctionProvider){
-    Event.publish(Event.EVENT_TYPE.WARN, 'Warning: invalid auction provider: ' + this.auctionProvider.name, 'auctionmediator');
-  } else {
+  if(auctionProvider){
     this.auctionProvider = auctionProvider;
     this.auctionProvider.setMediator(this);
+  } else {
+    Event.publish(Event.EVENT_TYPE.WARN, 'Warning: invalid auction provider: ' + delegateConfig.name, 'auctionmediator');
   }
-  return this.auctionProvider;
+  return auctionProvider;
 };
 
 /**

@@ -20,6 +20,7 @@ var Bid = require('../model/bid');
 function BidMediator(auctionMediator) {
   this.auctionMediator = auctionMediator;
   this.operators = [];
+  this.initDoneTimeout_ = 2000;
 }
 
 /**
@@ -47,6 +48,16 @@ BidMediator.prototype.refreshBids = function(/*slots*/) {
 };
 
 /**
+ * The maximum time the bid provider has before calling `done` inside the `init` method
+ *
+ * @param {number} millis timeout in milliseconds
+ * @return {undefined}
+ */
+BidMediator.prototype.setInitDoneTimeout = function(millis){
+  this.initDoneTimeout_ = typeof millis === 'number' ? millis : 2000;
+};
+
+/**
  * @private
  */
 BidMediator.prototype.getBids_ = function(provider, slots) {
@@ -70,7 +81,7 @@ BidMediator.prototype.getBids_ = function(provider, slots) {
       Event.publish(Event.EVENT_TYPE.WARN, 'Warning: The bid done callback for "'+name+'" hasn\'t been called within the allotted time (2sec)', 'bidmediator');
       bidDoneCb();
     }
-  }, 2000);
+  }, this.initDoneTimeout_);
 
   provider.init(slots, {}, pushBidCb, bidDoneCb);
 };

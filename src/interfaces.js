@@ -160,7 +160,7 @@ var Reporter = function(event){
 /**
  * Bid object structure for the {@link pushBidCallback}.
  *
- * @typedef {object} BidObject
+ * @typedef {BidObject} BidObject
  * @property {string} slot - slot name
  * @property {string} value - publisher adserver targeting bid value
  * @property {array.array.<number, number>} sizes - array of sizes for the slot the bid is for
@@ -209,6 +209,19 @@ var slotConfig = {
       slot: 'slot-name'
     }
   }
+};
+
+/**
+ *
+ * @typedef {PubfoodConfig} PubfoodConfig - all properties are optional
+ * @property {string} id
+ * @property {number} auctionProviderTimeout The maximum time the acution provider has before calling `done` inside the `init` method
+ * @property {number} bidProviderTimeout The maximum time the bid provider has before calling `done` inside the `init` method
+ */
+var PubfoodConfig = {
+  id: '',
+  auctionProviderTimeout: 2000,
+  bidProviderTimeout: 2000
 };
 
 module.exports = {

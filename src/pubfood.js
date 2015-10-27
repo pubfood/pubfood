@@ -19,8 +19,8 @@ var logger = require('./logger');
 
 }(window || {}, undefined, function(global/*, config*/) {
 
-  var pubfood = function(optionalId) {
-    return new pubfood.library.init(optionalId);
+  var pubfood = function(config) {
+    return new pubfood.library.init(config);
   };
 
   pubfood.library = pubfood.prototype = {
@@ -35,16 +35,18 @@ var logger = require('./logger');
    *
    * @alias pubfood
    * @constructor
-   * @param {string} [optional_id] Optional ID
+   * @param {PubfoodConfig} [config] Optional configuration
    * @return {pubfood}
    */
-  var api = pubfood.library.init = function(optionalId) {
+  var api = pubfood.library.init = function(config) {
     Event.publish(Event.EVENT_TYPE.PUBFOOD_API_LOAD);
 
     logger.logCall('api.init', arguments);
     this.EVENT_TYPE = Event.EVENT_TYPE;
     this.logger = logger;
-    this.id = optionalId;
+    this.id_ = config.id;
+    this.auctionProviderTimeout_ = config.auctionProviderTimeout;
+    this.bidProviderTimeout_ = config.bidProviderTimeout;
     return this;
   };
 
@@ -75,12 +77,12 @@ var logger = require('./logger');
    *
    * @function
    * @param {AuctionDelegate} delegate Auction provider configuration
-   * @throws {PubfoodError}
    * @return {pubfood}
    */
-  api.prototype.setAuctionProvider = function(provider) {
+  api.prototype.setAuctionProvider = function(delegate) {
     logger.logCall('api.setAuctionProvider', arguments);
-    this.library.mediator.setAuctionProvider(provider);
+    this.library.mediator.setAuctionProvider(delegate);
+    this.library.mediator.setAuctionProviderTimeout(this.auctionProviderTimeout_);
     return this;
   };
 
@@ -98,13 +100,13 @@ var logger = require('./logger');
    *
    * @function
    * @param {BidDelegate} delegate Bid provider configuaration
-   * @throws {PubfoodError}
    * @return {pubfood}
    * @example {file} ../examples/add-bid-provider.js
    */
   api.prototype.addBidProvider = function(delegate) {
     logger.logCall('api.addBidProvider', arguments);
     this.library.mediator.addBidProvider(delegate);
+    this.library.mediator.setBidProviderTimeout(this.bidProviderTimeout_);
     return this;
   };
 

@@ -57,8 +57,8 @@ describe('Api Callbacks - Tests', function() {
 
     var p = new pubfood({
       id: 'optionalId',
-      auctionProviderTimeout: 2000,
-      bidProviderTimeout: 2000
+      auctionProviderTimeout: 500,
+      bidProviderTimeout: 600
     });
 
     // add custom reporters

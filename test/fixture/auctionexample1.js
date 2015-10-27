@@ -34,7 +34,7 @@ var auctionexample1 = {
     name: 'Google',
     libUri: '//www.googletagservices.com/tag/js/gpt.js',
     init: function(targets, options, done) {
-      done();
+      //done();
     },
     refresh: function(slots, customTargeting, done) {
     },
@@ -49,7 +49,7 @@ var auctionexample1 = {
       name: 'yieldbot',
       libUri: '//cdn.yldbt.com/js/yieldbot.intent.js',
       init: function(slots, options, pushBid, done) {
-        done();
+        //done();
       },
       refresh: function(slots, options, pushBid, done) {
       }
