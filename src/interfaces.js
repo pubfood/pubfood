@@ -232,8 +232,8 @@ var slotConfig = {
  */
 var PubfoodConfig = {
   id: '',
-  auctionProviderTimeout: 2000,
-  bidProviderTimeout: 2000
+  auctionProviderCbTimeout: 2000,
+  bidProviderCbTimeout: 2000
 };
 
 module.exports = {

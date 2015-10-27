@@ -28,7 +28,6 @@ describe('Pubfood AuctionMediator', function testPubfoodMediator() {
       onEvent = true;
       assert.isDefined(Event._events, 'validation event not published');
       assert.isTrue(event.type === 'INVALID', 'should be an error event');
-      assert.isTrue(event.provider === 'validation', 'should be a validation error');
     });
     assert.isFalse(m.validate(), 'mediator should not be valid');
     // @todo hmmm, relies on synchronous event emit processing from 'validate'
@@ -67,14 +66,7 @@ describe('Pubfood AuctionMediator', function testPubfoodMediator() {
       }
     });
 
-    var onEvent = false;
-    Event.on(Event.EVENT_TYPE.INVALID, function(event) {
-      onEvent = true;
-      assert.isTrue(event.provider === 'validation', 'should be a validation warning');
-    });
     assert.isFalse(m.validate(), 'mediator should not be valid');
-    // @todo hmmm, relies on synchronous event emit processing from 'validate'
-    assert.isTrue(onEvent === true, 'should raise validation event');
   });
 
   it('should have slots with at least one bidder', function() {
@@ -100,14 +92,7 @@ describe('Pubfood AuctionMediator', function testPubfoodMediator() {
       }
     });
 
-    var onEvent = false;
-    Event.on(Event.EVENT_TYPE.INVALID, function(event) {
-      onEvent = true;
-      assert.isTrue(event.provider === 'validation', 'should be invalid');
-    });
     assert.isFalse(m.validate(), 'mediator should not be valid');
-    // @todo hmmm, relies on synchronous event emit processing from 'validate'
-    assert.isTrue(onEvent === true, 'should raise validation event');
   });
 
   it('should have at least one slot', function() {
@@ -122,14 +107,7 @@ describe('Pubfood AuctionMediator', function testPubfoodMediator() {
       }
     });
 
-    var onEvent = false;
-    Event.on(Event.EVENT_TYPE.INVALID, function(event) {
-      onEvent = true;
-      assert.isTrue(event.provider === 'validation', 'should be a validation warning');
-    });
     assert.isFalse(m.validate(), 'mediator should not be valid');
-    // @todo hmmm, relies on synchronous event emit processing from 'validate'
-    assert.isTrue(onEvent === true, 'should raise validation event');
   });
 
   it('should raise warning on setAuctionProvider with existing provider', function() {
@@ -149,9 +127,9 @@ describe('Pubfood AuctionMediator', function testPubfoodMediator() {
     m.setAuctionProvider(providerDelegate);
 
     var log = logger.history[logger.history.length - 1];
+    console.log('>>>>>>', log.args);
     assert.isTrue(log.args[0] === 'WARN');
     assert.isTrue(log.args[1] === 'Warning: auction provider exists: Google');
-    assert.isTrue(log.args[2] === 'auctionmediator');
 
   });
 

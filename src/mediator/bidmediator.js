@@ -51,7 +51,7 @@ BidMediator.prototype.refreshBids = function(/*slots*/) {
  * @param {number} millis timeout in milliseconds
  * @return {undefined}
  */
-BidMediator.prototype.setInitDoneTimeout = function(millis){
+BidMediator.prototype.setBidProviderCbTimeout = function(millis){
   this.initDoneTimeout_ = typeof millis === 'number' ? millis : 2000;
 };
 
@@ -76,7 +76,7 @@ BidMediator.prototype.getBids_ = function(provider, slots) {
 
   setTimeout(function(){
     if(!doneCalled) {
-      Event.publish(Event.EVENT_TYPE.WARN, 'Warning: The bid done callback for "'+name+'" hasn\'t been called within the allotted time (2sec)', 'bidmediator');
+      Event.publish(Event.EVENT_TYPE.WARN, 'Warning: The bid done callback for "'+name+'" hasn\'t been called within the allotted time (2sec)');
       bidDoneCb();
     }
   }, this.initDoneTimeout_);
@@ -94,7 +94,7 @@ BidMediator.prototype.getBids_ = function(provider, slots) {
 BidMediator.prototype.pushBid = function(bid, providerName) {
   var b = Bid.fromObject(bid);
   b.provider = providerName;
-  Event.publish(Event.EVENT_TYPE.BID_PUSH_NEXT, b, providerName);
+  Event.publish(Event.EVENT_TYPE.BID_PUSH_NEXT, b);
 };
 
 /**
@@ -105,7 +105,7 @@ BidMediator.prototype.pushBid = function(bid, providerName) {
  */
 BidMediator.prototype.doneBid = function(bidProvider) {
   // TODO consider having useful bid data available upon completion like the bids
-  Event.publish(Event.EVENT_TYPE.BID_COMPLETE, 'bid', bidProvider);
+  Event.publish(Event.EVENT_TYPE.BID_COMPLETE, bidProvider);
 };
 
 module.exports = BidMediator;

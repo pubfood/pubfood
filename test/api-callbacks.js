@@ -49,8 +49,8 @@ describe('Api Callbacks - Tests', function() {
 
     var pf = new pubfood({
       id: 'optionalId',
-      auctionProviderTimeout: 500,
-      bidProviderTimeout: 600
+      auctionProviderCbTimeout: 500,
+      bidProviderCbTimeout: 600
     });
 
     var checkDoneCallbacks = function(_key) {
@@ -72,9 +72,9 @@ describe('Api Callbacks - Tests', function() {
 
     // add reporter for BID_COMPLETE
     pf.addReporter('BID_COMPLETE', function(event) {
-      var provider = event.data;
-      if (typeof bidProviderDoneCalled[provider] !== 'undefined') {
-        bidProviderDoneCalled[provider] = true;
+      var data = event.data;
+      if (typeof bidProviderDoneCalled[data] !== 'undefined') {
+        bidProviderDoneCalled[data] = true;
       }
     });
 

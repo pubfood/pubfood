@@ -40,7 +40,7 @@ AuctionProvider.prototype.setMediator = function(mediator) {
  */
 AuctionProvider.withDelegate = function(delegate) {
   if (!AuctionProvider.validate(delegate)) {
-    Event.publish(Event.EVENT_TYPE.INVALID, {msg: 'Warn: invalid auction delegate - ' + (delegate && JSON.stringify(delegate)) || ''}, 'validation');
+    Event.publish(Event.EVENT_TYPE.INVALID, {msg: 'Warn: invalid auction delegate - ' + (delegate && JSON.stringify(delegate)) || ''});
     return null;
   }
   var p = new AuctionProvider(delegate);

@@ -120,10 +120,10 @@ PubfoodEvent.prototype.EVENT_TYPE = {
  * publish an event
  * @param {string} eventType The event type
  * @param {*} data the event data
- * @param {string} providerType The type of provider. ex: <i>bid</i>, <i>auction</i>
+ * @param {string} eventContext The type of provider. ex: <i>bid</i>, <i>auction</i>
  * @return {boolean} Indication if we've emitted an event.
  */
-PubfoodEvent.prototype.publish = function(eventType, data, providerType) {
+PubfoodEvent.prototype.publish = function(eventType, data, eventContext) {
   var ts = (+new Date());
 
   if(eventType === this.EVENT_TYPE.PUBFOOD_API_START && data){
@@ -135,7 +135,7 @@ PubfoodEvent.prototype.publish = function(eventType, data, providerType) {
   return this.emit(eventType, {
     ts: ts,
     type: eventType,
-    provider: providerType || 'pubfood',
+    eventContext: eventContext || 'pubfood',
     data: data || ''
   });
 };

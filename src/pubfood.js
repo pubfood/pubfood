@@ -86,8 +86,8 @@ var logger = require('./logger');
     this.EVENT_TYPE = Event.EVENT_TYPE;
     this.logger = logger;
     this.id_ = config.id;
-    this.auctionProviderTimeout_ = config.auctionProviderTimeout;
-    this.bidProviderTimeout_ = config.bidProviderTimeout;
+    this.auctionProviderTimeout_ = config.auctionProviderCbTimeout;
+    this.bidProviderTimeout_ = config.bidProviderCbTimeout;
     return this;
   };
 
@@ -124,7 +124,7 @@ var logger = require('./logger');
   api.prototype.setAuctionProvider = function(delegate) {
     logger.logCall('api.setAuctionProvider', arguments);
     var provider = this.library.mediator.setAuctionProvider(delegate);
-    this.library.mediator.setAuctionProviderTimeout(this.auctionProviderTimeout_);
+    this.library.mediator.setAuctionProviderCbTimeout(this.auctionProviderTimeout_);
     requiredApiCalls.setAuctionProvider++;
     if (!provider) {
       configErrors.push('Invalid auction provider config');
@@ -152,7 +152,7 @@ var logger = require('./logger');
   api.prototype.addBidProvider = function(delegate) {
     logger.logCall('api.addBidProvider', arguments);
     var provider = this.library.mediator.addBidProvider(delegate);
-    this.library.mediator.setBidProviderTimeout(this.bidProviderTimeout_);
+    this.library.mediator.setBidProviderCbTimeout(this.bidProviderTimeout_);
     requiredApiCalls.addBidProvider++;
     if (!provider) {
       configErrors.push('Invalid bid provider config');
