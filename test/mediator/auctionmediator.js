@@ -27,7 +27,7 @@ describe('Pubfood AuctionMediator', function testPubfoodMediator() {
     Event.on(Event.EVENT_TYPE.INVALID, function(event) {
       onEvent = true;
       assert.isDefined(Event._events, 'validation event not published');
-      assert.isTrue(event.type === 'invalid', 'should be an error event');
+      assert.isTrue(event.type === 'INVALID', 'should be an error event');
       assert.isTrue(event.provider === 'validation', 'should be a validation error');
     });
     assert.isFalse(m.validate(), 'mediator should not be valid');
@@ -149,7 +149,7 @@ describe('Pubfood AuctionMediator', function testPubfoodMediator() {
     m.setAuctionProvider(providerDelegate);
 
     var log = logger.history[logger.history.length - 1];
-    assert.isTrue(log.args[0] === 'warn');
+    assert.isTrue(log.args[0] === 'WARN');
     assert.isTrue(log.args[1] === 'Warning: auction provider exists: Google');
     assert.isTrue(log.args[2] === 'auctionmediator');
 

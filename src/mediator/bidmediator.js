@@ -95,7 +95,8 @@ BidMediator.prototype.pushBid = function(bid, providerName) {
  * @fires pubfood.PubfoodEvent.BID_COMPLETE
  */
 BidMediator.prototype.doneBid = function(bidProvider) {
-  Event.publish(Event.EVENT_TYPE.BID_COMPLETE, bidProvider, 'bid');
+  // TODO consider having useful bid data available upon completion like the bids
+  Event.publish(Event.EVENT_TYPE.BID_COMPLETE, 'bid', bidProvider);
 };
 
 module.exports = BidMediator;

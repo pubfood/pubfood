@@ -71,7 +71,7 @@ describe('Api Callbacks - Tests', function() {
     });
 
     p.addReporter('BID_COMPLETE', function(event) {
-      var provider = event.data;
+      var provider = event.provider;
       if (typeof bidProviderDoneCalled[provider] !== 'undefined') {
         bidProviderDoneCalled[provider] = true;
       }

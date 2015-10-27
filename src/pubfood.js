@@ -135,7 +135,7 @@ var logger = require('./logger');
       if (Event.EVENT_TYPE[eventType]) {
         Event.on(Event.EVENT_TYPE[eventType], util.bind(reporter, this));
       } else {
-        Event.publish(Event.EVENT_TYPE.WARN, 'Warning: Invalid event type "' + eventType + '"', 'pubfood');
+        Event.publish(Event.EVENT_TYPE.WARN, 'Warning: Invalid event type "' + eventType + '"');
       }
     }
 

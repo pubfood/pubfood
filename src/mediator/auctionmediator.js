@@ -449,7 +449,7 @@ AuctionMediator.prototype.start = function() {
   Event.publish(Event.EVENT_TYPE.AUCTION_GO, this.auctionProvider.name, 'auction');
 
   this.init();
-  Event.publish(Event.EVENT_TYPE.AUCTION_TRIGGER);
+  Event.publish(Event.EVENT_TYPE.AUCTION_TRIGGER, this.auctionProvider.name, 'auction');
 
   this.loadProviders();
   this.bidMediator.initBids(this.auctionState_);
