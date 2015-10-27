@@ -30,90 +30,90 @@ PubfoodEvent.prototype.EVENT_TYPE = {
    * Api library load
    * @event pubfood.PubfoodEvent.PUBFOOD_API_LOAD
    */
-  PUBFOOD_API_LOAD: 'pubfoodapiload',
+  PUBFOOD_API_LOAD: 'PUBFOOD_API_LOAD',
   /**
    * Api library start
    * @event pubfood.PubfoodEvent.PUBFOOD_API_START
    */
-  PUBFOOD_API_START: 'pubfoodapistart',
+  PUBFOOD_API_START: 'PUBFOOD_API_START',
   /**
    * Bid provider library load started
    * @event pubfood.PubfoodEvent.BID_LIB_START
    */
-  BID_LIB_START: 'bplibstart',
+  BID_LIB_START: 'BID_LIB_START',
   /**
    * Bid provider library loaded
    * @event pubfood.PubfoodEvent.BID_LIB_LOADED
    */
-  BID_LIB_LOADED: 'bplibloaded',
+  BID_LIB_LOADED: 'BID_LIB_LOADED',
   /**
    * Action started.<br>e.g [BidProvider.init]{@link pubfood/provider.BidProvider#init}
    * @event pubfood.PubfoodEvent.BID_START
    */
-  BID_START: 'bidstart',
+  BID_START: 'BID_START',
   /**
    *  Next item in data stream ready.<br>
    *  e.g [BidProvider.refresh]{@link pubfood/provider.BidProvider#init} raises
    *  a [BID_PUSH_NEXT]{@link pubfood/events.EVENT_TYPE.BID_PUSH_NEXT} event for each bid.
    * @event pubfood.PubfoodEvent.BID_PUSH_NEXT
    */
-  BID_PUSH_NEXT: 'bidpushnext',
+  BID_PUSH_NEXT: 'BID_PUSH_NEXT',
   /**
    * Action is complete
    * @event pubfood.PubfoodEvent.BID_COMPLETE
    */
-  BID_COMPLETE: 'bidcomplete',
+  BID_COMPLETE: 'BID_COMPLETE',
   /**
    * Start bid assembler
    * @event pubfood.PubfoodEvent.BID_ASSEMBLER
    */
-  BID_ASSEMBLER: 'bidassembler',
+  BID_ASSEMBLER: 'BID_ASSEMBLER',
   /**
    * Auction provider library load started
    * @event pubfood.PubfoodEvent.AUCTION_LIB_START
    */
-  AUCTION_LIB_START: 'aplibstart',
+  AUCTION_LIB_START: 'AUCTION_LIB_START',
   /**
    * Auction provider library loaded
    * @event pubfood.PubfoodEvent.AUCTION_LIB_LOADED
    */
-  AUCTION_LIB_LOADED: 'aplibloaded',
+  AUCTION_LIB_LOADED: 'AUCTION_LIB_LOADED',
   /**
    * Start the publisher auction
    * @event pubfood.PubfoodEvent.AUCTION_GO
    */
-  AUCTION_GO: 'auctiongo',
+  AUCTION_GO: 'AUCTION_GO',
   /**
    * Start the publisher auction from a business rule.
    * e.g. a bidder timeout
    * @event pubfood.PubfoodEvent.AUCTION_TRIGGER
    */
-  AUCTION_TRIGGER: 'auctiontrigger',
+  AUCTION_TRIGGER: 'AUCTION_TRIGGER',
   /**
    * The auction was restarted
    * @event pubfood.PubfoodEvent.AUCTION_REFRESH
    */
-  AUCTION_REFRESH: 'auctionrefresh',
+  AUCTION_REFRESH: 'AUCTION_REFRESH',
   /**
    * The auction has completed
    * @event pubfood.PubfoodEvent.AUCTION_COMPLETE
    */
-  AUCTION_COMPLETE: 'auctioncomplete',
+  AUCTION_COMPLETE: 'AUCTION_COMPLETE',
   /**
    * Error event raised
    * @event pubfood.PubfoodEvent.ERROR
    */
-  ERROR: 'error',
+  ERROR: 'ERROR',
   /**
    * Warn event raised
    * @event pubfood.PubfoodEvent.WARN
    */
-  WARN: 'warn',
+  WARN: 'WARN',
   /**
    * Invalid operation or data event raise
    * @event pubfood.PubfoodEvent.INVALID
    */
-  INVALID: 'invalid'
+  INVALID: 'INVALID'
 };
 
 /**
