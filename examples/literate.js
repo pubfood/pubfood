@@ -133,7 +133,7 @@ pf.addAuctionProvider({
 // ## auction timeout, logging, and starting
 
 // run the auction at 1.2 seconds even if some bidders are slower
-pf.timeout(1000)
+pf.timeout(1200)
 
 // simple console logging of events
 pf.addReporter(function(ev) {
