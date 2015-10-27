@@ -85,9 +85,11 @@ var logger = require('./logger');
     logger.logCall('api.init', arguments);
     this.EVENT_TYPE = Event.EVENT_TYPE;
     this.logger = logger;
-    this.id_ = config.id;
-    this.auctionProviderTimeout_ = config.auctionProviderCbTimeout;
-    this.bidProviderTimeout_ = config.bidProviderCbTimeout;
+    if (config) {
+      this.id_ = config.id || '';
+      this.auctionProviderTimeout_ = config.auctionProviderCbTimeout || 2000;
+      this.bidProviderTimeout_ = config.bidProviderCbTimeout || 2000;
+    }
     return this;
   };
 
