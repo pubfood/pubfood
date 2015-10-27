@@ -468,9 +468,6 @@ AuctionMediator.prototype.loadProviders = function(/*action*/) {
  * @returns {pubfood#mediator.AuctionMediator}
  */
 AuctionMediator.prototype.start = function() {
-
-  Event.publish(Event.EVENT_TYPE.AUCTION_GO, this.auctionProvider.name, 'auction');
-
   this.init();
   Event.publish(Event.EVENT_TYPE.AUCTION_TRIGGER, this.auctionProvider.name, 'auction');
 

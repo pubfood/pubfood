@@ -158,6 +158,18 @@ var Reporter = function(event){
 };
 
 /**
+ * Provides information about configuration at start
+ *
+ * @typedef {function} apiStartCallback
+ * @param {boolean} hasErrors true if there are any configuration errors
+ * @param {array} errors The list of errors
+ * @return {undefined}
+ */
+var apiStartCallback = function(hasErrors, errors){
+
+};
+
+/**
  * Bid object structure for the {@link pushBidCallback}.
  *
  * @typedef {BidObject} BidObject

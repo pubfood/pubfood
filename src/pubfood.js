@@ -23,11 +23,52 @@ var logger = require('./logger');
     return new pubfood.library.init(config);
   };
 
+  var configErrors = [];
+
+  var requiredApiCalls = {
+    //addReporter: 0,
+    addSlot: 0,
+    setAuctionProvider: 0,
+    addBidProvider: 0,
+  };
+
   pubfood.library = pubfood.prototype = {
     version: 'APP_VERSION',
     mediator: require('./mediator').mediatorBuilder(),
     PubfoodError: require('./errors'),
     logger: logger
+  };
+
+  /**
+   * validate the api configurations
+   * @private
+   * @return {{hasError: boolean, details: string[]}}
+   */
+  var validateConfig = function() {
+    var bidProviders = api.prototype.getBidProviders();
+
+    // check for core api method calls
+    for (var apiMethod in requiredApiCalls) {
+      if (requiredApiCalls[apiMethod] === 0) {
+        configErrors.push('"' + apiMethod + '" was not called');
+      }
+    }
+
+    // validate through all the slots bid provider
+    var slots = api.prototype.getSlots();
+    for (var i = 0; i < slots.length; i++) {
+      for (var providerName in slots[i].bidProviders) {
+        // make sure there's config for each bid provider
+        if (!bidProviders[providerName]) {
+          configErrors.push('No configuration found for bid provider "' + providerName + '"');
+        }
+      }
+    }
+
+    return {
+      hasError: configErrors.length > 0,
+      details: configErrors
+    };
   };
 
   /**
@@ -60,6 +101,7 @@ var logger = require('./logger');
   api.prototype.addSlot = function(slot) {
     logger.logCall('api.addSlot', arguments);
     this.library.mediator.addSlot(slot);
+    requiredApiCalls.addSlot++;
     return this;
   };
 
@@ -81,8 +123,12 @@ var logger = require('./logger');
    */
   api.prototype.setAuctionProvider = function(delegate) {
     logger.logCall('api.setAuctionProvider', arguments);
-    this.library.mediator.setAuctionProvider(delegate);
+    var provider = this.library.mediator.setAuctionProvider(delegate);
     this.library.mediator.setAuctionProviderTimeout(this.auctionProviderTimeout_);
+    requiredApiCalls.setAuctionProvider++;
+    if (!provider) {
+      configErrors.push('Invalid auction provider config');
+    }
     return this;
   };
 
@@ -100,19 +146,23 @@ var logger = require('./logger');
    *
    * @function
    * @param {BidDelegate} delegate Bid provider configuaration
-   * @return {pubfood}
    * @example {file} ../examples/add-bid-provider.js
+   * @return {pubfood}
    */
   api.prototype.addBidProvider = function(delegate) {
     logger.logCall('api.addBidProvider', arguments);
-    this.library.mediator.addBidProvider(delegate);
+    var provider = this.library.mediator.addBidProvider(delegate);
     this.library.mediator.setBidProviderTimeout(this.bidProviderTimeout_);
+    requiredApiCalls.addBidProvider++;
+    if (!provider) {
+      configErrors.push('Invalid bid provider config');
+    }
     return this;
   };
 
   /**
    * Gets a list of bidproviders
-   * @return {BidProvider[]}
+   * @return {provider1: {...}, provider2: {...}, provider3: {...}}
    */
   api.prototype.getBidProviders = function() {
     logger.logCall('api.getBidProvider', arguments);
@@ -193,13 +243,24 @@ var logger = require('./logger');
   /**
    * Start the bidding process
    * @param {number} [startTimestamp] An optional timestamp that's used for calculating other time deltas.
+   * @param {apiStartCallback} [startCb]
    * @return {pubfood}
    */
-  api.prototype.start = function(startTimestamp) {
+  api.prototype.start = function(startTimestamp, startCb) {
     Event.publish(Event.EVENT_TYPE.PUBFOOD_API_START, startTimestamp);
-
     logger.logCall('api.start', arguments);
-    this.library.mediator.start();
+
+    var configStatus = validateConfig();
+
+    if(typeof startCb === 'function'){
+      startCb(configStatus.hasError, configStatus.details);
+    }
+
+    // only continue of there aren't any config errors
+    if (!configStatus.hasError) {
+      this.library.mediator.start();
+    }
+
     return this;
   };
 
