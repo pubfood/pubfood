@@ -26,10 +26,12 @@ var fakeDom = {
 
 global.window = {};
 global.googletag = {};
-global.document = fakeDom;
-global.document.head = fakeDom;
-global.document.body = fakeDom;
-global.document.documentElement = fakeDom;
+if (!global.document) {
+  global.document = fakeDom;
+  global.document.head = fakeDom;
+  global.document.body = fakeDom;
+  global.document.documentElement = fakeDom;
+}
 
 var assert = require('chai').assert;
 var expect = require('chai').expect;
