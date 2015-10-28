@@ -1,18 +1,12 @@
 {
   "name": "pubfood",
   "version": "0.0.3",
-  "prvate": true,
   "description": "Header bidding library",
   "license": "MIT",
   "author": {
-    "name": "Yieldbot, Inc.",
-    "url": "http://www.yieldbot.com"
+    "name": "pubfood and other contributors",
+    "url": "https://github.com/pubfood/pubfood/blob/master/AUTHORS.txt"
   },
-  "contributors": [
-    "John Ellis <jellis@yieldbot.com>",
-    "Andrei McMillan <amcmillan@yieldbot.com>",
-    "Erik Solen <esolen@yieldbot.com>"
-  ],
   "main": "./src/pubfood.js",
   "scripts": {
     "prepare": "npm install && mkdir -p reports",
@@ -34,7 +28,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "ssh://git@github.com/yieldbot/pubfood.git"
+    "url": "https://github.com/pubfood/pubfood.git"
   },
   "keywords": [
     "prebid",
@@ -46,9 +40,9 @@
     "parallel"
   ],
   "bugs": {
-    "url": "https://github.com/yieldbot/pubfood/issues"
+    "url": "https://github.com/pubfood/pubfood/issues"
   },
-  "homepage": "https://github.com/yieldbot/pubfood",
+  "homepage": "http://pubfood.org",
   "browserify": {
     "standalone": "pubfood",
     "entries": [
