@@ -35,8 +35,8 @@ describe('Pubfood AuctionMediator', function testPubfoodMediator() {
   it('should have bidProviders', function() {
     var m = new AuctionMediator();
     m.setAuctionProvider({
-      name: 'Google',
-      libUri: '//www.googletagservices.com/tag/js/gpt.js',
+      name: 'provider1',
+      libUri: '../test/fixture/lib.js',
       init: function(slots, bids, done) {
 
       },
@@ -70,8 +70,8 @@ describe('Pubfood AuctionMediator', function testPubfoodMediator() {
   it('should have slots with at least one bidder', function() {
     var m = new AuctionMediator();
     m.setAuctionProvider({
-      name: 'Google',
-      libUri: '//www.googletagservices.com/tag/js/gpt.js',
+      name: 'provider1',
+      libUri: '../test/fixture/lib.js',
       init: function(slots, bids, done) {
 
       },
@@ -96,8 +96,8 @@ describe('Pubfood AuctionMediator', function testPubfoodMediator() {
   it('should have at least one slot', function() {
     var m = new AuctionMediator();
     m.setAuctionProvider({
-      name: 'Google',
-      libUri: '//www.googletagservices.com/tag/js/gpt.js',
+      name: 'provider1',
+      libUri: '../test/fixture/lib.js',
       init: function(slots, bids, done) {
 
       },
@@ -112,8 +112,8 @@ describe('Pubfood AuctionMediator', function testPubfoodMediator() {
     var m = new AuctionMediator();
 
     var providerDelegate = {
-      name: 'Google',
-      libUri: '//www.googletagservices.com/tag/js/gpt.js',
+      name: 'provider1',
+      libUri: '../test/fixture/lib.js',
       init: function(slots, bids, done) {
 
       },
@@ -127,7 +127,7 @@ describe('Pubfood AuctionMediator', function testPubfoodMediator() {
     var log = logger.history[logger.history.length - 1];
 
     assert.isTrue(log.args[0] === 'WARN');
-    assert.isTrue(log.args[1] === 'Warning: auction provider exists: Google');
+    assert.isTrue(log.args[1] === 'Warning: auction provider exists: provider1');
 
   });
 
@@ -171,8 +171,8 @@ describe('Pubfood AuctionMediator', function testPubfoodMediator() {
     });
 
     m.setAuctionProvider({
-      name: 'Google',
-      libUri: '//www.googletagservices.com/tag/js/gpt.js',
+      name: 'provider1',
+      libUri: '../test/fixture/lib.js',
       init: function(slots, bids, done) {
 
       },

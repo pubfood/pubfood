@@ -10,8 +10,8 @@
 module.exports = {
   valid: [
     {
-      name: 'Google',
-      libUri: '//www.googletagservices.com/tag/js/gpt.js',
+      name: 'provider1',
+      libUri: '../test/fixture/lib.js',
       init: function(slots, bids, done) {
       },
       refresh: function(slots, targeting, done) {
@@ -25,8 +25,8 @@ module.exports = {
   ],
   invalid: [
     {
-      name: 'Google',
-      libUri: '//www.googletagservices.com/tag/js/gpt.js',
+      name: 'provider2',
+      libUri: '../test/fixture/lib.js',
       refresh: function(slots, targeting, done) {
       },
       trigger: function(done) {
@@ -36,7 +36,7 @@ module.exports = {
       }
     },
     {
-      libUri: '//www.googletagservices.com/tag/js/gpt.js',
+      libUri: '../test/fixture/lib.js',
       init: function(slots, bids, done) {
       },
       refresh: function(slots, targeting, done) {
@@ -48,7 +48,7 @@ module.exports = {
       }
     },
     {
-      name: 'Google',
+      name: 'provider3',
       init: function(slots, bids, done) {
       },
       refresh: function(slots, targeting, done) {
@@ -60,8 +60,8 @@ module.exports = {
       }
     },
     {
-      name: 'Google',
-      libUri: '//www.googletagservices.com/tag/js/gpt.js',
+      name: 'provider4',
+      libUri: '../test/fixture/lib.js',
       init: function(slots, bids, done) {
       },
       trigger: function(done) {

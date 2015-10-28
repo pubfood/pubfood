@@ -10,7 +10,7 @@ var Slot = require('../../src/model/slot.js');
 
 describe('Slot', function testSlotBuilder() {
   var slotConfig = {
-    name: '/2476204/sidebar-unit', //google ad unit
+    name: '/2476204/sidebar-unit', // ad unit
     sizes: [
       [300, 250],
       [300, 600]

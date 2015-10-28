@@ -2,7 +2,6 @@
  * pubfood
  */
 
-/* global */
 /*eslint no-unused-vars: 0*/
 
 'use strict';
@@ -24,8 +23,8 @@ var auctionexample1 = {
     }
   ],
   auctionProvider: {
-    name: 'Google',
-    libUri: '//www.googletagservices.com/tag/js/gpt.js',
+    name: 'auctionProvider',
+    libUri: '../test/fixture/lib.js',
     init: function(targets, options, done) {
     },
     refresh: function(targets, done) {
@@ -64,6 +63,4 @@ var auctionexample1 = {
   ]
 };
 
-if(module && module.exports){
-  module.exports = auctionexample1;
-}
+module.exports = auctionexample1;

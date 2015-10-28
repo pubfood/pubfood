@@ -24,7 +24,6 @@ var fakeDom = {
 };
 
 global.window = {};
-global.googletag = {};
 if (!global.document) {
   global.document = fakeDom;
   global.document.head = fakeDom;
@@ -35,7 +34,6 @@ if (!global.document) {
 var assert = require('chai').assert;
 var expect = require('chai').expect;
 var pubfood = require('../src/pubfood');
-var auctionConfig = require('./fixture/auctionconfig1');
 var auctionExample = require('./fixture/auctionexample1');
 
 describe('Api Callbacks - Tests', function() {
