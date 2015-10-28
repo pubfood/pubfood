@@ -454,11 +454,10 @@ AuctionMediator.prototype.loadProviders = function(/*action*/) {
 /**
  * Construct a set of slots for bidders.
  *
- * @param {array} slots the array of slots for which to find bidders
  * @returns {object} bidderSlots an object containing an array of slots for each bidder.
  *
  */
-AuctionMediator.prototype.getBidderSlots = function(slots) {
+AuctionMediator.prototype.getBidderSlots = function() {
   var bidderSlots = {};
 
   for (var i = 0; i < this.slots.length; i++) {
