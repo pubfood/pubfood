@@ -17,6 +17,7 @@
     "doc": "gulp doc",
     "create_diagram": "jsdoc -t node_modules/jsdoc2diagram -r ./src -d ./dist/doc",
     "build": "npm run prepare && npm run lint && gulp build && npm run test",
+    "copy_dist_to_build": "gulp build && cp dist/pubfood.* build",
     "start": "npm run build && gulp serve"
   },
   "repository": {
