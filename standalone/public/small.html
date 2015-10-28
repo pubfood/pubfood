@@ -62,7 +62,6 @@
           food.addBidProvider({
             name: 'bp1',
             libUri: '/simulated-bid-provider/bp1.js',
-            sync: true,
             init: function(slots, options, next, done) {
               bp1.cmd.push(function() {
                 var encodedAvailability = encodeURIComponent('multi:300x250|300x600:400,rail:300x250:650');
@@ -111,7 +110,6 @@
           food.addBidProvider({
             name: 'bp2',
             libUri: '/simulated-bid-provider/bp2.js',
-            sync: true,
             init: function(slots, options, next, done) {
               bp2.cmd.push(function() {
                 var encodedAvailability = encodeURIComponent('multi:300x250|300x600:800,rail:300x250:950');
@@ -160,7 +158,6 @@
           food.addBidProvider({
             name: 'bp3',
             libUri: '/simulated-bid-provider/bp3.js',
-            sync: true,
             init: function(slots, options, next, done) {
               bp3.cmd.push(function() {
                 var encodedAvailability = encodeURIComponent('multi:300x250|300x600:900,rail:300x250:975');
@@ -281,11 +278,12 @@
           <div style="position:absolute;left:310px" id="div-rail"></div>
         </div>
         <script>
-          // TODO wrap in some pubfood api to delay this until after auction
-          // until that wrapping happens the bids should stay sync
-          auctionProviderOne.cmd.push(function() {
-            auctionProviderOne.display('div-multi-size');
-            auctionProviderOne.display('div-rail');
+          food.addReporter('AUCTION_POST_RUN', function() {
+            // wrap the cmd.push ... display inside a post auction run event
+            auctionProviderOne.cmd.push(function() {
+              auctionProviderOne.display('div-multi-size');
+              auctionProviderOne.display('div-rail');
+            });
           });
         </script>
         <p>Please open up the devtools for more information in the console</p>
