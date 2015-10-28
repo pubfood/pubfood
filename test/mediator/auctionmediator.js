@@ -39,7 +39,7 @@ describe('Pubfood AuctionMediator', function testPubfoodMediator() {
     m.setAuctionProvider({
       name: 'Google',
       libUri: '//www.googletagservices.com/tag/js/gpt.js',
-      init: function(slots, bids, options, done) {
+      init: function(slots, bids, done) {
 
       },
       refresh: function(slots, targeting, done) {
@@ -74,7 +74,7 @@ describe('Pubfood AuctionMediator', function testPubfoodMediator() {
     m.setAuctionProvider({
       name: 'Google',
       libUri: '//www.googletagservices.com/tag/js/gpt.js',
-      init: function(slots, bids, options, done) {
+      init: function(slots, bids, done) {
 
       },
       refresh: function(slots, targeting, done) {
@@ -100,7 +100,7 @@ describe('Pubfood AuctionMediator', function testPubfoodMediator() {
     m.setAuctionProvider({
       name: 'Google',
       libUri: '//www.googletagservices.com/tag/js/gpt.js',
-      init: function(slots, bids, options, done) {
+      init: function(slots, bids, done) {
 
       },
       refresh: function(slots, targeting, done) {
@@ -116,7 +116,7 @@ describe('Pubfood AuctionMediator', function testPubfoodMediator() {
     var providerDelegate = {
       name: 'Google',
       libUri: '//www.googletagservices.com/tag/js/gpt.js',
-      init: function(slots, bids, options, done) {
+      init: function(slots, bids, done) {
 
       },
       refresh: function(slots, targeting, done) {
@@ -133,10 +133,7 @@ describe('Pubfood AuctionMediator', function testPubfoodMediator() {
 
   });
 
-  it('should create an auctionState map', function() {
-    delete Event._events;
-    Event._events = {};
-
+  it('should build provider slot array', function() {
     var m = new AuctionMediator();
 
     m.addSlot({
@@ -145,32 +142,47 @@ describe('Pubfood AuctionMediator', function testPubfoodMediator() {
         [728, 90]
       ],
       elementId: 'div-leaderboard',
-      bidProviders: {
-        p1: {
-          slot: 's1'
-        }
-      }
+      bidProviders: [ 'p1' ]
+    });
+    m.addSlot({
+      name: '/abc/456',
+      sizes: [
+        [728, 90]
+      ],
+      elementId: 'div-leaderboard',
+      bidProviders: [ 'p1', 'p2' ]
     });
 
     m.addBidProvider({
       name: 'p1',
-      libUri: '',
-      init: function(slots, options, pushBid, done) {
+      libUri: 'someUri',
+      init: function(slots, pushBid, done) {
 
       },
-      refresh: function(slots, options, pushBid, done) {
+      refresh: function(slots, pushBid, done) {
+      }
+    });
+    m.addBidProvider({
+      name: 'p2',
+      libUri: 'someUri',
+      init: function(slots, pushBid, done) {
+
+      },
+      refresh: function(slots, pushBid, done) {
       }
     });
 
-    m.init();
+    m.setAuctionProvider({
+      name: 'Google',
+      libUri: '//www.googletagservices.com/tag/js/gpt.js',
+      init: function(slots, bids, done) {
 
-    var b = Bid.fromObject({
-      slot: '/abc/123',
-      value: '235',
-      sizes: [728, 90],
-      targeting: { foo: 'bar' }
+      },
+      refresh: function(slots, targeting, done) {
+      }
     });
-    Event.publish(Event.EVENT_TYPE.BID_PUSH_NEXT, b, 'p1');
+
+    m.start();
 
   });
 
@@ -195,10 +207,10 @@ describe('Pubfood AuctionMediator', function testPubfoodMediator() {
     m.addBidProvider({
       name: 'p1',
       libUri: '',
-      init: function(slots, options, pushBid, done) {
+      init: function(slots, pushBid, done) {
 
       },
-      refresh: function(slots, options, pushBid, done) {
+      refresh: function(slots, pushBid, done) {
       }
     });
 
@@ -213,5 +225,31 @@ describe('Pubfood AuctionMediator', function testPubfoodMediator() {
 
     var log = logger.history[logger.history.length - 1];
     assert.isTrue(log.args[2] === 'p1');
+  });
+
+  it('should set a bid prefix', function() {
+    var m = new AuctionMediator();
+    assert.isTrue(m.prefix, 'prefix should be set to true');
+
+    var b = Bid.fromObject({
+      slot: '/abc/123',
+      value: '235',
+      sizes: [728, 90],
+      targeting: { foo: 'bar' }
+    });
+
+    b.provider = 'p1';
+    var bidKey = m.getBidKey(b);
+    assert.isTrue(bidKey === 'p1_bid', 'incorrect bid prefix. default is to prefix.');
+
+    b.label = 'theBid';
+    bidKey = m.getBidKey(b);
+    assert.isTrue(bidKey === 'p1_theBid', 'should have both prefix and label');
+
+    m = new AuctionMediator({prefix: false});
+    b.label = null;
+    bidKey = m.getBidKey(b);
+    console.log('bidKey: ' + bidKey);
+    assert.isTrue(bidKey === 'bid', 'should not have a prefix.');
   });
 });

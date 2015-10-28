@@ -57,7 +57,8 @@ var logger = require('./logger');
     // validate through all the slots bid provider
     var slots = api.prototype.getSlots();
     for (var i = 0; i < slots.length; i++) {
-      for (var providerName in slots[i].bidProviders) {
+      for (var k = 0; k < slots[i].bidProviders.length; k++) {
+        var providerName = slots[i].bidProviders[k];
         // make sure there's config for each bid provider
         if (!bidProviders[providerName]) {
           configErrors.push('No configuration found for bid provider "' + providerName + '"');

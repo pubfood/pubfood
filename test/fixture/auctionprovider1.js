@@ -13,7 +13,7 @@ module.exports = {
     {
       name: 'Google',
       libUri: '//www.googletagservices.com/tag/js/gpt.js',
-      init: function(slots, bids, options, done) {
+      init: function(slots, bids, done) {
       },
       refresh: function(slots, targeting, done) {
       },
@@ -38,7 +38,7 @@ module.exports = {
     },
     {
       libUri: '//www.googletagservices.com/tag/js/gpt.js',
-      init: function(slots, bids, options, done) {
+      init: function(slots, bids, done) {
       },
       refresh: function(slots, targeting, done) {
       },
@@ -50,7 +50,7 @@ module.exports = {
     },
     {
       name: 'Google',
-      init: function(slots, bids, options, done) {
+      init: function(slots, bids, done) {
       },
       refresh: function(slots, targeting, done) {
       },
@@ -63,7 +63,7 @@ module.exports = {
     {
       name: 'Google',
       libUri: '//www.googletagservices.com/tag/js/gpt.js',
-      init: function(slots, bids, options, done) {
+      init: function(slots, bids, done) {
       },
       trigger: function(done) {
         setTimeout(function() {

@@ -17,13 +17,24 @@ var BidObject = require('../interfaces').BidObject;
  * Bid is the result of a partner [BidProvider]{@link pubfood/provider.BidProvider} request.
  *
  * @class
+ * @param {string} slot the slot name
+ * @param {string|number} value the bid value
+ * @param {Array.<number, number>} sizes the dimension sizes of the slot bid
  * @memberof pubfood#model
  */
-function Bid() {
+function Bid(slot, value, sizes) {
   if (this.init_) {
     this.init_();
   }
-  this.sizes = [];
+  this.sizes = sizes;
+  this.slot = slot;
+  this.value = value;
+  /** @property {string} type bid value type derived from {@link util.asType}  */
+  this.type = util.asType(this.value);
+  /** @property {string} [label] optional label for adserver key targeting for bid value e.g. <label>=2.00 */
+  this.label;
+  /** @property {string} [provider] the bid provider name */
+  this.provider;
 }
 
 /**
@@ -47,20 +58,13 @@ Bid.fromObject = function(config) {
   if (!Bid.validate(config)) return null;
   var b = new Bid();
   for (var k in config) {
-    b[k] = config[k];
+    if (util.asType(b[k]) === 'function') {
+      b[k](config[k]);
+    } else {
+      b[k] = config[k];
+    }
   }
   return b;
-};
-
-/**
- * Set the bid's label/name
- * @param {string} lbl
- * @return {pubfood#model.Bid}
- * @ignore
- */
-Bid.prototype.label = function(lbl) {
-  this.label = lbl || '';
-  return this;
 };
 
 /**
@@ -68,19 +72,9 @@ Bid.prototype.label = function(lbl) {
  * @param {string|number} v
  * @return {pubfood#model.Bid}
  */
-Bid.prototype.value = function(v) {
+Bid.prototype.setValue = function(v) {
   this.value = v || '';
   this.type = util.asType(this.value);
-  return this;
-};
-
-/**
- * Set the bid's slot
- * @param {pubfood#model.Slot} s
- * @return {pubfood#model.Bid}
- */
-Bid.prototype.slot = function(s) {
-  this.slot = s;
   return this;
 };
 
@@ -98,29 +92,6 @@ Bid.prototype.addSize = function(w, h) {
   var height = Math.abs(~~h);
 
   this.sizes.push([width, height]);
-  return this;
-};
-
-/**
- * Set the sizes for the bid
- *
- * @todo maybe combine with Bid.prototype.addSize
- *
- * @param {array} szs
- * @return {pubfood#model.Bid}
- */
-Bid.prototype.dimensions = function(szs) {
-  this.sizes = szs || [];
-  return this;
-};
-
-/**
- * Sets the bid's provider
- * @param {pubfood#provider.BidProvider} p
- * @return {pubfood#model.Bid}
- */
-Bid.prototype.provider = function(p) {
-  this.provider = p;
   return this;
 };
 

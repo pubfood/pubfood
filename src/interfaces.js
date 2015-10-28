@@ -19,7 +19,6 @@
  * @property {string} init.slots.elementId target DOM elementId
  * @property {array} init.slots.sizes slot sizes
  * @property {object} init.slots.targeting slot targeting key value pairs
- * @property {object} init.options Defaults to {}
  * @property {auctionDoneCallback} init.done Callback to execute on done
  * @property {function} refresh Auction provider delegate refresh auction request.<br>Called at startup. Returns <i>{undefined}</i>
  * @property {object[]} refresh.slots - slot objects with bids and page level targeting
@@ -27,20 +26,18 @@
  * @property {string} refresh.slots.elementId target DOM elementId
  * @property {array} refresh.slots.sizes slot sizes
  * @property {object} refresh.slots.targeting slot targeting key value pairs
- * @property {object} refresh.options Defaults to {}
  * @property {auctionDoneCallback} refresh.done Callback to execute on done
  * @property {function} [trigger] Auction provider delegate function to trigger the auction. Default: [pubfood.timeout]{@link pubfood#timeout}
  * @property {auctionDoneCallback} trigger.done Callback to initialize the auction provider
  */
 var auctionDelegate = {
-  options: {},
   name: '',
   libUri: '',
-  init: function(targeting, options, done) {},
-  refresh: function(targeting, options, done) {}
+  init: function(targeting, done) {},
+  refresh: function(targeting, done) {}
 };
 auctionDelegate.optional = {
-  options: true
+
 };
 
 /**
@@ -55,9 +52,6 @@ auctionDelegate.optional = {
  * @property {string} init.slots.name - @todo in process ralionalization of slot object structure
  * @property {array} init.slots.name.sizes
  * @property {object} init.slots.name.bidProviders
- * @property {object} init.options
- * @property {string} init.options.slot Provider external system Slot Name
- * @property {string} init.options.other Other properties optional properties added per provider requirement
  * @property {pushBidCallback} init.pushBid Callback to execute on next bid available
  * @property {bidDoneCallback} init.done Callback to execute on done
  * @property {function} refresh Refresh bids for [BidProvider.refresh]{@link pubfood#provider.BidProvider#refresh} delegate.
@@ -66,21 +60,16 @@ auctionDelegate.optional = {
  * @property {string} refresh.slots.name - @todo in process ralionalization of slot object structure
  * @property {array} refresh.slots.name.sizes
  * @property {object} refresh.slots.name.bidProviders
- * @property {object} refresh.options
- * @property {string} refresh.options.slot Provider external system Slot Name
- * @property {string} refresh.options.other Other properties optional properties added per provider requirement
  * @property {pushBidCallback} refresh.pushBid Callback to execute on next bid available
  * @property {bidDoneCallback} refresh.done Callback to execute on done
  */
 var bidDelegate = {
-  options: {},
   name: '',
   libUri: '',
-  init: function(slots, options, done) {},
-  refresh: function(slots, options, done) {}
+  init: function(slots, done) {},
+  refresh: function(slots, done) {}
 };
 bidDelegate.optional = {
-  options: true
 };
 
 /**
@@ -179,15 +168,18 @@ var apiStartCallback = function(hasErrors, errors){
  * @property {number} sizes.0 width slot width
  * @property {number} sizes.1 height slot height
  * @property {object} [targeting] - key/value pairs for additional adserver targeting
+ * @property {string} [label] optional targeting key to use for bid value
  */
 var bidObject = {
   slot: '',
   value: '',
   sizes: [],
-  targeting: {}
+  targeting: {},
+  label: ''
 };
 bidObject.optional = {
-  targeting: true
+  targeting: true,
+  label: true
 };
 
 /**
@@ -216,11 +208,7 @@ var slotConfig = {
   name: '',
   elementId: '',
   sizes: [],
-  bidProviders: {
-    providerName: {
-      slot: 'slot-name'
-    }
-  }
+  bidProviders: []
 };
 
 /**

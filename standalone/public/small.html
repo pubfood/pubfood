@@ -29,17 +29,7 @@
               [300, 600]
             ],
             elementId: 'div-multi-size',
-            bidProviders: {
-              bp1: {
-                slot: 'multi'
-              },
-              bp2: {
-                slot: 'multi'
-              },
-              bp3: {
-                slot: 'multi'
-              }
-            }
+            bidProviders: ['bp1', 'bp2', 'bp3']
           });
           food.addSlot({
             name: '/2476204/rail',
@@ -47,17 +37,7 @@
               [300, 250]
             ],
             elementId: 'div-rail',
-            bidProviders: {
-              bp1: {
-                slot: 'rail'
-              },
-              bp2: {
-                slot: 'rail'
-              },
-              bp3: {
-                slot: 'rail'
-              }
-            }
+            bidProviders: ['bp1', 'bp2', 'bp3']
           });
           food.addBidProvider({
             name: 'bp1',
@@ -103,7 +83,7 @@
                 done();
               });
             },
-            refresh: function(slots, options, done) {
+            refresh: function(slots, done) {
             }
           });
 
@@ -151,7 +131,7 @@
                 done();
               });
             },
-            refresh: function(slots, options, done) {
+            refresh: function(slots, done) {
             }
           });
 
@@ -199,14 +179,14 @@
                 done();
               });
             },
-            refresh: function(slots, options, done) {
+            refresh: function(slots, done) {
             }
           });
 
           food.setAuctionProvider({
             name: 'auctionProviderOne',
             libUri: '/simulated-auction-provider/auctionProviderOne.js',
-            init: function(targets, options, done) {
+            init: function(targets, done) {
               auctionProviderOne.cmd.push(function() {
                 var i, t;
                 for (i = 0; i < targets.length; i++) {

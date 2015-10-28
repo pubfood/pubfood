@@ -15,8 +15,8 @@ var AuctionMediator = require('./mediator/auctionmediator');
  * @memberof pubfood
  */
 var mediator = {
-  mediatorBuilder: function() {
-    return new AuctionMediator();
+  mediatorBuilder: function(config) {
+    return new AuctionMediator(config);
   }
 };
 

@@ -81,33 +81,31 @@ BidProvider.prototype.sync = function(/*loadSync*/) {
  *
  * Delegates to implementation [BidDelegate.init]{@link pubfood#interfaces.BidDelegate}
  *
- * @param {object} slots - delegate specific options
+ * @param {object} slots - delegate specific
  * @param {string} slots.name - @todo in process ralionalization of slot object structure
  * @param {array} slots.name.sizes
  * @param {object} slots.name.bidProviders
- * @param {object} options - provider delegate specific bid options
  * @param {pushBidCallback} pushBid - callback that registers the bid; execute callback for each bid object
  * @param {bidDoneCallback} done - a callback to execute on init complete
  * @return {undefined}
  */
-BidProvider.prototype.init = function(slots, options, pushBid, done) {
-  this.bidDelegate.init(slots, options, pushBid, done);
+BidProvider.prototype.init = function(slots, pushBid, done) {
+  this.bidDelegate.init(slots, pushBid, done);
 };
 
 /**
  * Refresh bids for ad slots
  *
- * @param {object} slots - delegate specific options
+ * @param {object} slots - delegate specific
  * @param {string} slots.name - @todo in process ralionalization of slot object structure
  * @param {array} slots.name.sizes
  * @param {object} slots.name.bidProviders
- * @param {object.<string, *>} options -  - provider delegate specific bid options
  * @param {pushBidCallback} pushBid - callback that registers the bid; execute callback for each bid object
  * @param {bidDoneCallback} done - a callback to execute on init complete
  * @return {undefined}
  */
-BidProvider.prototype.refresh = function(slots, options, pushBid, done) {
-  this.bidDelegate.refresh(slots, options, pushBid, done);
+BidProvider.prototype.refresh = function(slots, pushBid, done) {
+  this.bidDelegate.refresh(slots, pushBid, done);
 };
 
 module.exports = BidProvider;

@@ -8,7 +8,7 @@
 /reports
 # /src
 # /test
-
+/test/unittests.js
 ## files
 # .eslintignore
 # .eslintrc

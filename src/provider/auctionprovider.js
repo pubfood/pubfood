@@ -60,14 +60,6 @@ AuctionProvider.validate = function(delegate) {
 };
 
 /**
- * Auction provider delegate options.
- * @returns {object} options
- */
-AuctionProvider.prototype.getOptions = function() {
-  return this.auctionDelegate.options || {};
-};
-
-/**
  * Set the provider's name.
  *
  * @param {string} name - the auction provider name
@@ -93,33 +85,31 @@ AuctionProvider.prototype.libUri = function() {
  *
  * The AuctionProvider delegate javascript tag and other setup is done here.
  *
- * @param {object[]} slots - slot objects with bids and page level targeting
- * @param {string} slots.name slot name
- * @param {string} slots.elementId target DOM elementId
- * @param {array} slots.sizes slot sizes
- * @param {object} slots.targeting slot targeting key value pairs
- * @param {object} options - AuctionProvider delegate specific options
+ * @param {object[]} slotTargeting - slot objects with bids and page level targeting
+ * @param {string} slotTargeting.name slot name
+ * @param {string} slotTargeting.elementId target DOM elementId
+ * @param {array} slotTargeting.sizes slot sizes
+ * @param {object} slotTargeting.targeting slot targeting key value pairs
  * @param {auctionDoneCallback} done - a callback to execute on init complete
  * @return {undefined}
  */
-AuctionProvider.prototype.init = function(slots, options, done) {
-  this.auctionDelegate.init(slots, options, done);
+AuctionProvider.prototype.init = function(slotTargeting, done) {
+  this.auctionDelegate.init(slotTargeting, done);
 };
 
 /**
  * Refresh for ad slots
  *
- * @param {object[]} slots objects with bids and page level targeting
- * @param {string} slots.name slot name
- * @param {string} slots.elementId target DOM elementId
- * @param {array} slots.sizes slot sizes
- * @param {object} slots.targeting slot targeting key value pairs
- * @param {object} options AuctionProvider delegate specific options
+ * @param {object[]} slotTargeting objects with bids and page level targeting
+ * @param {string} slotTargeting.name slot name
+ * @param {string} slotTargeting.elementId target DOM elementId
+ * @param {array} slotTargeting.sizes slot sizes
+ * @param {object} slotTargeting.targeting slot targeting key value pairs
  * @param {auctionDoneCallback} done a callback to execute on init complete
  * @return {undefined}
  */
-AuctionProvider.prototype.refresh = function(slots, options, done) {
-  this.auctionDelegate.refresh(slots, options, done);
+AuctionProvider.prototype.refresh = function(slotTargeting, done) {
+  this.auctionDelegate.refresh(slotTargeting, done);
 };
 
 module.exports = AuctionProvider;

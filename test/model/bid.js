@@ -58,8 +58,8 @@ describe('Bid', function testBidBuilder() {
 
       var value = bidValues[i].v,
         type = bidValues[i].t,
-        bid = new Bid().
-        value(value);
+        bid = new Bid('slotName', value, [[300, 250]]);
+
 
       assert.equal(bid.value, value, 'bid value incorrect');
       assert.isDefined(bid.type, 'bid type undefined');
@@ -68,11 +68,8 @@ describe('Bid', function testBidBuilder() {
   });
 
   it('with a provider, slot name, dimensions and bid value', function() {
-    var bid = new Bid().
-        value(bidModel.value).
-        addSize(bidModel.dimensions[0][0], bidModel.dimensions[0][1]).
-        addSize(bidModel.dimensions[1][0], bidModel.dimensions[1][1]).
-        provider(bidModel.provider);
+    var bid = new Bid('slotName', bidModel.value, bidModel.dimensions);
+    bid.provider = bidModel.provider;
 
     assert.equal(bid.value, bidModel.value, 'bid value incorrect');
     assert.equal(bid.type, bidModel.type, 'bid type incorrect');

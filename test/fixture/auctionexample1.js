@@ -17,26 +17,19 @@ var auctionexample1 = {
         [300, 600]
       ],
       elementId: 'div-multi-size',
-      bidProviders: {
-        yieldbot: {
-          slot: 'medrec'
-        },
-        bidderFast: {
-          slot: 'fastSlot'
-        },
-        bidderSlow: {
-          slot: 'slowSlot'
-        }
-      }
+      bidProviders: [
+        'yieldbot',
+        'bidderFast',
+        'bidderSlow'
+      ]
     }
   ],
   auctionProvider: {
     name: 'Google',
     libUri: '//www.googletagservices.com/tag/js/gpt.js',
     init: function(targets, options, done) {
-      //done();
     },
-    refresh: function(slots, customTargeting, done) {
+    refresh: function(targets, done) {
     },
     trigger: function(done) {
       setTimeout(function() {
@@ -49,27 +42,24 @@ var auctionexample1 = {
       name: 'yieldbot',
       libUri: '//cdn.yldbt.com/js/yieldbot.intent.js',
       init: function(slots, options, pushBid, done) {
-        //done();
       },
-      refresh: function(slots, options, pushBid, done) {
+      refresh: function(slots, pushBid, done) {
       }
     },
     {
       name: 'bidderFast',
       libUri: '../test/fixture/lib.js',
-      init: function(slots, options, pushBid, done) {
-        done();
+      init: function(slots, pushBid, done) {
       },
-      refresh: function(slots, options, pushBid, done) {
+      refresh: function(slots, pushBid, done) {
       }
     },
     {
       name: 'bidderSlow',
       libUri: '../test/fixture/lib.js',
-      init: function(slots, options, pushBid, done) {
-        done();
+      init: function(slots, pushBid, done) {
       },
-      refresh: function(slots, options, pushBid, done) {
+      refresh: function(slots, pushBid, done) {
       }
     }
   ]

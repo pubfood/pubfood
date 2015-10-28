@@ -98,6 +98,7 @@
                      for (var i = 0; i < bids.length; i++) {
                          bids[i]['targeting'].code = (0 | Math.random() * 36).toString(36);
 
+                         bids[i].baseValue = bids[i].value;
                          bids[i].value = bids[i].value + 9;
                      }
                      return bids;

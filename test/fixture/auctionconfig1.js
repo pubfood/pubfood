@@ -21,14 +21,10 @@ var pubfoodContrib = {
         [300, 600]
       ],
       elementId: 'div-multi-size',
-      bidProviders: {
-        yieldbot: {
-          slot: 'medrec' // yieldbot's slot name
-        },
-        walkathon: {
-          slot: 'amz-left-adslot' // walkathoon's slot name
-        }
-      }
+      bidProviders: [
+        'yieldbot',
+        'walkathon'
+      ]
     },
     {
       name: '/2476204/leaderboard',
@@ -36,28 +32,53 @@ var pubfoodContrib = {
         [728, 90]
       ],
       elementId: 'div-leaderboard',
-      bidProviders: {
-        yieldbot: {
-          slot: 'leaderboard', // yieldbot's slot name
-        },
-        walkathon: {
-          slot: 'amz-top-adslot' // walkathoon's slot name
-        },
-        carsales: {
-          slot: 'crls-sl-af83b' // carsales's slot name
-        }
-      }
+      bidProviders: [
+        'yieldbot',
+        'walkathon',
+        'carsales'
+      ]
     }
   ],
   auctionProvider: {
-    options: {
-    },
     name: 'Google',
     libUri: '//www.googletagservices.com/tag/js/gpt.js',
-    init: function(targeting, options, done) {
-
+    init: function(targeting, done) {
+/* array of targeting objects
+      {
+        type: 'page',
+        targeting: {
+          yb_ad: 'y'
+        }
+      },
+      {
+        type: 'slot',
+        name: '/2476204/multi-size',
+        id: 'somerandomid',
+        elementId: 'div-multi-size',
+        sizes: [
+          [300, 250],
+          [300, 600]
+        ],
+        // a flattened list from all bidders
+        targeting: {
+          foo: ['bar', 'foo.bar'], // from bidder 1 & 2
+          foooo: ['bar'], // from bidder 2
+          provider1_bid: '400',
+          provider2_bid: '200'
+        },
+        bids: [
+          {
+            provider: 'provider1',
+            id: '1212121',
+            targeting: {
+              bid: '400',
+              foo: 'bar'
+            }
+          }
+        ]
+      }
+*/
       googletag.cmd.push(function() {
-        console.log('there');
         var i;
         for (i = 0; i < targeting.length; i++) {
           var slot = targeting[i];
@@ -75,7 +96,7 @@ var pubfoodContrib = {
             }
           }
           // Publisher sets their adserver targeting key vor the bid value here
-          gptslot.setTargeting('bid', bid.value);
+          //gptslot.setTargeting('bid', bid.value);
         }
       });
       googletag.cmd.push(function() {
@@ -88,7 +109,7 @@ var pubfoodContrib = {
       googletag.cmd.push(function() { googletag.display('div-multi-size'); });
 
     },
-    refresh: function(targeting, options, done) {
+    refresh: function(targeting, done) {
 
       googletag.cmd.push(function() {
         googletag.refresh();
@@ -99,24 +120,39 @@ var pubfoodContrib = {
   bidProviders: [
     {
       name: 'yieldbot',
-      options: {
+      slotParams: {
+        '/2476204/multi-size': 'medrec',
+        '/2476204/leaderboard': 'leaderboard'
       },
       libUri: '//cdn.yldbt.com/js/yieldbot.intent.js',
-      init: function(slots, options, pushBid, done) {
+      init: function(slots, pushBid, done) {
 
+        /* Slot object
+        {
+          name: '/2476204/multi-size',
+          sizes: [
+            [300, 250],
+            [300, 600]
+          ],
+          elementId: 'div-multi-size',
+          params: {
+            option1: 'use this for locality to the slot definition'
+          }
+        }
+        */
         var slotMap = {};
+        var slotParams = this.slotParams;
         ybotq.push(function() {
           yieldbot.psn('1234');
 
-          for (var k in slots) {
+          for (var k = 0; k < slots.length; k++) {
             var slot = slots[k];
-            /** @todo: should not need to reference oneself here */
-            var providerSlotName = slot.bidProviders['yieldbot'].slot;
+            var ybslot = slotParams[slot.name];
 
-            yieldbot.defineSlot(providerSlotName, {
+            yieldbot.defineSlot(ybslot, {
               sizes: slot.sizes
             });
-            slotMap[providerSlotName] = k;
+            slotMap[ybslot] = slot.name;
           }
           yieldbot.enableAsync();
           yieldbot.go();
@@ -147,7 +183,6 @@ var pubfoodContrib = {
               value: bid,
               sizes: sizes,
               targeting: {
-                value: bid,
                 ybot_ad: 'y',
                 ybot_slot: slot
               }
@@ -158,26 +193,28 @@ var pubfoodContrib = {
           done();
         });
       },
-      refresh: function(slots, options, done) {
+      refresh: function(slots, done) {
+        done();
       }
     },
     {
       name: 'carsales',
       libUri: '../test/fixture/lib.js',
-      init: function(slots, options, pushBid, done) {
+      init: function(slots, pushBid, done) {
         done();
       },
-      refresh: function(slots, options, pushBid, done) {
+      refresh: function(slots, pushBid, done) {
+        done();
       }
     },
     {
       name: 'walkathon',
-      options: { walk: 'athon'},
       libUri: '../test/fixture/lib.js',
-      init: function(slots, options, pushBid, done) {
+      init: function(slots, pushBid, done) {
         done();
       },
-      refresh: function(slots, options, pushBid, done) {
+      refresh: function(slots, pushBid, done) {
+        done();
       }
     }
   ]

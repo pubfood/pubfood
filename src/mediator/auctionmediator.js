@@ -25,16 +25,17 @@ var Event = require('../event');
  * @class
  * @memberof pubfood#mediator
  */
-function AuctionMediator(optionalId) {
-  if (optionalId) {
-    this.id = optionalId;
+function AuctionMediator(config) {
+  if (config && config.optionalId) {
+    this.id = config.optionalId;
   }
 
+  /** @property {boolean} prefix if false, do not add bid provider name to bid targeting key. Default: true */
+  this.prefix = config && config.hasOwnProperty('prefix') ? config.prefix : true;
   this.bidCount = 0;
   this.slots = [];
   this.bidProviders = {};
   this.auctionProvider = null;
-  this.auctionState_ = { slots: {}, providers: {}, bids: []};
   this.bids_ = [];
   this.lateBids_ = [];
   this.inAuction = false;
@@ -54,7 +55,6 @@ function AuctionMediator(optionalId) {
 AuctionMediator.prototype.init = function() {
   Event.on(Event.EVENT_TYPE.BID_COMPLETE, util.bind(this.checkBids_, this));
   Event.on(Event.EVENT_TYPE.BID_PUSH_NEXT, util.bind(this.pushBid_, this));
-  // Event.on(Event.EVENT_TYPE.AUCTION_COMPLETE, function(data) { console.log(data); });
   Event.on(Event.EVENT_TYPE.AUCTION_TRIGGER, util.bind(this.triggerAuction_, this));
   return this;
 };
@@ -202,7 +202,7 @@ AuctionMediator.prototype.triggerAuction_ = function() {
 /**
  * Adds bid on {pubfood.PubfoodEvent.BID_PUSH_NEXT} event.
  *
- * @param {object} data
+ * @param {object} event event object containing data payload
  * @private
  * @return {AuctionMediator}
  */
@@ -212,12 +212,6 @@ AuctionMediator.prototype.pushBid_ = function(event) {
     bid.type = 'slot';
     bid.provider = event.provider;
     this.bids_.push(bid);
-
-    bid.provider_ = this.auctionState_.providers[bid.provider];
-    bid.slot = this.auctionState_.slots[event.data.slot];
-
-    this.auctionState_.bids.push(bid);
-    this.auctionState_.slots[event.data.slot.name].bids.push(bid);
   } else {
     this.lateBids_.push(event.data);
   }
@@ -268,20 +262,35 @@ AuctionMediator.prototype.go_ = function() {
 
   Event.publish(Event.EVENT_TYPE.AUCTION_GO, name);
 
-  var options = this.auctionProvider.options || {};
-
   var targeting = this.buildTargeting_();
-  this.auctionProvider.init(targeting, options, doneCb);
+  this.auctionProvider.init(targeting, doneCb);
 };
 
 AuctionMediator.prototype.getBidKey = function(bid) {
-  var opts = this.auctionProvider.getOptions();
-
-  return (opts.prefix ? bid.provider + '_' : '') + (opts.bidKey || 'bid');
+  return (this.prefix && bid.provider ? bid.provider + '_' : '') + (bid.label || 'bid');
 };
 
 AuctionMediator.prototype.mergeKeys = function(slotTargeting, bidTargeting) {
   slotTargeting = util.mergeToObject(slotTargeting, bidTargeting);
+};
+
+
+/**
+ * Get slot bids.
+ *
+ * @param {string} slotName name of the slot
+ * @return {array} bids for the slot name
+ * @private
+ */
+AuctionMediator.prototype.getSlotBids = function(slotName) {
+  var slotBids = [];
+  for (var i = 0; i < this.bids_.length; i++) {
+    var b = this.bids_[i];
+    if (b.slot && b.slot === slotName) {
+      slotBids.push(b);
+    }
+  }
+  return slotBids;
 };
 
 /**
@@ -291,9 +300,8 @@ AuctionMediator.prototype.mergeKeys = function(slotTargeting, bidTargeting) {
  */
 AuctionMediator.prototype.buildTargeting_ = function() {
   var auctionTargeting = [];
-  var slots = this.auctionState_.slots || [];
-  for (var k in slots) {
-    var s = slots[k];
+  for (var i = 0; i < this.slots.length; i++) {
+    var s = this.slots[i];
     var t = { type: 'slot',
               name: s.name,
               id: s.id,
@@ -302,14 +310,18 @@ AuctionMediator.prototype.buildTargeting_ = function() {
               bids: [],
               targeting: {}
             };
-    var bids = slots[k].bids;
-    for (var b in bids) {
-      var bid = bids[b];
+
+    var slotBids = this.getSlotBids(s.name);
+    for (var k = 0; k < slotBids.length; k++) {
+      var bid = slotBids[k];
       t.bids.push({
+        value: bid.value,
         provider: bid.provider,
         id: bid.id,
         targeting: bid.targeting
       });
+      var bidKey = this.getBidKey(bid);
+      t.targeting[bidKey] = t.targeting[bidKey] || bid.value;
       this.mergeKeys(t.targeting, bid.targeting);
     }
 
@@ -335,59 +347,6 @@ AuctionMediator.prototype.auctionDone = function(data) {
 };
 
 /**
- *
- * @param {object} auctionState
- * @param {SlotConfig} slot
- * @private
- * @return {undefined}
- */
-AuctionMediator.initTargetingSlot_ = function(auctionState, slot) {
-  auctionState.slots[slot.name] = auctionState.slots[slot.name] || slot;
-  auctionState.slots[slot.name].bids = auctionState.slots[slot.name].bids || [];
-};
-
-/**
- *
- * @param {object} auctionState
- * @param {SlotConfig} slot
- * @param {string} providerName
- * @private
- * @return {undefined}
- */
-AuctionMediator.initTargetingProvider_ = function(auctionState, slot, providerName) {
-  auctionState.providers[providerName] = auctionState.providers[providerName] || {};
-  auctionState.providers[providerName].slots = auctionState.providers[providerName].slots || {};
-  auctionState.providers[providerName].slots[slot.name] = slot;
-  auctionState.slots[slot.name].bidProviders[providerName].provider = auctionState.providers[providerName];
-
-};
-
-/**
- *
- * @param {SlotConfig} slot
- * @private
- * @return {undefined}
- */
-AuctionMediator.prototype.addTargetingSlot_ = function(slot) {
-  AuctionMediator.initTargetingSlot_(this.auctionState_, slot);
-  this.updateTargetingProviders_(slot);
-};
-
-/**
- *
- * @param {SlotConfig} slot
- * @private
- * @return {undefined}
- */
-AuctionMediator.prototype.updateTargetingProviders_ = function(slot) {
-  var providers = slot.bidProviders || {};
-  for (var k in providers) {
-    var providerName = k;
-    AuctionMediator.initTargetingProvider_(this.auctionState_, slot, providerName);
-  }
-};
-
-/**
  * Add a [Slot]{@link pubfood#model.Slot} to [AuctionMediator]{@link pubfood#mediator.AuctionMediator} config.
  * @param {SlotConfig} slotConfig - configuration for a [Slot]{@link pubfood#model.Slot}
  * @returns {pubfood#mediator.AuctionMediator}
@@ -397,8 +356,6 @@ AuctionMediator.prototype.addSlot = function(slotConfig) {
   var slot = Slot.fromObject(slotConfig);
   if (slot) {
     this.slots.push(slot);
-
-    this.addTargetingSlot_(slot);
   }
   return this;
 };
@@ -413,11 +370,6 @@ AuctionMediator.prototype.addBidProvider = function(delegateConfig) {
   var bidProvider = BidProvider.withDelegate(delegateConfig);
   if (bidProvider) {
     this.bidProviders[bidProvider.name] = bidProvider;
-
-    if (!this.auctionState_.providers[bidProvider.name]) {
-      this.auctionState_.providers[bidProvider.name] = {};
-    }
-    this.auctionState_.providers[bidProvider.name].provider = bidProvider;
   } else {
     Event.publish(Event.EVENT_TYPE.WARN, 'Warning: invalid bid provider: ' + delegateConfig.name);
   }
@@ -501,6 +453,33 @@ AuctionMediator.prototype.loadProviders = function(/*action*/) {
 };
 
 /**
+ * Construct a set of slots for bidders.
+ *
+ * @param {array} slots the array of slots for which to find bidders
+ * @returns {object} bidderSlots an object containing an array of slots for each bidder.
+ *
+ */
+AuctionMediator.prototype.getBidderSlots = function(slots) {
+  var bidderSlots = {};
+
+  for (var i = 0; i < this.slots.length; i++) {
+    var slot = this.slots[i];
+    for (var k = 0; k < slot.bidProviders.length; k++) {
+      var provider = slot.bidProviders[k];
+
+      var bSlots = bidderSlots[provider] = bidderSlots[provider] || [];
+      bSlots.push(slot);
+    }
+  }
+
+  var ret = [];
+  for (var k in bidderSlots) {
+    ret.push({provider: this.bidProviders[k], slots: bidderSlots[k]});
+  }
+  return ret;
+};
+
+/**
  * Start auction bidding.
  * @returns {pubfood#mediator.AuctionMediator}
  */
@@ -509,7 +488,10 @@ AuctionMediator.prototype.start = function() {
   Event.publish(Event.EVENT_TYPE.AUCTION_TRIGGER, this.auctionProvider.name);
 
   this.loadProviders();
-  this.bidMediator.initBids(this.auctionState_);
+
+  var bidderSlots = this.getBidderSlots();
+
+  this.bidMediator.initBids(bidderSlots);
   return this;
 };
 

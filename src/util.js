@@ -4,14 +4,15 @@
  */
 
 'use strict';
-
+/** @namespace util */
 var util = {
   /**
-   * The type of an {Object}.
+   * Get the type of an object
    *
-   * https://javascriptweblog.wordpress.com/2011/08/08/
-   *         fixing-the-javascript-typeof-operator/
+   * @see https://javascriptweblog.wordpress.com/2011/08/08/fixing-the-javascript-typeof-operator/
    *
+   * @function asType
+   * @memberof util
    */
   asType: function(obj) {
     return ({}).toString.call(obj).match(/\s([a-zA-Z]+)/)[1].toLowerCase();
@@ -24,11 +25,10 @@ var util = {
       });
     /*jslint bitwise: false */
   },
-  /**
+  /*
    * Simple class extension/inheritance
    *
-   * TODO: refactor to use?
-   * - https://github.com/isaacs/inherits
+   * @todo refactor to use? - https://github.com/isaacs/inherits
    */
   extends: function(child, parent) {
 

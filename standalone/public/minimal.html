@@ -25,12 +25,10 @@
               [300, 250],
               [300, 600]
             ],
-            bidProviders: {
+            bidProviders: [
               // bidProvideOne
-              bidProviderOne: {
-                slot: 'multi'
-              }
-            }
+              'bidProviderOne'
+              ]
           });
           food.addSlot({
             name: '/2476204/rail',
@@ -48,7 +46,7 @@
             name: 'bidProviderOne',
             libUri: '/simulated-bid-provider/bidProviderOne.js',
             sync: true,
-            init: function(slots, options, next, done) {
+            init: function(slots, next, done) {
               bidProviderOne.cmd.push(function() {
                 var encodedAvailability = encodeURIComponent('multi:300x250|300x600:400,rail:300x250:650');
                 bidProviderOne.init('delay=200&fuzz=10&availability=' + encodedAvailability);
@@ -90,7 +88,7 @@
                 done();
               });
             },
-            refresh: function(slots, options, done) {
+            refresh: function(slots, done) {
             }
           });
 
@@ -99,7 +97,7 @@
           food.setAuctionProvider({
             name: 'auctionProviderOne',
             libUri: '/simulated-auction-provider/auctionProviderOne.js',
-            init: function(targets, options, done) {
+            init: function(targets, done) {
               auctionProviderOne.cmd.push(function() {
                 var i, t;
                 for (i = 0; i < targets.length; i++) {
