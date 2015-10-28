@@ -23,7 +23,7 @@ p.addBidProvider({name: 'Yieldbot',...});
 p.addBidProvider({name: 'Amazon',...});
 
 // add custom reporter
-p.addReporter(function(event){...});
+p.observe(function(event){...});
 
 p.start();
 ```

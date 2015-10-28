@@ -26,7 +26,7 @@ var logger = require('./logger');
   var configErrors = [];
 
   var requiredApiCalls = {
-    //addReporter: 0,
+    //observe: 0,
     addSlot: 0,
     setAuctionProvider: 0,
     addBidProvider: 0,
@@ -178,8 +178,8 @@ var logger = require('./logger');
    * @return {pubfood}
    * @example {file} ../examples/reporter.js
    */
-  api.prototype.addReporter = function(eventType, reporter) {
-    logger.logCall('api.addReporter', arguments);
+  api.prototype.observe = function(eventType, reporter) {
+    logger.logCall('api.observe', arguments);
     if (typeof eventType === 'function') {
       // subscribe the reported to all the available events
       for (var e in Event.EVENT_TYPE) {

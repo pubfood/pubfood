@@ -138,7 +138,7 @@
           });
 
           food.timeout(1000)
-          food.addReporter(function(ev) {
+          food.observe(function(ev) {
             console.log(ev);
           });
           food.start(+new Date());

@@ -32,12 +32,12 @@
              var batch = [];
 
              // this reporter listens on all events and pushes the event data to a queue `batch`
-             p.addReporter(function(event) {
+             p.observe(function(event) {
                  batch.push(event);
              });
 
              // this reporter only listens on the `AUCTION_COMPLETE` event, then loops over and displays the event data
-             p.addReporter('AUCTION_COMPLETE', function(event) {
+             p.observe('AUCTION_COMPLETE', function(event) {
                  for (var i = 0; i < batch.length; i++) {
                      console.log('%c' + batch[i].type, 'padding-right:5px;font-weight:bold;display:block;',JSON.stringify(batch[i]));
                  }

@@ -4,4 +4,4 @@ var reporter = function(event){
 
   //create csv from event.data
 };
-p.addReporter(reporter);
+p.observe(reporter);

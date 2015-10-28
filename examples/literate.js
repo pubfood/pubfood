@@ -136,7 +136,7 @@ pf.addAuctionProvider({
 pf.timeout(1200)
 
 // simple console logging of events
-pf.addReporter(function(ev) {
+pf.observe(function(ev) {
   console.log(ev);
 });
 

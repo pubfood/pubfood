@@ -65,7 +65,7 @@ describe('Api Callbacks - Tests', function() {
     };
 
     // add reporter for PUBFOOD_API_START
-    pf.addReporter('PUBFOOD_API_START', function(event) {
+    pf.observe('PUBFOOD_API_START', function(event) {
       var bidProviders = pf.getBidProviders();
       for(var key in bidProviders){
         bidProviderDoneCalled[key] = false;
@@ -73,7 +73,7 @@ describe('Api Callbacks - Tests', function() {
     });
 
     // add reporter for BID_COMPLETE
-    pf.addReporter('BID_COMPLETE', function(event) {
+    pf.observe('BID_COMPLETE', function(event) {
       var data = event.data;
       if (typeof bidProviderDoneCalled[data] !== 'undefined') {
         bidProviderDoneCalled[data] = true;
@@ -81,7 +81,7 @@ describe('Api Callbacks - Tests', function() {
     });
 
     // add reporter for AUCTION_COMPLETE
-    pf.addReporter('AUCTION_COMPLETE', function(event) {
+    pf.observe('AUCTION_COMPLETE', function(event) {
       // check to make sure that the bidder's done callback was called
       for (var key in bidProviderDoneCalled) {
         checkDoneCallbacks(key);
