@@ -48,8 +48,8 @@ describe('Api Callbacks - Tests', function() {
 
     var pf = new pubfood({
       id: 'optionalId',
-      auctionProviderCbTimeout: 500,
-      bidProviderCbTimeout: 600
+      auctionProviderCbTimeout: 1,
+      bidProviderCbTimeout: 1
     });
 
     var checkDoneCallbacks = function(_key) {
