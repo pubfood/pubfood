@@ -20,8 +20,8 @@ describe('Slot', function testSlotBuilder() {
       yieldbot: {
         slot: 'sidebar' //yieldbot's slot name
       },
-      amazon: {
-        slot: 'amz-left-adslot' // amazon's slot name
+      walkathon: {
+        slot: 'wlk-left-adslot' // walkathon's slot name
       }
     }
   };
