@@ -4,3 +4,10 @@ node_js:
 
 script:
   - "npm run build"
+
+deploy:
+  provider: npm
+  api_key: $API_KEY
+  on:
+    tags: true
+    branch: master
