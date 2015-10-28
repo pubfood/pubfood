@@ -4,18 +4,18 @@
   "description": "Auction and bid provider pubfood request simulator.",
   "main": "lib/server.js",
   "scripts": {
+    "prestart": "cp ../dist/pubfood.js ./public",
     "start": "node ./lib/server.js"
   },
   "repository": {
     "type": "git",
-    "url": "ssh://git@github.com/yieldbot/example.git"
+    "url": "https://github.com/pubfood/pubfood.git"
   },
-  "author": "",
+  "author": {
+    "name": "pubfood and other contributors",
+    "url": "https://github.com/pubfood/pubfood/blob/master/AUTHORS.txt"
+  },
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/yieldbot/example/issues"
-  },
-  "homepage": "https://github.com/yieldbot/example",
   "devDependencies": {
     "boom": "^2.9.0",
     "hapi": "^11.0.2",

@@ -3,6 +3,7 @@
 ## Requirements
 
 - nodejs (see https://nodejs.org/en/download/package-manager/ for install instructions)
+- run `npm run build` at the root directory to generate `dist/pubfood.js`
 
 ## Start the server
 
