@@ -16,18 +16,15 @@ describe('Slot', function testSlotBuilder() {
       [300, 600]
     ],
     elementId: '_300x250', //div element on the page
-    bidProviders: {
-      yieldbot: {
-        slot: 'sidebar' //yieldbot's slot name
-      },
-      walkathon: {
-        slot: 'wlk-left-adslot' // walkathon's slot name
-      }
-    }
+    bidProviders: [
+      'yieldbot',
+      'walkathon'
+    ]
   };
 
   var slotModel = {
     name: 'right-rail',
+    elementId: 'targetDomId',
     dimensions: [ [300, 250], [300, 600] ]
   };
 
@@ -43,6 +40,7 @@ describe('Slot', function testSlotBuilder() {
   it('will build a slot from a config object', function() {
     var slot = Slot.fromObject(slotConfig);
     assert.isNotNull(slot, 'invalid slot');
+    assert.deepEqual(slot.bidProviders, slotConfig.bidProviders, 'fromObject bidProvider mismatch');
   });
 
   it('with an internal id', function() {
@@ -51,9 +49,10 @@ describe('Slot', function testSlotBuilder() {
     assert.match(slot.id, /[\w]+$/, 'id is not an ascii string');
   });
 
-  it('with a name', function() {
-    var slot = new Slot().name(slotModel.name);
+  it('with a name and elementId', function() {
+    var slot = new Slot(slotModel.name, slotModel.elementId);
     assert.equal(slot.name, slotModel.name, 'slot name not set');
+    assert.equal(slot.elementId, slotModel.elementId, 'slot elementId not set');
   });
 
   it('with a dimensions array', function() {
@@ -70,8 +69,7 @@ describe('Slot', function testSlotBuilder() {
   });
 
   it('with a name and dimensions in fluent chain', function() {
-    var slot = new Slot().
-        name('right-rail').
+    var slot = new Slot(slotModel.name).
         addSize(300, 250).
         addSize(300, 600);
     assert.equal(slot.name, slotModel.name, 'slot name not set');

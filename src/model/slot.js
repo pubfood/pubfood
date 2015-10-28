@@ -14,11 +14,14 @@ var slotConfig = require('../interfaces').SlotConfig;
  * @class
  * @memberof pubfood#model
  */
-function Slot() {
+function Slot(name, elementId) {
   if (this.init_) {
     this.init_();
   }
-  this.elementId = '';
+  /** @property {string} name the slot name */
+  this.name = name;
+  /** @property {string} elementId target DOM element id for the slot */
+  this.elementId = elementId;
   this.bidProviders = [];
   this.sizes = [];
 }
@@ -48,28 +51,6 @@ Slot.fromObject = function(config) {
     s[k] = config[k];
   }
   return s;
-};
-
-/**
- * Set the slot name.
- *
- * @param {string} name the slot name
- * @returns {pubfood#model.Slot}
- */
-Slot.prototype.name = function(name) {
-  this.name = name;
-  return this;
-};
-
-/**
- * Set target DOM elementId.
- *
- * @param {string} elementId the target element Id
- * @returns {pubfood#model.Slot}
- */
-Slot.prototype.targetId = function(elementId) {
-  this.elementId = elementId;
-  return this;
 };
 
 /**
