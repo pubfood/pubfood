@@ -100,6 +100,11 @@ PubfoodEvent.prototype.EVENT_TYPE = {
    */
   AUCTION_COMPLETE: 'AUCTION_COMPLETE',
   /**
+   * The auction has finished running
+   * @event pubfood.PubfoodEvent.AUCTION_POST_RUN
+   */
+  AUCTION_POST_RUN: 'AUCTION_POST_RUN',
+  /**
    * Error event raised
    * @event pubfood.PubfoodEvent.ERROR
    */
@@ -203,6 +208,7 @@ PubfoodEvent.prototype.publish = function(eventType, data, eventContext) {
  * @property {string} data.AUCTION_TRIGGER
  * @property {string} data.AUCTION_REFRESH
  * @property {string} data.AUCTION_COMPLETE
+ * @property {string} data.AUCTION_POST_RUN
  * @property {string} data.BID_LIB_START
  * @property {string} data.BID_LIB_LOADED
  * @property {object} data.BID_PUSH_NEXT @see [Bid]{@link pubfood#model.Bid}

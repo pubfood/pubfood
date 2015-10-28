@@ -322,6 +322,12 @@ AuctionMediator.prototype.buildTargeting_ = function() {
  */
 AuctionMediator.prototype.auctionDone = function(data) {
   Event.publish(Event.EVENT_TYPE.AUCTION_COMPLETE, data);
+  setTimeout(function() {
+    // push this POST event onto the next tick of the event loop
+    Event.publish(Event.EVENT_TYPE.AUCTION_POST_RUN, data);
+    // TODO consider if delay should be zero or another default
+    // TODO consider if delay should be tweakable
+  }, 0);
 };
 
 AuctionMediator.initTargetingSlot_ = function(auctionState, slot) {
