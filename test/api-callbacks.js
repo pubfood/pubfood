@@ -1,6 +1,5 @@
 /**
  * pubfood
- * Copyright (c) 2015 Yieldbot, Inc. - All rights reserved.
  *
  * - check to make sure that the bidder's done callback was called
  * - check for core api method calls

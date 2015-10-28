@@ -1,7 +1,5 @@
 /**
  * pubfood
- * Copyright (c) 2015 Yieldbot, Inc. - All rights reserved.
- *
  */
 'use strict';
 
@@ -95,4 +93,3 @@ describe('Slot', function testSlotBuilder() {
     assert.deepEqual(slot.sizes, [ [300, 0], [0, 0], [0, 600], [728, 90] ], 'dimensions not equal');
   });
 });
-
