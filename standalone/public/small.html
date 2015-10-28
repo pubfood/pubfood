@@ -43,18 +43,23 @@
           food.addBidProvider({
             name: 'bp1',
             libUri: '/simulated-bid-provider/bp1.js',
-            init: function(slots, options, next, done) {
+            slotParams: {
+              '/2476204/multi-size': 'multi',
+              '/2476204/rail': 'rail'
+            },
+            init: function(slots, next, done) {
               bp1.cmd.push(function() {
                 var encodedAvailability = encodeURIComponent('multi:300x250|300x600:400,rail:300x250:650');
                 bp1.init('delay=200&fuzz=10&availability=' + encodedAvailability);
               });
+              var params = this.slotParams;
               bp1.cmd.push(function() {
                 var i;
                 var slotMap = {};
-                // TODO decide if slots are an array or an object
-                for (key in slots) {
-                  /** @todo: should not need to reference oneself here */
-                  slotMap[slots[key].bidProviders.bp1.slot] = key;
+                for (var k = 0; k < slots.length; k++) {
+                  var slot = slots[k];
+                  var ybslot = params[slot.name];
+                  slotMap[ybslot] = slot.name;
                 }
                 var getSizes = function (raw) {
                   var i;
@@ -91,18 +96,23 @@
           food.addBidProvider({
             name: 'bp2',
             libUri: '/simulated-bid-provider/bp2.js',
-            init: function(slots, options, next, done) {
+            slotParams: {
+              '/2476204/multi-size': 'multi',
+              '/2476204/rail': 'rail'
+            },
+            init: function(slots, next, done) {
               bp2.cmd.push(function() {
                 var encodedAvailability = encodeURIComponent('multi:300x250|300x600:800,rail:300x250:950');
                 bp2.init('delay=200&fuzz=10&availability=' + encodedAvailability);
               });
+              var params = this.slotParams;
               bp2.cmd.push(function() {
                 var i;
                 var slotMap = {};
-                // TODO decide if slots are an array or an object
-                for (key in slots) {
-                  /** @todo: should not need to reference oneself here */
-                  slotMap[slots[key].bidProviders.bp2.slot] = key;
+                for (var k = 0; k < slots.length; k++) {
+                  var slot = slots[k];
+                  var ybslot = params[slot.name];
+                  slotMap[ybslot] = slot.name;
                 }
                 var getSizes = function (raw) {
                   var i;
@@ -139,18 +149,23 @@
           food.addBidProvider({
             name: 'bp3',
             libUri: '/simulated-bid-provider/bp3.js',
-            init: function(slots, options, next, done) {
+            slotParams: {
+              '/2476204/multi-size': 'multi',
+              '/2476204/rail': 'rail'
+            },
+            init: function(slots, next, done) {
               bp3.cmd.push(function() {
                 var encodedAvailability = encodeURIComponent('multi:300x250|300x600:900,rail:300x250:975');
                 bp3.init('delay=200&fuzz=10&availability=' + encodedAvailability);
               });
+              var params = this.slotParams;
               bp3.cmd.push(function() {
                 var i;
                 var slotMap = {};
-                // TODO decide if slots are an array or an object
-                for (key in slots) {
-                  /** @todo: should not need to reference oneself here */
-                  slotMap[slots[key].bidProviders.bp3.slot] = key;
+                for (var k = 0; k < slots.length; k++) {
+                  var slot = slots[k];
+                  var ybslot = params[slot.name];
+                  slotMap[ybslot] = slot.name;
                 }
                 var getSizes = function (raw) {
                   var i;
