@@ -18,6 +18,11 @@ var logger = require('./logger');
 
 }(window || {}, undefined, function(global/*, config*/) {
 
+  if(global.pubfood){
+    global.pubfood.library.logger.logEvent(Event.EVENT_TYPE.WARN, ['multiple api load']);
+    return global.pubfood;
+  }
+
   var pubfood = function(config) {
     return new pubfood.library.init(config);
   };
