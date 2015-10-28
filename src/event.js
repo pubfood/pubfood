@@ -126,7 +126,7 @@ PubfoodEvent.prototype.EVENT_TYPE = {
 PubfoodEvent.prototype.publish = function(eventType, data, eventContext) {
   var ts = (+new Date());
 
-  if(eventType === this.EVENT_TYPE.PUBFOOD_API_START && data){
+  if (eventType === this.EVENT_TYPE.PUBFOOD_API_START && data) {
     ts = data;
   }
 

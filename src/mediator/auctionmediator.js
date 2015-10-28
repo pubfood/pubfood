@@ -137,7 +137,7 @@ AuctionMediator.prototype.getTimeout = function() {
 };
 
 /**
- * The maximum time the acution provider has before calling `done` inside the `init` method
+ * The maximum time the auction provider has before calling `done` inside the `init` method
  *
  * @param {number} millis timeout in milliseconds
  * @return {undefined}
@@ -248,15 +248,15 @@ AuctionMediator.prototype.go_ = function() {
   var doneCalled = false;
   var name = self.auctionProvider.name;
 
-  var doneCb = function(){
-    if(!doneCalled) {
+  var doneCb = function() {
+    if (!doneCalled) {
       doneCalled = true;
       self.auctionDone(name);
     }
   };
 
   setTimeout(function(){
-    if(!doneCalled) {
+    if (!doneCalled) {
       Event.publish(Event.EVENT_TYPE.WARN, 'Warning: The auction done callback for "'+name+'" hasn\'t been called within the allotted time (2sec)');
       doneCb();
     }
@@ -315,7 +315,7 @@ AuctionMediator.prototype.buildTargeting_ = function() {
 };
 
 /**
- * Notification of acution complete
+ * Notification of auction complete
  *
  * @param {string} data The auction mediator's name
  * @fires pubfood.PubfoodEvent.AUCTION_COMPLETE

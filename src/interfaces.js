@@ -227,7 +227,7 @@ var slotConfig = {
  *
  * @typedef {PubfoodConfig} PubfoodConfig - all properties are optional
  * @property {string} id
- * @property {number} auctionProviderTimeout The maximum time the acution provider has before calling `done` inside the `init` method
+ * @property {number} auctionProviderTimeout The maximum time the auction provider has before calling `done` inside the `init` method
  * @property {number} bidProviderTimeout The maximum time the bid provider has before calling `done` inside the `init` method
  */
 var PubfoodConfig = {
