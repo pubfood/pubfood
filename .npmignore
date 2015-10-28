@@ -2,10 +2,11 @@
 # /dist
 ## note doc gets repeated in the dist directory so it isn't rooted
 doc
-/standalone
+/examples
+/jsdoc_template
 /node_modules
-/reports
 /src
+/standalone
 /test
 
 ## files
@@ -13,15 +14,18 @@ doc
 .eslintrc
 .gitignore
 .npmignore
+.travis.yml
+# AUTHORS.txt
+# CONTRIBUTING.md
 gulpfile.js
-# LICENSE
+# LICENSE.txt
 # package.json
 # README.md
-tooth.json
 
-## jenkins generated stuff
-env.properties
-npm-shrinkwrap.json
+## standalone env (handled above)
+# /standalone/node_modules
+# /standalone/public/pubfood.js
+# /standalone/public/pubfood.min.js
 
 ## other generated stuff
 .DS_Store

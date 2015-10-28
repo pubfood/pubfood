@@ -2,22 +2,27 @@
 /dist
 ## note doc gets repeated in the dist directory so it isn't rooted
 # doc
-# /lib
+# /examples
+# /jsdoc_template
 /node_modules
-# /public
 # /src
+# /standalone
 # /test
-/test/unittests.js
+
 ## files
 # .eslintignore
 # .eslintrc
 # .gitignore
 # .npmignore
+# .travis.yml
+# AUTHORS.txt
+# CONTRIBUTING.md
 # gulpfile.js
-# LICENSE
+# LICENSE.txt
 # package.json
 # README.md
 
+## standalone env (not handled above)
 /standalone/node_modules
 /standalone/public/pubfood.js
 /standalone/public/pubfood.min.js
