@@ -1,5 +1,5 @@
 ## folders
-# /dist
+# /build
 ## note doc gets repeated in the dist directory so it isn't rooted
 doc
 /examples

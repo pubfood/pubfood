@@ -3,7 +3,7 @@ test/assets/vendor/*
 test/unittests.js
 examples/*.js
 tpl/*
-build/*
+dist/*
 
 # this is a hack for webstorm
 # cwd is not what eslint expect

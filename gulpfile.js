@@ -47,7 +47,7 @@ gulp.task('lint', function() {
 });
 
 gulp.task('doc', plugins.shell.task([
-  'jsdoc -R doc/API_DOC.md -d ./dist/doc ./src -t jsdoc_template -r'
+  'jsdoc -R doc/API_DOC.md -d ./build/doc ./src -t jsdoc_template -r'
 ]));
 
 gulp.task('build', function() {
@@ -56,19 +56,19 @@ gulp.task('build', function() {
   bundleStream
     .pipe(source('pubfood.js'))
     .pipe(plugins.replace('APP_VERSION', pkg.version))
-    .pipe(gulp.dest('./dist'))
+    .pipe(gulp.dest('./build'))
     .pipe(plugins.streamify(plugins.uglify()))
     .pipe(plugins.rename('pubfood.min.js'))
-    .pipe(gulp.dest('./dist'));
+    .pipe(gulp.dest('./build'));
 });
 
 gulp.task('clean', function() {
-  del(['dist/']).then(function(paths) {
+  del(['build/']).then(function(paths) {
     console.log('Cleaned paths:\n', paths.join('\n'));
   });
 });
 
-gulp.task('dist-js', ['build'], browserSync.reload);
+gulp.task('build-js', ['build'], browserSync.reload);
 
 gulp.task('serve', function() {
   browserSync({
@@ -80,6 +80,6 @@ gulp.task('serve', function() {
     }
   });
 
-  gulp.watch(['src/**/*.js', 'src/**/*.html', 'test/**/*.js', 'test/**/*.html'], ['dist-js']);
+  gulp.watch(['src/**/*.js', 'src/**/*.html', 'test/**/*.js', 'test/**/*.html'], ['build-js']);
 
 });
