@@ -7,6 +7,5 @@
 /*eslint no-undef: 0*/
 describe('Assembler - Tests', function () {
   require('./bidassembler');
-  require('./requestassembler');
   require('./transformoperator');
 });

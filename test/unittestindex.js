@@ -4,12 +4,10 @@
 
 'use strict';
 
-require('./model');
-require('./util');
-require('./errors');
-require('./event');
-require('./mediator');
-require('./provider');
 require('./assembler');
-require('./report');
+require('./errors');
+require('./mediator');
+require('./model');
+require('./provider');
+require('./util');
 require('./api-callbacks');
