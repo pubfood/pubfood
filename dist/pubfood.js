@@ -2120,7 +2120,7 @@ var logger = require('./logger');
   };
 
   pubfood.library = pubfood.prototype = {
-    version: '0.0.3',
+    version: '0.1.0',
     mediator: require('./mediator').mediatorBuilder(),
     PubfoodError: require('./errors'),
     logger: logger
