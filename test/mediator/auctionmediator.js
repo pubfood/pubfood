@@ -127,7 +127,7 @@ describe('Pubfood AuctionMediator', function testPubfoodMediator() {
     m.setAuctionProvider(providerDelegate);
 
     var log = logger.history[logger.history.length - 1];
-    console.log('>>>>>>', log.args);
+
     assert.isTrue(log.args[0] === 'WARN');
     assert.isTrue(log.args[1] === 'Warning: auction provider exists: Google');
 
