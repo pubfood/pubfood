@@ -55,12 +55,12 @@ pf.addBidProvider({
   name: 'amazon',
   libUri: 'http://c.amazon-adsystem.com/aax2/amzn_ads.js',
   // this function gets called once after the lib has loaded
-  init: function(slots, options, next, done) {
+  init: function(slots, options, pushBid, done) {
     // here are the things you'll need to accomplish
     // * if amazon needs their own slot definitions do that here
     // * call amazon and right afterwards call `done()` to finish bid initialization
     // for amazon
-    // * when amazon has the bids back call `next({ ... })` with the bid information.
+    // * when amazon has the bids back call `pushBid({ ... })` with the bid information.
     // it should look something like this once per bid on each slot
     // * if you have some first party data you want to send to amazon do it here
     /*
@@ -68,7 +68,7 @@ pf.addBidProvider({
     ...
     done();
     ...
-    next({
+     pushBid({
       slot: "..."
       value: ...,
       sizes: [...]
@@ -80,15 +80,15 @@ pf.addBidProvider({
 
 // ## yieldbot
 // next we'll get yieldbot to be one of the bidders too
-food.addBidProvider({
+pf.addBidProvider({
   name: 'yieldbot',
   libUri: 'http://cdn.yldbt.com/js/yieldbot.intent.js',
-  init: function(slots, options, next, done) {
+  init: function(slots, options, pushBid, done) {
     // here are the things you'll need to accomplish
     // * if yieldbot needs their own slot definitions do that here
     // * call yieldbot and right afterwards call `done()` to finish bid initialization
     // for yieldbot
-    // * when yieldbot has the bids back call `next({ ... })` with the bid information.
+    // * when yieldbot has the bids back call `pushBid({ ... })` with the bid information.
     // it should look something like this once per bid on each slot
     // * if you have some first party data you want to send to yieldbot do it here
     /*
@@ -96,7 +96,7 @@ food.addBidProvider({
     ...
     done();
     ...
-    next({
+     pushBid({
       slot: "..."
       value: ...,
       sizes: [...]
