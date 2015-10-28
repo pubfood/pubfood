@@ -151,12 +151,16 @@ AuctionMediator.prototype.setAuctionProviderCbTimeout = function(millis){
  *
  * @param {object}  event
  * @return {AuctionMediator}
- * @private
  */
 AuctionMediator.prototype.setAuctionTrigger = function(triggerFn) {
   this.trigger = triggerFn;
 };
 
+/**
+ *
+ * @private
+ * @return {undefined}
+ */
 AuctionMediator.prototype.startAuction_ = function() {
   Event.publish(Event.EVENT_TYPE.BID_ASSEMBLER, 'AuctionMediator');
   this.bidAssembler.process(this.bids_);
@@ -165,7 +169,7 @@ AuctionMediator.prototype.startAuction_ = function() {
 
 /**
  * Start the bid provider timeout.
- *
+ * @private
  * @return {AuctionMediator}
  */
 AuctionMediator.prototype.startTimeout_ = function() {
@@ -177,7 +181,7 @@ AuctionMediator.prototype.startTimeout_ = function() {
 
 /**
  * Force auction provider to init.
- *
+ * @private
  * @return {AuctionMediator}
  */
 AuctionMediator.prototype.triggerAuction_ = function() {
@@ -198,9 +202,9 @@ AuctionMediator.prototype.triggerAuction_ = function() {
 /**
  * Adds bid on {pubfood.PubfoodEvent.BID_PUSH_NEXT} event.
  *
-s   * @param {object} data
- * @return {AuctionMediator}
+ * @param {object} data
  * @private
+ * @return {AuctionMediator}
  */
 AuctionMediator.prototype.pushBid_ = function(event) {
   if (!this.inAuction) {
@@ -257,7 +261,7 @@ AuctionMediator.prototype.go_ = function() {
 
   setTimeout(function(){
     if (!doneCalled) {
-      Event.publish(Event.EVENT_TYPE.WARN, 'Warning: The auction done callback for "'+name+'" hasn\'t been called within the allotted time (2sec)');
+      Event.publish(Event.EVENT_TYPE.WARN, 'Warning: The auction done callback for "'+name+'" hasn\'t been called within the allotted time (' + (this.initDoneTimeout_/1000) + 'sec)');
       doneCb();
     }
   }, this.initDoneTimeout_);
@@ -330,11 +334,26 @@ AuctionMediator.prototype.auctionDone = function(data) {
   }, 0);
 };
 
+/**
+ *
+ * @param {object} auctionState
+ * @param {SlotConfig} slot
+ * @private
+ * @return {undefined}
+ */
 AuctionMediator.initTargetingSlot_ = function(auctionState, slot) {
   auctionState.slots[slot.name] = auctionState.slots[slot.name] || slot;
   auctionState.slots[slot.name].bids = auctionState.slots[slot.name].bids || [];
 };
 
+/**
+ *
+ * @param {object} auctionState
+ * @param {SlotConfig} slot
+ * @param {string} providerName
+ * @private
+ * @return {undefined}
+ */
 AuctionMediator.initTargetingProvider_ = function(auctionState, slot, providerName) {
   auctionState.providers[providerName] = auctionState.providers[providerName] || {};
   auctionState.providers[providerName].slots = auctionState.providers[providerName].slots || {};
@@ -343,11 +362,23 @@ AuctionMediator.initTargetingProvider_ = function(auctionState, slot, providerNa
 
 };
 
+/**
+ *
+ * @param {SlotConfig} slot
+ * @private
+ * @return {undefined}
+ */
 AuctionMediator.prototype.addTargetingSlot_ = function(slot) {
   AuctionMediator.initTargetingSlot_(this.auctionState_, slot);
   this.updateTargetingProviders_(slot);
 };
 
+/**
+ *
+ * @param {SlotConfig} slot
+ * @private
+ * @return {undefined}
+ */
 AuctionMediator.prototype.updateTargetingProviders_ = function(slot) {
   var providers = slot.bidProviders || {};
   for (var k in providers) {

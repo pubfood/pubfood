@@ -56,7 +56,10 @@ BidMediator.prototype.setBidProviderCbTimeout = function(millis){
 };
 
 /**
+ * @param {object} provider
+ * @param {object} slots
  * @private
+ * @return {undefined}
  */
 BidMediator.prototype.getBids_ = function(provider, slots) {
   var self = this;
