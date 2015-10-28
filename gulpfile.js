@@ -6,7 +6,6 @@ var gulp = require('gulp'),
   plugins = require('gulp-load-plugins')(),
   browserSync = require('browser-sync'),
   browserify = require('browserify'), // Consider using watchify
-  fs = require('fs'),
   del = require('del');
 
 gulp.task('browserify-unit-tests', function() {
@@ -26,16 +25,10 @@ gulp.task('test-html', function() {
     }));
 });
 
-gulp.task('test', ['test-spec', 'test-xunit']);
-
-gulp.task('test-spec', function() {
+gulp.task('test', function() {
   return gulp.src('./test/unittestindex.js')
     .pipe(plugins.mocha({reporter: 'spec'}));
 });
-
-gulp.task('test-xunit', plugins.shell.task([
-  'mocha -R "xunit" ./test/unittestindex.js > ./reports/mocha-xunit.xml'
-]));
 
 gulp.task('integration-test', function() {
   return gulp.src('test/index.html')
@@ -50,7 +43,6 @@ gulp.task('lint', function() {
   return gulp.src(['src/**/*.js', 'lib/**/*.js', 'test/**/*.js', 'gulpfile.js'])
     .pipe(plugins.eslint())
     .pipe(plugins.eslint.format())
-    .pipe(plugins.eslint.format('checkstyle', fs.createWriteStream('reports/jshint-checkstyle.xml')))
     .pipe(plugins.eslint.failAfterError());
 });
 

@@ -5,7 +5,6 @@
 # /lib
 /node_modules
 # /public
-/reports
 # /src
 # /test
 /test/unittests.js
@@ -18,14 +17,10 @@
 # LICENSE
 # package.json
 # README.md
-# tooth.json
 
+/standalone/node_modules
 /standalone/public/pubfood.js
 /standalone/public/pubfood.min.js
-
-## jenkins generated stuff
-env.properties
-npm-shrinkwrap.json
 
 ## other generated stuff
 .DS_Store
