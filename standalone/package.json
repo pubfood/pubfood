@@ -4,7 +4,6 @@
   "description": "Auction and bid provider pubfood request simulator.",
   "main": "lib/server.js",
   "scripts": {
-    "prestart": "cp ../dist/pubfood.js ./public",
     "start": "node ./lib/server.js"
   },
   "repository": {
