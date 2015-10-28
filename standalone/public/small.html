@@ -247,11 +247,27 @@
             }
           });
 
-          food.timeout(1000)
+          food.timeout(2000)
           var timeReference = +new Date();
           food.addReporter(function(ev) {
-            console.log(ev);
-            console.log(ev.type, 'delay in ms:', ev.ts - timeReference);
+            // console.log(ev);
+            // console.log(ev.type, 'delay in ms:', ev.ts - timeReference);
+          });
+          // google analytics
+          food.addReporter(function(ev) {
+            var elapsed = ev.ts - timeReference;
+            var data = {
+              hitType: 'timing',
+              timingCategory: 'pubfood',
+              timingVar: ev.type,
+              timingValue: elapsed,
+              timingLabel: ev.eventContext
+            };
+            if (ev.type.match(/COMPLETE$/)) {
+              console.log(data);
+              // TODO consider hitCallback poking a ANALYTICS_SENT event in pubfood
+              // ga('send', data);
+            }
           });
           food.start(timeReference);
         </script>
