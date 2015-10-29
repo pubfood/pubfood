@@ -31,7 +31,7 @@ gulp.task('build', function() {
 
   bundleStream
     .pipe(source('pubfood.js'))
-    .pipe(plugins.header('/*! pubfood vAPP_VERSION ' + (new Date()) + ' Copyright pubfood, http://pubfood.org/ */\n'))
+    .pipe(plugins.header('/*! pubfood vAPP_VERSION | (c) pubfood | http://pubfood.org/LICENSE.txt */\n'))
     .pipe(plugins.replace('APP_VERSION', pkg.version))
     .pipe(gulp.dest('./build'))
     .pipe(plugins.streamify(plugins.uglify({
