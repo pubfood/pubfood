@@ -84,6 +84,7 @@ BidMediator.prototype.getBids_ = function(provider, slots) {
     }
   }, this.initDoneTimeout_);
 
+  Event.publish(Event.EVENT_TYPE.BID_START, name);
   provider.init(slots, pushBidCb, bidDoneCb);
 };
 
