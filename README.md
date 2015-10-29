@@ -1,5 +1,9 @@
 # DRAFT: pubfood
 
+[![npm version](https://badge.fury.io/js/pubfood.svg)](https://badge.fury.io/js/pubfood)
+[![Build Status](https://travis-ci.org/pubfood/pubfood.svg?branch=master)](https://travis-ci.org/pubfood/pubfood)
+
+
 A browser client header bidding JavaScript library.
 
 # What is header bidding?
@@ -34,22 +38,24 @@ It's what we (YB) do; on pageview:
 
 ## Test
 
-```
-npm run test
-```
+- `npm run test`
 
 ## Start
 Opens the `test/index.html` file in your default browser.
 
-```
-npm start
-```
+- `npm start`
 
 ## Build Output
 
-- `dist/doc/index.html` _(...etc, JSDoc)_
-- `dist/pubfood.js`
-- `dist/pubfood.min.js`
+- `build/doc/index.html` _(...etc, JSDoc)_
+- `build/pubfood.js`
+- `build/pubfood.min.js`
+
+## Deploy Process
+
+- `npm run cut_deploy`
+- `git push --follow-tags`
+- check the [travis build](https://travis-ci.org/pubfood/pubfood)
 
 # References
 Some reasonable summaries if you're new to header bidding:
