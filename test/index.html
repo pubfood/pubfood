@@ -13,7 +13,7 @@
         <script src="../node_modules/chai/chai.js"></script>
 
         <!-- For testing sync load pubfood -->
-        <script src="../dist/pubfood.js"></script>
+        <script src="../build/pubfood.js"></script>
         <script src="../test/fixture/auctionconfig1.js"></script>
 
         <iframe src="//i.yldbt.com/m/start-testing" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" height="0" width="0" style="display: none"></iframe>
@@ -28,7 +28,7 @@
          var expect = chai.expect;
 
          describe('Pubfood API', function testPubfoodMediator() {
-             var p = new pubfood();
+             var p = new pubfood({prefix: true});
              var batch = [];
 
              // this reporter listens on all events and pushes the event data to a queue `batch`
@@ -48,7 +48,6 @@
                  assert.equal(p.getSlots().length, 1, 'mediator did not add slot');
 
                  var slot = p.getSlots()[0];
-                 delete slot.id;
                  expect(slot.name).to.eql(pubfoodContrib.slots[0].name, 'name not equal');
                  expect(slot.sizes).to.eql(pubfoodContrib.slots[0].sizes, 'sizes not equal');
                  expect(slot.providers).to.eql(pubfoodContrib.slots[0].providers, 'providers not equal');

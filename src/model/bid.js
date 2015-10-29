@@ -63,6 +63,7 @@ Bid.fromObject = function(config) {
       b[k] = config[k];
     }
   }
+  b.type = util.asType(b.value);
   return b;
 };
 

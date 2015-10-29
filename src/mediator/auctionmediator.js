@@ -208,8 +208,6 @@ AuctionMediator.prototype.triggerAuction_ = function() {
 AuctionMediator.prototype.pushBid_ = function(event) {
   if (!this.inAuction) {
     var bid = event.data;
-    bid.type = 'slot';
-    bid.provider = event.provider;
     this.bids_.push(bid);
   } else {
     this.lateBids_.push(event.data);

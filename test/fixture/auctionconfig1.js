@@ -85,17 +85,9 @@ var pubfoodContrib = {
           var gptslot = googletag.defineSlot(slot.name, slot.sizes, slot.elementId)
               .addService(googletag.pubads());
 
-          var bids = slot.bids || [];
-          for (var j=0; j<bids.length; j++) {
-            var bid = bids[j];
-            if (bid.targeting && typeof bid.targeting === 'object') {
-              for (var p in bid.targeting) {
-                gptslot.setTargeting(p, bid.targeting[p]);
-              }
-            }
+          for (var p in slot.targeting) {
+            gptslot.setTargeting(p, slot.targeting[p]);
           }
-          // Publisher sets their adserver targeting key vor the bid value here
-          //gptslot.setTargeting('bid', bid.value);
         }
       });
       googletag.cmd.push(function() {
@@ -184,7 +176,8 @@ var pubfoodContrib = {
               targeting: {
                 ybot_ad: 'y',
                 ybot_slot: slot
-              }
+              },
+              label: 'price'
             };
             pushBid(bidObject);
           }
