@@ -17,8 +17,9 @@
     "doc": "gulp doc",
     "create_diagram": "jsdoc -t node_modules/jsdoc2diagram -r ./src -d ./build/doc",
     "build": "npm run prepare && npm run lint && gulp build && npm run test",
-    "copy_build_to_dist": "gulp build && cp build/pubfood.* dist",
-    "bump-version": "npm --no-git-tag-version version patch && npm run copy_build_to_dist && git commit . -m 'copy build files to dist' && git tag v`node -e 'console.log(require(\"./package.json\").version)'` && echo 'git push --follow-tags'",
+    "precut_deploy": "npm run build && cp build/pubfood.* dist",
+    "cut_deploy": "git commit . -m 'copy build files to dist' && git tag v`node -e 'console.log(require(\"./package.json\").version)'`",
+    "postcut_deploy": "npm --no-git-tag-version version patch && git commit . -m 'version bump'",
     "start": "npm run build && gulp serve"
   },
   "repository": {
