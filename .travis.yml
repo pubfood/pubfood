@@ -11,6 +11,7 @@ script:
 
 deploy:
   provider: npm
+  email: esolen@yieldbot.com
   api_key: $API_KEY
   on:
     tags: true
