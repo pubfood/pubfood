@@ -1,29 +1,37 @@
 ### Pubfood
 
 ```js
-var p = new pubfood();
+var pf = new pubfood();
 
-p.addBidTransform(function(bids){...});
+pf.addBidTransform(function(bids){...});
 
-p.addRequestTransform(function(slots){...});
+pf.addRequestTransform(function(slots){...});
 
 // add sidebar-unit slot
-p.addSlot({name: '/2476204/sidebar-unit',...});
+pf.addSlot({name: '/2476204/sidebar-unit',...});
 
 // add leaderboard slot
-p.addSlot({name: '/2476204/leaderboard',...});
+pf.addSlot({name: '/2476204/leaderboard',...});
 
 // set the Google as the auction provider
-p.setAuctionProvider({name: 'Google',...});
+pf.setAuctionProvider({name: 'Google',...});
 
 // add bid provider - yieldbot
-p.addBidProvider({name: 'Yieldbot',...});
+pf.addBidProvider({name: 'Yieldbot',...});
 
 // add bid prodider - Amazon
-p.addBidProvider({name: 'Amazon',...});
+pf.addBidProvider({name: 'Amazon',...});
 
 // add custom reporter
-p.observe(function(event){...});
+pf.observe(function(event){...});
 
-p.start();
+var now = +(new Date());
+
+pf.start(now, function(hasErrors, details){
+  if(hasErrors){
+    // console.log('error details', details);
+  } else {
+    // no errors
+  }
+});
 ```

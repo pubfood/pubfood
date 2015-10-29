@@ -4,8 +4,7 @@ var gulp = require('gulp'),
   pkg = require('./package.json'),
   source = require('vinyl-source-stream'),
   plugins = require('gulp-load-plugins')(),
-  browserify = require('browserify'), // Consider using watchify
-  del = require('del');
+  browserify = require('browserify'); // Consider using watchify
 
 gulp.task('browserify-unit-tests', function() {
   var b = browserify();
@@ -26,10 +25,6 @@ gulp.task('lint', function() {
     .pipe(plugins.eslint.format())
     .pipe(plugins.eslint.failAfterError());
 });
-
-gulp.task('doc', plugins.shell.task([
-  'jsdoc -R doc/API_DOC.md -d ./build/doc ./src -t jsdoc_template -r'
-]));
 
 gulp.task('build', function() {
   var bundleStream = browserify([], pkg.browserify).bundle();
