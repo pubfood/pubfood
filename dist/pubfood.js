@@ -1211,8 +1211,6 @@ AuctionMediator.prototype.triggerAuction_ = function() {
 AuctionMediator.prototype.pushBid_ = function(event) {
   if (!this.inAuction) {
     var bid = event.data;
-    bid.type = 'slot';
-    bid.provider = event.provider;
     this.bids_.push(bid);
   } else {
     this.lateBids_.push(event.data);
@@ -1598,6 +1596,7 @@ BidMediator.prototype.getBids_ = function(provider, slots) {
     }
   }, this.initDoneTimeout_);
 
+  Event.publish(Event.EVENT_TYPE.BID_START, name);
   provider.init(slots, pushBidCb, bidDoneCb);
 };
 
@@ -1715,6 +1714,7 @@ Bid.fromObject = function(config) {
       b[k] = config[k];
     }
   }
+  b.type = util.asType(b.value);
   return b;
 };
 
@@ -2120,7 +2120,7 @@ var logger = require('./logger');
   };
 
   pubfood.library = pubfood.prototype = {
-    version: '0.1.2',
+    version: '0.1.3',
     mediator: require('./mediator').mediatorBuilder(),
     PubfoodError: require('./errors'),
     logger: logger
