@@ -7,7 +7,7 @@
     "name": "pubfood and other contributors",
     "url": "https://github.com/pubfood/pubfood/blob/master/AUTHORS.txt"
   },
-  "main": "./src/pubfood.js",
+  "main": "./dist/pubfood.js",
   "scripts": {
     "prepare": "npm install",
     "clean": "npm prune --production && npm run prepare && gulp clean",
