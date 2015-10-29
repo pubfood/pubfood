@@ -16,27 +16,9 @@ gulp.task('browserify-unit-tests', function() {
     .pipe(gulp.dest('./test'));
 });
 
-gulp.task('test-html', function() {
-  return gulp.src('test/unit-test-index.html')
-    .pipe(plugins.mochaPhantomjs({
-      reporter: 'spec',
-      localToRemoteUrlAccessEnabled: true,
-      localUrlAccessEnabled: true
-    }));
-});
-
 gulp.task('test', function() {
   return gulp.src('./test/unittestindex.js')
     .pipe(plugins.mocha({reporter: 'spec'}));
-});
-
-gulp.task('integration-test', function() {
-  return gulp.src('test/index.html')
-    .pipe(plugins.mochaPhantomjs({
-      reporter: 'spec',
-      localToRemoteUrlAccessEnabled: true,
-      localUrlAccessEnabled: true
-    }));
 });
 
 gulp.task('lint', function() {
