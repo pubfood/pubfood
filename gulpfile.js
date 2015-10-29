@@ -4,7 +4,6 @@ var gulp = require('gulp'),
   pkg = require('./package.json'),
   source = require('vinyl-source-stream'),
   plugins = require('gulp-load-plugins')(),
-  browserSync = require('browser-sync'),
   browserify = require('browserify'), // Consider using watchify
   del = require('del');
 
@@ -44,24 +43,4 @@ gulp.task('build', function() {
     .pipe(gulp.dest('./build'));
 });
 
-gulp.task('clean', function() {
-  del(['build/']).then(function(paths) {
-    console.log('Cleaned paths:\n', paths.join('\n'));
-  });
-});
-
-gulp.task('build-js', ['build'], browserSync.reload);
-
-gulp.task('serve', function() {
-  browserSync({
-    reloadDelay: 2000,
-    notify: false,
-    server: {
-      baseDir: './',
-      index: 'test/index.html'
-    }
-  });
-
-  gulp.watch(['src/**/*.js', 'src/**/*.html', 'test/**/*.js', 'test/**/*.html'], ['build-js']);
-
-});
+gulp.task('build-js', ['build']);
