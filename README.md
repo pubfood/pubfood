@@ -54,7 +54,10 @@ Opens the `test/index.html` file in your default browser.
 ## Deploy Process
 
 - `npm run cut_deploy`
-- `git push --follow-tags`
+- `git fetch`
+- `git rebase`
+- `git push`
+- `git push origin --tags`
 - check the [travis build](https://travis-ci.org/pubfood/pubfood)
 
 # References
