@@ -16,3 +16,10 @@ deploy:
   on:
     tags: true
     branch: master
+
+after_deploy:
+  npm run copy_build_to_dist
+  git commit . -m 'copy build files to dist (travis)'
+  git fetch
+  git rebase
+  git push
