@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Pubfood Quick Start 1</title>
+        <style>
+         body { font-family:'Helvetica Neue', Helvetica, Arial, sans-serif; }
+         .question { width: 40%; word-break: break-none; }
+        </style>
+    </head>
+    <body>
+        <script src="/pubfood.js"></script>
+        <script>
+          // global for the auction provider
+          window.auctionProviderOne = window.auctionProviderOne || {};
+          auctionProviderOne.cmd = auctionProviderOne.cmd || [];
+
+          // globals for all bid providers
+          window.bidProviderOne = window.bidProviderOne || {};
+          bidProviderOne.cmd = bidProviderOne.cmd || [];
+
+          // setup pubfood and hook it up to providers
+          var food = new pubfood();
+          food.addSlot({
+            name: '/2476204/rail',
+            elementId: 'div-rail',
+            sizes: [
+              [300, 250]
+            ],
+            bidProviders: [
+              'bidProviderOne'
+              ]
+          });
+          food.addBidProvider({
+            name: 'bidProviderOne',
+            libUri: '/simulated-bid-provider/bidProviderOne.js',
+            slotParams: {
+              '/2476204/rail': 'rail'
+            },
+            sync: true,
+            init: function(slots, next, done) {
+              bidProviderOne.cmd.push(function() {
+                var encodedAvailability = encodeURIComponent('multi:300x250|300x600:400,rail:300x250:650');
+                bidProviderOne.init('delay=200&fuzz=10&availability=' + encodedAvailability);
+              });
+              var params = this.slotParams;
+              bidProviderOne.cmd.push(function() {
+                var i;
+                var slotMap = {};
+                for (var k = 0; k < slots.length; k++) {
+                  var slot = slots[k];
+                  var ybslot = params[slot.name];
+                  slotMap[ybslot] = slot.name;
+                }
+                var getSizes = function (raw) {
+                  var i;
+                  var sizeSplit;
+                  var sizes = [];
+                  var sizesRaw = raw.split('|');
+                  for (i = 0; i < sizesRaw.length; i++) {
+                    sizeSplit = sizesRaw[i].split('x');
+                    sizes[i] = [parseInt(sizeSplit[0], 10), parseInt(sizeSplit[1], 10)];
+                  }
+                  return sizes;
+                };
+                var parts;
+                var availableSlots = bidProviderOne.getAvailable().split(',');
+                for (i = 0; i < availableSlots.length; i++) {
+                  parts = availableSlots[i].split(':');
+                  // TODO consider different bids for different sizes
+                  next({
+                    slot: slotMap[parts[0]],
+                    value: parts[2],
+                    sizes: getSizes(parts[1]),
+                    targeting: {
+                      provider1_bid: parts[2]
+                    }
+                  });
+                }
+                console.log('bidProviderOne available:', bidProviderOne.getAvailable());
+                done();
+              });
+            },
+            refresh: function(slots, done) {
+            }
+          });
+
+          // could add more bidProviders here as needed
+
+          food.setAuctionProvider({
+            name: 'auctionProviderOne',
+            libUri: '/simulated-auction-provider/auctionProviderOne.js',
+            init: function(targets, done) {
+              auctionProviderOne.cmd.push(function() {
+                var i, t;
+                for (i = 0; i < targets.length; i++) {
+                  var target = targets[i];
+
+                  if(target.type === 'page'){
+                    // set page level targeting
+                    for(t in target.targeting){
+                      auctionProviderOne.setTargeting(t, target.targeting[t]);
+                    }
+                  }
+
+                  if(target.type === 'slot'){
+                    var apSlot = auctionProviderOne.defineSlot(target.name, target.sizes, target.elementId);
+
+                    // set slot level targeting
+                    for(t in target.targeting){
+                      apSlot.setTargeting(t, target.targeting[t]);
+                    }
+
+                  }
+                }
+              });
+
+              auctionProviderOne.cmd.push(function() {
+                auctionProviderOne
+                  .enableSingleRequest()
+                  .enableServices();
+              });
+
+              done();
+            },
+            refresh: function(slots, customTargeting, done) {
+              done();
+            }
+          });
+
+          food.timeout(1000)
+          food.observe(function(ev) {
+            console.log(ev);
+          });
+          food.start(+new Date());
+        </script>
+        <h1>Pubfood Quick Start - Simple</h1>
+        <h2>Who?</h2>
+        <div class="question">
+        You are a publisher setting up header bidding on your site. You need a framework
+        to facilitate adding bidding partners incrementally.
+        <p></p>
+        Your developers need a simple way to add bidding partners to your particular
+        ad server.
+        </div>
+        <h2>What?</h2>
+        <div class="question">
+        You have an ad server that auctions bidders for the impression.
+        <p></p>
+        You have one bid partner that has a JavaScript library to make bid requests
+        in order to set bid targeting values for your ad server request.
+        </div>
+        <h2>Why?</h2>
+        <div class="question">
+        Your bid partner provider can improve the impression yield for your site.
+        If you can get your partner's impression bid before the ad server request,
+        you can run an ad server auction to prioritize campaign creative selection by:
+        <p></p>
+        <ol>
+            <li>Direct sold campaign contracts;</li>
+            <li>Partner bid value; and</li>
+            <li>Fallback to ad exchanges.</li>
+        </ol>
+        <p></p>
+        Partnering with a header bidder helps improve monetization potential and yield
+        for your content page views.
+        <p></p>
+        However, understanding more about header bidding partner performance will help
+        you further manage your yield, budget forecasts, sales planning and partnerships.
+        <p></p>
+        </div>
+        <h2>When?</h2>
+        <div class="question">
+        When a user visits your site, timing is important.
+        <p></p>
+        Firstly, user experience is key so page load latency is very important.
+        <p></p>
+        Therefore, asking bidders for interest in a pageview within the accepatble
+        page load window is key to maintaining your brand, user attention and
+        monetization of your content.
+        </div>
+        <h2>Where?</h2>
+        <div class="question">
+        Simple additions or refinements to:
+        <p></p>
+        <ol>
+            <li>Your site code</li>
+            <li>Your ad server operations</li>
+        </ol>
+        </div>
+        <h2>How?</h2>
+        <div class="question">
+        <em>Let's make a few assumptions to set the stage:</em>
+        <ol>
+            <li>
+                you've decided that header bidding will complement revenue generated
+                from your publication.
+                <p></p>
+                But, you want to take it slow and offer one slot only to header bidding
+                partners.
+                <p></p>
+            </li>
+            <li>
+                you already have direct ad sales and these are serviced using an existing
+                ad server service.
+                <p></p>
+            </li>
+            <li>
+                your IT development team already have your ad server JavaScript code deployed
+                on your site and want to reuse the code.
+                <p></p>
+            </li>
+            <li>
+                your Ad Operations team have told you that they want to setup your ad server
+                with specific line items targeting a partner's bid for specific slots and dimensions
+                as they do today with competing direct sold campaigns.
+                <p></p>
+            </li>
+        </ol>
+
+        </div>
+        <div style="position:relative;height:250px">
+          <div style="position:absolute" id="div-multi-size"></div>
+          <div style="position:absolute;left:310px" id="div-rail"></div>
+        </div>
+        <script>
+          auctionProviderOne.cmd.push(function() {
+            auctionProviderOne.display('div-multi-size');
+            auctionProviderOne.display('div-rail');
+          });
+        </script>
+
+    </body>
+</html>
