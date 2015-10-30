@@ -40,7 +40,7 @@
             sync: true,
             init: function(slots, next, done) {
               bidProviderOne.cmd.push(function() {
-                var encodedAvailability = encodeURIComponent('multi:300x250|300x600:400,rail:300x250:650');
+                var encodedAvailability = encodeURIComponent('rail:300x250:650');
                 bidProviderOne.init('delay=200&fuzz=10&availability=' + encodedAvailability);
               });
               var params = this.slotParams;
