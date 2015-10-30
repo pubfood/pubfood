@@ -1,4 +1,4 @@
-/*! pubfood v0.1.5 | (c) pubfood | http://pubfood.org/LICENSE.txt */
+/*! pubfood v0.1.6 | (c) pubfood | http://pubfood.org/LICENSE.txt */
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.pubfood = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 'use strict';
 
@@ -764,10 +764,14 @@ auctionDelegate.optional = {
  * @property {bidDoneCallback} refresh.done Callback to execute on done
  */
 var bidDelegate = {
-  name: '',
-  libUri: '',
-  init: function(slots, done) {},
-  refresh: function(slots, done) {}
+  name: '__default__',
+  libUri: ' ',
+  init: function(slots, pushBid, done) {
+    done();
+  },
+  refresh: function(slots, pushBid, done) {
+    done();
+  }
 };
 bidDelegate.optional = {
 };
@@ -1017,10 +1021,6 @@ var TransformOperator = require('../assembler/transformoperator');
 var AuctionProvider = require('../provider/auctionprovider');
 var BidProvider = require('../provider/bidprovider');
 var Event = require('../event');
-
-/**
- * @typedef {AuctionMediator} AuctionMediator [AuctionMediator]{@link pubfood#mediator.AuctionMediator}
- */
 
 /**
  * AuctionMediator coordiates requests to Publisher Ad Servers.
@@ -1353,7 +1353,6 @@ AuctionMediator.prototype.auctionDone = function(data) {
  * @returns {pubfood#mediator.AuctionMediator}
  */
 AuctionMediator.prototype.addSlot = function(slotConfig) {
-
   var slot = Slot.fromObject(slotConfig);
   if (slot) {
     this.slots.push(slot);
@@ -1375,6 +1374,10 @@ AuctionMediator.prototype.addBidProvider = function(delegateConfig) {
     Event.publish(Event.EVENT_TYPE.WARN, 'Warning: invalid bid provider: ' + delegateConfig.name);
   }
   return bidProvider;
+};
+
+AuctionMediator.prototype.bidProviderExists_ = function(name){
+  return !!this.bidProviders[name];
 };
 
 /**
@@ -2093,6 +2096,7 @@ module.exports = BidProvider;
 var Event = require('./event');
 var util = require('./util');
 var logger = require('./logger');
+var defaultBidProvider = require('./interfaces').BidDelegate;
 
 (function(global, undefined, ctor) {
 
@@ -2121,7 +2125,7 @@ var logger = require('./logger');
   };
 
   pubfood.library = pubfood.prototype = {
-    version: '0.1.5',
+    version: '0.1.6',
     mediator: require('./mediator').mediatorBuilder(),
     PubfoodError: require('./errors'),
     logger: logger
@@ -2190,6 +2194,14 @@ var logger = require('./logger');
    * @return {pubfood}
    */
   api.prototype.addSlot = function(slot) {
+
+    if (!util.isArray(slot.bidProviders) || slot.bidProviders.length === 0) {
+      slot.bidProviders = ['__default__'];
+      if(!this.library.mediator.bidProviderExists_('__default__')){
+        this.library.mediator.addBidProvider(defaultBidProvider);
+      }
+    }
+
     logger.logCall('api.addSlot', arguments);
     this.library.mediator.addSlot(slot);
     requiredApiCalls.addSlot++;
@@ -2379,7 +2391,7 @@ var logger = require('./logger');
   return pubfood;
 }));
 
-},{"./errors":5,"./event":6,"./logger":8,"./mediator":9,"./util":18}],18:[function(require,module,exports){
+},{"./errors":5,"./event":6,"./interfaces":7,"./logger":8,"./mediator":9,"./util":18}],18:[function(require,module,exports){
 /**
  * pubfood
  */
