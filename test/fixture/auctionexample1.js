@@ -39,7 +39,7 @@ var auctionexample1 = {
     {
       name: 'yieldbot',
       libUri: '//cdn.yldbt.com/js/yieldbot.intent.js',
-      init: function(slots, options, pushBid, done) {
+      init: function(slots, pushBid, done) {
       },
       refresh: function(slots, pushBid, done) {
       }

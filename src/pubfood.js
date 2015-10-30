@@ -162,7 +162,13 @@ var logger = require('./logger');
     this.library.mediator.setBidProviderCbTimeout(this.bidProviderTimeout_);
     requiredApiCalls.addBidProvider++;
     if (!provider) {
-      configErrors.push('Invalid bid provider config');
+      configErrors.push('Invalid bid provider config for ' + delegate.name);
+    }
+    if(typeof delegate.init === 'function' && delegate.init.length !== 3){
+      configErrors.push('Bid provider '+ delegate.name +'\'s init method requires 3 arguments');
+    }
+    if(typeof delegate.refresh === 'function' && delegate.refresh.length !== 3) {
+      configErrors.push('Bid provider ' + delegate.name + '\'s refresh method requires 3 arguments');
     }
     return this;
   };
