@@ -63,10 +63,14 @@ auctionDelegate.optional = {
  * @property {bidDoneCallback} refresh.done Callback to execute on done
  */
 var bidDelegate = {
-  name: '',
-  libUri: '',
-  init: function(slots, done) {},
-  refresh: function(slots, done) {}
+  name: '__default__',
+  libUri: ' ',
+  init: function(slots, pushBid, done) {
+    done();
+  },
+  refresh: function(slots, pushBid, done) {
+    done();
+  }
 };
 bidDelegate.optional = {
 };

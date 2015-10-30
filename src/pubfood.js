@@ -9,6 +9,7 @@
 var Event = require('./event');
 var util = require('./util');
 var logger = require('./logger');
+var defaultBidProvider = require('./interfaces').BidDelegate;
 
 (function(global, undefined, ctor) {
 
@@ -106,6 +107,14 @@ var logger = require('./logger');
    * @return {pubfood}
    */
   api.prototype.addSlot = function(slot) {
+
+    if (!util.isArray(slot.bidProviders) || slot.bidProviders.length === 0) {
+      slot.bidProviders = ['__default__'];
+      if(!this.library.mediator.bidProviderExists_('__default__')){
+        this.library.mediator.addBidProvider(defaultBidProvider);
+      }
+    }
+
     logger.logCall('api.addSlot', arguments);
     this.library.mediator.addSlot(slot);
     requiredApiCalls.addSlot++;

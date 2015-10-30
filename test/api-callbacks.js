@@ -89,6 +89,8 @@ describe('Api Callbacks - Tests', function() {
 
     // add slot
     pf.addSlot(auctionExample.slots[0]);
+    pf.addSlot(auctionExample.slots[1]);
+    pf.addSlot(auctionExample.slots[2]);
 
     // set the auction provider
     pf.setAuctionProvider(auctionExample.auctionProvider);

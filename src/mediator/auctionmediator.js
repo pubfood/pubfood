@@ -15,10 +15,6 @@ var BidProvider = require('../provider/bidprovider');
 var Event = require('../event');
 
 /**
- * @typedef {AuctionMediator} AuctionMediator [AuctionMediator]{@link pubfood#mediator.AuctionMediator}
- */
-
-/**
  * AuctionMediator coordiates requests to Publisher Ad Servers.
  *
  * @class
@@ -349,7 +345,6 @@ AuctionMediator.prototype.auctionDone = function(data) {
  * @returns {pubfood#mediator.AuctionMediator}
  */
 AuctionMediator.prototype.addSlot = function(slotConfig) {
-
   var slot = Slot.fromObject(slotConfig);
   if (slot) {
     this.slots.push(slot);
@@ -371,6 +366,10 @@ AuctionMediator.prototype.addBidProvider = function(delegateConfig) {
     Event.publish(Event.EVENT_TYPE.WARN, 'Warning: invalid bid provider: ' + delegateConfig.name);
   }
   return bidProvider;
+};
+
+AuctionMediator.prototype.bidProviderExists_ = function(name){
+  return !!this.bidProviders[name];
 };
 
 /**

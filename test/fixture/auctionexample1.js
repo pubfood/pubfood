@@ -20,6 +20,24 @@ var auctionexample1 = {
         'bidderFast',
         'bidderSlow'
       ]
+    },
+    {
+      name: '/2476205/another-size',
+      sizes: [
+        [300, 250],
+        [300, 450]
+      ],
+      elementId: 'div-another-size',
+      bidProviders: [
+      ]
+    },
+    {
+      name: '/2476206/another',
+      sizes: [
+        [300, 250],
+        [300, 450]
+      ],
+      elementId: 'div-another',
     }
   ],
   auctionProvider: {
