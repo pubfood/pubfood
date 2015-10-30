@@ -33,21 +33,14 @@ It's what we (YB) do; on pageview:
 
 ## Build
 
-- `npm run prepare`
-- `npm run build`
+- `npm start`
 
 ## Test
 
 - `npm run test`
 
-## Start
-Opens the `test/index.html` file in your default browser.
-
-- `npm start`
-
 ## Build Output
 
-- `build/doc/index.html` _(...etc, JSDoc)_
 - `build/pubfood.js`
 - `build/pubfood.min.js`
 

@@ -18,7 +18,7 @@
     "precut_deploy": "npm run copy_build_to_dist",
     "cut_deploy": "git commit . -m 'copy build files to dist' && git tag v`node -e 'console.log(require(\"./package.json\").version)'`",
     "postcut_deploy": "npm --no-git-tag-version version patch && git commit . -m 'version bump'",
-    "start": "npm run build && gulp serve"
+    "start": "npm run build"
   },
   "repository": {
     "type": "git",
