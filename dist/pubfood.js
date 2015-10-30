@@ -1,3 +1,4 @@
+/*! pubfood v0.1.5 | (c) pubfood | http://pubfood.org/LICENSE.txt */
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.pubfood = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 'use strict';
 
@@ -2120,7 +2121,7 @@ var logger = require('./logger');
   };
 
   pubfood.library = pubfood.prototype = {
-    version: '0.1.4',
+    version: '0.1.5',
     mediator: require('./mediator').mediatorBuilder(),
     PubfoodError: require('./errors'),
     logger: logger
@@ -2245,7 +2246,13 @@ var logger = require('./logger');
     this.library.mediator.setBidProviderCbTimeout(this.bidProviderTimeout_);
     requiredApiCalls.addBidProvider++;
     if (!provider) {
-      configErrors.push('Invalid bid provider config');
+      configErrors.push('Invalid bid provider config for ' + delegate.name);
+    }
+    if(typeof delegate.init === 'function' && delegate.init.length !== 3){
+      configErrors.push('Bid provider '+ delegate.name +'\'s init method requires 3 arguments');
+    }
+    if(typeof delegate.refresh === 'function' && delegate.refresh.length !== 3) {
+      configErrors.push('Bid provider ' + delegate.name + '\'s refresh method requires 3 arguments');
     }
     return this;
   };

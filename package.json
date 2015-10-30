@@ -10,7 +10,7 @@
   "main": "./dist/pubfood.js",
   "scripts": {
     "clean": "npm prune --production && rm -fr build",
-    "prepare": "npm install && mkdir build",
+    "prepare": "npm install && mkdir -p build",
     "lint": "gulp lint",
     "test": "gulp test",
     "doc": "jsdoc -R doc/API_DOC.md -d ./build/doc ./src -t jsdoc_template -r",
