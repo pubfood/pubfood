@@ -5,8 +5,12 @@
         <title>Pubfood Quick Start 1</title>
         <style>
          body { font-family:'Helvetica Neue', Helvetica, Arial, sans-serif; }
-         .question { width: 40%; word-break: break-none; }
+         .question { width: 55%; word-break: normal; }
+         .step { width: 850px; }
+         .step-text { width: 400px; word-break: normal; float: left; overflow: hidden }
+         .code-sample { width: 400px; margin-left: 2%; float: left; overflow: hidden }
         </style>
+        <script src="https://google-code-prettify.googlecode.com/svn/loader/run_prettify.js"></script>
     </head>
     <body>
         <script src="/pubfood.js"></script>
@@ -69,19 +73,21 @@
                   parts = availableSlots[i].split(':');
                   // TODO consider different bids for different sizes
                   next({
-                    slot: slotMap[parts[0]],
-                    value: parts[2],
-                    sizes: getSizes(parts[1]),
-                    targeting: {
-                      provider1_bid: parts[2]
-                    }
+                      slot: slotMap[parts[0]],
+                      value: parts[2],
+                      sizes: getSizes(parts[1]),
+                      label: 'avg_price',
+                      targeting: {
+                          other: 'targeting',
+                          more: 'targeting'
+                      }
                   });
                 }
                 console.log('bidProviderOne available:', bidProviderOne.getAvailable());
                 done();
               });
             },
-            refresh: function(slots, done) {
+            refresh: function(slots, next, done) {
             }
           });
 
@@ -218,6 +224,152 @@
             </li>
         </ol>
 
+        </div>
+        <p></p>
+        <h3>Getting started with the Pubfood framework</h3>
+        <ol>
+            <li>Define slots and which partner may bid for them.</li>
+            <li>Define or copy your bidding partner JavaScript code.</li>
+            <li>Define or copy your ad server JavaScript code to send bids to auction.</li>
+        </ol>
+
+
+        <div class="step">
+            <h4>Define slots</h4>
+            <div class="step-text">You will tell Pubfood which of your ad server slots are available for bidding and which partners may bid for therm.</div>
+            <div class="code-sample">
+                <pre class="prettyprint linenums">
+var food = new pubfood();
+food.addSlot({
+  name: '/2476204/rail',
+  elementId: 'div-rail',
+  sizes: [
+         [300, 250]
+       ],
+  bidProviders: [
+      'bidProviderOne'
+  ]
+});
+                </pre>
+            </div>
+        </div>
+        <div class="step">
+            <h4>Define bidding partner</h4>
+            <div class="step-text">Bid provider stuff here.</div>
+            <div class="code-sample">
+                <pre class="prettyprint linenums">
+
+food.addBidProvider({
+  name: 'bidProviderOne',
+  libUri: '/simulated-bid-provider/bidProviderOne.js',
+  slotParams: {
+    '/2476204/rail': 'rail'
+  },
+  sync: true,
+  init: function(slots, next, done) {
+    bidProviderOne.cmd.push(function() {
+      var encodedAvailability = encodeURIComponent('rail:300x250:650');
+      bidProviderOne.init('delay=200&fuzz=10&availability=' + encodedAvailability);
+    });
+    var params = this.slotParams;
+    bidProviderOne.cmd.push(function() {
+      var i;
+      var slotMap = {};
+      for (var k = 0; k < slots.length; k++) {
+        var slot = slots[k];
+        var ybslot = params[slot.name];
+        slotMap[ybslot] = slot.name;
+      }
+      var getSizes = function (raw) {
+        var i;
+        var sizeSplit;
+        var sizes = [];
+        var sizesRaw = raw.split('|');
+        for (i = 0; i < sizesRaw.length; i++) {
+          sizeSplit = sizesRaw[i].split('x');
+          sizes[i] = [parseInt(sizeSplit[0], 10), parseInt(sizeSplit[1], 10)];
+        }
+        return sizes;
+      };
+      var parts;
+      var availableSlots = bidProviderOne.getAvailable().split(',');
+      for (i = 0; i < availableSlots.length; i++) {
+        parts = availableSlots[i].split(':');
+        // TODO consider different bids for different sizes
+        next({
+            slot: slotMap[parts[0]],
+            value: parts[2],
+            sizes: getSizes(parts[1]),
+            label: 'avg_price',
+            targeting: {
+                other: 'targeting',
+                more: 'targeting'
+            }
+        });
+      }
+      console.log('bidProviderOne available:', bidProviderOne.getAvailable());
+      done();
+    });
+  },
+  refresh: function(slots, next, done) {
+  }
+});
+                </pre>
+            </div>
+        </div>
+        <div class="step">
+            <h4>Define your ad server</h4>
+            <div class="step-text">Publisher adserver stuff here</div>
+            <div class="code-sample">
+                <pre class="prettyprint linenums">
+food.setAuctionProvider({
+  name: 'auctionProviderOne',
+  libUri: '/simulated-auction-provider/auctionProviderOne.js',
+  init: function(targets, done) {
+    auctionProviderOne.cmd.push(function() {
+      var i, t;
+      for (i = 0; i < targets.length; i++) {
+        var target = targets[i];
+
+        if(target.type === 'page'){
+          // set page level targeting
+          for(t in target.targeting){
+            auctionProviderOne.setTargeting(t, target.targeting[t]);
+          }
+        }
+
+        if(target.type === 'slot'){
+          var apSlot = auctionProviderOne.defineSlot(target.name, target.sizes, target.elementId);
+
+          // set slot level targeting
+          for(t in target.targeting){
+            apSlot.setTargeting(t, target.targeting[t]);
+          }
+
+        }
+      }
+    });
+
+    auctionProviderOne.cmd.push(function() {
+      auctionProviderOne
+        .enableSingleRequest()
+        .enableServices();
+    });
+
+    done();
+  },
+  refresh: function(slots, customTargeting, done) {
+    done();
+  }
+});
+
+food.timeout(1000)
+food.observe(function(ev) {
+  console.log(ev);
+});
+food.start(+new Date());
+                </pre>
+            </div>
         </div>
         <div style="position:relative;height:250px">
           <div style="position:absolute" id="div-multi-size"></div>
