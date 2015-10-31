@@ -6,140 +6,66 @@
         <style>
          body { font-family:'Helvetica Neue', Helvetica, Arial, sans-serif; }
          .question { width: 55%; word-break: normal; }
-         .step { width: 850px; }
+         .step { width: 1050px; }
          .step-text { width: 400px; word-break: normal; float: left; overflow: hidden }
-         .code-sample { width: 400px; margin-left: 2%; float: left; overflow: hidden }
+         .code-sample { width: 600px; margin-left: 2%; float: left; overflow: hidden }
+         pre {
+             //white-space: pre-wrap;
+             overflow-x: scroll;
+         }
         </style>
         <script src="https://google-code-prettify.googlecode.com/svn/loader/run_prettify.js"></script>
     </head>
     <body>
-        <script src="/pubfood.js"></script>
         <script>
-          // global for the auction provider
-          window.auctionProviderOne = window.auctionProviderOne || {};
-          auctionProviderOne.cmd = auctionProviderOne.cmd || [];
+         function insertStepScript(name, content) {
+             var el = document.getElementById(name);
+             if (el) {
+                 var js = document.createElement('script');
+                 js.innerHTML = content;
+                 el.parentNode.insertBefore(js, el);
+             }
+         }
 
-          // globals for all bid providers
-          window.bidProviderOne = window.bidProviderOne || {};
-          bidProviderOne.cmd = bidProviderOne.cmd || [];
+         function insertStepDoc(name, content) {
+             var el = document.getElementById(name + '-code');
+             if (el) {
+                 el.innerHTML = content;
+             }
+         }
 
-          // setup pubfood and hook it up to providers
-          var food = new pubfood();
-          food.addSlot({
-            name: '/2476204/rail',
-            elementId: 'div-rail',
-            sizes: [
-              [300, 250]
-            ],
-            bidProviders: [
-              'bidProviderOne'
-              ]
-          });
-          food.addBidProvider({
-            name: 'bidProviderOne',
-            libUri: '/simulated-bid-provider/bidProviderOne.js',
-            slotParams: {
-              '/2476204/rail': 'rail'
-            },
-            sync: true,
-            init: function(slots, next, done) {
-              bidProviderOne.cmd.push(function() {
-                var encodedAvailability = encodeURIComponent('rail:300x250:650');
-                bidProviderOne.init('delay=200&fuzz=10&availability=' + encodedAvailability);
-              });
-              var params = this.slotParams;
-              bidProviderOne.cmd.push(function() {
-                var i;
-                var slotMap = {};
-                for (var k = 0; k < slots.length; k++) {
-                  var slot = slots[k];
-                  var ybslot = params[slot.name];
-                  slotMap[ybslot] = slot.name;
-                }
-                var getSizes = function (raw) {
-                  var i;
-                  var sizeSplit;
-                  var sizes = [];
-                  var sizesRaw = raw.split('|');
-                  for (i = 0; i < sizesRaw.length; i++) {
-                    sizeSplit = sizesRaw[i].split('x');
-                    sizes[i] = [parseInt(sizeSplit[0], 10), parseInt(sizeSplit[1], 10)];
-                  }
-                  return sizes;
-                };
-                var parts;
-                var availableSlots = bidProviderOne.getAvailable().split(',');
-                for (i = 0; i < availableSlots.length; i++) {
-                  parts = availableSlots[i].split(':');
-                  // TODO consider different bids for different sizes
-                  next({
-                      slot: slotMap[parts[0]],
-                      value: parts[2],
-                      sizes: getSizes(parts[1]),
-                      label: 'avg_price',
-                      targeting: {
-                          other: 'targeting',
-                          more: 'targeting'
-                      }
-                  });
-                }
-                console.log('bidProviderOne available:', bidProviderOne.getAvailable());
-                done();
-              });
-            },
-            refresh: function(slots, next, done) {
-            }
-          });
+         function getStep(name) {
+             var xhr = new XMLHttpRequest();
+             xhr.onload = function(e) {
+                 if (this.status == 200) {
+                     var blob = new Blob([this.response], {type: 'text/javascript'});
+                     var reader = new FileReader();
+                     reader.addEventListener("loadend", function() {
+                         insertStepScript(name, reader.result);
+                         insertStepDoc(name, reader.result);
+                     });
+                     reader.readAsText(blob);
+                 }
+             };
+             xhr.open('GET', '/quick-start1-' + name + '.js', true);
+             xhr.responseType = 'blob';
+             xhr.send();
+         }
 
-          // could add more bidProviders here as needed
+         // global for the auction provider
+         window.auctionProviderOne = window.auctionProviderOne || {};
+         auctionProviderOne.cmd = auctionProviderOne.cmd || [];
 
-          food.setAuctionProvider({
-            name: 'auctionProviderOne',
-            libUri: '/simulated-auction-provider/auctionProviderOne.js',
-            init: function(targets, done) {
-              auctionProviderOne.cmd.push(function() {
-                var i, t;
-                for (i = 0; i < targets.length; i++) {
-                  var target = targets[i];
-
-                  if(target.type === 'page'){
-                    // set page level targeting
-                    for(t in target.targeting){
-                      auctionProviderOne.setTargeting(t, target.targeting[t]);
-                    }
-                  }
-
-                  if(target.type === 'slot'){
-                    var apSlot = auctionProviderOne.defineSlot(target.name, target.sizes, target.elementId);
-
-                    // set slot level targeting
-                    for(t in target.targeting){
-                      apSlot.setTargeting(t, target.targeting[t]);
-                    }
-
-                  }
-                }
-              });
-
-              auctionProviderOne.cmd.push(function() {
-                auctionProviderOne
-                  .enableSingleRequest()
-                  .enableServices();
-              });
-
-              done();
-            },
-            refresh: function(slots, customTargeting, done) {
-              done();
-            }
-          });
-
-          food.timeout(1000)
-          food.observe(function(ev) {
-            console.log(ev);
-          });
-          food.start(+new Date());
+         // globals for all bid providers
+         window.bidProviderOne = window.bidProviderOne || {};
+         bidProviderOne.cmd = bidProviderOne.cmd || [];
         </script>
+
+        <script src="/pubfood.js"></script>
+
+        <div id="step1"></div>
+        <div id="step2"></div>
+
         <h1>Pubfood Quick Start - Simple</h1>
         <h2>Who?</h2>
         <div class="question">
@@ -148,7 +74,7 @@
         <p></p>
         Your developers need a simple way to add bidding partners to your particular
         ad server.
-        </div>
+        </div>>
         <h2>What?</h2>
         <div class="question">
         You have an ad server that auctions bidders for the impression.
@@ -227,29 +153,25 @@
         </div>
         <p></p>
         <h3>Getting started with the Pubfood framework</h3>
+        <div class="step">
+        <div class="step-text">
         <ol>
             <li>Define slots and which partner may bid for them.</li>
             <li>Define or copy your bidding partner JavaScript code.</li>
             <li>Define or copy your ad server JavaScript code to send bids to auction.</li>
         </ol>
-
+        </div>
+        <div class="step-code">
+            <b><em>How did this ad get here?</em></b>
+            <pre id="div-rail"></pre>
+        </div>
+        </div>
 
         <div class="step">
             <h4>Define slots</h4>
             <div class="step-text">You will tell Pubfood which of your ad server slots are available for bidding and which partners may bid for therm.</div>
             <div class="code-sample">
-                <pre class="prettyprint linenums">
-var food = new pubfood();
-food.addSlot({
-  name: '/2476204/rail',
-  elementId: 'div-rail',
-  sizes: [
-         [300, 250]
-       ],
-  bidProviders: [
-      'bidProviderOne'
-  ]
-});
+                <pre id="step1-code" class="prettyprint linenums">
                 </pre>
             </div>
         </div>
@@ -257,63 +179,7 @@ food.addSlot({
             <h4>Define bidding partner</h4>
             <div class="step-text">Bid provider stuff here.</div>
             <div class="code-sample">
-                <pre class="prettyprint linenums">
-
-food.addBidProvider({
-  name: 'bidProviderOne',
-  libUri: '/simulated-bid-provider/bidProviderOne.js',
-  slotParams: {
-    '/2476204/rail': 'rail'
-  },
-  sync: true,
-  init: function(slots, next, done) {
-    bidProviderOne.cmd.push(function() {
-      var encodedAvailability = encodeURIComponent('rail:300x250:650');
-      bidProviderOne.init('delay=200&fuzz=10&availability=' + encodedAvailability);
-    });
-    var params = this.slotParams;
-    bidProviderOne.cmd.push(function() {
-      var i;
-      var slotMap = {};
-      for (var k = 0; k < slots.length; k++) {
-        var slot = slots[k];
-        var ybslot = params[slot.name];
-        slotMap[ybslot] = slot.name;
-      }
-      var getSizes = function (raw) {
-        var i;
-        var sizeSplit;
-        var sizes = [];
-        var sizesRaw = raw.split('|');
-        for (i = 0; i < sizesRaw.length; i++) {
-          sizeSplit = sizesRaw[i].split('x');
-          sizes[i] = [parseInt(sizeSplit[0], 10), parseInt(sizeSplit[1], 10)];
-        }
-        return sizes;
-      };
-      var parts;
-      var availableSlots = bidProviderOne.getAvailable().split(',');
-      for (i = 0; i < availableSlots.length; i++) {
-        parts = availableSlots[i].split(':');
-        // TODO consider different bids for different sizes
-        next({
-            slot: slotMap[parts[0]],
-            value: parts[2],
-            sizes: getSizes(parts[1]),
-            label: 'avg_price',
-            targeting: {
-                other: 'targeting',
-                more: 'targeting'
-            }
-        });
-      }
-      console.log('bidProviderOne available:', bidProviderOne.getAvailable());
-      done();
-    });
-  },
-  refresh: function(slots, next, done) {
-  }
-});
+                <pre id="step2-code" class="prettyprint linenums">
                 </pre>
             </div>
         </div>
@@ -321,66 +187,19 @@ food.addBidProvider({
             <h4>Define your ad server</h4>
             <div class="step-text">Publisher adserver stuff here</div>
             <div class="code-sample">
-                <pre class="prettyprint linenums">
-food.setAuctionProvider({
-  name: 'auctionProviderOne',
-  libUri: '/simulated-auction-provider/auctionProviderOne.js',
-  init: function(targets, done) {
-    auctionProviderOne.cmd.push(function() {
-      var i, t;
-      for (i = 0; i < targets.length; i++) {
-        var target = targets[i];
-
-        if(target.type === 'page'){
-          // set page level targeting
-          for(t in target.targeting){
-            auctionProviderOne.setTargeting(t, target.targeting[t]);
-          }
-        }
-
-        if(target.type === 'slot'){
-          var apSlot = auctionProviderOne.defineSlot(target.name, target.sizes, target.elementId);
-
-          // set slot level targeting
-          for(t in target.targeting){
-            apSlot.setTargeting(t, target.targeting[t]);
-          }
-
-        }
-      }
-    });
-
-    auctionProviderOne.cmd.push(function() {
-      auctionProviderOne
-        .enableSingleRequest()
-        .enableServices();
-    });
-
-    done();
-  },
-  refresh: function(slots, customTargeting, done) {
-    done();
-  }
-});
-
-food.timeout(1000)
-food.observe(function(ev) {
-  console.log(ev);
-});
-food.start(+new Date());
+                <pre id="step3-code"class="prettyprint lang-js linenums">
                 </pre>
             </div>
         </div>
         <div style="position:relative;height:250px">
           <div style="position:absolute" id="div-multi-size"></div>
-          <div style="position:absolute;left:310px" id="div-rail"></div>
         </div>
-        <script>
-          auctionProviderOne.cmd.push(function() {
-            auctionProviderOne.display('div-multi-size');
-            auctionProviderOne.display('div-rail');
-          });
-        </script>
+        <div id="step3"></div>
 
+        <script>
+         getStep('step1');
+         getStep('step2');
+         getStep('step3');
+        </script>
     </body>
 </html>
