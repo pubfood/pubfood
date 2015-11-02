@@ -5,7 +5,7 @@
               '/2476204/rail': 'rail'
             },
             sync: false,
-            init: function(slots, next, done) {
+            init: function(slots, pushBid, done) {
               bidProviderOne.cmd.push(function() {
                 var encodedAvailability = encodeURIComponent('rail:300x250:650');
                 bidProviderOne.init('delay=20&fuzz=10&availability=' + encodedAvailability);
@@ -35,7 +35,7 @@
                 for (i = 0; i < availableSlots.length; i++) {
                   parts = availableSlots[i].split(':');
                   // TODO consider different bids for different sizes
-                  next({
+                  pushBid({
                       slot: slotMap[parts[0]],
                       value: parts[2],
                       sizes: getSizes(parts[1]),
@@ -49,55 +49,6 @@
                 done();
               });
             },
-            refresh: function(slots, next, done) {
+            refresh: function(slots, pushBid, done) {
             }
           });
-
-          // could add more bidProviders here as needed
-
-          food.setAuctionProvider({
-            name: 'auctionProviderOne',
-            libUri: '/simulated-auction-provider/auctionProviderOne.js',
-            init: function(targets, done) {
-              auctionProviderOne.cmd.push(function() {
-                var i, t;
-                for (i = 0; i < targets.length; i++) {
-                  var target = targets[i];
-
-                  if(target.type === 'page'){
-                    // set page level targeting
-                    for(t in target.targeting){
-                      auctionProviderOne.setTargeting(t, target.targeting[t]);
-                    }
-                  }
-
-                  if(target.type === 'slot'){
-                    var apSlot = auctionProviderOne.defineSlot(target.name, target.sizes, target.elementId);
-
-                    // set slot level targeting
-                    for(t in target.targeting){
-                      apSlot.setTargeting(t, target.targeting[t]);
-                    }
-
-                  }
-                }
-              });
-
-              auctionProviderOne.cmd.push(function() {
-                auctionProviderOne
-                  .enableSingleRequest()
-                  .enableServices();
-              });
-
-              done();
-            },
-            refresh: function(slots, customTargeting, done) {
-              done();
-            }
-          });
-
-          food.timeout(500)
-          food.observe(function(ev) {
-            console.log(ev);
-          });
-          food.start(+new Date());
