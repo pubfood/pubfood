@@ -185,7 +185,7 @@ var pubfoodContrib = {
           done();
         });
       },
-      refresh: function(slots, done) {
+      refresh: function(slots, pushBid, done) {
         done();
       }
     },

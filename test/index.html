@@ -105,7 +105,13 @@
 
                  p.addBidTransform(augmentBids);
 
-                 p.start(Date.now());
+                 p.start(Date.now(), function(hasErros, details){
+                     if(hasErros){
+                         console.log('HAS ERRORS', details);
+                     } else {
+                         console.log('no errors');
+                     }
+                 });
                  var targetEl = document.getElementById('div-multi-size');
                  assert.isDefined(targetEl, 'target div not defined');
 
