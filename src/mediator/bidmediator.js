@@ -18,29 +18,19 @@ function BidMediator(auctionMediator) {
   this.auctionMediator = auctionMediator;
   this.operators = [];
   this.callbackTimeout_ = 2000;
+  this.processCounter_ = 0;
 }
 
 /**
- * Initialize the bidders.
+ * Process tht bidders bids
  *
  * @param {object} bidderSlots object containing slots per bidder
  * @return {undefined}
  */
-BidMediator.prototype.initBids = function(bidderSlots) {
+BidMediator.prototype.processBids = function(bidderSlots) {
+  this.processCounter_++;
   for (var k in bidderSlots) {
-    this.getBids_(bidderSlots[k].provider, bidderSlots[k].slots, 'init');
-  }
-};
-
-/**
- * Refresh the bids
- *
- * @param {object} bidderSlots object containing slots per bidder
- * @return {undefined}
- */
-BidMediator.prototype.refreshBids = function(bidderSlots) {
-  for (var k in bidderSlots) {
-    this.getBids_(bidderSlots[k].provider, bidderSlots[k].slots, 'refresh');
+    this.getBids_(bidderSlots[k].provider, bidderSlots[k].slots);
   }
 };
 
@@ -57,11 +47,10 @@ BidMediator.prototype.setBidProviderCbTimeout = function(millis){
 /**
  * @param {object} provider
  * @param {object} slots
- * @param {string} fnName init or refresh
  * @private
  * @return {undefined}
  */
-BidMediator.prototype.getBids_ = function(provider, slots, fnName) {
+BidMediator.prototype.getBids_ = function(provider, slots) {
   var self = this;
   var name = provider.name;
   var doneCalled = false;
@@ -85,7 +74,7 @@ BidMediator.prototype.getBids_ = function(provider, slots, fnName) {
   }, this.callbackTimeout_);
 
   Event.publish(Event.EVENT_TYPE.BID_START, name);
-  if(fnName === 'init'){
+  if(this.processCounter_ === 1){
     provider.init(slots, pushBidCb, bidDoneCb);
   } else {
     provider.refresh(slots, pushBidCb, bidDoneCb);

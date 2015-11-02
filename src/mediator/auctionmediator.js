@@ -495,7 +495,7 @@ AuctionMediator.prototype.start = function() {
 
   var bidderSlots = this.getBidderSlots();
 
-  this.bidMediator.initBids(bidderSlots);
+  this.bidMediator.processBids(bidderSlots);
   return this;
 };
 
@@ -533,7 +533,7 @@ AuctionMediator.prototype.refresh = function(slotNames) {
 
       // trigger bid provider refresh
       var bidderSlots = this.getBidderSlots();
-      this.bidMediator.refreshBids(bidderSlots);
+      this.bidMediator.processBids(bidderSlots);
 
       // trigger auction provider refresh
       var doneCalled = false;
