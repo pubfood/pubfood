@@ -6,7 +6,7 @@
         <style>
          body { font-family:'Helvetica Neue', Helvetica, Arial, sans-serif; }
          .question { width: 55%; word-break: normal; }
-         .step { width: 1050px; }
+         .step { width: 1050px; float: left; }
          .step-text { width: 400px; word-break: normal; float: left; overflow: hidden }
          .code-sample { width: 600px; margin-left: 2%; float: left; overflow: hidden }
          pre {
@@ -149,6 +149,7 @@
         </div>
         <p></p>
         <h3>Getting started with the Pubfood framework</h3>
+        <div id="steps">
         <div class="step">
             <h4><em>The steps</em></h4>
             <div class="step-text">
@@ -179,7 +180,7 @@
         </div>
         <div class="step">
             <h4>Define bidding partner</h4>
-            <div class="step-text">Pubfood does not need to know much about how your bid provider works. What it does need to know is:<p>
+            <div class="step-text">Pubfood does not need to know much about how your bid provider works. What it does need to know is:
                 <ul>
                     <li><span class="lines-ref">line 2</span> - the bidder name</li>
                     <li><span class="lines-ref">line 3</span> - the bid provider JavaScript library to load</li>
@@ -219,7 +220,7 @@
             <h4>Define when to display ads</h4>
             <div class="step-text">When pubfood has completed the auction orchestration, it will raise an event to indicate ads are ready to display.
                 <ul>
-                    <li><span class="lines-ref">line 1</span> - observethe auction provider name</li>
+                    <li><span class="lines-ref">line 1</span> - observe the auction provider name</li>
                     <li><span class="lines-ref">line 3</span> - the auction provider JavaScript library to load</li>
                     <li><span class="lines-ref">line 5</span> - the function to initialize the auction</li>
                     <ul>
@@ -235,13 +236,14 @@
         </div>
         <div class="step">
             <h4>Start the pubfood auction</h4>
-            <div class="step-text">Starting a pubfood auction will initiate and orchestrate the steps defined above.</div>
+            <div class="step-text">Starting a pubfood auction will initiate and orchestrate the steps defined above.
+            </div>
             <div class="code-sample">
                 <pre id="step5-code" class="prettyprint lang-js linenums">
                 </pre>
             </div>
         </div>
-
+        </div>
         <div>
             <div id="step1"></div>
             <div id="step2"></div>
