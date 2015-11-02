@@ -30,6 +30,8 @@ function AuctionMediator(config) {
   this.bidCount = 0;
   this.totalBidProviders = 0;
   this.slots = [];
+  // store slots by name for easy lookup
+  this.slotMap = {};
   this.bidProviders = {};
   this.auctionProvider = null;
   this.bids_ = [];
@@ -268,7 +270,6 @@ AuctionMediator.prototype.mergeKeys = function(slotTargeting, bidTargeting) {
   slotTargeting = util.mergeToObject(slotTargeting, bidTargeting);
 };
 
-
 /**
  * Get slot bids.
  *
@@ -349,6 +350,7 @@ AuctionMediator.prototype.addSlot = function(slotConfig) {
   var slot = Slot.fromObject(slotConfig);
   if (slot) {
     this.slots.push(slot);
+    this.slotMap[slot.name] = slot;
   }
   return this;
 };
@@ -462,10 +464,12 @@ AuctionMediator.prototype.loadProviders = function(/*action*/) {
  */
 AuctionMediator.prototype.getBidderSlots = function() {
   var bidderSlots = {};
+  var ret = [];
+  var i, k;
 
-  for (var i = 0; i < this.slots.length; i++) {
+  for (i = 0; i < this.slots.length; i++) {
     var slot = this.slots[i];
-    for (var k = 0; k < slot.bidProviders.length; k++) {
+    for (k = 0; k < slot.bidProviders.length; k++) {
       var provider = slot.bidProviders[k];
 
       var bSlots = bidderSlots[provider] = bidderSlots[provider] || [];
@@ -473,8 +477,7 @@ AuctionMediator.prototype.getBidderSlots = function() {
     }
   }
 
-  var ret = [];
-  for (var k in bidderSlots) {
+  for (k in bidderSlots) {
     ret.push({provider: this.bidProviders[k], slots: bidderSlots[k]});
   }
   return ret;
@@ -503,9 +506,55 @@ AuctionMediator.prototype.start = function() {
  * @returns {pubfood#mediator.AuctionMediator}
  */
 AuctionMediator.prototype.refresh = function(slotNames) {
-  Event.publish(Event.EVENT_TYPE.AUCTION_REFRESH, this.auctionProvider.name);
+  if(!util.isArray(slotNames)){
+    Event.publish(Event.EVENT_TYPE.WARN, 'Invalid data structure, "refresh" accepts an array of strings (slot names)');
+  } else {
+    var i, slot;
+    var self = this;
 
-  this.bidMediator.refreshBids(slotNames);
+    // reset the slots
+    this.slots = [];
+
+    for (i=0; i< slotNames.length; i++) {
+      slot = slotNames[i];
+      if(!this.slotMap[slot]){
+        Event.publish(Event.EVENT_TYPE.WARN, 'Can\'t refresh slot "'+ slot +'", because it wasn\'t defined');
+      } else {
+        this.slots.push(this.slotMap[slot]);
+      }
+    }
+
+    if(this.slots.length > 0) {
+      var name = this.auctionProvider.name;
+      Event.publish(Event.EVENT_TYPE.AUCTION_REFRESH, name);
+
+      this.bids_ = [];
+      this.lateBids_ = [];
+
+      // trigger bid provider refresh
+      var bidderSlots = this.getBidderSlots();
+      this.bidMediator.refreshBids(bidderSlots);
+
+      // trigger auction provider refresh
+      var doneCalled = false;
+      var doneCb = function() {
+        if (!doneCalled) {
+          doneCalled = true;
+          self.auctionDone(name);
+        }
+      };
+
+      setTimeout(function(){
+        if (!doneCalled) {
+          Event.publish(Event.EVENT_TYPE.WARN, 'Warning: The auction done callback for "'+name+'" hasn\'t been called within the allotted time (' + (this.initDoneTimeout_/1000) + 'sec)');
+          doneCb();
+        }
+      }, this.initDoneTimeout_);
+
+      var targeting = this.buildTargeting_();
+      this.auctionProvider.refresh(targeting, doneCb);
+    }
+  }
   return this;
 };
 

@@ -4,8 +4,6 @@
 
 'use strict';
 
-//var util = require('../util');
-//var BidProvider = require('../provider/bidprovider');
 var Event = require('../event');
 var Bid = require('../model/bid');
 
@@ -19,7 +17,7 @@ var Bid = require('../model/bid');
 function BidMediator(auctionMediator) {
   this.auctionMediator = auctionMediator;
   this.operators = [];
-  this.initDoneTimeout_ = 2000;
+  this.callbackTimeout_ = 2000;
 }
 
 /**
@@ -29,20 +27,21 @@ function BidMediator(auctionMediator) {
  * @return {undefined}
  */
 BidMediator.prototype.initBids = function(bidderSlots) {
-  // TODO: run request operators here
-
   for (var k in bidderSlots) {
-    this.getBids_(bidderSlots[k].provider, bidderSlots[k].slots);
+    this.getBids_(bidderSlots[k].provider, bidderSlots[k].slots, 'init');
   }
 };
 
 /**
  * Refresh the bids
  *
- * @param {Slot[]} slots
+ * @param {object} bidderSlots object containing slots per bidder
+ * @return {undefined}
  */
-BidMediator.prototype.refreshBids = function(/*slots*/) {
-
+BidMediator.prototype.refreshBids = function(bidderSlots) {
+  for (var k in bidderSlots) {
+    this.getBids_(bidderSlots[k].provider, bidderSlots[k].slots, 'refresh');
+  }
 };
 
 /**
@@ -52,16 +51,17 @@ BidMediator.prototype.refreshBids = function(/*slots*/) {
  * @return {undefined}
  */
 BidMediator.prototype.setBidProviderCbTimeout = function(millis){
-  this.initDoneTimeout_ = typeof millis === 'number' ? millis : 2000;
+  this.callbackTimeout_ = typeof millis === 'number' ? millis : 2000;
 };
 
 /**
  * @param {object} provider
  * @param {object} slots
+ * @param {string} fnName init or refresh
  * @private
  * @return {undefined}
  */
-BidMediator.prototype.getBids_ = function(provider, slots) {
+BidMediator.prototype.getBids_ = function(provider, slots, fnName) {
   var self = this;
   var name = provider.name;
   var doneCalled = false;
@@ -82,10 +82,14 @@ BidMediator.prototype.getBids_ = function(provider, slots) {
       Event.publish(Event.EVENT_TYPE.WARN, 'Warning: The bid done callback for "'+name+'" hasn\'t been called within the allotted time (2sec)');
       bidDoneCb();
     }
-  }, this.initDoneTimeout_);
+  }, this.callbackTimeout_);
 
   Event.publish(Event.EVENT_TYPE.BID_START, name);
-  provider.init(slots, pushBidCb, bidDoneCb);
+  if(fnName === 'init'){
+    provider.init(slots, pushBidCb, bidDoneCb);
+  } else {
+    provider.refresh(slots, pushBidCb, bidDoneCb);
+  }
 };
 
 /**

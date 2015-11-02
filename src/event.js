@@ -17,6 +17,7 @@ var EventEmitter = require('eventemitter3');
  * @return {pubfood.PubfoodEvent}
  */
 function PubfoodEvent() {
+  this.auction_ = 1;
   // PubfoodEvent constructor
 }
 
@@ -138,6 +139,7 @@ PubfoodEvent.prototype.publish = function(eventType, data, eventContext) {
 
   return this.emit(eventType, {
     ts: ts,
+    auction: (eventType === this.EVENT_TYPE.AUCTION_POST_RUN) ? this.auction_++ :this.auction_,
     type: eventType,
     eventContext: eventContext || 'pubfood',
     data: data || ''

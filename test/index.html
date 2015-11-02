@@ -29,26 +29,27 @@
       var expect = chai.expect;
 
       describe('Pubfood API', function testPubfoodMediator() {
-        var p = new pubfood({prefix: true});
+        var pf = new pubfood({prefix: true});
         var batch = [];
 
         // this reporter listens on all events and pushes the event data to a queue `batch`
-        p.observe(function(event) {
+        pf.observe(function(event) {
           batch.push(event);
         });
 
         // this reporter only listens on the `AUCTION_COMPLETE` event, then loops over and displays the event data
-        p.observe('AUCTION_COMPLETE', function(event) {
+        pf.observe('AUCTION_COMPLETE', function(event) {
+          console.log('---------------------------------------');
           for (var i = 0; i < batch.length; i++) {
             console.log('%c' + batch[i].type, 'padding-right:5px;font-weight:bold;display:block;', JSON.stringify(batch[i]));
           }
         });
 
         it('should add a slot', function() {
-          p.addSlot(pubfoodContrib.slots[0]);
-          assert.equal(p.getSlots().length, 1, 'mediator did not add slot');
+          pf.addSlot(pubfoodContrib.slots[0]);
+          assert.equal(pf.getSlots().length, 1, 'mediator did not add slot');
 
-          var slot = p.getSlots()[0];
+          var slot = pf.getSlots()[0];
           expect(slot.name).to.eql(pubfoodContrib.slots[0].name, 'name not equal');
           expect(slot.sizes).to.eql(pubfoodContrib.slots[0].sizes, 'sizes not equal');
           expect(slot.providers).to.eql(pubfoodContrib.slots[0].providers, 'providers not equal');
@@ -56,33 +57,33 @@
 
         });
         it('should add a bid provider', function() {
-          p.addBidProvider(pubfoodContrib.bidProviders[0]);
+          pf.addBidProvider(pubfoodContrib.bidProviders[0]);
 
-          expect(p.getBidProviders()).not.to.be.empty;
+          expect(pf.getBidProviders()).not.to.be.empty;
 
-          p.addBidProvider(pubfoodContrib.bidProviders[1]);
-          assert.equal(Object.keys(p.getBidProviders()).length, 2, 'bid provider not added');
+          pf.addBidProvider(pubfoodContrib.bidProviders[1]);
+          assert.equal(Object.keys(pf.getBidProviders()).length, 2, 'bid provider not added');
 
-          p.addBidProvider(pubfoodContrib.bidProviders[2]);
-          assert.equal(Object.keys(p.getBidProviders()).length, 3, 'bid provider not added');
+          pf.addBidProvider(pubfoodContrib.bidProviders[2]);
+          assert.equal(Object.keys(pf.getBidProviders()).length, 3, 'bid provider not added');
         });
 
         it('should add an auction provider', function() {
 
-          p.setAuctionProvider(pubfoodContrib.auctionProvider);
+          pf.setAuctionProvider(pubfoodContrib.auctionProvider);
 
-          assert.isDefined(p.getAuctionProvider(), 'auction provider not set');
+          assert.isDefined(pf.getAuctionProvider(), 'auction provider not set');
 
         });
 
         it('should start an auction', function() {
-          p.addBidProvider(pubfoodContrib.bidProviders[0]);
-          p.addBidProvider(pubfoodContrib.bidProviders[1]);
-          p.addBidProvider(pubfoodContrib.bidProviders[2]);
+          pf.addBidProvider(pubfoodContrib.bidProviders[0]);
+          pf.addBidProvider(pubfoodContrib.bidProviders[1]);
+          pf.addBidProvider(pubfoodContrib.bidProviders[2]);
 
-          p.addSlot(pubfoodContrib.slots[1]);
+          pf.addSlot(pubfoodContrib.slots[1]);
 
-          assert.equal(p.getSlots().length, 2, 'mediator did not add slot');
+          assert.equal(pf.getSlots().length, 2, 'mediator did not add slot');
         });
 
         it('should augment auction bids', function() {
@@ -92,7 +93,7 @@
               startAuction();
             }, 1000);
           };
-          p.setAuctionTrigger(trigger);
+          pf.setAuctionTrigger(trigger);
 
           function augmentBids(bids, params) {
             for (var i = 0; i < bids.length; i++) {
@@ -104,9 +105,14 @@
             return bids;
           }
 
-          p.addBidTransform(augmentBids);
+          pf.addBidTransform(augmentBids);
 
-          p.start(Date.now(), function(hasErros, details) {
+          // refresh the auction after 2 seconds
+          setTimeout(function(){
+            pf.refresh(['/2476204/multi-size', 'foo']);
+          }, 2000);
+
+          pf.start(Date.now(), function(hasErros, details) {
             if (hasErros) {
               console.log('HAS ERRORS', details);
             } else {
