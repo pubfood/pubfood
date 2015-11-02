@@ -40,6 +40,7 @@ function AuctionMediator(config) {
   this.timeout_ = -1;
   this.trigger_ = null;
   this.initDoneTimeout_ = 2000;
+  this.processTargetingCounter_ = 0;
   this.bidMediator = new BidMediator(this);
   this.bidAssembler = new BidAssembler(this);
   this.requestAssembler = new RequestAssembler();
@@ -234,32 +235,10 @@ AuctionMediator.prototype.checkBids_ = function() {
  * @return {undefined}
  */
 AuctionMediator.prototype.go_ = function() {
-  var self = this;
-
-  if (this.inAuction) return;
-  this.inAuction = true;
-
-  var doneCalled = false;
-  var name = self.auctionProvider.name;
-
-  var doneCb = function() {
-    if (!doneCalled) {
-      doneCalled = true;
-      self.auctionDone(name);
-    }
-  };
-
-  setTimeout(function(){
-    if (!doneCalled) {
-      Event.publish(Event.EVENT_TYPE.WARN, 'Warning: The auction done callback for "'+name+'" hasn\'t been called within the allotted time (' + (this.initDoneTimeout_/1000) + 'sec)');
-      doneCb();
-    }
-  }, this.initDoneTimeout_);
-
-  Event.publish(Event.EVENT_TYPE.AUCTION_GO, name);
-
-  var targeting = this.buildTargeting_();
-  this.auctionProvider.init(targeting, doneCb);
+  if (!this.inAuction) {
+    this.inAuction = true;
+    this.processTargeting_();
+  }
 };
 
 AuctionMediator.prototype.getBidKey = function(bid) {
@@ -323,6 +302,41 @@ AuctionMediator.prototype.buildTargeting_ = function() {
     auctionTargeting.push(t);
   }
   return auctionTargeting;
+};
+
+/**
+ * process the targeting for the auction provider
+ * @private
+ * @return {undefined}
+ */
+AuctionMediator.prototype.processTargeting_ = function() {
+  var self = this;
+  var doneCalled = false;
+  var name = self.auctionProvider.name;
+  self.processTargetingCounter_++;
+
+  var doneCb = function() {
+    if (!doneCalled) {
+      doneCalled = true;
+      self.auctionDone(name);
+    }
+  };
+
+  setTimeout(function() {
+    if (!doneCalled) {
+      Event.publish(Event.EVENT_TYPE.WARN, 'Warning: The auction done callback for "' + name + '" hasn\'t been called within the allotted time (' + (self.initDoneTimeout_ / 1000) + 'sec)');
+      doneCb();
+    }
+  }, self.initDoneTimeout_);
+
+  Event.publish(Event.EVENT_TYPE.AUCTION_GO, name);
+
+  var targeting = self.buildTargeting_();
+  if (self.processTargetingCounter_ === 1) {
+    self.auctionProvider.init(targeting, doneCb);
+  } else {
+    self.auctionProvider.refresh(targeting, doneCb);
+  }
 };
 
 /**
