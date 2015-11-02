@@ -28,6 +28,7 @@ function AuctionMediator(config) {
   /** @property {boolean} prefix if false, do not add bid provider name to bid targeting key. Default: true */
   this.prefix = config && config.hasOwnProperty('prefix') ? config.prefix : true;
   this.bidCount = 0;
+  this.totalBidProviders = 0;
   this.slots = [];
   this.bidProviders = {};
   this.auctionProvider = null;
@@ -217,9 +218,9 @@ AuctionMediator.prototype.pushBid_ = function(event) {
  * @private
  * @return {undefined}
  */
-AuctionMediator.prototype.checkBids_ = function(/*data*/) {
+AuctionMediator.prototype.checkBids_ = function() {
   this.bidCount++;
-  if (this.bidCount === Object.keys(this.bidProviders).length) {
+  if (this.bidCount === this.totalBidProviders) {
     this.startAuction_();
   }
 };
@@ -361,7 +362,12 @@ AuctionMediator.prototype.addBidProvider = function(delegateConfig) {
 
   var bidProvider = BidProvider.withDelegate(delegateConfig);
   if (bidProvider) {
-    this.bidProviders[bidProvider.name] = bidProvider;
+    if(this.bidProviders[bidProvider.name]){
+      Event.publish(Event.EVENT_TYPE.WARN, 'Warning: bid provider ' + bidProvider.name + ' is already added');
+    } else {
+      this.totalBidProviders++;
+      this.bidProviders[bidProvider.name] = bidProvider;
+    }
   } else {
     Event.publish(Event.EVENT_TYPE.WARN, 'Warning: invalid bid provider: ' + delegateConfig.name);
   }
