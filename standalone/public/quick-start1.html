@@ -155,15 +155,23 @@
             <div class="step-text">
                 <ol>
                     <li>Define slots and which partner may bid for them.</li>
+                    <p><b><span class="code-ref">food.addSlot(...);</span></b></p>
                     <li>Define or copy your bidding partner JavaScript code.</li>
+                    <p><b><span class="code-ref">food.addBidProvider(...);</span></b></p>
+                    <p>
                     <ol>
-                        <li>on each bid, call the <span class="code-ref">pushBid({})</span> callback</li>
-                        <li>when bidding finished, call the <span class="code-ref">done()</span> callback</li>
+                        <li>on each bid, call the <b><span class="code-ref">pushBid({})</span></b> callback</li>
+                        <li>when bidding finished, call the <b><span class="code-ref">done()</span></b> callback</li>
                     </ol>
+                    </p>
                     <li>Define or copy your ad server JavaScript code to send bids to auction.</li>
+                    <p><b><span class="code-ref">food.setAuctionProvider(...);</span></b></p>
                     <li>Define where to display your ad.</li>
+                    <p><b><span class="code-ref">food.observe('AUCTION_POST_RUN', ...);</span></b></p>
                     <li>Set a bidder timeout and start the pubfood auction.</li>
-                </ol>
+                    <p><b><span class="code-ref">food.timeout(...);</span></b></p>
+                    <p><b><span class="code-ref">food.start();</span></b></p>
+                    </ol>
             </div>
             <div class="code-sample">
                 <b><em>How did this ad get here?</em></b>
@@ -200,7 +208,7 @@
         </div>
         <div class="step">
             <h4>Define your ad server</h4>
-            <div class="step-text">Publisher adserver stuff here.
+            <div class="step-text">Set your auction provider that will receive bid targeting and send the targeting to auction in your ad server.
                 <ul>
                     <li><span class="lines-ref">line 2</span> - the auction provider name</li>
                     <li><span class="lines-ref">line 3</span> - the auction provider JavaScript library to load</li>
@@ -237,6 +245,11 @@
         <div class="step">
             <h4>Start the pubfood auction</h4>
             <div class="step-text">Starting a pubfood auction will initiate and orchestrate the steps defined above.
+                <ul>
+                    <li><span class="lines-ref">line 1</span> - bidders need to respond withing this time</li>
+                    <li><span class="lines-ref">line 2</span> - we can observe all events for debugging</li>
+                    <li><span class="lines-ref">line 5</span> - finally, start the auction</li>
+                </ul>
             </div>
             <div class="code-sample">
                 <pre id="step5-code" class="prettyprint lang-js linenums">
