@@ -1,145 +1,146 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="utf-8">
-        <link rel="stylesheet" href="../node_modules/gulp-mocha/node_modules/mocha/mocha.css" />
-        <title>Pubfood Tests</title>
-    </head>
-    <body>
+  <head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="../node_modules/gulp-mocha/node_modules/mocha/mocha.css"/>
+    <title>Pubfood Tests</title>
+  </head>
+  <body>
 
-        <div id="mocha"></div>
+    <div id="mocha"></div>
 
-        <script src="../node_modules/gulp-mocha/node_modules/mocha/mocha.js"></script>
-        <script src="../node_modules/chai/chai.js"></script>
+    <script src="../node_modules/gulp-mocha/node_modules/mocha/mocha.js"></script>
+    <script src="../node_modules/chai/chai.js"></script>
 
-        <!-- For testing sync load pubfood -->
-        <script src="../build/pubfood.js"></script>
-        <script src="../test/fixture/auctionconfig1.js"></script>
+    <!-- For testing sync load pubfood -->
+    <script src="../build/pubfood.js"></script>
+    <script src="../test/fixture/auctionconfig1.js"></script>
 
-        <iframe src="//i.yldbt.com/m/start-testing" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" height="0" width="0" style="display: none"></iframe>
-        <script type="text/javascript">
-         mocha.ui('bdd');
-        </script>
+    <iframe src="//i.yldbt.com/m/start-testing" frameborder="0" scrolling="no" marginheight="0" marginwidth="0"
+            height="0" width="0" style="display: none"></iframe>
+    <script type="text/javascript">
+      mocha.ui('bdd');
+    </script>
 
-        <script type="text/javascript">
+    <script type="text/javascript">
 
-         // ToDo: Separate concerns and load tests via script elements
-         var assert = chai.assert;
-         var expect = chai.expect;
+      // ToDo: Separate concerns and load tests via script elements
+      var assert = chai.assert;
+      var expect = chai.expect;
 
-         describe('Pubfood API', function testPubfoodMediator() {
-             var p = new pubfood({prefix: true});
-             var batch = [];
+      describe('Pubfood API', function testPubfoodMediator() {
+        var p = new pubfood({prefix: true});
+        var batch = [];
 
-             // this reporter listens on all events and pushes the event data to a queue `batch`
-             p.observe(function(event) {
-                 batch.push(event);
-             });
+        // this reporter listens on all events and pushes the event data to a queue `batch`
+        p.observe(function(event) {
+          batch.push(event);
+        });
 
-             // this reporter only listens on the `AUCTION_COMPLETE` event, then loops over and displays the event data
-             p.observe('AUCTION_COMPLETE', function(event) {
-                 for (var i = 0; i < batch.length; i++) {
-                     console.log('%c' + batch[i].type, 'padding-right:5px;font-weight:bold;display:block;',JSON.stringify(batch[i]));
-                 }
-             });
+        // this reporter only listens on the `AUCTION_COMPLETE` event, then loops over and displays the event data
+        p.observe('AUCTION_COMPLETE', function(event) {
+          for (var i = 0; i < batch.length; i++) {
+            console.log('%c' + batch[i].type, 'padding-right:5px;font-weight:bold;display:block;', JSON.stringify(batch[i]));
+          }
+        });
 
-             it('should add a slot', function() {
-                 p.addSlot(pubfoodContrib.slots[0]);
-                 assert.equal(p.getSlots().length, 1, 'mediator did not add slot');
+        it('should add a slot', function() {
+          p.addSlot(pubfoodContrib.slots[0]);
+          assert.equal(p.getSlots().length, 1, 'mediator did not add slot');
 
-                 var slot = p.getSlots()[0];
-                 expect(slot.name).to.eql(pubfoodContrib.slots[0].name, 'name not equal');
-                 expect(slot.sizes).to.eql(pubfoodContrib.slots[0].sizes, 'sizes not equal');
-                 expect(slot.providers).to.eql(pubfoodContrib.slots[0].providers, 'providers not equal');
-                 expect(slot.elementId).to.eql(pubfoodContrib.slots[0].elementId, 'elementId not equal');
+          var slot = p.getSlots()[0];
+          expect(slot.name).to.eql(pubfoodContrib.slots[0].name, 'name not equal');
+          expect(slot.sizes).to.eql(pubfoodContrib.slots[0].sizes, 'sizes not equal');
+          expect(slot.providers).to.eql(pubfoodContrib.slots[0].providers, 'providers not equal');
+          expect(slot.elementId).to.eql(pubfoodContrib.slots[0].elementId, 'elementId not equal');
 
-             });
-             it('should add a bid provider', function() {
-                 p.addBidProvider(pubfoodContrib.bidProviders[0]);
+        });
+        it('should add a bid provider', function() {
+          p.addBidProvider(pubfoodContrib.bidProviders[0]);
 
-                 expect(p.getBidProviders()).not.to.be.empty;
+          expect(p.getBidProviders()).not.to.be.empty;
 
-                 p.addBidProvider(pubfoodContrib.bidProviders[1]);
-                 assert.equal(Object.keys(p.getBidProviders()).length, 2, 'bid provider not added');
+          p.addBidProvider(pubfoodContrib.bidProviders[1]);
+          assert.equal(Object.keys(p.getBidProviders()).length, 2, 'bid provider not added');
 
-                 p.addBidProvider(pubfoodContrib.bidProviders[2]);
-                 assert.equal(Object.keys(p.getBidProviders()).length, 3, 'bid provider not added');
-             });
+          p.addBidProvider(pubfoodContrib.bidProviders[2]);
+          assert.equal(Object.keys(p.getBidProviders()).length, 3, 'bid provider not added');
+        });
 
-             it('should add an auction provider', function() {
+        it('should add an auction provider', function() {
 
-                 p.setAuctionProvider(pubfoodContrib.auctionProvider);
+          p.setAuctionProvider(pubfoodContrib.auctionProvider);
 
-                 assert.isDefined(p.getAuctionProvider(), 'auction provider not set');
+          assert.isDefined(p.getAuctionProvider(), 'auction provider not set');
 
-             });
+        });
 
-             it('should start an auction', function() {
-                 p.addBidProvider(pubfoodContrib.bidProviders[0]);
-                 p.addBidProvider(pubfoodContrib.bidProviders[1]);
-                 p.addBidProvider(pubfoodContrib.bidProviders[2]);
+        it('should start an auction', function() {
+          p.addBidProvider(pubfoodContrib.bidProviders[0]);
+          p.addBidProvider(pubfoodContrib.bidProviders[1]);
+          p.addBidProvider(pubfoodContrib.bidProviders[2]);
 
-                 p.addSlot(pubfoodContrib.slots[1]);
+          p.addSlot(pubfoodContrib.slots[1]);
 
-                 assert.equal(p.getSlots().length, 2, 'mediator did not add slot');
-             });
+          assert.equal(p.getSlots().length, 2, 'mediator did not add slot');
+        });
 
-             it('should augment auction bids', function() {
+        it('should augment auction bids', function() {
 
-                 var trigger = function(startAuction) {
-                     setTimeout(function() {
-                         startAuction();
-                     }, 1000);
-                 };
-                 p.setAuctionTrigger(trigger);
+          var trigger = function(startAuction) {
+            setTimeout(function() {
+              startAuction();
+            }, 1000);
+          };
+          p.setAuctionTrigger(trigger);
 
-                 function augmentBids(bids, params) {
-                     for (var i = 0; i < bids.length; i++) {
-                         bids[i]['targeting'].code = (0 | Math.random() * 36).toString(36);
+          function augmentBids(bids, params) {
+            for (var i = 0; i < bids.length; i++) {
+              bids[i]['targeting'].code = (0 | Math.random() * 36).toString(36);
 
-                         bids[i].baseValue = bids[i].value;
-                         bids[i].value = bids[i].value + 9;
-                     }
-                     return bids;
-                 }
+              bids[i].baseValue = bids[i].value;
+              bids[i].value = bids[i].value + 9;
+            }
+            return bids;
+          }
 
-                 p.addBidTransform(augmentBids);
+          p.addBidTransform(augmentBids);
 
-                 p.start(Date.now(), function(hasErros, details){
-                     if(hasErros){
-                         console.log('HAS ERRORS', details);
-                     } else {
-                         console.log('no errors');
-                     }
-                 });
-                 var targetEl = document.getElementById('div-multi-size');
-                 assert.isDefined(targetEl, 'target div not defined');
+          p.start(Date.now(), function(hasErros, details) {
+            if (hasErros) {
+              console.log('HAS ERRORS', details);
+            } else {
+              console.log('no errors');
+            }
+          });
+          var targetEl = document.getElementById('div-multi-size');
+          assert.isDefined(targetEl, 'target div not defined');
 
-                 /**
-                  * @todo use http://chaijs.com/plugins/chai-as-promised for async tests
-                 assert.isTrue(targetEl.childElementCount > 0, 'target div has no ad container elements');
-                  */
-             });
-         });
+          /**
+           * @todo use http://chaijs.com/plugins/chai-as-promised for async tests
+           assert.isTrue(targetEl.childElementCount > 0, 'target div has no ad container elements');
+           */
+        });
+      });
 
-        </script>
+    </script>
 
-        <script>
-         onload = function() {
-             if (window.debugger) {
-                 eval('debugger;');
-             }
-             mocha.run();
-         };
-        </script>
+    <script>
+      onload = function() {
+        if (window.debugger) {
+          eval('debugger;');
+        }
+        mocha.run();
+      };
+    </script>
 
-        <h2>Test Dfp Integration</h2>
+    <h2>Test Dfp Integration</h2>
 
-        <div id='div-leaderboard'>
-        </div>
+    <div id='div-leaderboard'>
+    </div>
 
-        <div id='div-multi-size'>
-        </div>
+    <div id='div-multi-size'>
+    </div>
 
-    </body>
+  </body>
 </html>
