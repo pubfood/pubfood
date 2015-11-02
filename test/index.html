@@ -27,9 +27,9 @@
       // ToDo: Separate concerns and load tests via script elements
       var assert = chai.assert;
       var expect = chai.expect;
+      var pf = new pubfood({prefix: true});
 
       describe('Pubfood API', function testPubfoodMediator() {
-        var pf = new pubfood({prefix: true});
         var batch = [];
 
         // this reporter listens on all events and pushes the event data to a queue `batch`

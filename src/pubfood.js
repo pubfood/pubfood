@@ -100,6 +100,14 @@ var defaultBidProvider = require('./interfaces').BidDelegate;
   };
 
   /**
+   *
+   * @param {string} type
+   */
+  api.prototype.dumpLog = function(type){
+    this.logger.dumpLog(type);
+  };
+
+  /**
    * Make this adslot avaialble for bidding
    *
    * @function
@@ -293,6 +301,7 @@ var defaultBidProvider = require('./interfaces').BidDelegate;
    * @return {pubfood}
    */
   api.prototype.refresh = function(slotNames) {
+    logger.auction++;
     logger.logCall('api.refresh', arguments);
     this.library.mediator.refresh(slotNames);
     return this;

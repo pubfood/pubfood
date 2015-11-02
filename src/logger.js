@@ -16,17 +16,27 @@
  * @property {array} logEvent.args The event arguments
  */
 var logger = {
+  auction: 1,
   history: [],
-  dumpLog: function() {
+  dumpLog: function(type) {
     if (console && console.log) {
       for (var i = 0; i < this.history.length; i++) {
-        console.log(this.history[i]);
+        var log = this.history[i];
+        if(type){
+          type = type || '';
+          if(type.match(/event/) && log.eventName) {
+            console.log(log);
+          }
+        } else {
+          console.log(log);
+        }
       }
     }
   },
   logCall: function(name, args) {
     this.history.push({
       ts: (+new Date()),
+      auction: this.auction,
       functionName: name,
       args: Array.prototype.slice.call(args)
     });
@@ -34,6 +44,7 @@ var logger = {
   logEvent: function(name, args){
     this.history.push({
       ts: (+new Date()),
+      auction: this.auction,
       eventName: name,
       args: Array.prototype.slice.call(args)
     });
