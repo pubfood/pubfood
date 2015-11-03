@@ -447,16 +447,26 @@ AuctionMediator.prototype.addBidTransform = function(delegate){
 
 /**
  * Load bid provider JavaScript library/tag.
- * @params {*} action
+ * @params {boolean} randomizeBidRequests
  * @returns {undefined}
  */
-AuctionMediator.prototype.loadProviders = function(/*action*/) {
+AuctionMediator.prototype.loadProviders = function(randomizeBidRequests) {
   var uri;
+  var keys = [];
 
-  for (var k in this.bidProviders) {
-    if (this.bidProviders[k].libUri) {
-      uri = this.bidProviders[k].libUri() || '';
-      var sync = this.bidProviders[k].sync();
+  for (var bp in this.bidProviders) {
+    keys.push(bp);
+  }
+
+  if (randomizeBidRequests) {
+    keys = util.random(keys);
+  }
+
+  for (var i = 0; i < keys.length; i++) {
+    var key = keys[i];
+    if (this.bidProviders[key].libUri) {
+      uri = this.bidProviders[key].libUri() || '';
+      var sync = this.bidProviders[key].sync();
       util.loadUri(uri, sync);
     }
   }
@@ -499,13 +509,14 @@ AuctionMediator.prototype.getBidderSlots = function() {
 
 /**
  * Start auction bidding.
+ * @param {boolean} randomizeBidRequests
  * @returns {pubfood#mediator.AuctionMediator}
  */
-AuctionMediator.prototype.start = function() {
+AuctionMediator.prototype.start = function(randomizeBidRequests) {
   this.init();
   Event.publish(Event.EVENT_TYPE.AUCTION_TRIGGER, this.auctionProvider.name);
 
-  this.loadProviders();
+  this.loadProviders(randomizeBidRequests);
 
   var bidderSlots = this.getBidderSlots();
 

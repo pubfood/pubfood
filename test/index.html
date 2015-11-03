@@ -27,7 +27,7 @@
       // ToDo: Separate concerns and load tests via script elements
       var assert = chai.assert;
       var expect = chai.expect;
-      var pf = new pubfood({prefix: true});
+      var pf = new pubfood({randomizeBidRequests: true});
 
       describe('Pubfood API', function testPubfoodMediator() {
         var batch = [];

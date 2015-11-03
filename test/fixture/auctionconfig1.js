@@ -101,10 +101,10 @@ var pubfoodContrib = {
 
     },
     refresh: function(targeting, done) {
-      if (googletag) {
+      googletag.cmd.push(function() {
         googletag.pubads().refresh();
         done();
-      }
+      });
     }
   },
   bidProviders: [

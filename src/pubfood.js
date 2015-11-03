@@ -95,6 +95,7 @@ var defaultBidProvider = require('./interfaces').BidDelegate;
       this.id_ = config.id || '';
       this.auctionProviderTimeout_ = config.auctionProviderCbTimeout || 2000;
       this.bidProviderTimeout_ = config.bidProviderCbTimeout || 2000;
+      this.randomizeBidRequests_ = !!config.randomizeBidRequests;
     }
     return this;
   };
@@ -288,7 +289,7 @@ var defaultBidProvider = require('./interfaces').BidDelegate;
 
     // only continue of there aren't any config errors
     if (!configStatus.hasError) {
-      this.library.mediator.start();
+      this.library.mediator.start(this.randomizeBidRequests_);
     }
 
     return this;

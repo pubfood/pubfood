@@ -66,9 +66,6 @@ BidMediator.prototype.getBids_ = function(provider, slots) {
     }
   };
 
-  Event.publish(Event.EVENT_TYPE.BID_START, name);
-  provider.init(slots, pushBidCb, bidDoneCb);
-
   setTimeout(function(){
     if(!doneCalled) {
       Event.publish(Event.EVENT_TYPE.WARN, 'Warning: The bid done callback for "'+name+'" hasn\'t been called within the allotted time (2sec)');

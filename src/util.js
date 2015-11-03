@@ -159,4 +159,15 @@ var util = {
   }
 };
 
+/**
+ * http://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
+ * @param {array} collection
+ * @return {Array}
+ */
+util.random = function(collection) {
+  return collection.sort(function() {
+    return .5 - Math.random();
+  });
+};
+
 module.exports = util;
