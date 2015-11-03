@@ -6,8 +6,8 @@
         <style>
          body { font-family:'Helvetica Neue', Helvetica, Arial, sans-serif; }
          .question { width: 55%; word-break: normal; }
-         .step { width: 1050px; float: left; }
-         .step-text { width: 400px; word-break: normal; float: left; overflow: hidden }
+         .step { width: 100%; float: left; }
+         .step-text { width: 450px; word-break: normal; float: left; overflow: hidden }
          .code-sample { width: 600px; margin-left: 2%; float: left; overflow: hidden }
          pre {
              overflow-x: scroll;
@@ -34,14 +34,17 @@
              }
          }
 
-         function getStep(name) {
+         function getStep(name, doScript) {
+             var insertCode = doScript || true;
              var xhr = new XMLHttpRequest();
              xhr.onload = function(e) {
                  if (this.status == 200) {
                      var blob = new Blob([this.response], {type: 'text/javascript'});
                      var reader = new FileReader();
                      reader.addEventListener("loadend", function() {
-                         insertStepScript(name, reader.result);
+                         if (insertCode) {
+                             insertStepScript(name, reader.result);
+                         }
                          insertStepDoc(name, reader.result);
                      });
                      reader.readAsText(blob);
@@ -64,26 +67,29 @@
         <script src="/pubfood.js"></script>
 
         <h1>Pubfood Quick Start - Simple</h1>
+        <div style="width: 60%">
+            This guide stages a simple header bidding scenario using brief statements to answer the questions <em>Who?, What?, Why?, When, Where?</em> and <em>How?</em> to result in a bidding partner ad being selected for impression by your ad server.
+        </div>
+        <h2><a href="#steps"><em>TL;DR to jump to the code...</em></a></h2>
         <h2>Who?</h2>
         <div class="question">
         You are a publisher setting up header bidding on your site. You need a framework
-        to facilitate adding bidding partners incrementally.
+        to facilitate adding bid partners incrementally to your site.
         <p></p>
-        Your developers need a simple way to add bidding partners to your particular
-        ad server.
+        Your developers need a simple way to add bid partners to go get a first look at inventory in  your particular ad server.
         </div>
         <h2>What?</h2>
         <div class="question">
-        You have an ad server that auctions bidders for the impression.
+        You have an ad server that can auction bids for an impression with key/value targeting line item configuration.
         <p></p>
-        You have one bid partner that has a JavaScript library to make bid requests
+        You have one bid partner that has a JavaScript library that would make bid requests
         in order to set bid targeting values for your ad server request.
         </div>
         <h2>Why?</h2>
         <div class="question">
         Your bid partner provider can improve the impression yield for your site.
         If you can get your partner's impression bid before the ad server request,
-        you can run an ad server auction to prioritize campaign creative selection by:
+        you can run an ad server auction to prioritize campaign creative selection by revenue channels:
         <p></p>
         <ol>
             <li>Direct sold campaign contracts;</li>
@@ -91,10 +97,10 @@
             <li>Fallback to ad exchanges.</li>
         </ol>
         <p></p>
-        Partnering with a header bidder helps improve monetization potential and yield
-        for your content page views.
+        A header bidding partner helps improve monetization potential and yield
+        for your content page view inventory.
         <p></p>
-        However, understanding more about header bidding partner performance will help
+        Understanding more about header bidding partner performance will help
         you further manage your yield, budget forecasts, sales planning and partnerships.
         <p></p>
         </div>
@@ -102,19 +108,26 @@
         <div class="question">
         When a user visits your site, timing is important.
         <p></p>
-        Firstly, user experience is key so page load latency is very important.
+        Firstly, user experience is critical and page load latency is a very important part of that experience.
         <p></p>
-        Therefore, asking bidders for interest in a pageview within the accepatble
-        page load window is key to maintaining your brand, user attention and
-        monetization of your content.
+        Therefore, obtaining bidder interest in a pageview within an accepatble
+        page load latency window is key to maintaining your brand, user attention and
+        monetization of your content page view inventory.
         </div>
         <h2>Where?</h2>
         <div class="question">
-        Simple additions or refinements to:
+            Using Pubfood has minimal impact on your existing investment in development and ad operations.
+            Pubfood will have two organizational touch points for your business:
         <p></p>
         <ol>
-            <li>Your site code</li>
-            <li>Your ad server operations</li>
+            <li><b>Your site code</b></li>
+            <p>
+                Existing site JavaScript code can be used in Pubfood where applicable. For any new bid partner, this integration JavaScript code would be either given to you by the partner or your development team would write the code: in either case, this code can be used by pubfood.
+            </p>
+            <li><b>Your ad server operations</b></li>
+            <p>
+                Targeting configuration in your ad server is managed by your ad operations team. Existing line item targeting definitions can be used. Your ad operations team will coordinate with the development team to ensure that the correct targeting keys are supplied to your ad server for decisioning.
+            </p>
         </ol>
         </div>
         <h2>How?</h2>
@@ -140,9 +153,7 @@
                 <p></p>
             </li>
             <li>
-                your Ad Operations team have told you that they want to setup your ad server
-                with specific line items targeting a partner's bid for specific slots and dimensions
-                as they do today with competing direct sold campaigns.
+                As they do today with competing direct sold campaigns, your Ad Operations team have told you that they want to setup your ad server with specific line items to target bidders on specific slots and dimensions.
                 <p></p>
             </li>
         </ol>
@@ -154,28 +165,41 @@
             <h4><em>The steps</em></h4>
             <div class="step-text">
                 <ol>
-                    <li>Define slots and which partner may bid for them.</li>
-                    <p><b><span class="code-ref">food.addSlot(...);</span></b></p>
-                    <li>Define or copy your bidding partner JavaScript code.</li>
-                    <p><b><span class="code-ref">food.addBidProvider(...);</span></b></p>
+                    <li><b>Include the pubfood JavaScript library in your code.</b></li>
+                    <p></p>
+                    <li><b><span class="code-ref">food.addSlot(...);</span></b></li>
+                    <p>Define slots and which partner may bid for them.</p>
+                    <li><b><span class="code-ref">food.addBidProvider(...);</span></b></li>
+                    <p>Define or copy your bidding partner JavaScript code.</p>
                     <p>
                     <ol>
                         <li>on each bid, call the <b><span class="code-ref">pushBid({})</span></b> callback</li>
                         <li>when bidding finished, call the <b><span class="code-ref">done()</span></b> callback</li>
                     </ol>
                     </p>
-                    <li>Define or copy your ad server JavaScript code to send bids to auction.</li>
-                    <p><b><span class="code-ref">food.setAuctionProvider(...);</span></b></p>
-                    <li>Define where to display your ad.</li>
-                    <p><b><span class="code-ref">food.observe('AUCTION_POST_RUN', ...);</span></b></p>
-                    <li>Set a bidder timeout and start the pubfood auction.</li>
-                    <p><b><span class="code-ref">food.timeout(...);</span></b></p>
-                    <p><b><span class="code-ref">food.start();</span></b></p>
+                    <li><b><span class="code-ref">food.setAuctionProvider(...);</span></b></li>
+                    <p>Define or copy your ad server JavaScript code to send bids to auction.</p>
+                    <li><b><span class="code-ref">food.observe('AUCTION_POST_RUN', ...);</span></b></li>
+                    <p>Define where to display your ad.</p>
+                    <li>
+                        <b><span class="code-ref">food.start();</span></b><br>
+                        <b><span class="code-ref">food.timeout(...);</span></b>
+                    </li>
+                    <p>Set a bidder timeout and start the pubfood auction.</p>
                     </ol>
             </div>
-            <div class="code-sample">
+            <div id="theAd" class="code-sample">
                 <b><em>How did this ad get here?</em></b>
                 <pre id="div-rail"></pre>
+            </div>
+        </div>
+        <div class="step">
+            <h4>Include the pubfood library in your site code</h4>
+            <div class="step-text">To execute the following steps in your own code, you will need to include the pubfood JavaScript library.</div>
+            <div class="code-sample">
+                <b><a href="https://github.com/pubfood/pubfood/tree/master/dist">https://github.com/pubfood/pubfood/tree/master/dist</a></b>
+                <pre id="step0-code" class="prettyprint linenums">
+                </pre>
             </div>
         </div>
         <div class="step">
@@ -257,7 +281,13 @@
             </div>
         </div>
         </div>
+        <br>
+        <span style="font-size: larger; font-weight: bold">Very good</span>
+        You read through the steps.</h3><a href="#theAd"> This is the sample ad rendered by the steps.</a>
+        <br>
+        <br>
         <div>
+            <div id="step"></div>
             <div id="step1"></div>
             <div id="step2"></div>
             <div id="step3"></div>
@@ -265,12 +295,13 @@
             <div id="step5"></div>
         </div>
         <script>
+         getStep('step0', false);
          getStep('step1');
          getStep('step2');
          getStep('step3');
          getStep('step4');
          getStep('step5');
         </script>
-        <script src="https://google-code-prettify.googlecode.com/svn/loader/run_prettify.js"></script>
+        <script src="https://google-code-prettify.googlecode.com/svn/loader/run_prettify.js?skin=sons-of-obsidian"></script>
     </body>
 </html>

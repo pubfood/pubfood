@@ -1,5 +1,4 @@
-// setup pubfood and hook it up to providers
-var food = new pubfood({ bidProviderCbTimeout: 3500 });
+var food = new pubfood();
 food.addSlot({
   name: '/2476204/rail',
   elementId: 'div-rail',
