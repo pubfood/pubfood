@@ -7,9 +7,7 @@ A browser client header bidding JavaScript library.
 
 # Architecture Overview
 
-![Architecture Overview - Requests](doc/pubfood-api-flow-requests.png?raw=true "Architecture Overview - Requests")
-![Architecture Overview - Creative](doc/pubfood-api-flow-creative.png?raw=true "Architecture Overview - Creative")
-![Architecture Overview - Report](doc/pubfood-api-flow-report.png?raw=true "Architecture Overview - Report")
+![Architecture Overview - Requests](doc/pubfood-overview.png?raw=true "Architecture Overview")
 
 # Build Tasks
 
