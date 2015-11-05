@@ -17,8 +17,9 @@
         </style>
     </head>
     <body>
+        <script src="https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js?autorun=false&skin=sons-of-obsidian"></script>
         <script>
-         function insertStepScript(name, content) {
+         var insertStepScript = function(name, content) {
              var el = document.getElementById(name);
              if (el) {
                  var js = document.createElement('script');
@@ -27,25 +28,32 @@
              }
          }
 
-         function insertStepDoc(name, content) {
+         var insertStepDoc = function(name, content) {
              var el = document.getElementById(name + '-code');
              if (el) {
                  el.innerHTML = content;
              }
-         }
+         };
 
-         function getStep(name, doScript) {
+         var stepsRequested = 0;
+         var stepsReturned = 0;
+         var getStep = function(name, doScript) {
+             stepsRequested += 1;
              var insertCode = doScript || true;
              var xhr = new XMLHttpRequest();
              xhr.onload = function(e) {
-                 if (this.status == 200) {
+                 if (this.status === 200) {
                      var blob = new Blob([this.response], {type: 'text/javascript'});
                      var reader = new FileReader();
-                     reader.addEventListener("loadend", function() {
+                     reader.addEventListener('loadend', function() {
                          if (insertCode) {
                              insertStepScript(name, reader.result);
                          }
                          insertStepDoc(name, reader.result);
+                         stepsReturned += 1;
+                         if (stepsRequested === stepsReturned) {
+                           PR.prettyPrint();
+                         }
                      });
                      reader.readAsText(blob);
                  }
@@ -53,7 +61,7 @@
              xhr.open('GET', '/quick-start1-' + name + '.js', true);
              xhr.responseType = 'blob';
              xhr.send();
-         }
+         };
 
          // global for the auction provider
          window.auctionProviderOne = window.auctionProviderOne || {};
@@ -292,6 +300,5 @@
          getStep('step4');
          getStep('step5');
         </script>
-        <script src="https://google-code-prettify.googlecode.com/svn/loader/run_prettify.js?skin=sons-of-obsidian"></script>
     </body>
 </html>
