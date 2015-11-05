@@ -75,24 +75,27 @@ window.PROVIDER_GLOBAL.cmd = window.PROVIDER_GLOBAL.cmd || [];
       return;
     }
     _initializing = true;
+    var ORDERED_DELIMITER = '|';
+    var SIZE_DELIMITER = ',';
+    var KEY_VALUE_PAIR_DELIMITER = '&';
     var slotsEncoded = _map(function (s) {
       return {
         encodedSizes: _map(function (d) {
           return enc(d[0] + 'x' + d[1]);
-        }, s.sizes).join(','),
+        }, s.sizes).join(SIZE_DELIMITER),
         encodedTargeting: _map(function (d) {
           return enc(d[0]) + '=' + enc(d[1]);
-        }, s.targeting).join('&'),
+        }, s.targeting).join(KEY_VALUE_PAIR_DELIMITER),
         encodedElId: enc(s.element),
         encodedName: enc(s.name)
       };
     }, _slots);
-    var nameParam = 'name=' + enc(_pluck('encodedName', slotsEncoded).join('|'));
-    var elIdParam = 'elid=' + enc(_pluck('encodedElId', slotsEncoded).join('|'));
-    var sizeParam = 'size=' + enc(_pluck('encodedSizes', slotsEncoded).join('|'));
-    var targetingParam = 'target=' + enc(_pluck('encodedTargeting', slotsEncoded).join('|'));
+    var nameParam = 'name=' + enc(_pluck('encodedName', slotsEncoded).join(ORDERED_DELIMITER));
+    var elIdParam = 'elid=' + enc(_pluck('encodedElId', slotsEncoded).join(ORDERED_DELIMITER));
+    var sizeParam = 'size=' + enc(_pluck('encodedSizes', slotsEncoded).join(ORDERED_DELIMITER));
+    var targetingParam = 'target=' + enc(_pluck('encodedTargeting', slotsEncoded).join(ORDERED_DELIMITER));
     // TODO figure out page level targeting
-    var queryParams = nameParam + '&' + elIdParam + '&' + sizeParam + '&' + targetingParam;
+    var queryParams = [nameParam, elIdParam, sizeParam, targetingParam].join(KEY_VALUE_PAIR_DELIMITER);
     var src = '/simulated-auction-provider/PROVIDER_GLOBAL/enable?' + queryParams;
     // load async
     // TODO consider window.document or just raw document instead

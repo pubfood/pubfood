@@ -78,24 +78,26 @@ server.route({
   handler: function routeHandler(request, reply) {
     var DEFAULT_DELAY = 20;
     var DEFAULT_FUZZ = 10;
+    var ORDERED_DELIMITER = '|';
+    var SIZE_DELIMITER = ',';
     var parsedDelay = parseInt(request.query.delay, 0);
     var delay = isFinite(parsedDelay) ? parsedDelay : DEFAULT_DELAY;
     var parsedFuzz = parseInt(request.query.fuzz, 0);
     var fuzz = isFinite(parsedFuzz) ? parsedFuzz : DEFAULT_FUZZ;
     var actualDelay = Math.round(delay + ((2 * Math.random() - 1) * fuzz), 3);
-    var names = (request.query.name || '').split('|').map(function (d) {
+    var names = (request.query.name || '').split(ORDERED_DELIMITER).map(function (d) {
       return querystring.unescape(d);
     });
-    var elIds = (request.query.elid || '').split('|').map(function (d) {
+    var elIds = (request.query.elid || '').split(ORDERED_DELIMITER).map(function (d) {
       return querystring.unescape(d);
     });
-    var sizes = (request.query.size || '').split('|').map(function (d) {
-      return querystring.unescape(d).split(',').map(function (e) {
+    var sizes = (request.query.size || '').split(ORDERED_DELIMITER).map(function (d) {
+      return querystring.unescape(d).split(SIZE_DELIMITER).map(function (e) {
         var parts = e.split('x');
         return [parseInt(parts[0], 10), parseInt(parts[1], 10)];
       });
     });
-    var target = (request.query.target || '').split('|').map(function (d) {
+    var target = (request.query.target || '').split(ORDERED_DELIMITER).map(function (d) {
       return querystring.unescape(d);
     });
     console.log('names', names);
