@@ -27,9 +27,6 @@ A browser client header bidding JavaScript library.
 ## Deploy Process
 
 - `npm run cut_deploy`
-- `git fetch`
-- `git rebase`
-- `git push`
 - `git push origin --tags`
 - check the [travis build](https://travis-ci.org/pubfood/pubfood)
 
