@@ -1,67 +1,14 @@
-/**
- * pubfood
- */
-
-'use strict';
-
 window.PROVIDER_GLOBAL = window.PROVIDER_GLOBAL || {};
 window.PROVIDER_GLOBAL.cmd = window.PROVIDER_GLOBAL.cmd || [];
-
 (function(api, enc) {
+  'use strict';
   var _initializing = false;
   var _initialized = false;
   var _cmdQ = api.cmd;
   var _slots = [];
-  /* eslint-disable no-unused-vars */
   var _singleRequest = false;
-  /* eslint-enable no-unused-vars */
 
-  var _map = function (cb, arr) {
-    var res = [];
-    for (var i = 0; i < arr.length; i++) {
-      res[i] = cb(arr[i]);
-    }
-    return res;
-  };
-  var _pluck = function (key, arr) {
-    return _map(function (obj) {
-      return obj[key];
-    }, arr);
-  };
-
-  /**
-   * create a new slot object
-   * @param {string} name
-   * @param {array.<number, number>} sizes
-   * @param {string} elementId
-   * @private
-   * @return {_slot}
-   */
-  var _slot = function(name, sizes, elementId){
-    this.name = name;
-    this.sizes = sizes;
-    this.element = elementId;
-    this.targeting = [];
-  };
-
-  /**
-   * set target on the slot
-   * @param {string} key
-   * @param {string|number} val
-   * @return {_slot}
-   */
-  _slot.prototype.setTargeting = function(key, val){
-    this.targeting.push([key, val]);
-    return this;
-  };
-
-  /**
-   * drain the queue
-   *
-   * @param reasonToDrain
-   * @return {undefined}
-   */
-  var drainQ = function(/*reasonToDrain*/) {
+  var drainQ = function(reasonToDrain) {
     var i;
     var len = _cmdQ.length;
     var stopEarly = false;
@@ -83,46 +30,35 @@ window.PROVIDER_GLOBAL.cmd = window.PROVIDER_GLOBAL.cmd || [];
       _cmdQ = [];
     }
   };
-
-  drainQ('initial drain');
-
-  /**
-   * allow pushing on more cmd callbacks
-   * @type {{push: Function}}
-   */
-  api.cmd = {
-    push: function() {
-      if (_initializing) {
-        _cmdQ = _cmdQ.concat(Array.prototype.slice.call(arguments));
-        drainQ('cmd.push delay');
-      } else {
-        _cmdQ = Array.prototype.slice.call(arguments);
-        drainQ('cmd.push drain');
-      }
+  var _map = function(cb, arr) {
+    var res = [];
+    for (var i = 0; i < arr.length; i++) {
+      res[i] = cb(arr[i]);
     }
+    return res;
+  };
+  var _pluck = function(key, arr) {
+    return _map(function (obj) {
+      return obj[key];
+    }, arr);
   };
 
-  /**
-   * define a slot
-   *
-   * @param {string} slotName
-   * @param {array.<number, number>} sizes
-   * @param {string} elementId
-   * @return {_slot}
-   */
+  var _slot = function(name, sizes, elementId) {
+    this.name = name;
+    this.sizes = sizes;
+    this.element = elementId;
+    this.targeting = [];
+  };
+  _slot.prototype.setTargeting = function(key, val) {
+    this.targeting.push([key, val]);
+    return this;
+  };
+
   api.defineSlot = function(slotName, sizes, elementId) {
     var slot = new _slot(slotName, sizes, elementId);
     _slots.push(slot);
     return slot;
   };
-
-  /**
-   * set targeting on all slots
-   *
-   * @param {string} key
-   * @param {string|number} val
-   * @return {api}
-   */
   api.setTargeting = function(key, val) {
     var i;
     for (i = 0; i < _slots.length; i++) {
@@ -130,12 +66,10 @@ window.PROVIDER_GLOBAL.cmd = window.PROVIDER_GLOBAL.cmd || [];
     }
     return api;
   };
-
   api.enableSingleRequest = function() {
     _singleRequest = true;
     return api;
   };
-
   api.enableServices = function() {
     if (_initializing || _initialized) {
       return;
@@ -173,7 +107,6 @@ window.PROVIDER_GLOBAL.cmd = window.PROVIDER_GLOBAL.cmd || [];
     _initialized = true;
     drainQ('resume drain');
   };
-
   api.display = function(divId) {
     var div = document.getElementById(divId);
     var i;
@@ -189,7 +122,6 @@ window.PROVIDER_GLOBAL.cmd = window.PROVIDER_GLOBAL.cmd || [];
       console.log('cannot display on', divId);
     }
   };
-
   api.fillSlot = function(divId, size, contents) {
     var i;
     for (i = 0; i < _slots.length; i++) {
@@ -200,4 +132,16 @@ window.PROVIDER_GLOBAL.cmd = window.PROVIDER_GLOBAL.cmd || [];
     }
   };
 
+  drainQ('initial drain');
+  api.cmd = {
+    push: function() {
+      if (_initializing) {
+        _cmdQ = _cmdQ.concat(Array.prototype.slice.call(arguments));
+        drainQ('cmd.push delay');
+      } else {
+        _cmdQ = Array.prototype.slice.call(arguments);
+        drainQ('cmd.push drain');
+      }
+    }
+  };
 })(window.PROVIDER_GLOBAL, window.encodeURIComponent);

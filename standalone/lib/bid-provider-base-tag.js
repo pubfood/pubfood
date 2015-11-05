@@ -1,21 +1,12 @@
-/* globals PROVIDER_GLOBAL */
-/*eslint no-unused-vars: 0*/
-
 window.PROVIDER_GLOBAL = window.PROVIDER_GLOBAL || {};
-PROVIDER_GLOBAL.cmd = PROVIDER_GLOBAL.cmd || [];
+window.PROVIDER_GLOBAL.cmd = window.PROVIDER_GLOBAL.cmd || [];
 (function() {
+  'use strict';
   var _availability = '';
   var _initializing = false;
   var _initialized = false;
-  var _cmdQ = [];
-  // var self = this;
-  // var getFramework = function() {
-  //   return self.PROVIDER_GLOBAL || (self.PROVIDER_GLOBAL = {});
-  // };
-  // var setIfNotAlreadySet = function(name, defaultValue) {
-  //   var framework = getFramework();
-  //   framework.hasOwnProperty(name) || (framework[name] = e);
-  // };
+  var _cmdQ = PROVIDER_GLOBAL.cmd;
+
   var drainQ = function(reasonToDrain) {
     var i;
     var len = _cmdQ.length;
@@ -59,11 +50,9 @@ PROVIDER_GLOBAL.cmd = PROVIDER_GLOBAL.cmd || [];
     } else {
       // load sync
       var providerId = 'PROVIDER_GLOBAL-init-' + Math.random();
-      /*eslint-disable no-empty */
       try {
         doc.write('<script id="' + providerId + '" src="' + initURL + '"></script>');
       } catch (e) { }
-      /*eslint-enable no-empty */
       doc.getElementById(providerId) && (PROVIDER_GLOBAL._init_started = true);
     }
   };
@@ -78,7 +67,7 @@ PROVIDER_GLOBAL.cmd = PROVIDER_GLOBAL.cmd || [];
   PROVIDER_GLOBAL.getAvailable = function() {
     return _availability;
   };
-  _cmdQ = PROVIDER_GLOBAL.cmd;
+
   drainQ('initial drain');
   // allow pushing on more cmd callbacks
   PROVIDER_GLOBAL.cmd = {
