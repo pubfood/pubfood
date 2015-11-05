@@ -3,7 +3,6 @@
 ## note doc gets repeated in the dist directory so it isn't rooted
 # doc
 # /examples
-# /jsdoc_template
 /node_modules
 # /src
 # /standalone
@@ -24,8 +23,6 @@
 
 ## standalone env (not handled above)
 /standalone/node_modules
-/standalone/public/pubfood.js
-/standalone/public/pubfood.min.js
 
 ## other generated stuff
 .DS_Store
