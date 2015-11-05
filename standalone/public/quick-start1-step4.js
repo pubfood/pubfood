@@ -1,4 +1,4 @@
-food.observe('AUCTION_POST_RUN', function(ev) {
+food.observe('AUCTION_POST_RUN', function() {
   auctionProviderOne.cmd.push(function() {
     auctionProviderOne.display('div-rail');
   });

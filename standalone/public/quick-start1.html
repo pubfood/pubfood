@@ -216,13 +216,10 @@
                 <ul>
                     <li><span class="lines-ref">line 2</span> - the bidder name</li>
                     <li><span class="lines-ref">line 3</span> - the bid provider JavaScript library to load</li>
-                    <li><span class="lines-ref">line 4</span> - bidder specific config for slots. in this case the bidder has it's own identifier for the <span class="code-ref">/2476204/rail</span> slot</li>
-                    <li><span class="lines-ref">line 8</span> - the function to initialize bids</li>
-                    <ul>
-                        <li><span class="lines-ref">line 38</span> - submit a bid with the <span class="code-ref">pushBid({})</span> callback</li>
-                        <li><span class="lines-ref">line 49</span> - notify pubfood when done with the  <span class="code-ref">done()</span> callback</li>
-                    </ul>
-                    <li><span class="lines-ref">line 52</span> The function to refresh bids</li>
+                    <li><span class="lines-ref">line 4</span> - the function to initialize bids</li>
+                    <li><span class="lines-ref">line 15</span> - submit a bid with the <span class="code-ref">pushBid({})</span> callback</li>
+                    <li><span class="lines-ref">line 24</span> - notify pubfood with the  <span class="code-ref">done()</span> callback</li>
+                    <li><span class="lines-ref">line 27</span> - the function to refresh bids</li>
                 </ul>
             </div>
             <div class="code-sample">
@@ -236,11 +233,9 @@
                 <ul>
                     <li><span class="lines-ref">line 2</span> - the auction provider name</li>
                     <li><span class="lines-ref">line 3</span> - the auction provider JavaScript library to load</li>
-                    <li><span class="lines-ref">line 5</span> - the function to initialize the auction</li>
-                    <ul>
-                        <li><span class="lines-ref">line 36</span> - notify pubfood when done with the  <span class="code-ref">done()</span> callback</li>
-                    </ul>
-                    <li><span class="lines-ref">line 52</span> - the function to refresh with a new auction for slots</li>
+                    <li><span class="lines-ref">line 4</span> - the function to initialize the auction</li>
+                    <li><span class="lines-ref">line 29</span> - notify pubfood with the  <span class="code-ref">done()</span> callback</li>
+                    <li><span class="lines-ref">line 31</span> - the function to refresh with a new auction</li>
                 </ul>
             </div>
             <div class="code-sample">
@@ -252,13 +247,8 @@
             <h4>Define when to display ads</h4>
             <div class="step-text">When pubfood has completed the auction orchestration, it will raise an event to indicate ads are ready to display.
                 <ul>
-                    <li><span class="lines-ref">line 1</span> - observe the auction provider name</li>
-                    <li><span class="lines-ref">line 3</span> - the auction provider JavaScript library to load</li>
-                    <li><span class="lines-ref">line 5</span> - the function to initialize the auction</li>
-                    <ul>
-                        <li><span class="lines-ref">line 36</span> - notify pubfood when done with the  <span class="code-ref">done()</span> callback</li>
-                    </ul>
-                    <li><span class="lines-ref">line 52</span> - the function to refresh with a new auction for slots</li>
+                    <li><span class="lines-ref">line 1</span> - observe the auction provider</li>
+                    <li><span class="lines-ref">line 3</span> - the auction provider will display the ad</li>
                 </ul>
             </div>
             <div class="code-sample">

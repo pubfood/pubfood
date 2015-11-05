@@ -1,11 +1,7 @@
 var food = new pubfood();
 food.addSlot({
-  name: '/2476204/rail',
+  name: '2476204-rail',
   elementId: 'div-rail',
-  sizes: [
-    [300, 250]
-  ],
-  bidProviders: [
-    'bidProviderOne'
-  ]
+  sizes: [[300, 250]],
+  bidProviders: ['bidProviderOne']
 });
