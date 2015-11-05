@@ -152,7 +152,8 @@ var pubfoodContrib = {
         ybotq.push(function() {
           var i;
 
-          var pageSlots = yieldbot.getPageCriteria().split(','); //sidebar:300x250:800,test_slot:300x250:200
+          var pageCriteria = yieldbot.getPageCriteria(); //sidebar:300x250:800,test_slot:300x250:200
+          var pageSlots = pageCriteria !== '' ? pageCriteria.split(',') : [];
           for (i = 0; i < pageSlots.length; i++) {
 
             var slotInfo = pageSlots[i].split(':'); //sidebar:300x250:800
