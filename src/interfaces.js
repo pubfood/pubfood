@@ -32,23 +32,17 @@ auctionDelegate.optional = {
 };
 
 /**
- * Interface for classes that are delegates for the BidProvider decorator..
+ * Interface for classes that are delegates for the BidProvider decorator.
  *
  * @typedef {BidDelegate} BidDelegate
  * @property {string} name Bid provider delegate name.
  * @property {string} libUri location of the delegate JavaScript library/tag.
  * @property {function} init Initial bid request for [BidProvider.init]{@link pubfood#provider.BidProvider#init} delegate.
- * @property {object} init.slots
- * @property {string} init.slots.name - @todo in process ralionalization of slot object structure
- * @property {array} init.slots.name.sizes
- * @property {object} init.slots.name.bidProviders
+ * @property {Slot[]} init.slots slots to bid on
  * @property {pushBidCallback} init.pushBid Callback to execute on next bid available
  * @property {bidDoneCallback} init.done Callback to execute on done
  * @property {function} refresh Refresh bids for [BidProvider.refresh]{@link pubfood#provider.BidProvider#refresh} delegate.
- * @property {object} refresh.slots
- * @property {string} refresh.slots.name - @todo in process ralionalization of slot object structure
- * @property {array} refresh.slots.name.sizes
- * @property {object} refresh.slots.name.bidProviders
+ * @property {Slot[]} refresh.slots slots to bid on
  * @property {pushBidCallback} refresh.pushBid Callback to execute on next bid available
  * @property {bidDoneCallback} refresh.done Callback to execute on done
  */
