@@ -12,6 +12,7 @@ var AuctionMediator = require('./mediator/auctionmediator');
  * Coordinates and orchestrates Mediator and Assembler instances.
  *
  * @memberof pubfood
+ # @private
  */
 var mediator = {
   mediatorBuilder: function(config) {

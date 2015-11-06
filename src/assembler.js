@@ -11,8 +11,8 @@ require('./assembler/bidassembler');
  * Coordinates and orchestrates Assembler instances.
  *
  * @memberof pubfood
- * @instance
  * @property {function} getType Returns an instances of [Assembler]{@link pubfood#assembler.BaseAssembler}
+ * @private
  */
 var assembler = {
   getType: function(type) {
@@ -26,11 +26,5 @@ var assembler = {
     return model;
   },
 };
-
-//console.log(assembler.getType('foo'));
-//console.log('');
-//console.log('baseassembler', assembler.getType('baseassembler'));
-//console.log('');
-//console.log('bidassembler', assembler.getType('bidassembler'));
 
 module.exports = assembler;

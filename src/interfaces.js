@@ -12,19 +12,11 @@
  * @typedef {AuctionDelegate} AuctionDelegate
  * @property {string} name Auction provider delegate name
  * @property {string} libUri
- * @property {function} init Auction provider delegate initial auction request.<br>Called at startup. Returns <i>{undefined}</i>
- * @property {object[]} init.slots - slot objects with bids and page level targeting
- * @property {string} init.slots.name slot name
- * @property {string} init.slots.elementId target DOM elementId
- * @property {array} init.slots.sizes slot sizes
- * @property {object} init.slots.targeting slot targeting key value pairs
+ * @property {function} init Auction provider delegate initial auction request.<br>Called at startup.
+ * @property {array.<object>} init.targeting - array of {@link SlotTargetingObject}|{@link PageTargetingObject}
  * @property {auctionDoneCallback} init.done Callback to execute on done
- * @property {function} refresh Auction provider delegate refresh auction request.<br>Called at startup. Returns <i>{undefined}</i>
- * @property {object[]} refresh.slots - slot objects with bids and page level targeting
- * @property {string} refresh.slots.name slot name
- * @property {string} refresh.slots.elementId target DOM elementId
- * @property {array} refresh.slots.sizes slot sizes
- * @property {object} refresh.slots.targeting slot targeting key value pairs
+ * @property {function} refresh Auction provider delegate refresh auction request.<br>Called at startup.
+ * @property {array.<object>} refresh.targeting - array of {@link SlotTargetingObject}|{@link PageTargetingObject}
  * @property {auctionDoneCallback} refresh.done Callback to execute on done
  * @property {function} [trigger] Auction provider delegate function to trigger the auction. Default: [pubfood.timeout]{@link pubfood#timeout}
  * @property {auctionDoneCallback} trigger.done Callback to initialize the auction provider
@@ -46,7 +38,6 @@ auctionDelegate.optional = {
  * @property {string} name Bid provider delegate name.
  * @property {string} libUri location of the delegate JavaScript library/tag.
  * @property {function} init Initial bid request for [BidProvider.init]{@link pubfood#provider.BidProvider#init} delegate.
- * <br>Returns {undefined}
  * @property {object} init.slots
  * @property {string} init.slots.name - @todo in process ralionalization of slot object structure
  * @property {array} init.slots.name.sizes
@@ -54,7 +45,6 @@ auctionDelegate.optional = {
  * @property {pushBidCallback} init.pushBid Callback to execute on next bid available
  * @property {bidDoneCallback} init.done Callback to execute on done
  * @property {function} refresh Refresh bids for [BidProvider.refresh]{@link pubfood#provider.BidProvider#refresh} delegate.
- * <br> Return {undefined}
  * @property {object} refresh.slots
  * @property {string} refresh.slots.name - @todo in process ralionalization of slot object structure
  * @property {array} refresh.slots.name.sizes
@@ -78,9 +68,9 @@ bidDelegate.optional = {
 /**
  * Function delegates for the [TransformOperator]{@link pubfood#assembler.TransformOperator} decorator.
  * @typedef {function} TransformDelegate
- * @property {Bid[]} bids array of bids to transform @returns {Bid[]}
- * @property {object} params parameters as required by delegate function. Future use.
- * @returns {Bid[]}
+ * @param {Bid[]} bids array of bids to transform
+ * @param {object} params parameters as required by delegate function. Future use.
+ * @returns {Bid[]|null}
  * @example
  *   var transformDelegate = function(bids, params) { console.log('operate on bids'); };
  */
@@ -90,11 +80,13 @@ var transformDelegate = function(bids, params) {
 /**
  * Auction trigger function.
  *
- * A custom function that can be registered with an [AuctionProvider]{@link pubfood#provider.AuctionProvider} that
+ * A custom function that can be registered with an [AuctionMediator]{@link pubfood#mediator.AuctionMediator} that
  * will determine when the publisher ad server request should be initiated.
  *
+ * The [start]{@link startAuctionCallback} callback must be invoked to start the auction.
+ *
  * @typedef {function} AuctionTriggerFn
- * @property {startAuctionCallback} start callback to initiate the publisher ad server request
+ * @param {startAuctionCallback} start callback to initiate the publisher ad server request
  */
 var auctionTriggerFunction = function(startAuctionCallback) {
 };
@@ -108,7 +100,7 @@ var auctionTriggerFunction = function(startAuctionCallback) {
  */
 
 /**
- * Callback to notify of {@link pubfood#provider.BidProvider} has its completed bidding process.
+ * Callback to notify of [BidProvider]{@link pubfood#provider.BidProvider} has its completed bidding process.
  *
  * @typedef {function} bidDoneCallback
  * @fires pubfood.PubfoodEvent.BID_COMPLETE
@@ -143,7 +135,6 @@ var pushBidCallback = function(){
  * @param {object} event -
  * @param {string} event.type -
  * @param {*} event.data -
- * @return {undefined}
  */
 var Reporter = function(event){
 
@@ -155,7 +146,6 @@ var Reporter = function(event){
  * @typedef {function} apiStartCallback
  * @param {boolean} hasErrors true if there are any configuration errors
  * @param {array} errors The list of errors
- * @return {undefined}
  */
 var apiStartCallback = function(hasErrors, errors){
 
@@ -168,8 +158,8 @@ var apiStartCallback = function(hasErrors, errors){
  * @property {string} slot - slot name
  * @property {string} value - publisher adserver targeting bid value
  * @property {array.array.<number, number>} sizes - array of sizes for the slot the bid is for
- * @property {number} sizes.0 width slot width
- * @property {number} sizes.1 height slot height
+ * @property {number} sizes.0 width
+ * @property {number} sizes.1 height
  * @property {object} [targeting] - key/value pairs for additional adserver targeting
  * @property {string} [label] optional targeting key to use for bid value
  */
@@ -192,19 +182,15 @@ bidObject.optional = {
  * @property {array.<number, number>} sizes array of slot sizes
  * @property {number} sizes.0 width slot width
  * @property {number} sizes.1 height slot height
- * @property {object.<string, object>} bidProviders
- * @property {object} bidProviders.providerName bid provider name
- * @property {string} bidProviders.providerName.slot external provider system slot name
+ * @property {string[]} bidProviders array of [BidProvider.name]{@link pubfood#provider.BidProvider#name} values
  * @example
  * var slotConfig = {
  *       name: '/abc/123/rectangle',
  *       elementId: 'div-left',
  *       sizes: [ [300, 250], [300, 600] ],
- *       bidProviders: {
- *                       p1: {
- *                        slot: 'p1-rectangle-slot'
- *                       }
- *                     }
+ *       bidProviders: [
+ *                       'p1', 'p2'
+ *                     ]
  *     };
  */
 var slotConfig = {
@@ -215,16 +201,47 @@ var slotConfig = {
 };
 
 /**
+ * @typedef {BidderSlots} BidderSlots.
+ *
+ * @property {BidProvider} provider
+ * @property {Slot[]} slots
+ */
+
+/**
+ * @typedef {SlotTargetingObject} SlotTargetingObject
+ *
+ * Key value targeting for a specific slot.
+ *
+ * @property {string} type the targeting level [slot|page]
+ * @property {string} [name] the [Slot.name]{@link pubfood#mode.Slot#name} if type is 'slot'
+ * @property {string} id the generated identifier of the object
+ * @property {string} [elementId] the target DOM element id for the slot
+ * @property {array.<number, number>} sizes array of slot sizes
+ * @property {object.<string, string>} targeting object containing key/value pair targeting
+ */
+
+/**
+ * @typedef {PageTargetingObject} PageTargetingObject
+ *
+ * Global key value targeting for the page.
+ *
+ * @property {string} type the targeting level [slot|page]
+ * @property {object.<string, string>} targeting object containing key/value pair targeting
+ */
+
+/**
  *
  * @typedef {PubfoodConfig} PubfoodConfig - all properties are optional
  * @property {string} id
- * @property {number} auctionProviderTimeout The maximum time the auction provider has before calling `done` inside the `init` method
- * @property {number} bidProviderTimeout The maximum time the bid provider has before calling `done` inside the `init` method
+ * @property {number} auctionProviderTimeout The maximum time the auction provider has before calling {@link auctionDoneCallback} inside the [AuctionProvider.init]{@link pubfood#provider.AuctionProvider#init} or [AuctionProvider.refresh]{@link pubfood#provider.AuctionProvider#refresh} methods
+ * @property {number} bidProviderTimeout The maximum time the bid provider has before calling {@link bidDoneCallback} inside the [BidProvider.init]{@link pubfood#provider.BidProvider#init} or [BidProvider.refresh]{@link pubfood#provider.BidProvider#refresh} methods
+ * @property {boolean} randomizeBidRequests Randomize the order in which [BidProvider]{@link pubfood#provider.BidProvider} requests are made.
  */
 var PubfoodConfig = {
   id: '',
   auctionProviderCbTimeout: 2000,
-  bidProviderCbTimeout: 2000
+  bidProviderCbTimeout: 2000,
+  randomizeBidRequests: false
 };
 
 module.exports = {

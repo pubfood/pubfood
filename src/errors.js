@@ -16,7 +16,9 @@ var ERR_NAME = 'PubfoodError';
  */
 function PubfoodError(message) {
   this.name = ERR_NAME;
+  /** @property {string} message The error message */
   this.message = message || 'Pubfood integration error.';
+  /** @property {string} stack The error stack trace */
   this.stack = (new Error()).stack;
 }
 

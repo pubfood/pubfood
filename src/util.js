@@ -6,11 +6,12 @@
 /** @namespace util */
 var util = {
   /**
-   * Get the type of an object
+   * Get the type name of an object.
    *
    * @see https://javascriptweblog.wordpress.com/2011/08/08/fixing-the-javascript-typeof-operator/
    *
    * @function asType
+   * @returns {string}
    * @memberof util
    */
   asType: function(obj) {
@@ -160,7 +161,8 @@ var util = {
 };
 
 /**
- * http://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
+ * Randomize the position of items in a collection.
+ * @see http://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
  * @param {array} collection
  * @return {Array}
  */

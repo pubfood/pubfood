@@ -9,11 +9,9 @@
  * publisher ad server request [AuctionProvider]{@link pubfood#provider.AuctionProvider}.
  *
  * @class
- * @param {AuctionMediator} - bidder and publisher request coordination
  * @memberof pubfood#assembler
  */
-function BidAssembler(auctionMediator) {
-  this.auctionMediator = auctionMediator;
+function BidAssembler() {
   this.operators = [];
 }
 

@@ -17,6 +17,7 @@ describe('Errors - Tests', function () {
 
       assert.isTrue(err.is(cmp), 'not a PubfoodError');
       assert.isTrue(err.message === MSG);
+      assert.match(err.stack, /new PubfoodError/, 'error does not contain the stack');
     });
   });
 

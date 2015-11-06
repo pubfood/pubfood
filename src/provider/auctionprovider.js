@@ -9,7 +9,7 @@ var AuctionDelegate = require('../interfaces').AuctionDelegate;
 var Event = require('../event');
 
 /**
- * AuctionProvider implements the publisher ad server requests.
+ * AuctionProvider decorates the {@link AuctionDelegate} to implement the publisher ad server requests.
  *
  * @class
  * @memberof pubfood#provider
@@ -49,7 +49,7 @@ AuctionProvider.withDelegate = function(delegate) {
 /**
  * Validate a auction provider delegate.
  *
- * Checks that the delegate has the require properties specified by {@link AuctionDelegate}
+ * Checks that the delegate has the required properties specified by {@link AuctionDelegate}
  *
  * @param {AuctionDelegate} delegate - bid provider delegate object literal
  * @returns {boolean} true if delegate has required functions and properties
@@ -70,8 +70,7 @@ AuctionProvider.prototype.setName = function(name) {
 };
 
 /**
- * Get the auction provider's libUri
- * @todo maybe change to getLibUri
+ * Get the auction provider JavaScript library Uri/Url.
  *
  * @return {string}
  */
@@ -82,33 +81,23 @@ AuctionProvider.prototype.libUri = function() {
 /**
  * Initialize a auction provider.
  *
- * The AuctionProvider delegate javascript tag and other setup is done here.
+ * The AuctionProvider delegate Javascript and other tag setup is done here.
  *
- * @param {object[]} slotTargeting - slot objects with bids and page level targeting
- * @param {string} slotTargeting.name slot name
- * @param {string} slotTargeting.elementId target DOM elementId
- * @param {array} slotTargeting.sizes slot sizes
- * @param {object} slotTargeting.targeting slot targeting key value pairs
+ * @param {array.<SlotTargetingObject|PageTargetingObject>} targeting - objects with bids and page level targeting. Can be arran of both {@link SlotTargetingObject} <em>and</em> {@link PageTargetingObject}.
  * @param {auctionDoneCallback} done - a callback to execute on init complete
- * @return {undefined}
  */
-AuctionProvider.prototype.init = function(slotTargeting, done) {
-  this.auctionDelegate.init(slotTargeting, done);
+AuctionProvider.prototype.init = function(targeting, done) {
+  this.auctionDelegate.init(targeting, done);
 };
 
 /**
  * Refresh for ad slots
  *
- * @param {object[]} slotTargeting objects with bids and page level targeting
- * @param {string} slotTargeting.name slot name
- * @param {string} slotTargeting.elementId target DOM elementId
- * @param {array} slotTargeting.sizes slot sizes
- * @param {object} slotTargeting.targeting slot targeting key value pairs
+ * @param {array.<SlotTargetingObject|PageTargetingObject>} targeting - objects with bids and page level targeting. Can be arran of both {@link SlotTargetingObject} <em>and</em> {@link PageTargetingObject}.
  * @param {auctionDoneCallback} done a callback to execute on init complete
- * @return {undefined}
  */
-AuctionProvider.prototype.refresh = function(slotTargeting, done) {
-  this.auctionDelegate.refresh(slotTargeting, done);
+AuctionProvider.prototype.refresh = function(targeting, done) {
+  this.auctionDelegate.refresh(targeting, done);
 };
 
 module.exports = AuctionProvider;

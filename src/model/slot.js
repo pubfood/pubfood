@@ -12,15 +12,15 @@ var slotConfig = require('../interfaces').SlotConfig;
  * Slot contains a definition of a publisher ad unit.
  *
  * @class
+ * @param {string} name the slot name
+ * @param {string} elementId target DOM element id for the slot
  * @memberof pubfood#model
  */
 function Slot(name, elementId) {
   if (this.init_) {
     this.init_();
   }
-  /** @property {string} name the slot name */
   this.name = name;
-  /** @property {string} elementId target DOM element id for the slot */
   this.elementId = elementId;
   this.bidProviders = [];
   this.sizes = [];

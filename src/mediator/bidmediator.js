@@ -13,6 +13,7 @@ var Bid = require('../model/bid');
  * @class
  * @param {AuctionMediator} auctionMediator - auction mediator object
  * @memberof pubfood/mediator
+ * @private
  */
 function BidMediator(auctionMediator) {
   this.auctionMediator = auctionMediator;
@@ -24,8 +25,7 @@ function BidMediator(auctionMediator) {
 /**
  * Process tht bidders bids
  *
- * @param {object} bidderSlots object containing slots per bidder
- * @return {undefined}
+ * @param {BidderSlots[]} bidderSlots object containing slots per bidder
  */
 BidMediator.prototype.processBids = function(bidderSlots) {
   this.processCounter_++;
@@ -38,7 +38,6 @@ BidMediator.prototype.processBids = function(bidderSlots) {
  * The maximum time the bid provider has before calling `done` inside the `init` method
  *
  * @param {number} millis timeout in milliseconds
- * @return {undefined}
  */
 BidMediator.prototype.setBidProviderCbTimeout = function(millis){
   this.callbackTimeout_ = typeof millis === 'number' ? millis : 2000;
@@ -48,7 +47,6 @@ BidMediator.prototype.setBidProviderCbTimeout = function(millis){
  * @param {object} provider
  * @param {object} slots
  * @private
- * @return {undefined}
  */
 BidMediator.prototype.getBids_ = function(provider, slots) {
   var self = this;

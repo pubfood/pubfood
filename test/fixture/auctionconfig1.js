@@ -124,10 +124,7 @@ var pubfoodContrib = {
             [300, 250],
             [300, 600]
           ],
-          elementId: 'div-multi-size',
-          params: {
-            option1: 'use this for locality to the slot definition'
-          }
+          elementId: 'div-multi-size'
         }
         */
         var slotMap = {};

@@ -1,10 +1,9 @@
 var p = new pubfood();
 p.addBidProvider({
-  name: 'Yieldbot',
-  options: {},
+  name: 'BidProvider1',
   libUrl: '',
-  init: function(options, done) {
+  init: function(slots, pushBid, done) {
   },
-  refresh: function(slots, options, done) {
+  refresh: function(slots, pushBid, done) {
   }
 });

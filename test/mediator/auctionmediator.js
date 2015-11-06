@@ -247,7 +247,6 @@ describe('Pubfood AuctionMediator', function testPubfoodMediator() {
     m = new AuctionMediator({prefix: false});
     b.label = null;
     bidKey = m.getBidKey(b);
-    console.log('bidKey: ' + bidKey);
     assert.isTrue(bidKey === 'bid', 'should not have a prefix.');
   });
 });

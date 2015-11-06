@@ -196,7 +196,7 @@ PubfoodEvent.prototype.publish = function(eventType, data, eventContext) {
  * @property {object|string} data Data structure for each event type
  * @property {string} data.PUBFOOD_API_LOAD
  * @property {string} data.PUBFOOD_API_START
- * @property {object} data.ERROR
+ * @property {PubfoodError} data.ERROR
  * @property {*} data.ERROR.stackTrace
  * @property {string} data.WARN warning message
  * @property {string} data.INVALID validation message

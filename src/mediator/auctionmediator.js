@@ -42,7 +42,7 @@ function AuctionMediator(config) {
   this.initDoneTimeout_ = 2000;
   this.processTargetingCounter_ = 0;
   this.bidMediator = new BidMediator(this);
-  this.bidAssembler = new BidAssembler(this);
+  this.bidAssembler = new BidAssembler();
   this.requestAssembler = new RequestAssembler();
 }
 
@@ -139,7 +139,6 @@ AuctionMediator.prototype.getTimeout = function() {
  * The maximum time the auction provider has before calling `done` inside the `init` method
  *
  * @param {number} millis timeout in milliseconds
- * @return {undefined}
  */
 AuctionMediator.prototype.setAuctionProviderCbTimeout = function(millis){
   this.initDoneTimeout_ = typeof millis === 'number' ? millis : 2000;
@@ -156,9 +155,7 @@ AuctionMediator.prototype.setAuctionTrigger = function(triggerFn) {
 };
 
 /**
- *
  * @private
- * @return {undefined}
  */
 AuctionMediator.prototype.startAuction_ = function() {
   Event.publish(Event.EVENT_TYPE.BID_ASSEMBLER, 'AuctionMediator');
@@ -216,10 +213,11 @@ AuctionMediator.prototype.pushBid_ = function(event) {
 };
 
 /**
- * @todo add docs
+ * Check the bid complete count.
+ *
+ * If all bidders are complete, start the auction.
  *
  * @private
- * @return {undefined}
  */
 AuctionMediator.prototype.checkBids_ = function() {
   this.bidCount++;
@@ -232,7 +230,6 @@ AuctionMediator.prototype.checkBids_ = function() {
  * Start the auction delegate.
  *
  * @private
- * @return {undefined}
  */
 AuctionMediator.prototype.go_ = function() {
   if (!this.inAuction) {
@@ -307,7 +304,6 @@ AuctionMediator.prototype.buildTargeting_ = function() {
 /**
  * process the targeting for the auction provider
  * @private
- * @return {undefined}
  */
 AuctionMediator.prototype.processTargeting_ = function() {
   var self = this;
@@ -398,7 +394,6 @@ AuctionMediator.prototype.bidProviderExists_ = function(name){
  * The maximum time the bid provider has before calling `done` inside the `init` method
  *
  * @param {number} millis timeout in milliseconds
- * @return {undefined}
  */
 AuctionMediator.prototype.setBidProviderCbTimeout = function(millis){
   this.bidMediator.setBidProviderCbTimeout(millis);
@@ -448,7 +443,6 @@ AuctionMediator.prototype.addBidTransform = function(delegate){
 /**
  * Load bid provider JavaScript library/tag.
  * @params {boolean} randomizeBidRequests
- * @returns {undefined}
  */
 AuctionMediator.prototype.loadProviders = function(randomizeBidRequests) {
   var uri;
@@ -483,7 +477,7 @@ AuctionMediator.prototype.loadProviders = function(randomizeBidRequests) {
 /**
  * Construct a set of slots for bidders.
  *
- * @returns {object} bidderSlots an object containing an array of slots for each bidder.
+ * @returns {BidderSlots[]} bidderSlots an object containing an array of slots for each bidder.
  *
  */
 AuctionMediator.prototype.getBidderSlots = function() {

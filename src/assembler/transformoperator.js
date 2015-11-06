@@ -6,7 +6,7 @@
 
 var util = require('../util');
 var Event = require('../event');
-//var transformDelegate = require('../interfaces').TransformDelegate;
+var PubfoodError = require('../errors');
 
 /**
  * @typedef {TransformOperator} TransformOperator [TransformOperator]{@link pubfood#assembler.TransformOperator}
@@ -72,7 +72,7 @@ TransformOperator.prototype.process = function(bids, params) {
   var outBids = this.transform(bids, params);
 
   if (!outBids) {
-    Event.publish(Event.EVENT_TYPE.ERROR, 'no transform output');
+    Event.publish(Event.EVENT_TYPE.ERROR, new PubfoodError('no transform output'));
   }
 
   return outBids || null;
