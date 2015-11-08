@@ -35,3 +35,4 @@ Some reasonable summaries if you're new to header bidding:
 
 - http://adexchanger.com/publishers/the-rise-of-header-bidding-and-the-end-of-the-publisher-waterfall/
 - http://www.adopsinsider.com/ad-exchanges/diagramming-the-header-bidding-redirect-path/
+- https://www.yieldbot.com/blog/header-bidding/
