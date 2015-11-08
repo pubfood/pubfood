@@ -114,11 +114,6 @@
 
           pf.addBidTransform(augmentBids);
 
-          // refresh the auction after 2 seconds
-          setTimeout(function(){
-            pf.refresh(['/2476204/multi-size', 'foo']);
-          }, 5500);
-
           pf.start(Date.now(), function(hasErros, details) {
             if (hasErros) {
               console.log('HAS ERRORS', details);
