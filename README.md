@@ -17,7 +17,7 @@ A browser client header bidding JavaScript library.
 
 ## Test
 
-- `npm run test`
+- `npm test`
 
 ## Build Output
 
