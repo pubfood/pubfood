@@ -96,9 +96,6 @@ var pubfoodContrib = {
         done();
       });
 
-      googletag.cmd.push(function() { googletag.display('div-leaderboard'); });
-      googletag.cmd.push(function() { googletag.display('div-multi-size'); });
-
     },
     refresh: function(targeting, done) {
       googletag.cmd.push(function() {

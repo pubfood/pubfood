@@ -24,26 +24,33 @@
 
     <script type="text/javascript">
 
-      // ToDo: Separate concerns and load tests via script elements
-      var assert = chai.assert;
-      var expect = chai.expect;
-      var pf = new pubfood({randomizeBidRequests: true});
+     // ToDo: Separate concerns and load tests via script elements
+     var assert = chai.assert;
+     var expect = chai.expect;
+     var pf = new pubfood(
+         {
+             randomizeBidRequests: true,
+             bidProviderCbTimeout: 6000,
+             auctionProviderCbTimeout: 6000
+         }
+     );
+
+     var batch = [];
+
+     // this reporter listens on all events and pushes the event data to a queue `batch`
+     pf.observe(function(event) {
+         batch.push(event);
+     });
+
+     // this reporter only listens on the `AUCTION_COMPLETE` event, then loops over and displays the event data
+     pf.observe('AUCTION_COMPLETE', function(event) {
+         console.log('---------------------------------------');
+         for (var i = 0; i < batch.length; i++) {
+             console.log('%c' + batch[i].type, 'padding-right:5px;font-weight:bold;display:block;', JSON.stringify(batch[i]));
+         }
+     });
 
       describe('Pubfood API', function testPubfoodMediator() {
-        var batch = [];
-
-        // this reporter listens on all events and pushes the event data to a queue `batch`
-        pf.observe(function(event) {
-          batch.push(event);
-        });
-
-        // this reporter only listens on the `AUCTION_COMPLETE` event, then loops over and displays the event data
-        pf.observe('AUCTION_COMPLETE', function(event) {
-          console.log('---------------------------------------');
-          for (var i = 0; i < batch.length; i++) {
-            console.log('%c' + batch[i].type, 'padding-right:5px;font-weight:bold;display:block;', JSON.stringify(batch[i]));
-          }
-        });
 
         it('should add a slot', function() {
           pf.addSlot(pubfoodContrib.slots[0]);
@@ -91,7 +98,7 @@
           var trigger = function(startAuction) {
             setTimeout(function() {
               startAuction();
-            }, 1000);
+            }, 6000);
           };
           pf.setAuctionTrigger(trigger);
 
@@ -110,7 +117,7 @@
           // refresh the auction after 2 seconds
           setTimeout(function(){
             pf.refresh(['/2476204/multi-size', 'foo']);
-          }, 2000);
+          }, 5500);
 
           pf.start(Date.now(), function(hasErros, details) {
             if (hasErros) {
@@ -144,9 +151,23 @@
 
     <div id='div-leaderboard'>
     </div>
-
+    <script>
+     // simulate throttled network
+     setTimeout(function() {
+         pf.observe('AUCTION_POST_RUN', function() {
+             googletag.cmd.push(function() { googletag.display('div-leaderboard'); });
+         });
+     }, 5000);
+    </script>
     <div id='div-multi-size'>
     </div>
-
+    <script>
+     // simulate throttled network
+     setTimeout(function() {
+         pf.observe('AUCTION_POST_RUN', function() {
+             googletag.cmd.push(function() { googletag.display('div-multi-size'); });
+         });
+     }, 1500);
+    </script>
   </body>
 </html>

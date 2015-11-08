@@ -18,6 +18,7 @@ var EventEmitter = require('eventemitter3');
  */
 function PubfoodEvent() {
   this.auction_ = 1;
+  this.observeImmediate_ = {};
   // PubfoodEvent constructor
 }
 
@@ -222,4 +223,26 @@ PubfoodEvent.prototype.publish = function(eventType, data, eventContext) {
  */
 
 util.extends(PubfoodEvent, EventEmitter);
+
+PubfoodEvent.prototype.emit = function(event) {
+  var ret = EventEmitter.prototype.emit.apply(this, arguments);
+  if (!ret) {
+    ret = true;
+    this.observeImmediate_[event] = this.observeImmediate_[event] || [];
+    this.observeImmediate_[event].push(Array.prototype.splice.call(arguments, 1));
+  }
+  return ret;
+};
+
+PubfoodEvent.prototype.on = function(event, fn) {
+  var emitted = this.observeImmediate_[event] || null;
+  if (emitted) {
+    for (var i = 0; i < emitted.length; i++) {
+      fn(emitted[i]);
+    }
+    return this;
+  }
+  return EventEmitter.prototype.on.apply(this, arguments);
+};
+
 module.exports = new PubfoodEvent();

@@ -565,7 +565,7 @@ AuctionMediator.prototype.refresh = function(slotNames) {
 
       setTimeout(function(){
         if (!doneCalled) {
-          Event.publish(Event.EVENT_TYPE.WARN, 'Warning: The auction done callback for "'+name+'" hasn\'t been called within the allotted time (' + (this.initDoneTimeout_/1000) + 'sec)');
+          Event.publish(Event.EVENT_TYPE.WARN, 'Warning: The auction done callback for "'+name+'" hasn\'t been called within the allotted time (' + (self.initDoneTimeout_/1000) + 'sec)');
           doneCb();
         }
       }, this.initDoneTimeout_);
