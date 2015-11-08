@@ -33,7 +33,6 @@
           food.addBidProvider({
             name: 'bidProviderOne',
             libUri: '/simulated-bid-provider/bidProviderOne.js',
-            sync: true,
             init: function(slots, pushBid, done) {
               bidProviderOne.cmd.push(function() {
                 var encodedAvailability = encodeURIComponent('multi:300x250|300x600:400,rail:300x250:650');
@@ -137,10 +136,16 @@
           <div style="position:absolute;left:310px" id="div-rail"></div>
         </div>
         <script>
-          auctionProviderOne.cmd.push(function() {
-            auctionProviderOne.display('div-multi-size');
-            auctionProviderOne.display('div-rail');
-          });
+          var ARTIFICIAL_DELAY = 1000;
+          setTimeout(function() {
+            console.log('poke ' + ARTIFICIAL_DELAY + 'ms later');
+            food.observe('AUCTION_POST_RUN', function() {
+              auctionProviderOne.cmd.push(function() {
+                auctionProviderOne.display('div-multi-size');
+                auctionProviderOne.display('div-rail');
+              });
+            });
+          }, ARTIFICIAL_DELAY);
         </script>
         <p>Please open up the devtools for more information in the console</p>
         <p>Feedback is warmly welcome be it questions, comments or concerns.</p>
