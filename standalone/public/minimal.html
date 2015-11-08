@@ -21,55 +21,38 @@
           food.addSlot({
             name: '/2476204/multi-size',
             elementId: 'div-multi-size',
-            sizes: [
-              [300, 250],
-              [300, 600]
-            ],
-            bidProviders: [
-              // bidProvideOne
-              'bidProviderOne'
-              ]
+            sizes: [[300, 250], [300, 600]],
+            bidProviders: ['bidProviderOne']
           });
           food.addSlot({
             name: '/2476204/rail',
             elementId: 'div-rail',
-            sizes: [
-              [300, 250]
-            ],
-            bidProviders: [
-              'bidProviderOne'
-              ]
+            sizes: [[300, 250]],
+            bidProviders: ['bidProviderOne']
           });
           food.addBidProvider({
             name: 'bidProviderOne',
             libUri: '/simulated-bid-provider/bidProviderOne.js',
-            slotParams: {
-              '/2476204/multi-size': 'multi',
-              '/2476204/rail': 'rail'
-            },
             sync: true,
-            init: function(slots, next, done) {
+            init: function(slots, pushBid, done) {
               bidProviderOne.cmd.push(function() {
                 var encodedAvailability = encodeURIComponent('multi:300x250|300x600:400,rail:300x250:650');
                 bidProviderOne.init('delay=200&fuzz=10&availability=' + encodedAvailability);
               });
-              var params = this.slotParams;
               bidProviderOne.cmd.push(function() {
                 var i;
-                var slotMap = {};
-                for (var k = 0; k < slots.length; k++) {
-                  var slot = slots[k];
-                  var ybslot = params[slot.name];
-                  slotMap[ybslot] = slot.name;
-                }
+                var slotMap = {
+                  'multi': '/2476204/multi-size',
+                  'rail': '/2476204/rail'
+                };
                 var getSizes = function (raw) {
-                  var i;
+                  var j;
                   var sizeSplit;
                   var sizes = [];
                   var sizesRaw = raw.split('|');
-                  for (i = 0; i < sizesRaw.length; i++) {
-                    sizeSplit = sizesRaw[i].split('x');
-                    sizes[i] = [parseInt(sizeSplit[0], 10), parseInt(sizeSplit[1], 10)];
+                  for (j = 0; j < sizesRaw.length; j++) {
+                    sizeSplit = sizesRaw[j].split('x');
+                    sizes[j] = [parseInt(sizeSplit[0], 10), parseInt(sizeSplit[1], 10)];
                   }
                   return sizes;
                 };
@@ -78,7 +61,8 @@
                 for (i = 0; i < availableSlots.length; i++) {
                   parts = availableSlots[i].split(':');
                   // TODO consider different bids for different sizes
-                  next({
+                  console.log(slotMap[parts[0]]);
+                  pushBid({
                     slot: slotMap[parts[0]],
                     value: parts[2],
                     sizes: getSizes(parts[1]),
@@ -87,11 +71,10 @@
                     }
                   });
                 }
-                console.log('bidProviderOne available:', bidProviderOne.getAvailable());
                 done();
               });
             },
-            refresh: function(slots, done) {
+            refresh: function(slots, pushBid, done) {
             }
           });
 
