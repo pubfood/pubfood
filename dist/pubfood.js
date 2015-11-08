@@ -1,4 +1,4 @@
-/*! pubfood v0.1.7 | (c) pubfood | http://pubfood.org/LICENSE.txt */
+/*! pubfood v0.1.8 | (c) pubfood | http://pubfood.org/LICENSE.txt */
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.pubfood = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 'use strict';
 
@@ -275,11 +275,9 @@ if ('undefined' !== typeof module) {
  * publisher ad server request [AuctionProvider]{@link pubfood#provider.AuctionProvider}.
  *
  * @class
- * @param {AuctionMediator} - bidder and publisher request coordination
  * @memberof pubfood#assembler
  */
-function BidAssembler(auctionMediator) {
-  this.auctionMediator = auctionMediator;
+function BidAssembler() {
   this.operators = [];
 }
 
@@ -366,7 +364,7 @@ module.exports = RequestAssembler;
 
 var util = require('../util');
 var Event = require('../event');
-//var transformDelegate = require('../interfaces').TransformDelegate;
+var PubfoodError = require('../errors');
 
 /**
  * @typedef {TransformOperator} TransformOperator [TransformOperator]{@link pubfood#assembler.TransformOperator}
@@ -432,7 +430,7 @@ TransformOperator.prototype.process = function(bids, params) {
   var outBids = this.transform(bids, params);
 
   if (!outBids) {
-    Event.publish(Event.EVENT_TYPE.ERROR, 'no transform output');
+    Event.publish(Event.EVENT_TYPE.ERROR, new PubfoodError('no transform output'));
   }
 
   return outBids || null;
@@ -440,7 +438,7 @@ TransformOperator.prototype.process = function(bids, params) {
 
 module.exports = TransformOperator;
 
-},{"../event":6,"../util":18}],5:[function(require,module,exports){
+},{"../errors":5,"../event":6,"../util":18}],5:[function(require,module,exports){
 /**
  * pubfood
  *
@@ -459,7 +457,9 @@ var ERR_NAME = 'PubfoodError';
  */
 function PubfoodError(message) {
   this.name = ERR_NAME;
+  /** @property {string} message The error message */
   this.message = message || 'Pubfood integration error.';
+  /** @property {string} stack The error stack trace */
   this.stack = (new Error()).stack;
 }
 
@@ -493,6 +493,7 @@ var EventEmitter = require('eventemitter3');
  */
 function PubfoodEvent() {
   this.auction_ = 1;
+  this.observeImmediate_ = {};
   // PubfoodEvent constructor
 }
 
@@ -671,7 +672,7 @@ PubfoodEvent.prototype.publish = function(eventType, data, eventContext) {
  * @property {object|string} data Data structure for each event type
  * @property {string} data.PUBFOOD_API_LOAD
  * @property {string} data.PUBFOOD_API_START
- * @property {object} data.ERROR
+ * @property {PubfoodError} data.ERROR
  * @property {*} data.ERROR.stackTrace
  * @property {string} data.WARN warning message
  * @property {string} data.INVALID validation message
@@ -697,6 +698,31 @@ PubfoodEvent.prototype.publish = function(eventType, data, eventContext) {
  */
 
 util.extends(PubfoodEvent, EventEmitter);
+
+PubfoodEvent.prototype.emit = function(event) {
+  var ret = EventEmitter.prototype.emit.apply(this, arguments);
+
+  // Always allow AUCTION_POST_RUN events to execute immediately
+  // after the emitted event
+  if (!ret || this.EVENT_TYPE.AUCTION_POST_RUN === event) {
+    ret = true;
+    this.observeImmediate_[event] = this.observeImmediate_[event] || [];
+    this.observeImmediate_[event].push(Array.prototype.splice.call(arguments, 1));
+  }
+  return ret;
+};
+
+PubfoodEvent.prototype.on = function(event, fn) {
+  var emitted = this.observeImmediate_[event] || null;
+  if (emitted) {
+    for (var i = 0; i < emitted.length; i++) {
+      fn(emitted[i]);
+    }
+    return this;
+  }
+  return EventEmitter.prototype.on.apply(this, arguments);
+};
+
 module.exports = new PubfoodEvent();
 
 },{"./logger":8,"./util":18,"eventemitter3":1}],7:[function(require,module,exports){
@@ -714,19 +740,11 @@ module.exports = new PubfoodEvent();
  * @typedef {AuctionDelegate} AuctionDelegate
  * @property {string} name Auction provider delegate name
  * @property {string} libUri
- * @property {function} init Auction provider delegate initial auction request.<br>Called at startup. Returns <i>{undefined}</i>
- * @property {object[]} init.slots - slot objects with bids and page level targeting
- * @property {string} init.slots.name slot name
- * @property {string} init.slots.elementId target DOM elementId
- * @property {array} init.slots.sizes slot sizes
- * @property {object} init.slots.targeting slot targeting key value pairs
+ * @property {function} init Auction provider delegate initial auction request.<br>Called at startup.
+ * @property {array.<object>} init.targeting - array of {@link SlotTargetingObject}|{@link PageTargetingObject}
  * @property {auctionDoneCallback} init.done Callback to execute on done
- * @property {function} refresh Auction provider delegate refresh auction request.<br>Called at startup. Returns <i>{undefined}</i>
- * @property {object[]} refresh.slots - slot objects with bids and page level targeting
- * @property {string} refresh.slots.name slot name
- * @property {string} refresh.slots.elementId target DOM elementId
- * @property {array} refresh.slots.sizes slot sizes
- * @property {object} refresh.slots.targeting slot targeting key value pairs
+ * @property {function} refresh Auction provider delegate refresh auction request.<br>Called at startup.
+ * @property {array.<object>} refresh.targeting - array of {@link SlotTargetingObject}|{@link PageTargetingObject}
  * @property {auctionDoneCallback} refresh.done Callback to execute on done
  * @property {function} [trigger] Auction provider delegate function to trigger the auction. Default: [pubfood.timeout]{@link pubfood#timeout}
  * @property {auctionDoneCallback} trigger.done Callback to initialize the auction provider
@@ -742,25 +760,17 @@ auctionDelegate.optional = {
 };
 
 /**
- * Interface for classes that are delegates for the BidProvider decorator..
+ * Interface for classes that are delegates for the BidProvider decorator.
  *
  * @typedef {BidDelegate} BidDelegate
  * @property {string} name Bid provider delegate name.
  * @property {string} libUri location of the delegate JavaScript library/tag.
  * @property {function} init Initial bid request for [BidProvider.init]{@link pubfood#provider.BidProvider#init} delegate.
- * <br>Returns {undefined}
- * @property {object} init.slots
- * @property {string} init.slots.name - @todo in process ralionalization of slot object structure
- * @property {array} init.slots.name.sizes
- * @property {object} init.slots.name.bidProviders
+ * @property {Slot[]} init.slots slots to bid on
  * @property {pushBidCallback} init.pushBid Callback to execute on next bid available
  * @property {bidDoneCallback} init.done Callback to execute on done
  * @property {function} refresh Refresh bids for [BidProvider.refresh]{@link pubfood#provider.BidProvider#refresh} delegate.
- * <br> Return {undefined}
- * @property {object} refresh.slots
- * @property {string} refresh.slots.name - @todo in process ralionalization of slot object structure
- * @property {array} refresh.slots.name.sizes
- * @property {object} refresh.slots.name.bidProviders
+ * @property {Slot[]} refresh.slots slots to bid on
  * @property {pushBidCallback} refresh.pushBid Callback to execute on next bid available
  * @property {bidDoneCallback} refresh.done Callback to execute on done
  */
@@ -780,9 +790,9 @@ bidDelegate.optional = {
 /**
  * Function delegates for the [TransformOperator]{@link pubfood#assembler.TransformOperator} decorator.
  * @typedef {function} TransformDelegate
- * @property {Bid[]} bids array of bids to transform @returns {Bid[]}
- * @property {object} params parameters as required by delegate function. Future use.
- * @returns {Bid[]}
+ * @param {Bid[]} bids array of bids to transform
+ * @param {object} params parameters as required by delegate function. Future use.
+ * @returns {Bid[]|null}
  * @example
  *   var transformDelegate = function(bids, params) { console.log('operate on bids'); };
  */
@@ -792,11 +802,13 @@ var transformDelegate = function(bids, params) {
 /**
  * Auction trigger function.
  *
- * A custom function that can be registered with an [AuctionProvider]{@link pubfood#provider.AuctionProvider} that
+ * A custom function that can be registered with an [AuctionMediator]{@link pubfood#mediator.AuctionMediator} that
  * will determine when the publisher ad server request should be initiated.
  *
+ * The [start]{@link startAuctionCallback} callback must be invoked to start the auction.
+ *
  * @typedef {function} AuctionTriggerFn
- * @property {startAuctionCallback} start callback to initiate the publisher ad server request
+ * @param {startAuctionCallback} start callback to initiate the publisher ad server request
  */
 var auctionTriggerFunction = function(startAuctionCallback) {
 };
@@ -810,7 +822,7 @@ var auctionTriggerFunction = function(startAuctionCallback) {
  */
 
 /**
- * Callback to notify of {@link pubfood#provider.BidProvider} has its completed bidding process.
+ * Callback to notify of [BidProvider]{@link pubfood#provider.BidProvider} has its completed bidding process.
  *
  * @typedef {function} bidDoneCallback
  * @fires pubfood.PubfoodEvent.BID_COMPLETE
@@ -845,7 +857,6 @@ var pushBidCallback = function(){
  * @param {object} event -
  * @param {string} event.type -
  * @param {*} event.data -
- * @return {undefined}
  */
 var Reporter = function(event){
 
@@ -857,7 +868,6 @@ var Reporter = function(event){
  * @typedef {function} apiStartCallback
  * @param {boolean} hasErrors true if there are any configuration errors
  * @param {array} errors The list of errors
- * @return {undefined}
  */
 var apiStartCallback = function(hasErrors, errors){
 
@@ -870,8 +880,8 @@ var apiStartCallback = function(hasErrors, errors){
  * @property {string} slot - slot name
  * @property {string} value - publisher adserver targeting bid value
  * @property {array.array.<number, number>} sizes - array of sizes for the slot the bid is for
- * @property {number} sizes.0 width slot width
- * @property {number} sizes.1 height slot height
+ * @property {number} sizes.0 width
+ * @property {number} sizes.1 height
  * @property {object} [targeting] - key/value pairs for additional adserver targeting
  * @property {string} [label] optional targeting key to use for bid value
  */
@@ -894,19 +904,15 @@ bidObject.optional = {
  * @property {array.<number, number>} sizes array of slot sizes
  * @property {number} sizes.0 width slot width
  * @property {number} sizes.1 height slot height
- * @property {object.<string, object>} bidProviders
- * @property {object} bidProviders.providerName bid provider name
- * @property {string} bidProviders.providerName.slot external provider system slot name
+ * @property {string[]} bidProviders array of [BidProvider.name]{@link pubfood#provider.BidProvider#name} values
  * @example
  * var slotConfig = {
  *       name: '/abc/123/rectangle',
  *       elementId: 'div-left',
  *       sizes: [ [300, 250], [300, 600] ],
- *       bidProviders: {
- *                       p1: {
- *                        slot: 'p1-rectangle-slot'
- *                       }
- *                     }
+ *       bidProviders: [
+ *                       'p1', 'p2'
+ *                     ]
  *     };
  */
 var slotConfig = {
@@ -917,16 +923,47 @@ var slotConfig = {
 };
 
 /**
+ * @typedef {BidderSlots} BidderSlots.
+ *
+ * @property {BidProvider} provider
+ * @property {Slot[]} slots
+ */
+
+/**
+ * @typedef {SlotTargetingObject} SlotTargetingObject
+ *
+ * Key value targeting for a specific slot.
+ *
+ * @property {string} type the targeting level [slot|page]
+ * @property {string} [name] the [Slot.name]{@link pubfood#mode.Slot#name} if type is 'slot'
+ * @property {string} id the generated identifier of the object
+ * @property {string} [elementId] the target DOM element id for the slot
+ * @property {array.<number, number>} sizes array of slot sizes
+ * @property {object.<string, string>} targeting object containing key/value pair targeting
+ */
+
+/**
+ * @typedef {PageTargetingObject} PageTargetingObject
+ *
+ * Global key value targeting for the page.
+ *
+ * @property {string} type the targeting level [slot|page]
+ * @property {object.<string, string>} targeting object containing key/value pair targeting
+ */
+
+/**
  *
  * @typedef {PubfoodConfig} PubfoodConfig - all properties are optional
  * @property {string} id
- * @property {number} auctionProviderTimeout The maximum time the auction provider has before calling `done` inside the `init` method
- * @property {number} bidProviderTimeout The maximum time the bid provider has before calling `done` inside the `init` method
+ * @property {number} auctionProviderTimeout The maximum time the auction provider has before calling {@link auctionDoneCallback} inside the [AuctionProvider.init]{@link pubfood#provider.AuctionProvider#init} or [AuctionProvider.refresh]{@link pubfood#provider.AuctionProvider#refresh} methods
+ * @property {number} bidProviderTimeout The maximum time the bid provider has before calling {@link bidDoneCallback} inside the [BidProvider.init]{@link pubfood#provider.BidProvider#init} or [BidProvider.refresh]{@link pubfood#provider.BidProvider#refresh} methods
+ * @property {boolean} randomizeBidRequests Randomize the order in which [BidProvider]{@link pubfood#provider.BidProvider} requests are made.
  */
 var PubfoodConfig = {
   id: '',
   auctionProviderCbTimeout: 2000,
-  bidProviderCbTimeout: 2000
+  bidProviderCbTimeout: 2000,
+  randomizeBidRequests: false
 };
 
 module.exports = {
@@ -1008,6 +1045,7 @@ var AuctionMediator = require('./mediator/auctionmediator');
  * Coordinates and orchestrates Mediator and Assembler instances.
  *
  * @memberof pubfood
+ # @private
  */
 var mediator = {
   mediatorBuilder: function(config) {
@@ -1062,7 +1100,7 @@ function AuctionMediator(config) {
   this.initDoneTimeout_ = 2000;
   this.processTargetingCounter_ = 0;
   this.bidMediator = new BidMediator(this);
-  this.bidAssembler = new BidAssembler(this);
+  this.bidAssembler = new BidAssembler();
   this.requestAssembler = new RequestAssembler();
 }
 
@@ -1159,7 +1197,6 @@ AuctionMediator.prototype.getTimeout = function() {
  * The maximum time the auction provider has before calling `done` inside the `init` method
  *
  * @param {number} millis timeout in milliseconds
- * @return {undefined}
  */
 AuctionMediator.prototype.setAuctionProviderCbTimeout = function(millis){
   this.initDoneTimeout_ = typeof millis === 'number' ? millis : 2000;
@@ -1176,9 +1213,7 @@ AuctionMediator.prototype.setAuctionTrigger = function(triggerFn) {
 };
 
 /**
- *
  * @private
- * @return {undefined}
  */
 AuctionMediator.prototype.startAuction_ = function() {
   Event.publish(Event.EVENT_TYPE.BID_ASSEMBLER, 'AuctionMediator');
@@ -1236,10 +1271,11 @@ AuctionMediator.prototype.pushBid_ = function(event) {
 };
 
 /**
- * @todo add docs
+ * Check the bid complete count.
+ *
+ * If all bidders are complete, start the auction.
  *
  * @private
- * @return {undefined}
  */
 AuctionMediator.prototype.checkBids_ = function() {
   this.bidCount++;
@@ -1252,7 +1288,6 @@ AuctionMediator.prototype.checkBids_ = function() {
  * Start the auction delegate.
  *
  * @private
- * @return {undefined}
  */
 AuctionMediator.prototype.go_ = function() {
   if (!this.inAuction) {
@@ -1327,7 +1362,6 @@ AuctionMediator.prototype.buildTargeting_ = function() {
 /**
  * process the targeting for the auction provider
  * @private
- * @return {undefined}
  */
 AuctionMediator.prototype.processTargeting_ = function() {
   var self = this;
@@ -1418,7 +1452,6 @@ AuctionMediator.prototype.bidProviderExists_ = function(name){
  * The maximum time the bid provider has before calling `done` inside the `init` method
  *
  * @param {number} millis timeout in milliseconds
- * @return {undefined}
  */
 AuctionMediator.prototype.setBidProviderCbTimeout = function(millis){
   this.bidMediator.setBidProviderCbTimeout(millis);
@@ -1468,7 +1501,6 @@ AuctionMediator.prototype.addBidTransform = function(delegate){
 /**
  * Load bid provider JavaScript library/tag.
  * @params {boolean} randomizeBidRequests
- * @returns {undefined}
  */
 AuctionMediator.prototype.loadProviders = function(randomizeBidRequests) {
   var uri;
@@ -1503,7 +1535,7 @@ AuctionMediator.prototype.loadProviders = function(randomizeBidRequests) {
 /**
  * Construct a set of slots for bidders.
  *
- * @returns {object} bidderSlots an object containing an array of slots for each bidder.
+ * @returns {BidderSlots[]} bidderSlots an object containing an array of slots for each bidder.
  *
  */
 AuctionMediator.prototype.getBidderSlots = function() {
@@ -1591,7 +1623,7 @@ AuctionMediator.prototype.refresh = function(slotNames) {
 
       setTimeout(function(){
         if (!doneCalled) {
-          Event.publish(Event.EVENT_TYPE.WARN, 'Warning: The auction done callback for "'+name+'" hasn\'t been called within the allotted time (' + (this.initDoneTimeout_/1000) + 'sec)');
+          Event.publish(Event.EVENT_TYPE.WARN, 'Warning: The auction done callback for "'+name+'" hasn\'t been called within the allotted time (' + (self.initDoneTimeout_/1000) + 'sec)');
           doneCb();
         }
       }, this.initDoneTimeout_);
@@ -1621,6 +1653,7 @@ var Bid = require('../model/bid');
  * @class
  * @param {AuctionMediator} auctionMediator - auction mediator object
  * @memberof pubfood/mediator
+ * @private
  */
 function BidMediator(auctionMediator) {
   this.auctionMediator = auctionMediator;
@@ -1632,8 +1665,7 @@ function BidMediator(auctionMediator) {
 /**
  * Process tht bidders bids
  *
- * @param {object} bidderSlots object containing slots per bidder
- * @return {undefined}
+ * @param {BidderSlots[]} bidderSlots object containing slots per bidder
  */
 BidMediator.prototype.processBids = function(bidderSlots) {
   this.processCounter_++;
@@ -1646,7 +1678,6 @@ BidMediator.prototype.processBids = function(bidderSlots) {
  * The maximum time the bid provider has before calling `done` inside the `init` method
  *
  * @param {number} millis timeout in milliseconds
- * @return {undefined}
  */
 BidMediator.prototype.setBidProviderCbTimeout = function(millis){
   this.callbackTimeout_ = typeof millis === 'number' ? millis : 2000;
@@ -1656,7 +1687,6 @@ BidMediator.prototype.setBidProviderCbTimeout = function(millis){
  * @param {object} provider
  * @param {object} slots
  * @private
- * @return {undefined}
  */
 BidMediator.prototype.getBids_ = function(provider, slots) {
   var self = this;
@@ -1853,15 +1883,15 @@ var slotConfig = require('../interfaces').SlotConfig;
  * Slot contains a definition of a publisher ad unit.
  *
  * @class
+ * @param {string} name the slot name
+ * @param {string} elementId target DOM element id for the slot
  * @memberof pubfood#model
  */
 function Slot(name, elementId) {
   if (this.init_) {
     this.init_();
   }
-  /** @property {string} name the slot name */
   this.name = name;
-  /** @property {string} elementId target DOM element id for the slot */
   this.elementId = elementId;
   this.bidProviders = [];
   this.sizes = [];
@@ -1953,7 +1983,7 @@ var AuctionDelegate = require('../interfaces').AuctionDelegate;
 var Event = require('../event');
 
 /**
- * AuctionProvider implements the publisher ad server requests.
+ * AuctionProvider decorates the {@link AuctionDelegate} to implement the publisher ad server requests.
  *
  * @class
  * @memberof pubfood#provider
@@ -1993,7 +2023,7 @@ AuctionProvider.withDelegate = function(delegate) {
 /**
  * Validate a auction provider delegate.
  *
- * Checks that the delegate has the require properties specified by {@link AuctionDelegate}
+ * Checks that the delegate has the required properties specified by {@link AuctionDelegate}
  *
  * @param {AuctionDelegate} delegate - bid provider delegate object literal
  * @returns {boolean} true if delegate has required functions and properties
@@ -2014,8 +2044,7 @@ AuctionProvider.prototype.setName = function(name) {
 };
 
 /**
- * Get the auction provider's libUri
- * @todo maybe change to getLibUri
+ * Get the auction provider JavaScript library Uri/Url.
  *
  * @return {string}
  */
@@ -2026,33 +2055,23 @@ AuctionProvider.prototype.libUri = function() {
 /**
  * Initialize a auction provider.
  *
- * The AuctionProvider delegate javascript tag and other setup is done here.
+ * The AuctionProvider delegate Javascript and other tag setup is done here.
  *
- * @param {object[]} slotTargeting - slot objects with bids and page level targeting
- * @param {string} slotTargeting.name slot name
- * @param {string} slotTargeting.elementId target DOM elementId
- * @param {array} slotTargeting.sizes slot sizes
- * @param {object} slotTargeting.targeting slot targeting key value pairs
+ * @param {array.<SlotTargetingObject|PageTargetingObject>} targeting - objects with bids and page level targeting. Can be arran of both {@link SlotTargetingObject} <em>and</em> {@link PageTargetingObject}.
  * @param {auctionDoneCallback} done - a callback to execute on init complete
- * @return {undefined}
  */
-AuctionProvider.prototype.init = function(slotTargeting, done) {
-  this.auctionDelegate.init(slotTargeting, done);
+AuctionProvider.prototype.init = function(targeting, done) {
+  this.auctionDelegate.init(targeting, done);
 };
 
 /**
  * Refresh for ad slots
  *
- * @param {object[]} slotTargeting objects with bids and page level targeting
- * @param {string} slotTargeting.name slot name
- * @param {string} slotTargeting.elementId target DOM elementId
- * @param {array} slotTargeting.sizes slot sizes
- * @param {object} slotTargeting.targeting slot targeting key value pairs
+ * @param {array.<SlotTargetingObject|PageTargetingObject>} targeting - objects with bids and page level targeting. Can be arran of both {@link SlotTargetingObject} <em>and</em> {@link PageTargetingObject}.
  * @param {auctionDoneCallback} done a callback to execute on init complete
- * @return {undefined}
  */
-AuctionProvider.prototype.refresh = function(slotTargeting, done) {
-  this.auctionDelegate.refresh(slotTargeting, done);
+AuctionProvider.prototype.refresh = function(targeting, done) {
+  this.auctionDelegate.refresh(targeting, done);
 };
 
 module.exports = AuctionProvider;
@@ -2140,13 +2159,9 @@ BidProvider.prototype.sync = function(/*loadSync*/) {
  *
  * Delegates to implementation [BidDelegate.init]{@link pubfood#interfaces.BidDelegate}
  *
- * @param {object} slots - delegate specific
- * @param {string} slots.name - @todo in process ralionalization of slot object structure
- * @param {array} slots.name.sizes
- * @param {object} slots.name.bidProviders
+ * @param {Slot[]} slots slots to bid on
  * @param {pushBidCallback} pushBid - callback that registers the bid; execute callback for each bid object
  * @param {bidDoneCallback} done - a callback to execute on init complete
- * @return {undefined}
  */
 BidProvider.prototype.init = function(slots, pushBid, done) {
   this.bidDelegate.init(slots, pushBid, done);
@@ -2155,13 +2170,9 @@ BidProvider.prototype.init = function(slots, pushBid, done) {
 /**
  * Refresh bids for ad slots
  *
- * @param {object} slots - delegate specific
- * @param {string} slots.name - @todo in process ralionalization of slot object structure
- * @param {array} slots.name.sizes
- * @param {object} slots.name.bidProviders
+ * @param {Slot[]} slots slots to bid on
  * @param {pushBidCallback} pushBid - callback that registers the bid; execute callback for each bid object
  * @param {bidDoneCallback} done - a callback to execute on init complete
- * @return {undefined}
  */
 BidProvider.prototype.refresh = function(slots, pushBid, done) {
   this.bidDelegate.refresh(slots, pushBid, done);
@@ -2210,7 +2221,7 @@ var defaultBidProvider = require('./interfaces').BidDelegate;
   };
 
   pubfood.library = pubfood.prototype = {
-    version: '0.1.7',
+    version: '0.1.8',
     mediator: require('./mediator').mediatorBuilder(),
     PubfoodError: require('./errors'),
     logger: logger
@@ -2495,11 +2506,12 @@ var defaultBidProvider = require('./interfaces').BidDelegate;
 /** @namespace util */
 var util = {
   /**
-   * Get the type of an object
+   * Get the type name of an object.
    *
    * @see https://javascriptweblog.wordpress.com/2011/08/08/fixing-the-javascript-typeof-operator/
    *
    * @function asType
+   * @returns {string}
    * @memberof util
    */
   asType: function(obj) {
@@ -2649,7 +2661,8 @@ var util = {
 };
 
 /**
- * http://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
+ * Randomize the position of items in a collection.
+ * @see http://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
  * @param {array} collection
  * @return {Array}
  */
