@@ -237,7 +237,7 @@ var defaultBidProvider = require('./interfaces').BidDelegate;
   };
 
   /**
-   * Sets a function delegate to initiate publisher the ad server request.
+   * Sets a function delegate to initiate the publisher ad server request.
    *
    * @param {AuctionTriggerFn} delegate the function that makes the callback to start the auction
    */
