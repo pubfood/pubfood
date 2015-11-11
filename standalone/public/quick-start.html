@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Quick Start - Code Only | Pubfood</title>
+    <style>
+      body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
+    </style>
+    <script src="/pubfood.min.js"></script>
+    <script>
+      // global for the auction provider
+      window.auctionProviderOne = window.auctionProviderOne || {};
+      auctionProviderOne.cmd = auctionProviderOne.cmd || [];
+      // globals for all bid providers
+      window.bidProviderOne = window.bidProviderOne || {};
+      bidProviderOne.cmd = bidProviderOne.cmd || [];
+      var food = new pubfood();
+      food.addSlot({
+        name: '2476204-rail',
+        elementId: 'div-rail',
+        sizes: [[300, 250]],
+        bidProviders: ['bidProviderOne']
+      });
+      food.addBidProvider({
+        name: 'bidProviderOne',
+        libUri: '/simulated-bid-provider/bidProviderOne.js',
+        init: function(slots, pushBid, done) {
+          bidProviderOne.cmd.push(function() {
+            var encodedAvailability = encodeURIComponent('2476204-rail.650.300x250');
+            bidProviderOne.init('delay=20&fuzz=10&availability=' + encodedAvailability);
+          });
+          bidProviderOne.cmd.push(function() {
+            var getSize = function (raw) {
+              var sizeSplit = raw.split('x');
+              return [parseInt(sizeSplit[0], 10), parseInt(sizeSplit[1], 10)];
+            };
+            var parts = bidProviderOne.getAvailable().split('.');
+            pushBid({
+              slot: parts[0],
+              value: parts[1],
+              sizes: getSize(parts[2]),
+              label: 'avg_price',
+              targeting: {
+                pvd1: 'targeting'
+              }
+            });
+            done();
+          });
+        },
+        refresh: function(slots, pushBid, done) {
+        }
+      });
+      food.setAuctionProvider({
+        name: 'auctionProviderOne',
+        libUri: '/simulated-auction-provider/auctionProviderOne.js',
+        init: function(bids, done) {
+          auctionProviderOne.cmd.push(function() {
+            var i, key;
+            for (i = 0; i < bids.length; i++) {
+              var bid = bids[i];
+              if (bid.type === 'page') {
+                // set page level targeting
+                for (key in bid.targeting) {
+                  auctionProviderOne.setTargeting(key, bid.targeting[key]);
+                }
+              }
+              if (bid.type === 'slot') {
+                var apSlot = auctionProviderOne.defineSlot(bid.name, bid.sizes, bid.elementId);
+                // set slot level targeting
+                for (key in bid.targeting) {
+                  apSlot.setTargeting(key, bid.targeting[key]);
+                }
+              }
+            }
+          });
+          auctionProviderOne.cmd.push(function() {
+            auctionProviderOne
+              .enableSingleRequest()
+              .enableServices();
+          });
+          done();
+        },
+        refresh: function(bids, done) {
+        }
+      });
+      food.timeout(500);
+      food.observe(function(ev) {
+        console.log(ev);
+      });
+      food.start();
+    </script>
+  </head>
+  <body>
+    <h3>Here is a live example</h3>
+    <div id="div-rail">
+      <script>
+        // Note: this auction provider requires the `display` to be called after the div is available
+        food.observe('AUCTION_POST_RUN', function() {
+          auctionProviderOne.cmd.push(function() {
+            auctionProviderOne.display('div-rail');
+          });
+        });
+      </script>
+    </div>
+  </body>
+</html>
