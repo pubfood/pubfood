@@ -12,6 +12,11 @@ var logger = require('../../src/logger');
 var Bid = require('../../src/model/bid');
 /** @todo generalize fixture config to improve readability of tests */
 describe('Pubfood AuctionMediator', function testPubfoodMediator() {
+
+  beforeEach(function() {
+    Event.removeAllListeners();
+  });
+
   it('should set a timeout', function() {
     var m = new AuctionMediator();
     m.timeout(1000);
@@ -185,7 +190,6 @@ describe('Pubfood AuctionMediator', function testPubfoodMediator() {
   });
 
   it('should handle push next', function() {
-    Event.removeAllListeners();
 
     var m = new AuctionMediator();
 

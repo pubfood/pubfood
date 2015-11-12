@@ -38,9 +38,12 @@ var Event = require('../src/event');
 var auctionExample = require('./fixture/auctionexample1');
 
 describe('Api Callbacks - Tests', function() {
-  it('should call all the callbacks', function(done) {
 
+  beforeEach(function() {
     Event.removeAllListeners();
+  });
+
+  it('should call all the callbacks', function(done) {
 
     //
     var bidProviderDoneCalled = {
