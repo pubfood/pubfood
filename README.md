@@ -27,8 +27,14 @@ A browser client header bidding JavaScript library.
 ## Deploy Process
 
 - `npm run cut_deploy`
-- `git push origin --tags`
-- check the [travis build](https://travis-ci.org/pubfood/pubfood)
+- `git push --tags origin master`
+ - check the [travis build](https://travis-ci.org/pubfood/pubfood)
+- write a release note such as
+ - https://github.com/pubfood/pubfood/releases/tag/v0.1.9
+- confirm the `pubfood` package is updated on npm
+ - https://www.npmjs.com/package/pubfood
+- post a release announcement here
+ - https://pubfood.slack.com/messages/general/
 
 # References
 Some reasonable summaries if you're new to header bidding:
