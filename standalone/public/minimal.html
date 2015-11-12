@@ -60,7 +60,6 @@
                 for (i = 0; i < availableSlots.length; i++) {
                   parts = availableSlots[i].split(':');
                   // TODO consider different bids for different sizes
-                  console.log(slotMap[parts[0]]);
                   pushBid({
                     slot: slotMap[parts[0]],
                     value: parts[2],
@@ -115,7 +114,7 @@
 
               done();
             },
-            refresh: function(slots, customTargeting, done) {
+            refresh: function(targets, done) {
               done();
             }
           });
@@ -136,16 +135,14 @@
           <div style="position:absolute;left:310px" id="div-rail"></div>
         </div>
         <script>
-          var ARTIFICIAL_DELAY = 1000;
-          setTimeout(function() {
-            console.log('poke ' + ARTIFICIAL_DELAY + 'ms later');
+          setTimeout(function () {
             food.observe('AUCTION_POST_RUN', function() {
               auctionProviderOne.cmd.push(function() {
                 auctionProviderOne.display('div-multi-size');
                 auctionProviderOne.display('div-rail');
               });
             });
-          }, ARTIFICIAL_DELAY);
+          }, 2000);
         </script>
         <p>Please open up the devtools for more information in the console</p>
         <p>Feedback is warmly welcome be it questions, comments or concerns.</p>
