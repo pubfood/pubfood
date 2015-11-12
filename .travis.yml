@@ -1,7 +1,7 @@
 language: node_js
 
 node_js:
-  - 0.10.31
+  - 4.2.2
 
 before_install:
   - npm install -g npm@'>=2.13.5'
