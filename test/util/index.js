@@ -5,6 +5,7 @@
 
 var assert = require('chai').assert;
 var util = require('../../src/util');
+var BidObject = require('../../src/interfaces').BidObject;
 
 /*eslint no-unused-vars: 0*/
 /*eslint no-undef: 0*/
@@ -101,5 +102,34 @@ describe('Util - Tests', function () {
 
     target = util.mergeToObject(target, source);
     assert.isTrue(target.prefix === 'bar', 'source should overwrite target property');
+  });
+
+  it('should validate object properties', function() {
+    var b = {};
+    assert.isFalse(util.validate(BidObject, b), 'empty object should not be valid');
+
+    b.slot = '';
+    assert.isFalse(util.validate(BidObject, b), 'object with required string property empty should not be valid');
+
+    b.slot = 0;
+    assert.isFalse(util.validate(BidObject, b), 'object with required string property with numeric should not be valid');
+
+    b.slot = 's1';
+    b.sizes = [];
+    b.value = 33;
+    assert.isFalse(util.validate(BidObject, b), 'object with empty required array property should not be valid');
+
+    b.sizes.push('anything');
+    assert.isTrue(util.validate(BidObject, b), 'object with required properties set should be valid');
+
+    b.value = 0;
+    assert.isTrue(util.validate(BidObject, b), 'object with optional property numeric falsy (zero) should be valid');
+
+    b.value = '';
+    assert.isTrue(util.validate(BidObject, b), 'object with optional property falsy set should be valid');
+
+    b.sizes = {};
+    assert.isTrue(util.validate(BidObject, b), 'object with array property with object set should not be valid');
+
   });
 });

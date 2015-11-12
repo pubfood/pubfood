@@ -166,7 +166,8 @@ var bidObject = {
 };
 bidObject.optional = {
   targeting: true,
-  label: true
+  label: true,
+  value: true
 };
 
 /**

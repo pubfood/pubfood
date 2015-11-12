@@ -185,8 +185,8 @@ describe('Pubfood AuctionMediator', function testPubfoodMediator() {
   });
 
   it('should handle push next', function() {
-    delete Event._events;
-    Event._events = {};
+    Event.removeAllListeners();
+
     var m = new AuctionMediator();
 
     m.addSlot({
