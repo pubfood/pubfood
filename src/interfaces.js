@@ -150,7 +150,7 @@ var apiStartCallback = function(hasErrors, errors){
  *
  * @typedef {BidObject} BidObject
  * @property {string} slot - slot name
- * @property {string} value - publisher adserver targeting bid value
+ * @property {string} value - publisher adserver targeting bid value. Default: empty string.
  * @property {array.array.<number, number>} sizes - array of sizes for the slot the bid is for
  * @property {number} sizes.0 width
  * @property {number} sizes.1 height
@@ -166,7 +166,8 @@ var bidObject = {
 };
 bidObject.optional = {
   targeting: true,
-  label: true
+  label: true,
+  value: true
 };
 
 /**

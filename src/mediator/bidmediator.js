@@ -88,8 +88,12 @@ BidMediator.prototype.getBids_ = function(provider, slots) {
  */
 BidMediator.prototype.pushBid = function(bid, providerName) {
   var b = Bid.fromObject(bid);
-  b.provider = providerName;
-  Event.publish(Event.EVENT_TYPE.BID_PUSH_NEXT, b);
+  if (b) {
+    b.provider = providerName;
+    Event.publish(Event.EVENT_TYPE.BID_PUSH_NEXT, b);
+  } else {
+    Event.publish(Event.EVENT_TYPE.WARN, 'Invalid bid object: ' + JSON.stringify(bid || {}));
+  }
 };
 
 /**

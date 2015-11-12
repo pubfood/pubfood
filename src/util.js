@@ -143,15 +143,21 @@ var util = {
 
       var isOpt = !!type.optional &&!!type.optional[k],
         hasProp = obj.hasOwnProperty(k),
-        isSet = !!obj[k],
-        isModel = !obj['init'];
+        valType = this.asType(obj[k]),
+        isModel = !obj['init'],
+        isSet = true;
+
+      if (valType === 'null' || valType === 'undefined'
+          || (valType === 'number' && !isFinite(obj[k]))
+          || (valType === 'string' && obj[k] === '')
+         ) isSet = false;
 
       if (!isOpt && (!hasProp || !isSet)) ++err;
 
       if (isSet && isModel &&
         (util.isArray(obj[k]) && obj[k].length === 0)) ++err;
 
-      if (isSet && !isModel &&
+      if (isSet && !isModel && // model object Bid+Slot can have mixed types
         (util.asType(obj[k]) !== util.asType(type[k]))) ++err;
 
       if (err > 0) break;

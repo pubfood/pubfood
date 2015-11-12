@@ -173,6 +173,7 @@ var pubfoodContrib = {
               },
               label: 'price'
             };
+            delete bidObject.value; // pubfood core should not fail with missing value property
             pushBid(bidObject);
           }
 

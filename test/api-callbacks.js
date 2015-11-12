@@ -34,9 +34,15 @@ if (!global.document) {
 var assert = require('chai').assert;
 var expect = require('chai').expect;
 var pubfood = require('../src/pubfood');
+var Event = require('../src/event');
 var auctionExample = require('./fixture/auctionexample1');
 
 describe('Api Callbacks - Tests', function() {
+
+  beforeEach(function() {
+    Event.removeAllListeners();
+  });
+
   it('should call all the callbacks', function(done) {
 
     //

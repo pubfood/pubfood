@@ -1,4 +1,4 @@
-/*! pubfood v0.1.8 | (c) pubfood | http://pubfood.org/LICENSE.txt */
+/*! pubfood v0.1.9 | (c) pubfood | http://pubfood.org/LICENSE.txt */
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.pubfood = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 'use strict';
 
@@ -878,7 +878,7 @@ var apiStartCallback = function(hasErrors, errors){
  *
  * @typedef {BidObject} BidObject
  * @property {string} slot - slot name
- * @property {string} value - publisher adserver targeting bid value
+ * @property {string} value - publisher adserver targeting bid value. Default: empty string.
  * @property {array.array.<number, number>} sizes - array of sizes for the slot the bid is for
  * @property {number} sizes.0 width
  * @property {number} sizes.1 height
@@ -894,7 +894,8 @@ var bidObject = {
 };
 bidObject.optional = {
   targeting: true,
-  label: true
+  label: true,
+  value: true
 };
 
 /**
@@ -1344,13 +1345,13 @@ AuctionMediator.prototype.buildTargeting_ = function() {
     for (var k = 0; k < slotBids.length; k++) {
       var bid = slotBids[k];
       t.bids.push({
-        value: bid.value,
+        value: bid.value || '',
         provider: bid.provider,
         id: bid.id,
         targeting: bid.targeting
       });
       var bidKey = this.getBidKey(bid);
-      t.targeting[bidKey] = t.targeting[bidKey] || bid.value;
+      t.targeting[bidKey] = t.targeting[bidKey] || (bid.value || '');
       this.mergeKeys(t.targeting, bid.targeting);
     }
 
@@ -1419,6 +1420,8 @@ AuctionMediator.prototype.addSlot = function(slotConfig) {
   if (slot) {
     this.slots.push(slot);
     this.slotMap[slot.name] = slot;
+  } else {
+    Event.publish(Event.EVENT_TYPE.WARN, 'Invalid slot object: ' + JSON.stringify(slotConfig || {}));
   }
   return this;
 };
@@ -1728,8 +1731,12 @@ BidMediator.prototype.getBids_ = function(provider, slots) {
  */
 BidMediator.prototype.pushBid = function(bid, providerName) {
   var b = Bid.fromObject(bid);
-  b.provider = providerName;
-  Event.publish(Event.EVENT_TYPE.BID_PUSH_NEXT, b);
+  if (b) {
+    b.provider = providerName;
+    Event.publish(Event.EVENT_TYPE.BID_PUSH_NEXT, b);
+  } else {
+    Event.publish(Event.EVENT_TYPE.WARN, 'Invalid bid object: ' + JSON.stringify(bid || {}));
+  }
 };
 
 /**
@@ -1787,7 +1794,7 @@ var BidObject = require('../interfaces').BidObject;
  *
  * @class
  * @param {string} slot the slot name
- * @param {string|number} value the bid value
+ * @param {string|number} value the bid value. Default: empty string.
  * @param {Array.<number, number>} sizes the dimension sizes of the slot bid
  * @memberof pubfood#model
  */
@@ -2221,7 +2228,7 @@ var defaultBidProvider = require('./interfaces').BidDelegate;
   };
 
   pubfood.library = pubfood.prototype = {
-    version: '0.1.8',
+    version: '0.1.9',
     mediator: require('./mediator').mediatorBuilder(),
     PubfoodError: require('./errors'),
     logger: logger
@@ -2420,7 +2427,7 @@ var defaultBidProvider = require('./interfaces').BidDelegate;
   };
 
   /**
-   * Sets a function delegate to initiate publisher the ad server request.
+   * Sets a function delegate to initiate the publisher ad server request.
    *
    * @param {AuctionTriggerFn} delegate the function that makes the callback to start the auction
    */
@@ -2643,15 +2650,21 @@ var util = {
 
       var isOpt = !!type.optional &&!!type.optional[k],
         hasProp = obj.hasOwnProperty(k),
-        isSet = !!obj[k],
-        isModel = !obj['init'];
+        valType = this.asType(obj[k]),
+        isModel = !obj['init'],
+        isSet = true;
+
+      if (valType === 'null' || valType === 'undefined'
+          || (valType === 'number' && !isFinite(obj[k]))
+          || (valType === 'string' && obj[k] === '')
+         ) isSet = false;
 
       if (!isOpt && (!hasProp || !isSet)) ++err;
 
       if (isSet && isModel &&
         (util.isArray(obj[k]) && obj[k].length === 0)) ++err;
 
-      if (isSet && !isModel &&
+      if (isSet && !isModel && // model object Bid+Slot can have mixed types
         (util.asType(obj[k]) !== util.asType(type[k]))) ++err;
 
       if (err > 0) break;

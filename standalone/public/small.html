@@ -4,7 +4,6 @@
         <meta charset="utf-8">
         <title>Pubfood World Simulator</title>
         <style>body { font-family:'Helvetica Neue', Helvetica, Arial, sans-serif; }</style>
-        <script src="/pubfood.js"></script>
     </head>
     <body>
         <script src="/pubfood.js"></script>
@@ -25,18 +24,13 @@
           var food = new pubfood();
           food.addSlot({
             name: '/2476204/multi-size',
-            sizes: [
-              [300, 250],
-              [300, 600]
-            ],
+            sizes: [[300, 250], [300, 600]],
             elementId: 'div-multi-size',
             bidProviders: ['bp1', 'bp2', 'bp3']
           });
           food.addSlot({
             name: '/2476204/rail',
-            sizes: [
-              [300, 250]
-            ],
+            sizes: [[300, 250]],
             elementId: 'div-rail',
             bidProviders: ['bp1', 'bp2', 'bp3']
           });
@@ -47,10 +41,10 @@
               '/2476204/multi-size': 'multi',
               '/2476204/rail': 'rail'
             },
-            init: function(slots, next, done) {
+            init: function(slots, pushBid, done) {
               bp1.cmd.push(function() {
                 var encodedAvailability = encodeURIComponent('multi:300x250|300x600:400,rail:300x250:650');
-                bp1.init('delay=200&fuzz=10&availability=' + encodedAvailability);
+                bp1.init('delay=100&fuzz=10&availability=' + encodedAvailability);
               });
               var params = this.slotParams;
               bp1.cmd.push(function() {
@@ -77,7 +71,7 @@
                 for (i = 0; i < availableSlots.length; i++) {
                   parts = availableSlots[i].split(':');
                   // TODO consider different bids for different sizes
-                  next({
+                  pushBid({
                     slot: slotMap[parts[0]],
                     value: parts[2],
                     sizes: getSizes(parts[1]),
@@ -89,7 +83,7 @@
                 done();
               });
             },
-            refresh: function(slots, done) {
+            refresh: function(slots, pushBid, done) {
             }
           });
 
@@ -100,10 +94,10 @@
               '/2476204/multi-size': 'multi',
               '/2476204/rail': 'rail'
             },
-            init: function(slots, next, done) {
+            init: function(slots, pushBid, done) {
               bp2.cmd.push(function() {
                 var encodedAvailability = encodeURIComponent('multi:300x250|300x600:800,rail:300x250:950');
-                bp2.init('delay=200&fuzz=10&availability=' + encodedAvailability);
+                bp2.init('delay=600&fuzz=10&availability=' + encodedAvailability);
               });
               var params = this.slotParams;
               bp2.cmd.push(function() {
@@ -130,7 +124,7 @@
                 for (i = 0; i < availableSlots.length; i++) {
                   parts = availableSlots[i].split(':');
                   // TODO consider different bids for different sizes
-                  next({
+                  pushBid({
                     slot: slotMap[parts[0]],
                     value: parts[2],
                     sizes: getSizes(parts[1]),
@@ -142,7 +136,7 @@
                 done();
               });
             },
-            refresh: function(slots, done) {
+            refresh: function(slots, pushBid, done) {
             }
           });
 
@@ -153,7 +147,7 @@
               '/2476204/multi-size': 'multi',
               '/2476204/rail': 'rail'
             },
-            init: function(slots, next, done) {
+            init: function(slots, pushBid, done) {
               bp3.cmd.push(function() {
                 var encodedAvailability = encodeURIComponent('multi:300x250|300x600:900,rail:300x250:975');
                 bp3.init('delay=200&fuzz=10&availability=' + encodedAvailability);
@@ -183,7 +177,7 @@
                 for (i = 0; i < availableSlots.length; i++) {
                   parts = availableSlots[i].split(':');
                   // TODO consider different bids for different sizes
-                  next({
+                  pushBid({
                     slot: slotMap[parts[0]],
                     value: parts[2],
                     sizes: getSizes(parts[1]),
@@ -195,7 +189,7 @@
                 done();
               });
             },
-            refresh: function(slots, done) {
+            refresh: function(slots, pushBid, done) {
             }
           });
 
@@ -235,7 +229,7 @@
 
               done();
             },
-            refresh: function(slots, customTargeting, done) {
+            refresh: function(targets, done) {
               done();
             }
           });
@@ -243,20 +237,20 @@
           food.timeout(2000)
           var timeReference = +new Date();
           food.observe(function(ev) {
-            // console.log(ev);
+            console.log(ev);
             // console.log(ev.type, 'delay in ms:', ev.ts - timeReference);
           });
           // google analytics
           food.observe(function(ev) {
             var elapsed = ev.ts - timeReference;
-            var data = {
-              hitType: 'timing',
-              timingCategory: 'pubfood',
-              timingVar: ev.type,
-              timingValue: elapsed,
-              timingLabel: ev.eventContext
-            };
             if (ev.type.match(/COMPLETE$/)) {
+              var data = {
+                hitType: 'timing',
+                timingCategory: 'pubfood',
+                timingVar: ev.type,
+                timingValue: elapsed,
+                timingLabel: ev.data
+              };
               console.log(data);
               // TODO consider hitCallback poking a ANALYTICS_SENT event in pubfood
               // ga('send', data);
