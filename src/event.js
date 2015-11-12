@@ -232,7 +232,7 @@ PubfoodEvent.prototype.emit = function(event) {
   if (!ret || this.EVENT_TYPE.AUCTION_POST_RUN === event) {
     ret = true;
     this.observeImmediate_[event] = this.observeImmediate_[event] || [];
-    this.observeImmediate_[event].push(Array.prototype.splice.call(arguments, 1));
+    this.observeImmediate_[event].push(Array.prototype.slice.call(arguments, 1));
   }
   return ret;
 };
@@ -241,7 +241,7 @@ PubfoodEvent.prototype.on = function(event, fn) {
   var emitted = this.observeImmediate_[event] || null;
   if (emitted) {
     for (var i = 0; i < emitted.length; i++) {
-      fn(emitted[i]);
+      fn.apply(this, emitted[i]);
     }
     return this;
   }

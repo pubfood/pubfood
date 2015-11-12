@@ -6,6 +6,7 @@
 
 require('./assembler');
 require('./errors');
+require('./event');
 require('./mediator');
 require('./model');
 require('./provider');
