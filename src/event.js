@@ -241,7 +241,7 @@ PubfoodEvent.prototype.on = function(event, fn) {
   var emitted = this.observeImmediate_[event] || null;
   if (emitted) {
     for (var i = 0; i < emitted.length; i++) {
-      fn(emitted[i]);
+      fn.apply(this, emitted[i]);
     }
     return this;
   }
