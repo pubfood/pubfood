@@ -5,6 +5,7 @@
 
 var assert = require('chai').assert;
 var util = require('../../src/util');
+var BidObject = require('../../src/interfaces').BidObject;
 
 /*eslint no-unused-vars: 0*/
 /*eslint no-undef: 0*/
@@ -101,5 +102,53 @@ describe('Util - Tests', function () {
 
     target = util.mergeToObject(target, source);
     assert.isTrue(target.prefix === 'bar', 'source should overwrite target property');
+  });
+
+  it('should validate object properties', function() {
+
+    assert.isFalse(util.validate(BidObject, {}), 'empty object should not be valid');
+
+    var BID_REQUIRED_EMPTY_STR = {
+      slot: '',
+      sizes: [[728,90]],
+      value: 33
+    };
+    assert.isFalse(util.validate(BidObject, BID_REQUIRED_EMPTY_STR), 'object with required string property empty should not be valid');
+
+    var BID_EMPTY_SIZES = {
+      slot: 's1',
+      sizes: [],
+      value: 33
+    };
+    assert.isFalse(util.validate(BidObject, BID_EMPTY_SIZES), 'object with empty required array property should not be valid');
+
+    var BID_PROPS_SET = {
+      slot: 's1',
+      sizes: [[300, 600]],
+      value: ''
+    };
+    assert.isTrue(util.validate(BidObject, BID_PROPS_SET), 'object with required properties set should be valid');
+
+    var BID_VALUE_ZERO = {
+      slot: 's1',
+      sizes: [[300, 250]],
+      value: 0
+    };
+    assert.isTrue(util.validate(BidObject, BID_VALUE_ZERO), 'object with optional property numeric falsy (zero) should be valid');
+
+    var BID_VALUE_EMPTY_STR = {
+      slot: 's1',
+      sizes: [[300, 250]],
+      value: ''
+    };
+    assert.isTrue(util.validate(BidObject, BID_VALUE_EMPTY_STR), 'object with optional property falsy set should be valid');
+
+    var BID_SIZES_NOT_ARRAY = {
+      slot: 's1',
+      sizes: {},
+      value: ''
+    };
+    assert.isTrue(util.validate(BidObject, BID_SIZES_NOT_ARRAY), 'object with array property with object set should not be valid');
+
   });
 });

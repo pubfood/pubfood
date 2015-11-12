@@ -42,11 +42,6 @@ module.exports = {
   ],
   invalid: [
     {
-      sizes: [300, 250],
-      slot: '/this/is/a/slot',
-      value: null
-    },
-    {
       targeting: {
         yes: 'yes',
         no: 'no'

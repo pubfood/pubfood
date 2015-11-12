@@ -17,7 +17,7 @@ var BidObject = require('../interfaces').BidObject;
  *
  * @class
  * @param {string} slot the slot name
- * @param {string|number} value the bid value
+ * @param {string|number} value the bid value. Default: empty string.
  * @param {Array.<number, number>} sizes the dimension sizes of the slot bid
  * @memberof pubfood#model
  */

@@ -286,13 +286,13 @@ AuctionMediator.prototype.buildTargeting_ = function() {
     for (var k = 0; k < slotBids.length; k++) {
       var bid = slotBids[k];
       t.bids.push({
-        value: bid.value,
+        value: bid.value || '',
         provider: bid.provider,
         id: bid.id,
         targeting: bid.targeting
       });
       var bidKey = this.getBidKey(bid);
-      t.targeting[bidKey] = t.targeting[bidKey] || bid.value;
+      t.targeting[bidKey] = t.targeting[bidKey] || (bid.value || '');
       this.mergeKeys(t.targeting, bid.targeting);
     }
 
@@ -361,6 +361,8 @@ AuctionMediator.prototype.addSlot = function(slotConfig) {
   if (slot) {
     this.slots.push(slot);
     this.slotMap[slot.name] = slot;
+  } else {
+    Event.publish(Event.EVENT_TYPE.WARN, 'Invalid slot object: ' + JSON.stringify(slotConfig || {}));
   }
   return this;
 };
