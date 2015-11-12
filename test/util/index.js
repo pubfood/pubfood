@@ -110,7 +110,7 @@ describe('Util - Tests', function () {
 
     var BID_REQUIRED_EMPTY_STR = {
       slot: '',
-      sizes: [[728,90]],
+      sizes: [[728, 90]],
       value: 33
     };
     assert.isFalse(util.validate(BidObject, BID_REQUIRED_EMPTY_STR), 'object with required string property empty should not be valid');
