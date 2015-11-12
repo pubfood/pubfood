@@ -232,7 +232,7 @@ PubfoodEvent.prototype.emit = function(event) {
   if (!ret || this.EVENT_TYPE.AUCTION_POST_RUN === event) {
     ret = true;
     this.observeImmediate_[event] = this.observeImmediate_[event] || [];
-    this.observeImmediate_[event].push(Array.prototype.splice.call(arguments, 1));
+    this.observeImmediate_[event].push(Array.prototype.slice.call(arguments, 1));
   }
   return ret;
 };
