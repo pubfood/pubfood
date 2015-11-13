@@ -97,7 +97,12 @@ AuctionProvider.prototype.init = function(targeting, done) {
  * @param {auctionDoneCallback} done a callback to execute on init complete
  */
 AuctionProvider.prototype.refresh = function(targeting, done) {
-  this.auctionDelegate.refresh(targeting, done);
+  var refresh = (this.auctionDelegate && this.auctionDelegate.refresh) || null;
+  if (!refresh) {
+    Event.publish(Event.EVENT_TYPE.WARN, 'AuctionProvider.auctionDelegate.refresh not defined.');
+    return;
+  }
+  refresh(targeting, done);
 };
 
 module.exports = AuctionProvider;

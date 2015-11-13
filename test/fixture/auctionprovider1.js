@@ -21,6 +21,17 @@ module.exports = {
           done();
         }, 100);
       }
+    },
+    {
+      name: 'provider1',
+      libUri: '../test/fixture/lib.js',
+      init: function(slots, bids, done) {
+      },
+      trigger: function(done) {
+        setTimeout(function() {
+          done();
+        }, 100);
+      }
     }
   ],
   invalid: [
@@ -60,7 +71,6 @@ module.exports = {
       }
     },
     {
-      name: 'provider4',
       libUri: '../test/fixture/lib.js',
       init: function(slots, bids, done) {
       },

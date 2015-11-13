@@ -15,7 +15,7 @@
  * @property {function} init Auction provider delegate initial auction request.<br>Called at startup.
  * @property {array.<object>} init.targeting - array of {@link SlotTargetingObject}|{@link PageTargetingObject}
  * @property {auctionDoneCallback} init.done Callback to execute on done
- * @property {function} refresh Auction provider delegate refresh auction request.<br>Called at startup.
+ * @property {function} [refresh] Auction provider delegate refresh auction request.<br>Called at startup.
  * @property {array.<object>} refresh.targeting - array of {@link SlotTargetingObject}|{@link PageTargetingObject}
  * @property {auctionDoneCallback} refresh.done Callback to execute on done
  * @property {function} [trigger] Auction provider delegate function to trigger the auction. Default: [pubfood.timeout]{@link pubfood#timeout}
@@ -28,7 +28,7 @@ var auctionDelegate = {
   refresh: function(targeting, done) {}
 };
 auctionDelegate.optional = {
-
+  refresh: true
 };
 
 /**
@@ -41,7 +41,7 @@ auctionDelegate.optional = {
  * @property {Slot[]} init.slots slots to bid on
  * @property {pushBidCallback} init.pushBid Callback to execute on next bid available
  * @property {bidDoneCallback} init.done Callback to execute on done
- * @property {function} refresh Refresh bids for [BidProvider.refresh]{@link pubfood#provider.BidProvider#refresh} delegate.
+ * @property {function} [refresh] Refresh bids for [BidProvider.refresh]{@link pubfood#provider.BidProvider#refresh} delegate.
  * @property {Slot[]} refresh.slots slots to bid on
  * @property {pushBidCallback} refresh.pushBid Callback to execute on next bid available
  * @property {bidDoneCallback} refresh.done Callback to execute on done
@@ -57,6 +57,7 @@ var bidDelegate = {
   }
 };
 bidDelegate.optional = {
+  refresh: true
 };
 
 /**

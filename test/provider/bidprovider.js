@@ -30,4 +30,33 @@ describe('Pubfood BidProvider', function() {
       assert.match(log.args[1].msg, /^Warn: invalid bidder delegate/, 'was not a validation error on delegate');
     }
   });
+
+  it('should not reference optional refresh delegate if not defined', function() {
+
+    var BID_PROVIDER_NO_REFRESH = {
+      name: 'no-refresh',
+      libUri: 'the Uri',
+      init: function(slots, pushBid, done) {}
+    };
+
+    var bp = BidProvider.withDelegate(BID_PROVIDER_NO_REFRESH);
+    assert.isDefined(bp.refresh);
+    assert.isDefined(bp.bidDelegate);
+
+    bp.refresh();
+    var log = logger.history[logger.history.length - 1];
+    assert.match(log.args[1], /^BidProvider.bidDelegate.refresh/, 'should get bidDelegate warning');
+
+    var BID_PROVIDER_WITH_REFRESH = {
+      name: 'no-refresh',
+      libUri: 'the Uri',
+      init: function() {},
+      refresh: function() { testRefresh = true; }
+    };
+
+    var testRefresh = false;
+    var bp2 = BidProvider.withDelegate(BID_PROVIDER_WITH_REFRESH);
+    bp2.refresh();
+    assert.isTrue(testRefresh, 'refresh delegate not called');
+  });
 });

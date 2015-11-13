@@ -16,6 +16,12 @@ module.exports = {
       },
       refresh: function(slots, options, pushBid, done) {
       }
+    },
+    {
+      name: 'bidder1',
+      libUri: '//localhost/cdn/bidder1.js',
+      init: function(slots, options, pushBid, done) {
+      }
     }
   ],
   invalid: [
@@ -24,7 +30,6 @@ module.exports = {
     },
     {
       name: 'bidder1',
-      libUri: '//localhost/cdn/bidder1.js',
       init: function(slots, options, pushBid, done) {
       }
     },
