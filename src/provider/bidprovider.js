@@ -96,7 +96,12 @@ BidProvider.prototype.init = function(slots, pushBid, done) {
  * @param {bidDoneCallback} done - a callback to execute on init complete
  */
 BidProvider.prototype.refresh = function(slots, pushBid, done) {
-  this.bidDelegate.refresh(slots, pushBid, done);
+  var refresh = (this.bidDelegate && this.bidDelegate.refresh) || null;
+  if (!refresh) {
+    Event.publish(Event.EVENT_TYPE.WARN, 'BidProvider.bidDelegate.refresh not defined.');
+    return;
+  }
+  refresh(slots, pushBid, done);
 };
 
 module.exports = BidProvider;
