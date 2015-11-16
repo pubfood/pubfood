@@ -5,7 +5,6 @@
 # /examples
 /node_modules
 # /src
-# /standalone
 # /test
 
 ## files
@@ -20,9 +19,6 @@
 # LICENSE.txt
 # package.json
 # README.md
-
-## standalone env (not handled above)
-/standalone/node_modules
 
 ## other generated stuff
 .DS_Store
