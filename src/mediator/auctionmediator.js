@@ -19,6 +19,7 @@ var Event = require('../event');
  *
  * @class
  * @memberof pubfood#mediator
+ * @private
  */
 function AuctionMediator(config) {
   if (config && config.optionalId) {

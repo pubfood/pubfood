@@ -3,7 +3,10 @@
  */
 
 'use strict';
-/** @namespace util */
+/**
+ * @namespace util
+ * @private
+ */
 var util = {
   /**
    * Get the type name of an object.

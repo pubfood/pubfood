@@ -10,10 +10,11 @@ var PubfoodError = require('../errors');
 
 /**
  * @typedef {TransformOperator} TransformOperator [TransformOperator]{@link pubfood#assembler.TransformOperator}
+ * @memberof typeDefs
  */
 
 /**
- * TransformOperator processes input bids and outputs rusult bids.
+ * TransformOperator processes input bids and outputs result bids.
  *
  * @class
  * @param {TransformDelegate} delegate - function to transform input bids
@@ -29,6 +30,7 @@ function TransformOperator(delegate) {
  *
  * @param {TransformDelegate} delegate the operator delegate function
  * @return {boolean}
+ * @private
  */
 TransformOperator.validate = function(delegate) {
   return !!delegate &&  util.asType(delegate) === 'function';
@@ -39,6 +41,7 @@ TransformOperator.validate = function(delegate) {
  *
  * @param {TransformDelegate} delegate transform object
  * @return {boolean}
+ * @private
  */
 TransformOperator.withDelegate = function(delegate) {
   if (!TransformOperator.validate(delegate)) return null;
@@ -65,6 +68,7 @@ TransformOperator.prototype.setName = function(name) {
  * @param {BidObject[]} bids - bids to process.
  * @param {object} params - parameters as required by delegate function
  * @returns {Bid[]} - processed output bids
+ * @private
  */
 TransformOperator.prototype.process = function(bids, params) {
   if (!bids) return null;

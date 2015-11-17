@@ -12,6 +12,7 @@ var Event = require('../event');
  * AuctionProvider decorates the {@link AuctionDelegate} to implement the publisher ad server requests.
  *
  * @class
+ * @property {string} name the name of the provider
  * @memberof pubfood#provider
  * @param {AuctionDelegate} auctionDelegate
  */
@@ -83,7 +84,7 @@ AuctionProvider.prototype.libUri = function() {
  *
  * The AuctionProvider delegate Javascript and other tag setup is done here.
  *
- * @param {array.<SlotTargetingObject|PageTargetingObject>} targeting - objects with bids and page level targeting. Can be arran of both {@link SlotTargetingObject} <em>and</em> {@link PageTargetingObject}.
+ * @param {array.<SlotTargetingObject>} targeting - objects with bid targeting
  * @param {auctionDoneCallback} done - a callback to execute on init complete
  */
 AuctionProvider.prototype.init = function(targeting, done) {
@@ -93,7 +94,7 @@ AuctionProvider.prototype.init = function(targeting, done) {
 /**
  * Refresh for ad slots
  *
- * @param {array.<SlotTargetingObject|PageTargetingObject>} targeting - objects with bids and page level targeting. Can be arran of both {@link SlotTargetingObject} <em>and</em> {@link PageTargetingObject}.
+ * @param {array.<SlotTargetingObject>} targeting - objects with bid level targeting
  * @param {auctionDoneCallback} done a callback to execute on init complete
  */
 AuctionProvider.prototype.refresh = function(targeting, done) {

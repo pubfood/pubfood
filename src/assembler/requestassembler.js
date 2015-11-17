@@ -10,6 +10,7 @@
  *
  * @class
  * @memberof pubfood#assembler
+ * @private
  */
 function RequestAssembler() {
   this.operators = [];
@@ -18,7 +19,7 @@ function RequestAssembler() {
 /**
  * Add a transform operator to the assembler processing pipeline.
  *
- * @param {TransformOperator} operator - function to transfomr bids
+ * @param {TransformOperator} operator - function to transform bids
  *
  */
 RequestAssembler.prototype.addOperator = function(operator) {

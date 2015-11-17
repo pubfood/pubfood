@@ -82,7 +82,6 @@ var defaultBidProvider = require('./interfaces').BidDelegate;
    *
    * @alias pubfood
    * @constructor
-   * @param {PubfoodConfig} [config] Optional configuration
    * @return {pubfood}
    */
   var api = pubfood.library.init = function(config) {

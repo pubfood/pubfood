@@ -6,6 +6,8 @@
 
 /*eslint no-unused-vars: 0*/
 
+/** @namespace typeDefs */
+
 /**
  * Interface for classes that are delegates for the AuctionProvider decorator..
  *
@@ -13,13 +15,14 @@
  * @property {string} name Auction provider delegate name
  * @property {string} libUri
  * @property {function} init Auction provider delegate initial auction request.<br>Called at startup.
- * @property {array.<object>} init.targeting - array of {@link SlotTargetingObject}|{@link PageTargetingObject}
+ * @property {array.<SlotTargetingObject>} init.targeting
  * @property {auctionDoneCallback} init.done Callback to execute on done
  * @property {function} [refresh] Auction provider delegate refresh auction request.<br>Called at startup.
- * @property {array.<object>} refresh.targeting - array of {@link SlotTargetingObject}|{@link PageTargetingObject}
+ * @property {array.<SlotTargetingObject>} refresh.targeting
  * @property {auctionDoneCallback} refresh.done Callback to execute on done
  * @property {function} [trigger] Auction provider delegate function to trigger the auction. Default: [pubfood.timeout]{@link pubfood#timeout}
  * @property {auctionDoneCallback} trigger.done Callback to initialize the auction provider
+ * @memberof typeDefs
  */
 var auctionDelegate = {
   name: '',
@@ -45,6 +48,7 @@ auctionDelegate.optional = {
  * @property {Slot[]} refresh.slots slots to bid on
  * @property {pushBidCallback} refresh.pushBid Callback to execute on next bid available
  * @property {bidDoneCallback} refresh.done Callback to execute on done
+ * @memberof typeDefs
  */
 var bidDelegate = {
   name: '__default__',
@@ -68,6 +72,7 @@ bidDelegate.optional = {
  * @returns {Bid[]|null}
  * @example
  *   var transformDelegate = function(bids, params) { console.log('operate on bids'); };
+ * @memberof typeDefs
  */
 var transformDelegate = function(bids, params) {
 };
@@ -82,6 +87,7 @@ var transformDelegate = function(bids, params) {
  *
  * @typedef {function} AuctionTriggerFn
  * @param {startAuctionCallback} start callback to initiate the publisher ad server request
+ * @memberof typeDefs
  */
 var auctionTriggerFunction = function(startAuctionCallback) {
 };
@@ -92,6 +98,7 @@ var auctionTriggerFunction = function(startAuctionCallback) {
  * This is the callback passed into the {@link AuctionTriggerFn}.
  *
  * @typedef {function} startAuctionCallback
+ * @memberof typeDefs
  */
 
 /**
@@ -99,6 +106,7 @@ var auctionTriggerFunction = function(startAuctionCallback) {
  *
  * @typedef {function} bidDoneCallback
  * @fires pubfood.PubfoodEvent.BID_COMPLETE
+ * @memberof typeDefs
  */
 var bidDoneCallback = function(){
 
@@ -109,6 +117,7 @@ var bidDoneCallback = function(){
  *
  * @typedef {function} auctionDoneCallback
  * @fires pubfood.PubfoodEvent.AUCTION_COMPLETE
+ * @memberof typeDefs
  */
 var auctionDoneCallback = function(){
 
@@ -119,6 +128,7 @@ var auctionDoneCallback = function(){
  * Callback to push bids into the list for publisher ad server auction.
  * @typedef {function} pushBidCallback
  * @fires pubfood.PubfoodEvent.BID_PUSH_NEXT
+ * @memberof typeDefs
  */
 var pushBidCallback = function(){
 
@@ -130,6 +140,7 @@ var pushBidCallback = function(){
  * @param {object} event -
  * @param {string} event.type -
  * @param {*} event.data -
+ * @memberof typeDefs
  */
 var Reporter = function(event){
 
@@ -141,6 +152,7 @@ var Reporter = function(event){
  * @typedef {function} apiStartCallback
  * @param {boolean} hasErrors true if there are any configuration errors
  * @param {array} errors The list of errors
+ * @memberof typeDefs
  */
 var apiStartCallback = function(hasErrors, errors){
 
@@ -157,6 +169,7 @@ var apiStartCallback = function(hasErrors, errors){
  * @property {number} sizes.1 height
  * @property {object} [targeting] - key/value pairs for additional adserver targeting
  * @property {string} [label] optional targeting key to use for bid value
+ * @memberof typeDefs
  */
 var bidObject = {
   slot: '',
@@ -188,6 +201,7 @@ bidObject.optional = {
  *                       'p1', 'p2'
  *                     ]
  *     };
+ * @memberof typeDefs
  */
 var slotConfig = {
   name: '',
@@ -197,10 +211,11 @@ var slotConfig = {
 };
 
 /**
- * @typedef {BidderSlots} BidderSlots.
+ * @typedef {BidderSlots} BidderSlots
  *
  * @property {BidProvider} provider
  * @property {Slot[]} slots
+ * @memberof typeDefs
  */
 
 /**
@@ -214,24 +229,18 @@ var slotConfig = {
  * @property {string} [elementId] the target DOM element id for the slot
  * @property {array.<number, number>} sizes array of slot sizes
  * @property {object.<string, string>} targeting object containing key/value pair targeting
- */
-
-/**
- * @typedef {PageTargetingObject} PageTargetingObject
- *
- * Global key value targeting for the page.
- *
- * @property {string} type the targeting level [slot|page]
- * @property {object.<string, string>} targeting object containing key/value pair targeting
+ * @memberof typeDefs
  */
 
 /**
  *
  * @typedef {PubfoodConfig} PubfoodConfig - all properties are optional
  * @property {string} id
- * @property {number} auctionProviderTimeout The maximum time the auction provider has before calling {@link auctionDoneCallback} inside the [AuctionProvider.init]{@link pubfood#provider.AuctionProvider#init} or [AuctionProvider.refresh]{@link pubfood#provider.AuctionProvider#refresh} methods
- * @property {number} bidProviderTimeout The maximum time the bid provider has before calling {@link bidDoneCallback} inside the [BidProvider.init]{@link pubfood#provider.BidProvider#init} or [BidProvider.refresh]{@link pubfood#provider.BidProvider#refresh} methods
+ * @property {number} auctionProviderCbTimeout The maximum time the auction provider has before calling {@link auctionDoneCallback} inside the [AuctionProvider.init]{@link pubfood#provider.AuctionProvider#init} or [AuctionProvider.refresh]{@link pubfood#provider.AuctionProvider#refresh} methods
+ * @property {number} bidProviderCbTimeout The maximum time the bid provider has before calling {@link bidDoneCallback} inside the [BidProvider.init]{@link pubfood#provider.BidProvider#init} or [BidProvider.refresh]{@link pubfood#provider.BidProvider#refresh} methods
  * @property {boolean} randomizeBidRequests Randomize the order in which [BidProvider]{@link pubfood#provider.BidProvider} requests are made.
+ * @memberof typeDefs
+ * @private
  */
 var PubfoodConfig = {
   id: '',

@@ -10,6 +10,7 @@ var BidObject = require('../interfaces').BidObject;
 
 /**
  * @typedef {Bid} Bid [Bid]{@link pubfood#model.Bid}
+ * @memberof typeDefs
  */
 
 /**

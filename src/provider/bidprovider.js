@@ -12,6 +12,7 @@ var Event = require('../event');
  * BidProvider implements bidding partner requests.
  *
  * @class
+ * @property {string} name the name of the provider
  * @memberof pubfood#provider
  * @param {BidDelegate} delegate
  */
