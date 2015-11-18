@@ -456,7 +456,7 @@ AuctionMediator.prototype.loadProviders = function(randomizeBidRequests) {
   }
 
   if (randomizeBidRequests) {
-    keys = util.random(keys);
+    util.randomize(keys);
   }
 
   for (var i = 0; i < keys.length; i++) {
