@@ -1,4 +1,4 @@
-/*! pubfood v0.1.9 | (c) pubfood | http://pubfood.org/LICENSE.txt */
+/*! pubfood v0.1.10 | (c) pubfood | http://pubfood.org/LICENSE.txt */
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.pubfood = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 'use strict';
 
@@ -276,6 +276,7 @@ if ('undefined' !== typeof module) {
  *
  * @class
  * @memberof pubfood#assembler
+ * @private
  */
 function BidAssembler() {
   this.operators = [];
@@ -284,7 +285,7 @@ function BidAssembler() {
 /**
  * Add a transform operator to the assembler processing pipeline.
  *
- * @param {TransformOperator} operator - function to transfomr bids
+ * @param {TransformOperator} operator - function to transform bids
  *
  */
 BidAssembler.prototype.addOperator = function(operator) {
@@ -322,6 +323,7 @@ module.exports = BidAssembler;
  *
  * @class
  * @memberof pubfood#assembler
+ * @private
  */
 function RequestAssembler() {
   this.operators = [];
@@ -330,7 +332,7 @@ function RequestAssembler() {
 /**
  * Add a transform operator to the assembler processing pipeline.
  *
- * @param {TransformOperator} operator - function to transfomr bids
+ * @param {TransformOperator} operator - function to transform bids
  *
  */
 RequestAssembler.prototype.addOperator = function(operator) {
@@ -367,18 +369,14 @@ var Event = require('../event');
 var PubfoodError = require('../errors');
 
 /**
- * @typedef {TransformOperator} TransformOperator [TransformOperator]{@link pubfood#assembler.TransformOperator}
- */
-
-/**
- * TransformOperator processes input bids and outputs rusult bids.
+ * TransformOperator processes input bids and outputs result bids.
  *
  * @class
  * @param {TransformDelegate} delegate - function to transform input bids
  * @memberof pubfood#assembler
  */
 function TransformOperator(delegate) {
-  this.name = '';
+  this.name = 'OP-' + util.newId();
   this.transform = delegate;
 }
 
@@ -387,6 +385,7 @@ function TransformOperator(delegate) {
  *
  * @param {TransformDelegate} delegate the operator delegate function
  * @return {boolean}
+ * @private
  */
 TransformOperator.validate = function(delegate) {
   return !!delegate &&  util.asType(delegate) === 'function';
@@ -397,18 +396,19 @@ TransformOperator.validate = function(delegate) {
  *
  * @param {TransformDelegate} delegate transform object
  * @return {boolean}
+ * @private
  */
 TransformOperator.withDelegate = function(delegate) {
   if (!TransformOperator.validate(delegate)) return null;
 
   var t = new TransformOperator(delegate);
-  t.setName('OP-' + util.newId());
+
   return t;
 };
 
 /**
  * Set the operator name.
- *
+ * Default name: OP-[uniqueID] e.g. OP-ih47iucugqzlerdpbr
  * @param {string} name the name of the operator
  * @return {TransformOperator}
  */
@@ -423,6 +423,7 @@ TransformOperator.prototype.setName = function(name) {
  * @param {BidObject[]} bids - bids to process.
  * @param {object} params - parameters as required by delegate function
  * @returns {Bid[]} - processed output bids
+ * @private
  */
 TransformOperator.prototype.process = function(bids, params) {
   if (!bids) return null;
@@ -451,7 +452,6 @@ var ERR_NAME = 'PubfoodError';
 /**
  * Pubfood Error
  * @class
- * @memberof pubfood
  * @param {string} message - the error description
  * @return {pubfood.PubfoodError}
  */
@@ -488,7 +488,10 @@ var EventEmitter = require('eventemitter3');
 /**
  * Pubfood event class
  * @class
- * @memberof pubfood
+ * @property {string} ts The timestamp of the event
+ * @property {string} type The event type
+ * @property {string} provider The type of provider. Defaults to <i>pubfood</i>
+ * @property {object|string} data Data structure for each event type
  * @return {pubfood.PubfoodEvent}
  */
 function PubfoodEvent() {
@@ -498,101 +501,133 @@ function PubfoodEvent() {
 }
 
 /**
- * @type {object}
  * @description Available event types
  */
 PubfoodEvent.prototype.EVENT_TYPE = {
   /**
    * Api library load
-   * @event pubfood.PubfoodEvent.PUBFOOD_API_LOAD
+   * @event PubfoodEvent.PUBFOOD_API_LOAD
+   * @private
    */
   PUBFOOD_API_LOAD: 'PUBFOOD_API_LOAD',
   /**
    * Api library start
-   * @event pubfood.PubfoodEvent.PUBFOOD_API_START
+   * @event PubfoodEvent.PUBFOOD_API_START
+   * @property {number} data api start timestamp
+   * @private
    */
   PUBFOOD_API_START: 'PUBFOOD_API_START',
   /**
    * Bid provider library load started
-   * @event pubfood.PubfoodEvent.BID_LIB_START
+   * @event PubfoodEvent.BID_LIB_START
+   * @private
    */
   BID_LIB_START: 'BID_LIB_START',
   /**
    * Bid provider library loaded
-   * @event pubfood.PubfoodEvent.BID_LIB_LOADED
+   * @event PubfoodEvent.BID_LIB_LOADED
+   * @property {string} data [BidProvider.name]{@link pubfood#provider.BidProvider}
+   * @private
    */
   BID_LIB_LOADED: 'BID_LIB_LOADED',
   /**
    * Action started.<br>e.g [BidProvider.init]{@link pubfood/provider.BidProvider#init}
-   * @event pubfood.PubfoodEvent.BID_START
+   * @event PubfoodEvent.BID_START
+   * @property {string} data [BidProvider.name]{@link pubfood#provider.BidProvider}
    */
   BID_START: 'BID_START',
   /**
-   *  Next item in data stream ready.<br>
-   *  e.g [BidProvider.refresh]{@link pubfood/provider.BidProvider#init} raises
-   *  a [BID_PUSH_NEXT]{@link pubfood/events.EVENT_TYPE.BID_PUSH_NEXT} event for each bid.
-   * @event pubfood.PubfoodEvent.BID_PUSH_NEXT
+   *  Next item in data stream ready.
+   *
+   * @event PubfoodEvent.BID_PUSH_NEXT
+   * @property {object} data @see [Bid]{@link pubfood#model.Bid}
+   * @property {string} data.id
+   * @property {array.<number, number>} data.sizes
+   * @property {string} data.value
+   * @property {object} data.targeting
+   * @private
    */
   BID_PUSH_NEXT: 'BID_PUSH_NEXT',
   /**
    * Action is complete
-   * @event pubfood.PubfoodEvent.BID_COMPLETE
+   * @event PubfoodEvent.BID_COMPLETE
+   * @property {string} data [BidProvider.name]{@link pubfood#provider.BidProvider}
    */
   BID_COMPLETE: 'BID_COMPLETE',
   /**
    * Start bid assembler
-   * @event pubfood.PubfoodEvent.BID_ASSEMBLER
+   * @event PubfoodEvent.BID_ASSEMBLER
+   * @property {Bid[]} data bid objects with potentially custom properties.
+   * See also [TransformOperator]{@link pubfood#assembler.TransformOperator}
+   * @private
    */
   BID_ASSEMBLER: 'BID_ASSEMBLER',
   /**
    * Auction provider library load started
-   * @event pubfood.PubfoodEvent.AUCTION_LIB_START
+   * @event PubfoodEvent.AUCTION_LIB_START
+   * @property {string} data [AuctionProvider.name]{@link pubfood#provider.AuctionProvider}
+   * @private
    */
   AUCTION_LIB_START: 'AUCTION_LIB_START',
   /**
    * Auction provider library loaded
-   * @event pubfood.PubfoodEvent.AUCTION_LIB_LOADED
+   * @event PubfoodEvent.AUCTION_LIB_LOADED
+   * @property {string} data [AuctionProvider.name]{@link pubfood#provider.AuctionProvider}
+   * @private
    */
   AUCTION_LIB_LOADED: 'AUCTION_LIB_LOADED',
   /**
    * Start the publisher auction
-   * @event pubfood.PubfoodEvent.AUCTION_GO
+   * @event PubfoodEvent.AUCTION_GO
+   * @property {string} data [AuctionProvider.name]{@link pubfood#provider.AuctionProvider}
    */
   AUCTION_GO: 'AUCTION_GO',
   /**
    * Start the publisher auction from a business rule.
    * e.g. a bidder timeout
-   * @event pubfood.PubfoodEvent.AUCTION_TRIGGER
+   * @event PubfoodEvent.AUCTION_TRIGGER
+   * @property {string} data [AuctionProvider.name]{@link pubfood#provider.AuctionProvider}
+   * @private
    */
   AUCTION_TRIGGER: 'AUCTION_TRIGGER',
   /**
    * The auction was restarted
-   * @event pubfood.PubfoodEvent.AUCTION_REFRESH
+   * @event PubfoodEvent.AUCTION_REFRESH
+   * @property {string} data [AuctionProvider.name]{@link pubfood#provider.AuctionProvider}
+   * @private
    */
   AUCTION_REFRESH: 'AUCTION_REFRESH',
   /**
    * The auction has completed
-   * @event pubfood.PubfoodEvent.AUCTION_COMPLETE
+   * @event PubfoodEvent.AUCTION_COMPLETE
+   * @property {string} data [AuctionProvider.name]{@link pubfood#provider.AuctionProvider}
    */
   AUCTION_COMPLETE: 'AUCTION_COMPLETE',
   /**
    * The auction has finished running
-   * @event pubfood.PubfoodEvent.AUCTION_POST_RUN
+   * @event PubfoodEvent.AUCTION_POST_RUN
+   * @property {string} data [AuctionProvider.name]{@link pubfood#provider.AuctionProvider}
+   * @private
    */
   AUCTION_POST_RUN: 'AUCTION_POST_RUN',
   /**
    * Error event raised
-   * @event pubfood.PubfoodEvent.ERROR
+   * @event PubfoodEvent.ERROR
+   * @property {PubfoodError} data
+   * @property {string} data.message
+   * @property {string} data.stack
    */
   ERROR: 'ERROR',
   /**
    * Warn event raised
-   * @event pubfood.PubfoodEvent.WARN
+   * @event PubfoodEvent.WARN
+   * @property {string} data the warning message
    */
   WARN: 'WARN',
   /**
    * Invalid operation or data event raise
-   * @event pubfood.PubfoodEvent.INVALID
+   * @event PubfoodEvent.INVALID
+   * @property {string} data description message
    */
   INVALID: 'INVALID'
 };
@@ -626,6 +661,7 @@ PubfoodEvent.prototype.publish = function(eventType, data, eventContext) {
  * @function emit
  * @memberof pubfood.PubfoodEvent
  * @see https://github.com/primus/eventemitter3
+ * @private
  */
 
 /**
@@ -633,13 +669,14 @@ PubfoodEvent.prototype.publish = function(eventType, data, eventContext) {
  * @function on
  * @memberof pubfood.PubfoodEvent
  * @see https://github.com/primus/eventemitter3
- */
+  */
 
 /**
  * Add an EventListener that's only called once.
  * @function once
  * @memberof pubfood.PubfoodEvent
  * @see https://github.com/primus/eventemitter3
+ * @private
  */
 
 /**
@@ -647,6 +684,7 @@ PubfoodEvent.prototype.publish = function(eventType, data, eventContext) {
  * @function removeListener
  * @memberof pubfood.PubfoodEvent
  * @see https://github.com/primus/eventemitter3
+ * @private
  */
 
 /**
@@ -654,6 +692,7 @@ PubfoodEvent.prototype.publish = function(eventType, data, eventContext) {
  * @function removeAllListeners
  * @memberof pubfood.PubfoodEvent
  * @see https://github.com/primus/eventemitter3
+ * @private
  */
 
 /**
@@ -661,40 +700,7 @@ PubfoodEvent.prototype.publish = function(eventType, data, eventContext) {
  * @function listeners
  * @memberof pubfood.PubfoodEvent
  * @see https://github.com/primus/eventemitter3
- */
-
-/**
- * @typedef {object} EventStructure
- * @memberof pubfood.PubfoodEvent
- * @property {string} ts The timestamp of the event
- * @property {string} type The event type
- * @property {string} provider The type of provider. Defaults to <i>pubfood</i>
- * @property {object|string} data Data structure for each event type
- * @property {string} data.PUBFOOD_API_LOAD
- * @property {string} data.PUBFOOD_API_START
- * @property {PubfoodError} data.ERROR
- * @property {*} data.ERROR.stackTrace
- * @property {string} data.WARN warning message
- * @property {string} data.INVALID validation message
- * @property {object} data.AUCTION_LIB_START
- * @property {string} data.AUCTION_LIB_START.auctionProvider
- * @property {object} data.AUCTION_LIB_LOADED
- * @property {string} data.AUCTION_LIB_LOADED.auctionProvider
- * @property {string} data.AUCTION_GO
- * @property {string} data.AUCTION_TRIGGER
- * @property {string} data.AUCTION_REFRESH
- * @property {string} data.AUCTION_COMPLETE
- * @property {string} data.AUCTION_POST_RUN
- * @property {string} data.BID_LIB_START
- * @property {string} data.BID_LIB_LOADED
- * @property {object} data.BID_PUSH_NEXT @see [Bid]{@link pubfood#model.Bid}
- * @property {string} data.BID_PUSH_NEXT.id
- * @property {array.<number, number>} data.BID_PUSH_NEXT.sizes
- * @property {string} data.BID_PUSH_NEXT.value
- * @property {object} data.BID_PUSH_NEXT.targetting
- * @property {string} data.BID_START
- * @property {string} data.BID_COMPLETE
- * @property {string} data.BID_ASSEMBLER
+ * @private
  */
 
 util.extends(PubfoodEvent, EventEmitter);
@@ -707,7 +713,7 @@ PubfoodEvent.prototype.emit = function(event) {
   if (!ret || this.EVENT_TYPE.AUCTION_POST_RUN === event) {
     ret = true;
     this.observeImmediate_[event] = this.observeImmediate_[event] || [];
-    this.observeImmediate_[event].push(Array.prototype.splice.call(arguments, 1));
+    this.observeImmediate_[event].push(Array.prototype.slice.call(arguments, 1));
   }
   return ret;
 };
@@ -716,7 +722,7 @@ PubfoodEvent.prototype.on = function(event, fn) {
   var emitted = this.observeImmediate_[event] || null;
   if (emitted) {
     for (var i = 0; i < emitted.length; i++) {
-      fn(emitted[i]);
+      fn.apply(this, emitted[i]);
     }
     return this;
   }
@@ -734,6 +740,8 @@ module.exports = new PubfoodEvent();
 
 /*eslint no-unused-vars: 0*/
 
+/** @namespace typeDefs */
+
 /**
  * Interface for classes that are delegates for the AuctionProvider decorator..
  *
@@ -741,13 +749,14 @@ module.exports = new PubfoodEvent();
  * @property {string} name Auction provider delegate name
  * @property {string} libUri
  * @property {function} init Auction provider delegate initial auction request.<br>Called at startup.
- * @property {array.<object>} init.targeting - array of {@link SlotTargetingObject}|{@link PageTargetingObject}
+ * @property {array.<SlotTargetingObject>} init.targeting
  * @property {auctionDoneCallback} init.done Callback to execute on done
- * @property {function} refresh Auction provider delegate refresh auction request.<br>Called at startup.
- * @property {array.<object>} refresh.targeting - array of {@link SlotTargetingObject}|{@link PageTargetingObject}
+ * @property {function} [refresh] Auction provider delegate refresh auction request.<br>Called at startup.
+ * @property {array.<SlotTargetingObject>} refresh.targeting
  * @property {auctionDoneCallback} refresh.done Callback to execute on done
  * @property {function} [trigger] Auction provider delegate function to trigger the auction. Default: [pubfood.timeout]{@link pubfood#timeout}
  * @property {auctionDoneCallback} trigger.done Callback to initialize the auction provider
+ * @memberof typeDefs
  */
 var auctionDelegate = {
   name: '',
@@ -756,7 +765,7 @@ var auctionDelegate = {
   refresh: function(targeting, done) {}
 };
 auctionDelegate.optional = {
-
+  refresh: true
 };
 
 /**
@@ -769,10 +778,11 @@ auctionDelegate.optional = {
  * @property {Slot[]} init.slots slots to bid on
  * @property {pushBidCallback} init.pushBid Callback to execute on next bid available
  * @property {bidDoneCallback} init.done Callback to execute on done
- * @property {function} refresh Refresh bids for [BidProvider.refresh]{@link pubfood#provider.BidProvider#refresh} delegate.
+ * @property {function} [refresh] Refresh bids for [BidProvider.refresh]{@link pubfood#provider.BidProvider#refresh} delegate.
  * @property {Slot[]} refresh.slots slots to bid on
  * @property {pushBidCallback} refresh.pushBid Callback to execute on next bid available
  * @property {bidDoneCallback} refresh.done Callback to execute on done
+ * @memberof typeDefs
  */
 var bidDelegate = {
   name: '__default__',
@@ -785,6 +795,7 @@ var bidDelegate = {
   }
 };
 bidDelegate.optional = {
+  refresh: true
 };
 
 /**
@@ -795,6 +806,7 @@ bidDelegate.optional = {
  * @returns {Bid[]|null}
  * @example
  *   var transformDelegate = function(bids, params) { console.log('operate on bids'); };
+ * @memberof typeDefs
  */
 var transformDelegate = function(bids, params) {
 };
@@ -809,6 +821,7 @@ var transformDelegate = function(bids, params) {
  *
  * @typedef {function} AuctionTriggerFn
  * @param {startAuctionCallback} start callback to initiate the publisher ad server request
+ * @memberof typeDefs
  */
 var auctionTriggerFunction = function(startAuctionCallback) {
 };
@@ -819,13 +832,15 @@ var auctionTriggerFunction = function(startAuctionCallback) {
  * This is the callback passed into the {@link AuctionTriggerFn}.
  *
  * @typedef {function} startAuctionCallback
+ * @memberof typeDefs
  */
 
 /**
  * Callback to notify of [BidProvider]{@link pubfood#provider.BidProvider} has its completed bidding process.
  *
  * @typedef {function} bidDoneCallback
- * @fires pubfood.PubfoodEvent.BID_COMPLETE
+ * @fires PubfoodEvent.BID_COMPLETE
+ * @memberof typeDefs
  */
 var bidDoneCallback = function(){
 
@@ -835,7 +850,8 @@ var bidDoneCallback = function(){
  * Publisher ad server request processing is done.
  *
  * @typedef {function} auctionDoneCallback
- * @fires pubfood.PubfoodEvent.AUCTION_COMPLETE
+ * @fires PubfoodEvent.AUCTION_COMPLETE
+ * @memberof typeDefs
  */
 var auctionDoneCallback = function(){
 
@@ -845,20 +861,22 @@ var auctionDoneCallback = function(){
 /**
  * Callback to push bids into the list for publisher ad server auction.
  * @typedef {function} pushBidCallback
- * @fires pubfood.PubfoodEvent.BID_PUSH_NEXT
+ * @param {BidObject} bid the bid object
+ * @fires PubfoodEvent.BID_PUSH_NEXT
+ * @memberof typeDefs
  */
-var pushBidCallback = function(){
+var pushBidCallback = function(bid){
 
 };
 
 /**
  * Custom reporter.
- * @typedef {function} Reporter
- * @param {object} event -
- * @param {string} event.type -
- * @param {*} event.data -
+ * A function that handles reporting of [PubfoodEvent]{@link PubfoodEvent} objects
+ * @typedef {function} reporter
+ * @param {PubfoodEvent} event the event object
+ * @memberof typeDefs
  */
-var Reporter = function(event){
+var reporter = function(event){
 
 };
 
@@ -868,6 +886,7 @@ var Reporter = function(event){
  * @typedef {function} apiStartCallback
  * @param {boolean} hasErrors true if there are any configuration errors
  * @param {array} errors The list of errors
+ * @memberof typeDefs
  */
 var apiStartCallback = function(hasErrors, errors){
 
@@ -884,6 +903,7 @@ var apiStartCallback = function(hasErrors, errors){
  * @property {number} sizes.1 height
  * @property {object} [targeting] - key/value pairs for additional adserver targeting
  * @property {string} [label] optional targeting key to use for bid value
+ * @memberof typeDefs
  */
 var bidObject = {
   slot: '',
@@ -900,7 +920,7 @@ bidObject.optional = {
 
 /**
  * @typedef {SlotConfig} SlotConfig
- * @property {string} name name of the slot/ad unit in [AuctionProvider]{@link pubfood#provider.AuctionProvider} system
+ * @property {string} name name of the slot/ad unit in [AuctionProvider]{@link pubfood#provider.AuctionProvider} system e.g. DFP /accountId/mpu-rt
  * @property {string} [elementId] DOM target element id
  * @property {array.<number, number>} sizes array of slot sizes
  * @property {number} sizes.0 width slot width
@@ -915,6 +935,7 @@ bidObject.optional = {
  *                       'p1', 'p2'
  *                     ]
  *     };
+ * @memberof typeDefs
  */
 var slotConfig = {
   name: '',
@@ -924,10 +945,12 @@ var slotConfig = {
 };
 
 /**
- * @typedef {BidderSlots} BidderSlots.
+ * @typedef {BidderSlots} BidderSlots
  *
  * @property {BidProvider} provider
  * @property {Slot[]} slots
+ * @memberof typeDefs
+ * @private
  */
 
 /**
@@ -941,24 +964,18 @@ var slotConfig = {
  * @property {string} [elementId] the target DOM element id for the slot
  * @property {array.<number, number>} sizes array of slot sizes
  * @property {object.<string, string>} targeting object containing key/value pair targeting
- */
-
-/**
- * @typedef {PageTargetingObject} PageTargetingObject
- *
- * Global key value targeting for the page.
- *
- * @property {string} type the targeting level [slot|page]
- * @property {object.<string, string>} targeting object containing key/value pair targeting
+ * @memberof typeDefs
  */
 
 /**
  *
  * @typedef {PubfoodConfig} PubfoodConfig - all properties are optional
  * @property {string} id
- * @property {number} auctionProviderTimeout The maximum time the auction provider has before calling {@link auctionDoneCallback} inside the [AuctionProvider.init]{@link pubfood#provider.AuctionProvider#init} or [AuctionProvider.refresh]{@link pubfood#provider.AuctionProvider#refresh} methods
- * @property {number} bidProviderTimeout The maximum time the bid provider has before calling {@link bidDoneCallback} inside the [BidProvider.init]{@link pubfood#provider.BidProvider#init} or [BidProvider.refresh]{@link pubfood#provider.BidProvider#refresh} methods
+ * @property {number} auctionProviderCbTimeout The maximum time the auction provider has before calling {@link auctionDoneCallback} inside the [AuctionProvider.init]{@link pubfood#provider.AuctionProvider#init} or [AuctionProvider.refresh]{@link pubfood#provider.AuctionProvider#refresh} methods
+ * @property {number} bidProviderCbTimeout The maximum time the bid provider has before calling {@link bidDoneCallback} inside the [BidProvider.init]{@link pubfood#provider.BidProvider#init} or [BidProvider.refresh]{@link pubfood#provider.BidProvider#refresh} methods
  * @property {boolean} randomizeBidRequests Randomize the order in which [BidProvider]{@link pubfood#provider.BidProvider} requests are made.
+ * @memberof typeDefs
+ * @private
  */
 var PubfoodConfig = {
   id: '',
@@ -992,6 +1009,7 @@ module.exports = {
  * @property {function} logEvent Logs every time a given event is emitted
  * @property {string} logEvent.name The event name
  * @property {array} logEvent.args The event arguments
+ * @private
  */
 var logger = {
   auction: 1,
@@ -1078,6 +1096,7 @@ var Event = require('../event');
  *
  * @class
  * @memberof pubfood#mediator
+ * @private
  */
 function AuctionMediator(config) {
   if (config && config.optionalId) {
@@ -1398,7 +1417,7 @@ AuctionMediator.prototype.processTargeting_ = function() {
  * Notification of auction complete
  *
  * @param {string} data The auction mediator's name
- * @fires pubfood.PubfoodEvent.AUCTION_COMPLETE
+ * @fires AUCTION_COMPLETE
  */
 AuctionMediator.prototype.auctionDone = function(data) {
   Event.publish(Event.EVENT_TYPE.AUCTION_COMPLETE, data);
@@ -1514,7 +1533,7 @@ AuctionMediator.prototype.loadProviders = function(randomizeBidRequests) {
   }
 
   if (randomizeBidRequests) {
-    keys = util.random(keys);
+    util.randomize(keys);
   }
 
   for (var i = 0; i < keys.length; i++) {
@@ -1727,7 +1746,7 @@ BidMediator.prototype.getBids_ = function(provider, slots) {
  *
  * @param {Bid} bid The bid id
  * @param {string} providerName the name of the [BidProvider]{@link pubfood#provider.BidProvider}
- * @fires pubfood.PubfoodEvent.BID_PUSH_NEXT
+ * @fires PubfoodEvent.BID_PUSH_NEXT
  */
 BidMediator.prototype.pushBid = function(bid, providerName) {
   var b = Bid.fromObject(bid);
@@ -1743,7 +1762,7 @@ BidMediator.prototype.pushBid = function(bid, providerName) {
  * Notification that the [BidProvider]{@link pubfood#provider.BidProvider} bidding is complete.
  *
  * @param {string} bidProvider The [BidProvider]{@link pubfood#provider.BidProvider} name
- * @fires pubfood.PubfoodEvent.BID_COMPLETE
+ * @fires PubfoodEvent.BID_COMPLETE
  */
 BidMediator.prototype.doneBid = function(bidProvider) {
   // TODO consider having useful bid data available upon completion like the bids
@@ -1786,10 +1805,6 @@ var BaseModelObject = require('./basemodelobject');
 var BidObject = require('../interfaces').BidObject;
 
 /**
- * @typedef {Bid} Bid [Bid]{@link pubfood#model.Bid}
- */
-
-/**
  * Bid is the result of a partner [BidProvider]{@link pubfood/provider.BidProvider} request.
  *
  * @class
@@ -1818,6 +1833,7 @@ function Bid(slot, value, sizes) {
  *
  * @param {BidObject} config
  * @return {boolean}
+ * @private
  */
 Bid.validate = function(config) {
   if (!config) return false;
@@ -1829,6 +1845,7 @@ Bid.validate = function(config) {
  *
  * @param {BidObject} config bid object literal
  * @returns {pubfood#model.Bid|null} instance of [Bid]{@link pubfood#model.Bid}
+ * @private
  */
 Bid.fromObject = function(config) {
   if (!Bid.validate(config)) return null;
@@ -1909,6 +1926,7 @@ function Slot(name, elementId) {
  *
  * @param {SlotConfig} config slot configuration object
  * @return {boolean}
+ * @private
  */
 Slot.validate = function(config) {
   if (!config) return false;
@@ -1920,6 +1938,7 @@ Slot.validate = function(config) {
  *
  * @param {SlotConfig} config slot object literal
  * @returns {Slot|null} instance of [Slot]{@link pubfood#model.Slot}. <strong><em>null</em></strong> if invalid.
+ * @private
  */
 Slot.fromObject = function(config) {
   if (!Slot.validate(config)) return null;
@@ -1941,6 +1960,7 @@ Slot.fromObject = function(config) {
  *
  * @example
  * slot.sizes([ [300, 250], [300, 600] ]);
+ * @private
  */
 Slot.prototype.addSizes = function(slotSizes) {
   Array.prototype.push.apply(this.sizes, slotSizes);
@@ -1965,13 +1985,11 @@ Slot.prototype.addSize = function(width, height) {
 /**
  * Add bid provider allocated to the slot.
  *
- * @param {object} bidProvider
- * @param {string} bidProvider.provider The bid provider's name
- * @param {string} bidProvider.slot The slot name
+ * @param {string} bidProvider the provider name
  * @returns {pubfood#model.Slot}
  */
-Slot.prototype.addBidProvider = function(slotBidProvider) {
-  this.bidProviders.push(slotBidProvider);
+Slot.prototype.addBidProvider = function(bidProvider) {
+  this.bidProviders.push(bidProvider);
   return this;
 };
 
@@ -1993,8 +2011,9 @@ var Event = require('../event');
  * AuctionProvider decorates the {@link AuctionDelegate} to implement the publisher ad server requests.
  *
  * @class
+ * @property {string} name the name of the provider
  * @memberof pubfood#provider
- * @param {AuctionDelegate} auctionDelegate
+ * @param {AuctionDelegate} auctionDelegate the delegate object that implements [libUri()]{@link pubfood#provider.AuctionProvider#libUri}, [init()]{@link pubfood#provider.AuctionProvider#init} and [refresh()]{@link pubfood#provider.AuctionProvider#refresh}
  */
 function AuctionProvider(auctionDelegate) {
   this.name = auctionDelegate.name || '';
@@ -2007,6 +2026,7 @@ function AuctionProvider(auctionDelegate) {
  * Set the central auction mediator that orchestrates the auctions.
  *
  * @param {AuctionMediator} mediator - the auction mediator
+ * @private
  */
 AuctionProvider.prototype.setMediator = function(mediator) {
   this.mediator = mediator;
@@ -2017,6 +2037,7 @@ AuctionProvider.prototype.setMediator = function(mediator) {
  *
  * @param {AuctionDelegate} delegate - provider object literal
  * @returns {pubfood#provider.AuctionProvider|null} instance of [AuctionProvider]{@link pubfood#provider.AuctionProvider}. <em>null</em> if delegate is invalid.
+ * @private
  */
 AuctionProvider.withDelegate = function(delegate) {
   if (!AuctionProvider.validate(delegate)) {
@@ -2034,20 +2055,10 @@ AuctionProvider.withDelegate = function(delegate) {
  *
  * @param {AuctionDelegate} delegate - bid provider delegate object literal
  * @returns {boolean} true if delegate has required functions and properties
+ * @private
  */
 AuctionProvider.validate = function(delegate) {
   return util.validate(AuctionDelegate, delegate);
-};
-
-/**
- * Set the provider's name.
- *
- * @param {string} name - the auction provider name
- * @return {pubfood#provider.AuctionProvider}
- */
-AuctionProvider.prototype.setName = function(name) {
-  this.name = name;
-  return this;
 };
 
 /**
@@ -2064,7 +2075,7 @@ AuctionProvider.prototype.libUri = function() {
  *
  * The AuctionProvider delegate Javascript and other tag setup is done here.
  *
- * @param {array.<SlotTargetingObject|PageTargetingObject>} targeting - objects with bids and page level targeting. Can be arran of both {@link SlotTargetingObject} <em>and</em> {@link PageTargetingObject}.
+ * @param {array.<SlotTargetingObject>} targeting - objects with bid targeting
  * @param {auctionDoneCallback} done - a callback to execute on init complete
  */
 AuctionProvider.prototype.init = function(targeting, done) {
@@ -2074,11 +2085,16 @@ AuctionProvider.prototype.init = function(targeting, done) {
 /**
  * Refresh for ad slots
  *
- * @param {array.<SlotTargetingObject|PageTargetingObject>} targeting - objects with bids and page level targeting. Can be arran of both {@link SlotTargetingObject} <em>and</em> {@link PageTargetingObject}.
+ * @param {array.<SlotTargetingObject>} targeting - objects with bid level targeting
  * @param {auctionDoneCallback} done a callback to execute on init complete
  */
 AuctionProvider.prototype.refresh = function(targeting, done) {
-  this.auctionDelegate.refresh(targeting, done);
+  var refresh = (this.auctionDelegate && this.auctionDelegate.refresh) || null;
+  if (!refresh) {
+    Event.publish(Event.EVENT_TYPE.WARN, 'AuctionProvider.auctionDelegate.refresh not defined.');
+    return;
+  }
+  refresh(targeting, done);
 };
 
 module.exports = AuctionProvider;
@@ -2098,8 +2114,9 @@ var Event = require('../event');
  * BidProvider implements bidding partner requests.
  *
  * @class
+ * @param {BidDelegate} delegate the delegate object that implements [libUri()]{@link pubfood#provider.BidProvider#libUri}, [init()]{@link pubfood#provider.BidProvider#init} and [refresh()]{@link pubfood#provider.BidProvider#refresh}
+ * @property {string} name the name of the provider
  * @memberof pubfood#provider
- * @param {BidDelegate} delegate
  */
 function BidProvider(delegate) {
   this.name = delegate.name || '';
@@ -2111,6 +2128,7 @@ function BidProvider(delegate) {
  *
  * @param {BidDelegate} delegate - bid provider delegate object literal
  * @returns {pubfood#provider.BidProvider|null} instance of [BidProvider]{@link pubfood#provider.BidProvider}. <em>null</em> if delegate is invalid.
+ * @private
  */
 BidProvider.withDelegate = function(delegate) {
   if (!BidProvider.validate(delegate)) {
@@ -2127,6 +2145,7 @@ BidProvider.withDelegate = function(delegate) {
  *
  * @param {BidDelegate} delegate - bid provider delegate object literal
  * @returns {boolean} true if delegate has required functions and properties
+ * @private
  */
 BidProvider.validate = function(delegate) {
   return util.validate(BidDelegate, delegate);
@@ -2182,7 +2201,12 @@ BidProvider.prototype.init = function(slots, pushBid, done) {
  * @param {bidDoneCallback} done - a callback to execute on init complete
  */
 BidProvider.prototype.refresh = function(slots, pushBid, done) {
-  this.bidDelegate.refresh(slots, pushBid, done);
+  var refresh = (this.bidDelegate && this.bidDelegate.refresh) || null;
+  if (!refresh) {
+    Event.publish(Event.EVENT_TYPE.WARN, 'BidProvider.bidDelegate.refresh not defined.');
+    return;
+  }
+  refresh(slots, pushBid, done);
 };
 
 module.exports = BidProvider;
@@ -2228,7 +2252,7 @@ var defaultBidProvider = require('./interfaces').BidDelegate;
   };
 
   pubfood.library = pubfood.prototype = {
-    version: '0.1.9',
+    version: '0.1.10',
     mediator: require('./mediator').mediatorBuilder(),
     PubfoodError: require('./errors'),
     logger: logger
@@ -2272,7 +2296,6 @@ var defaultBidProvider = require('./interfaces').BidDelegate;
    *
    * @alias pubfood
    * @constructor
-   * @param {PubfoodConfig} [config] Optional configuration
    * @return {pubfood}
    */
   var api = pubfood.library.init = function(config) {
@@ -2322,7 +2345,7 @@ var defaultBidProvider = require('./interfaces').BidDelegate;
 
   /**
    * Get a list a of all registered slots
-   * @return {MediatorSlot}
+   * @return {Slot[]}
    */
   api.prototype.getSlots = function() {
     logger.logCall('api.getSlots', arguments);
@@ -2383,7 +2406,7 @@ var defaultBidProvider = require('./interfaces').BidDelegate;
 
   /**
    * Gets a list of bidproviders
-   * @return {{provider1: {}, provider2: {}, provider3: {}}}
+   * @return {object.<BidProvider>}}
    */
   api.prototype.getBidProviders = function() {
     logger.logCall('api.getBidProvider', arguments);
@@ -2393,7 +2416,7 @@ var defaultBidProvider = require('./interfaces').BidDelegate;
   /**
    * Add a custom reporter
    * @param {string} [eventType] the event to bind this reporter to
-   * @param {Reporter} reporter Custom reporter
+   * @param {reporter} reporter Custom reporter
    * @return {pubfood}
    * @example {file} ../examples/reporter.js
    */
@@ -2510,7 +2533,10 @@ var defaultBidProvider = require('./interfaces').BidDelegate;
  */
 
 'use strict';
-/** @namespace util */
+/**
+ * @namespace util
+ * @private
+ */
 var util = {
   /**
    * Get the type name of an object.
@@ -2674,15 +2700,24 @@ var util = {
 };
 
 /**
- * Randomize the position of items in a collection.
- * @see http://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
- * @param {array} collection
- * @return {Array}
+ * Randomize the position of items in an array. The original array will be
+ * both changed in place and returned. The algorithm implemented here is a
+ * Fisher–Yates Shuffle which is unbiased.
+ *
+ * @see http://bost.ocks.org/mike/shuffle/
+ *
+ * @param {array} array that should be permuted in place and returned.
+ * @return {array} the permuted array.
  */
-util.random = function(collection) {
-  return collection.sort(function() {
-    return .5 - Math.random();
-  });
+util.randomize = function(array) {
+  var m = array.length, t, i;
+  while (m) {
+    i = Math.floor(Math.random() * m--);
+    t = array[m];
+    array[m] = array[i];
+    array[i] = t;
+  }
+  return array;
 };
 
 module.exports = util;
