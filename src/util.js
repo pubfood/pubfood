@@ -170,15 +170,24 @@ var util = {
 };
 
 /**
- * Randomize the position of items in a collection.
- * @see http://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
- * @param {array} collection
- * @return {Array}
+ * Randomize the position of items in an array. The original array will be
+ * both changed in place and returned. The algorithm implemented here is a
+ * Fisher–Yates Shuffle which is unbiased.
+ *
+ * @see http://bost.ocks.org/mike/shuffle/
+ *
+ * @param {array} array that should be permuted in place and returned.
+ * @return {array} the permuted array.
  */
-util.random = function(collection) {
-  return collection.sort(function() {
-    return .5 - Math.random();
-  });
+util.randomize = function(array) {
+  var m = array.length, t, i;
+  while (m) {
+    i = Math.floor(Math.random() * m--);
+    t = array[m];
+    array[m] = array[i];
+    array[i] = t;
+  }
+  return array;
 };
 
 module.exports = util;
