@@ -131,7 +131,7 @@ var defaultBidProvider = require('./interfaces').BidDelegate;
 
   /**
    * Get a list a of all registered slots
-   * @return {MediatorSlot}
+   * @return {Slot[]}
    */
   api.prototype.getSlots = function() {
     logger.logCall('api.getSlots', arguments);
@@ -192,7 +192,7 @@ var defaultBidProvider = require('./interfaces').BidDelegate;
 
   /**
    * Gets a list of bidproviders
-   * @return {{provider1: {}, provider2: {}, provider3: {}}}
+   * @return {object.<BidProvider>}}
    */
   api.prototype.getBidProviders = function() {
     logger.logCall('api.getBidProvider', arguments);
@@ -202,7 +202,7 @@ var defaultBidProvider = require('./interfaces').BidDelegate;
   /**
    * Add a custom reporter
    * @param {string} [eventType] the event to bind this reporter to
-   * @param {Reporter} reporter Custom reporter
+   * @param {reporter} reporter Custom reporter
    * @return {pubfood}
    * @example {file} ../examples/reporter.js
    */

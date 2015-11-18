@@ -12,9 +12,9 @@ var Event = require('../event');
  * BidProvider implements bidding partner requests.
  *
  * @class
+ * @param {BidDelegate} delegate the delegate object that implements [libUri()]{@link pubfood#provider.BidProvider#libUri}, [init()]{@link pubfood#provider.BidProvider#init} and [refresh()]{@link pubfood#provider.BidProvider#refresh}
  * @property {string} name the name of the provider
  * @memberof pubfood#provider
- * @param {BidDelegate} delegate
  */
 function BidProvider(delegate) {
   this.name = delegate.name || '';
@@ -26,6 +26,7 @@ function BidProvider(delegate) {
  *
  * @param {BidDelegate} delegate - bid provider delegate object literal
  * @returns {pubfood#provider.BidProvider|null} instance of [BidProvider]{@link pubfood#provider.BidProvider}. <em>null</em> if delegate is invalid.
+ * @private
  */
 BidProvider.withDelegate = function(delegate) {
   if (!BidProvider.validate(delegate)) {
@@ -42,6 +43,7 @@ BidProvider.withDelegate = function(delegate) {
  *
  * @param {BidDelegate} delegate - bid provider delegate object literal
  * @returns {boolean} true if delegate has required functions and properties
+ * @private
  */
 BidProvider.validate = function(delegate) {
   return util.validate(BidDelegate, delegate);

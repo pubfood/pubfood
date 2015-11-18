@@ -105,7 +105,7 @@ var auctionTriggerFunction = function(startAuctionCallback) {
  * Callback to notify of [BidProvider]{@link pubfood#provider.BidProvider} has its completed bidding process.
  *
  * @typedef {function} bidDoneCallback
- * @fires pubfood.PubfoodEvent.BID_COMPLETE
+ * @fires PubfoodEvent.BID_COMPLETE
  * @memberof typeDefs
  */
 var bidDoneCallback = function(){
@@ -116,7 +116,7 @@ var bidDoneCallback = function(){
  * Publisher ad server request processing is done.
  *
  * @typedef {function} auctionDoneCallback
- * @fires pubfood.PubfoodEvent.AUCTION_COMPLETE
+ * @fires PubfoodEvent.AUCTION_COMPLETE
  * @memberof typeDefs
  */
 var auctionDoneCallback = function(){
@@ -127,22 +127,22 @@ var auctionDoneCallback = function(){
 /**
  * Callback to push bids into the list for publisher ad server auction.
  * @typedef {function} pushBidCallback
- * @fires pubfood.PubfoodEvent.BID_PUSH_NEXT
+ * @param {BidObject} bid the bid object
+ * @fires PubfoodEvent.BID_PUSH_NEXT
  * @memberof typeDefs
  */
-var pushBidCallback = function(){
+var pushBidCallback = function(bid){
 
 };
 
 /**
  * Custom reporter.
- * @typedef {function} Reporter
- * @param {object} event -
- * @param {string} event.type -
- * @param {*} event.data -
+ * A function that handles reporting of [PubfoodEvent]{@link PubfoodEvent} objects
+ * @typedef {function} reporter
+ * @param {PubfoodEvent} event the event object
  * @memberof typeDefs
  */
-var Reporter = function(event){
+var reporter = function(event){
 
 };
 
@@ -186,7 +186,7 @@ bidObject.optional = {
 
 /**
  * @typedef {SlotConfig} SlotConfig
- * @property {string} name name of the slot/ad unit in [AuctionProvider]{@link pubfood#provider.AuctionProvider} system
+ * @property {string} name name of the slot/ad unit in [AuctionProvider]{@link pubfood#provider.AuctionProvider} system e.g. DFP /accountId/mpu-rt
  * @property {string} [elementId] DOM target element id
  * @property {array.<number, number>} sizes array of slot sizes
  * @property {number} sizes.0 width slot width
@@ -216,6 +216,7 @@ var slotConfig = {
  * @property {BidProvider} provider
  * @property {Slot[]} slots
  * @memberof typeDefs
+ * @private
  */
 
 /**

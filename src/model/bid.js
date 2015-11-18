@@ -9,11 +9,6 @@ var BaseModelObject = require('./basemodelobject');
 var BidObject = require('../interfaces').BidObject;
 
 /**
- * @typedef {Bid} Bid [Bid]{@link pubfood#model.Bid}
- * @memberof typeDefs
- */
-
-/**
  * Bid is the result of a partner [BidProvider]{@link pubfood/provider.BidProvider} request.
  *
  * @class
@@ -42,6 +37,7 @@ function Bid(slot, value, sizes) {
  *
  * @param {BidObject} config
  * @return {boolean}
+ * @private
  */
 Bid.validate = function(config) {
   if (!config) return false;
@@ -53,6 +49,7 @@ Bid.validate = function(config) {
  *
  * @param {BidObject} config bid object literal
  * @returns {pubfood#model.Bid|null} instance of [Bid]{@link pubfood#model.Bid}
+ * @private
  */
 Bid.fromObject = function(config) {
   if (!Bid.validate(config)) return null;

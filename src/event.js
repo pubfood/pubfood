@@ -17,7 +17,6 @@ var EventEmitter = require('eventemitter3');
  * @property {string} type The event type
  * @property {string} provider The type of provider. Defaults to <i>pubfood</i>
  * @property {object|string} data Data structure for each event type
- * @memberof pubfood
  * @return {pubfood.PubfoodEvent}
  */
 function PubfoodEvent() {
@@ -32,40 +31,40 @@ function PubfoodEvent() {
 PubfoodEvent.prototype.EVENT_TYPE = {
   /**
    * Api library load
-   * @event pubfood.PubfoodEvent.PUBFOOD_API_LOAD
+   * @event PubfoodEvent.PUBFOOD_API_LOAD
    * @private
    */
   PUBFOOD_API_LOAD: 'PUBFOOD_API_LOAD',
   /**
    * Api library start
-   * @event pubfood.PubfoodEvent.PUBFOOD_API_START
+   * @event PubfoodEvent.PUBFOOD_API_START
    * @property {number} data api start timestamp
    * @private
    */
   PUBFOOD_API_START: 'PUBFOOD_API_START',
   /**
    * Bid provider library load started
-   * @event pubfood.PubfoodEvent.BID_LIB_START
+   * @event PubfoodEvent.BID_LIB_START
    * @private
    */
   BID_LIB_START: 'BID_LIB_START',
   /**
    * Bid provider library loaded
-   * @event pubfood.PubfoodEvent.BID_LIB_LOADED
+   * @event PubfoodEvent.BID_LIB_LOADED
    * @property {string} data [BidProvider.name]{@link pubfood#provider.BidProvider}
    * @private
    */
   BID_LIB_LOADED: 'BID_LIB_LOADED',
   /**
    * Action started.<br>e.g [BidProvider.init]{@link pubfood/provider.BidProvider#init}
-   * @event pubfood.PubfoodEvent.BID_START
+   * @event PubfoodEvent.BID_START
    * @property {string} data [BidProvider.name]{@link pubfood#provider.BidProvider}
    */
   BID_START: 'BID_START',
   /**
    *  Next item in data stream ready.
    *
-   * @event pubfood.PubfoodEvent.BID_PUSH_NEXT
+   * @event PubfoodEvent.BID_PUSH_NEXT
    * @property {object} data @see [Bid]{@link pubfood#model.Bid}
    * @property {string} data.id
    * @property {array.<number, number>} data.sizes
@@ -76,13 +75,13 @@ PubfoodEvent.prototype.EVENT_TYPE = {
   BID_PUSH_NEXT: 'BID_PUSH_NEXT',
   /**
    * Action is complete
-   * @event pubfood.PubfoodEvent.BID_COMPLETE
+   * @event PubfoodEvent.BID_COMPLETE
    * @property {string} data [BidProvider.name]{@link pubfood#provider.BidProvider}
    */
   BID_COMPLETE: 'BID_COMPLETE',
   /**
    * Start bid assembler
-   * @event pubfood.PubfoodEvent.BID_ASSEMBLER
+   * @event PubfoodEvent.BID_ASSEMBLER
    * @property {Bid[]} data bid objects with potentially custom properties.
    * See also [TransformOperator]{@link pubfood#assembler.TransformOperator}
    * @private
@@ -90,68 +89,69 @@ PubfoodEvent.prototype.EVENT_TYPE = {
   BID_ASSEMBLER: 'BID_ASSEMBLER',
   /**
    * Auction provider library load started
-   * @event pubfood.PubfoodEvent.AUCTION_LIB_START
+   * @event PubfoodEvent.AUCTION_LIB_START
    * @property {string} data [AuctionProvider.name]{@link pubfood#provider.AuctionProvider}
    * @private
    */
   AUCTION_LIB_START: 'AUCTION_LIB_START',
   /**
    * Auction provider library loaded
-   * @event pubfood.PubfoodEvent.AUCTION_LIB_LOADED
+   * @event PubfoodEvent.AUCTION_LIB_LOADED
    * @property {string} data [AuctionProvider.name]{@link pubfood#provider.AuctionProvider}
    * @private
    */
   AUCTION_LIB_LOADED: 'AUCTION_LIB_LOADED',
   /**
    * Start the publisher auction
-   * @event pubfood.PubfoodEvent.AUCTION_GO
+   * @event PubfoodEvent.AUCTION_GO
    * @property {string} data [AuctionProvider.name]{@link pubfood#provider.AuctionProvider}
    */
   AUCTION_GO: 'AUCTION_GO',
   /**
    * Start the publisher auction from a business rule.
    * e.g. a bidder timeout
-   * @event pubfood.PubfoodEvent.AUCTION_TRIGGER
+   * @event PubfoodEvent.AUCTION_TRIGGER
    * @property {string} data [AuctionProvider.name]{@link pubfood#provider.AuctionProvider}
    * @private
    */
   AUCTION_TRIGGER: 'AUCTION_TRIGGER',
   /**
    * The auction was restarted
-   * @event pubfood.PubfoodEvent.AUCTION_REFRESH
+   * @event PubfoodEvent.AUCTION_REFRESH
    * @property {string} data [AuctionProvider.name]{@link pubfood#provider.AuctionProvider}
    * @private
    */
   AUCTION_REFRESH: 'AUCTION_REFRESH',
   /**
    * The auction has completed
-   * @event pubfood.PubfoodEvent.AUCTION_COMPLETE
+   * @event PubfoodEvent.AUCTION_COMPLETE
    * @property {string} data [AuctionProvider.name]{@link pubfood#provider.AuctionProvider}
    */
   AUCTION_COMPLETE: 'AUCTION_COMPLETE',
   /**
    * The auction has finished running
-   * @event pubfood.PubfoodEvent.AUCTION_POST_RUN
+   * @event PubfoodEvent.AUCTION_POST_RUN
    * @property {string} data [AuctionProvider.name]{@link pubfood#provider.AuctionProvider}
    * @private
    */
   AUCTION_POST_RUN: 'AUCTION_POST_RUN',
   /**
    * Error event raised
-   * @event pubfood.PubfoodEvent.ERROR
+   * @event PubfoodEvent.ERROR
    * @property {PubfoodError} data
-   * @property {*} data.stackTrace
+   * @property {string} data.message
+   * @property {string} data.stack
    */
   ERROR: 'ERROR',
   /**
    * Warn event raised
-   * @event pubfood.PubfoodEvent.WARN
+   * @event PubfoodEvent.WARN
    * @property {string} data the warning message
    */
   WARN: 'WARN',
   /**
    * Invalid operation or data event raise
-   * @event pubfood.PubfoodEvent.INVALID
+   * @event PubfoodEvent.INVALID
    * @property {string} data description message
    */
   INVALID: 'INVALID'
@@ -186,6 +186,7 @@ PubfoodEvent.prototype.publish = function(eventType, data, eventContext) {
  * @function emit
  * @memberof pubfood.PubfoodEvent
  * @see https://github.com/primus/eventemitter3
+ * @private
  */
 
 /**
@@ -193,13 +194,14 @@ PubfoodEvent.prototype.publish = function(eventType, data, eventContext) {
  * @function on
  * @memberof pubfood.PubfoodEvent
  * @see https://github.com/primus/eventemitter3
- */
+  */
 
 /**
  * Add an EventListener that's only called once.
  * @function once
  * @memberof pubfood.PubfoodEvent
  * @see https://github.com/primus/eventemitter3
+ * @private
  */
 
 /**
@@ -207,6 +209,7 @@ PubfoodEvent.prototype.publish = function(eventType, data, eventContext) {
  * @function removeListener
  * @memberof pubfood.PubfoodEvent
  * @see https://github.com/primus/eventemitter3
+ * @private
  */
 
 /**
@@ -214,6 +217,7 @@ PubfoodEvent.prototype.publish = function(eventType, data, eventContext) {
  * @function removeAllListeners
  * @memberof pubfood.PubfoodEvent
  * @see https://github.com/primus/eventemitter3
+ * @private
  */
 
 /**
@@ -221,6 +225,7 @@ PubfoodEvent.prototype.publish = function(eventType, data, eventContext) {
  * @function listeners
  * @memberof pubfood.PubfoodEvent
  * @see https://github.com/primus/eventemitter3
+ * @private
  */
 
 util.extends(PubfoodEvent, EventEmitter);

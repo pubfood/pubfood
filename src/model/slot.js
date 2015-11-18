@@ -31,6 +31,7 @@ function Slot(name, elementId) {
  *
  * @param {SlotConfig} config slot configuration object
  * @return {boolean}
+ * @private
  */
 Slot.validate = function(config) {
   if (!config) return false;
@@ -42,6 +43,7 @@ Slot.validate = function(config) {
  *
  * @param {SlotConfig} config slot object literal
  * @returns {Slot|null} instance of [Slot]{@link pubfood#model.Slot}. <strong><em>null</em></strong> if invalid.
+ * @private
  */
 Slot.fromObject = function(config) {
   if (!Slot.validate(config)) return null;
@@ -63,6 +65,7 @@ Slot.fromObject = function(config) {
  *
  * @example
  * slot.sizes([ [300, 250], [300, 600] ]);
+ * @private
  */
 Slot.prototype.addSizes = function(slotSizes) {
   Array.prototype.push.apply(this.sizes, slotSizes);
@@ -87,13 +90,11 @@ Slot.prototype.addSize = function(width, height) {
 /**
  * Add bid provider allocated to the slot.
  *
- * @param {object} bidProvider
- * @param {string} bidProvider.provider The bid provider's name
- * @param {string} bidProvider.slot The slot name
+ * @param {string} bidProvider the provider name
  * @returns {pubfood#model.Slot}
  */
-Slot.prototype.addBidProvider = function(slotBidProvider) {
-  this.bidProviders.push(slotBidProvider);
+Slot.prototype.addBidProvider = function(bidProvider) {
+  this.bidProviders.push(bidProvider);
   return this;
 };
 

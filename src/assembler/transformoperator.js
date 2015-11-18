@@ -9,11 +9,6 @@ var Event = require('../event');
 var PubfoodError = require('../errors');
 
 /**
- * @typedef {TransformOperator} TransformOperator [TransformOperator]{@link pubfood#assembler.TransformOperator}
- * @memberof typeDefs
- */
-
-/**
  * TransformOperator processes input bids and outputs result bids.
  *
  * @class
@@ -21,7 +16,7 @@ var PubfoodError = require('../errors');
  * @memberof pubfood#assembler
  */
 function TransformOperator(delegate) {
-  this.name = '';
+  this.name = 'OP-' + util.newId();
   this.transform = delegate;
 }
 
@@ -47,13 +42,13 @@ TransformOperator.withDelegate = function(delegate) {
   if (!TransformOperator.validate(delegate)) return null;
 
   var t = new TransformOperator(delegate);
-  t.setName('OP-' + util.newId());
+
   return t;
 };
 
 /**
  * Set the operator name.
- *
+ * Default name: OP-[uniqueID] e.g. OP-ih47iucugqzlerdpbr
  * @param {string} name the name of the operator
  * @return {TransformOperator}
  */

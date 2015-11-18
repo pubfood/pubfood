@@ -340,7 +340,7 @@ AuctionMediator.prototype.processTargeting_ = function() {
  * Notification of auction complete
  *
  * @param {string} data The auction mediator's name
- * @fires pubfood.PubfoodEvent.AUCTION_COMPLETE
+ * @fires AUCTION_COMPLETE
  */
 AuctionMediator.prototype.auctionDone = function(data) {
   Event.publish(Event.EVENT_TYPE.AUCTION_COMPLETE, data);

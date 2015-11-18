@@ -10,7 +10,6 @@ var ERR_NAME = 'PubfoodError';
 /**
  * Pubfood Error
  * @class
- * @memberof pubfood
  * @param {string} message - the error description
  * @return {pubfood.PubfoodError}
  */

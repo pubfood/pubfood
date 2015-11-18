@@ -14,6 +14,7 @@
  * @property {function} logEvent Logs every time a given event is emitted
  * @property {string} logEvent.name The event name
  * @property {array} logEvent.args The event arguments
+ * @private
  */
 var logger = {
   auction: 1,

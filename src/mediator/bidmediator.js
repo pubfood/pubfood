@@ -84,7 +84,7 @@ BidMediator.prototype.getBids_ = function(provider, slots) {
  *
  * @param {Bid} bid The bid id
  * @param {string} providerName the name of the [BidProvider]{@link pubfood#provider.BidProvider}
- * @fires pubfood.PubfoodEvent.BID_PUSH_NEXT
+ * @fires PubfoodEvent.BID_PUSH_NEXT
  */
 BidMediator.prototype.pushBid = function(bid, providerName) {
   var b = Bid.fromObject(bid);
@@ -100,7 +100,7 @@ BidMediator.prototype.pushBid = function(bid, providerName) {
  * Notification that the [BidProvider]{@link pubfood#provider.BidProvider} bidding is complete.
  *
  * @param {string} bidProvider The [BidProvider]{@link pubfood#provider.BidProvider} name
- * @fires pubfood.PubfoodEvent.BID_COMPLETE
+ * @fires PubfoodEvent.BID_COMPLETE
  */
 BidMediator.prototype.doneBid = function(bidProvider) {
   // TODO consider having useful bid data available upon completion like the bids

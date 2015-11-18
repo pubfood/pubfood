@@ -14,7 +14,7 @@ var Event = require('../event');
  * @class
  * @property {string} name the name of the provider
  * @memberof pubfood#provider
- * @param {AuctionDelegate} auctionDelegate
+ * @param {AuctionDelegate} auctionDelegate the delegate object that implements [libUri()]{@link pubfood#provider.AuctionProvider#libUri}, [init()]{@link pubfood#provider.AuctionProvider#init} and [refresh()]{@link pubfood#provider.AuctionProvider#refresh}
  */
 function AuctionProvider(auctionDelegate) {
   this.name = auctionDelegate.name || '';
@@ -27,6 +27,7 @@ function AuctionProvider(auctionDelegate) {
  * Set the central auction mediator that orchestrates the auctions.
  *
  * @param {AuctionMediator} mediator - the auction mediator
+ * @private
  */
 AuctionProvider.prototype.setMediator = function(mediator) {
   this.mediator = mediator;
@@ -37,6 +38,7 @@ AuctionProvider.prototype.setMediator = function(mediator) {
  *
  * @param {AuctionDelegate} delegate - provider object literal
  * @returns {pubfood#provider.AuctionProvider|null} instance of [AuctionProvider]{@link pubfood#provider.AuctionProvider}. <em>null</em> if delegate is invalid.
+ * @private
  */
 AuctionProvider.withDelegate = function(delegate) {
   if (!AuctionProvider.validate(delegate)) {
@@ -54,20 +56,10 @@ AuctionProvider.withDelegate = function(delegate) {
  *
  * @param {AuctionDelegate} delegate - bid provider delegate object literal
  * @returns {boolean} true if delegate has required functions and properties
+ * @private
  */
 AuctionProvider.validate = function(delegate) {
   return util.validate(AuctionDelegate, delegate);
-};
-
-/**
- * Set the provider's name.
- *
- * @param {string} name - the auction provider name
- * @return {pubfood#provider.AuctionProvider}
- */
-AuctionProvider.prototype.setName = function(name) {
-  this.name = name;
-  return this;
 };
 
 /**
