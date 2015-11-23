@@ -102,6 +102,8 @@
           };
           pf.setAuctionTrigger(trigger);
 
+          // alternatively for timeout, use pubfood.timeout(millis); e.g.
+          // pf.timeout(6000);
           function augmentBids(bids, params) {
             for (var i = 0; i < bids.length; i++) {
               bids[i]['targeting'].code = (0 | Math.random() * 36).toString(36);
