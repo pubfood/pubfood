@@ -1,4 +1,4 @@
-/*! pubfood v0.1.10 | (c) pubfood | http://pubfood.org/LICENSE.txt */
+/*! pubfood v0.1.11 | (c) pubfood | http://pubfood.org/LICENSE.txt */
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.pubfood = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 'use strict';
 
@@ -1106,7 +1106,6 @@ function AuctionMediator(config) {
   /** @property {boolean} prefix if false, do not add bid provider name to bid targeting key. Default: true */
   this.prefix = config && config.hasOwnProperty('prefix') ? config.prefix : true;
   this.bidCount = 0;
-  this.totalBidProviders = 0;
   this.slots = [];
   // store slots by name for easy lookup
   this.slotMap = {};
@@ -1114,6 +1113,7 @@ function AuctionMediator(config) {
   this.auctionProvider = null;
   this.bids_ = [];
   this.lateBids_ = [];
+  this.bidStatus = {};
   this.inAuction = false;
   this.timeout_ = -1;
   this.trigger_ = null;
@@ -1291,15 +1291,36 @@ AuctionMediator.prototype.pushBid_ = function(event) {
 };
 
 /**
- * Check the bid complete count.
+ * Check bidder status if all are done.
+ *
+ * @returns {boolean} true if all bidders are complete. False otherwise.
+ *
+ */
+AuctionMediator.prototype.allBiddersDone = function() {
+  var allDone = true;
+  for (var provider in this.bidStatus) {
+    if (!this.bidStatus[provider]) {
+      allDone = false;
+      break;
+    }
+  }
+  return allDone;
+};
+
+/**
+ * Check the bid completion status for all bidder requests.
  *
  * If all bidders are complete, start the auction.
  *
+ * @param {PubfoodEvent} event BID_COMPLETE
+ * @param {string} event.data the [BidProvider.name]{@link pubfood#provider.BidProvider}
  * @private
  */
-AuctionMediator.prototype.checkBids_ = function() {
-  this.bidCount++;
-  if (this.bidCount === this.totalBidProviders) {
+AuctionMediator.prototype.checkBids_ = function(event) {
+  var provider = event.data;
+  this.bidStatus[provider] = true;
+
+  if (this.allBiddersDone()) {
     this.startAuction_();
   }
 };
@@ -1457,7 +1478,6 @@ AuctionMediator.prototype.addBidProvider = function(delegateConfig) {
     if(this.bidProviders[bidProvider.name]){
       Event.publish(Event.EVENT_TYPE.WARN, 'Warning: bid provider ' + bidProvider.name + ' is already added');
     } else {
-      this.totalBidProviders++;
       this.bidProviders[bidProvider.name] = bidProvider;
     }
   } else {
@@ -1576,7 +1596,10 @@ AuctionMediator.prototype.getBidderSlots = function() {
   }
 
   for (k in bidderSlots) {
-    ret.push({provider: this.bidProviders[k], slots: bidderSlots[k]});
+    if (this.bidProviders[k]) {
+      ret.push({provider: this.bidProviders[k] || {}, slots: bidderSlots[k]});
+      this.bidStatus[k] = false;
+    }
   }
   return ret;
 };
@@ -2252,7 +2275,7 @@ var defaultBidProvider = require('./interfaces').BidDelegate;
   };
 
   pubfood.library = pubfood.prototype = {
-    version: '0.1.10',
+    version: '0.1.11',
     mediator: require('./mediator').mediatorBuilder(),
     PubfoodError: require('./errors'),
     logger: logger
