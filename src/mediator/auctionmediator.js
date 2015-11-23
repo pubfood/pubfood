@@ -29,7 +29,6 @@ function AuctionMediator(config) {
   /** @property {boolean} prefix if false, do not add bid provider name to bid targeting key. Default: true */
   this.prefix = config && config.hasOwnProperty('prefix') ? config.prefix : true;
   this.bidCount = 0;
-  this.totalBidProviders = 0;
   this.slots = [];
   // store slots by name for easy lookup
   this.slotMap = {};
@@ -37,6 +36,7 @@ function AuctionMediator(config) {
   this.auctionProvider = null;
   this.bids_ = [];
   this.lateBids_ = [];
+  this.bidStatus = {};
   this.inAuction = false;
   this.timeout_ = -1;
   this.trigger_ = null;
@@ -214,15 +214,36 @@ AuctionMediator.prototype.pushBid_ = function(event) {
 };
 
 /**
- * Check the bid complete count.
+ * Check bidder status if all are done.
+ *
+ * @returns {boolean} true if all bidders are complete. False otherwise.
+ *
+ */
+AuctionMediator.prototype.allBiddersDone = function() {
+  var allDone = true;
+  for (var provider in this.bidStatus) {
+    if (!this.bidStatus[provider]) {
+      allDone = false;
+      break;
+    }
+  }
+  return allDone;
+};
+
+/**
+ * Check the bid completion status for all bidder requests.
  *
  * If all bidders are complete, start the auction.
  *
+ * @param {PubfoodEvent} event BID_COMPLETE
+ * @param {string} event.data the [BidProvider.name]{@link pubfood#provider.BidProvider}
  * @private
  */
-AuctionMediator.prototype.checkBids_ = function() {
-  this.bidCount++;
-  if (this.bidCount === this.totalBidProviders) {
+AuctionMediator.prototype.checkBids_ = function(event) {
+  var provider = event.data;
+  this.bidStatus[provider] = true;
+
+  if (this.allBiddersDone()) {
     this.startAuction_();
   }
 };
@@ -380,7 +401,6 @@ AuctionMediator.prototype.addBidProvider = function(delegateConfig) {
     if(this.bidProviders[bidProvider.name]){
       Event.publish(Event.EVENT_TYPE.WARN, 'Warning: bid provider ' + bidProvider.name + ' is already added');
     } else {
-      this.totalBidProviders++;
       this.bidProviders[bidProvider.name] = bidProvider;
     }
   } else {
@@ -499,7 +519,10 @@ AuctionMediator.prototype.getBidderSlots = function() {
   }
 
   for (k in bidderSlots) {
-    ret.push({provider: this.bidProviders[k], slots: bidderSlots[k]});
+    if (this.bidProviders[k]) {
+      ret.push({provider: this.bidProviders[k] || {}, slots: bidderSlots[k]});
+      this.bidStatus[k] = false;
+    }
   }
   return ret;
 };

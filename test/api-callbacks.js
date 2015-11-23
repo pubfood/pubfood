@@ -39,8 +39,18 @@ var auctionExample = require('./fixture/auctionexample1');
 
 describe('Api Callbacks - Tests', function() {
 
-  beforeEach(function() {
+  function clearEvents() {
     Event.removeAllListeners();
+    Event.observeImmediate_ = null;
+    Event.observeImmediate_ = {};
+  }
+
+  beforeEach(function() {
+    clearEvents();
+  });
+
+  afterEach(function() {
+    clearEvents();
   });
 
   it('should call all the callbacks', function(done) {
