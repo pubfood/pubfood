@@ -87,6 +87,9 @@ describe('Pubfood AuctionMediator', function testPubfoodMediator() {
     bidderSlots = m1.getBidderSlots();
 
     assert.isTrue(bidderSlots.length === 1, 'm1 should have one BidProvider for requests');
+    assert.isUndefined(m1.bidStatus['b1'], 'm1 should not track BidProvider b1');
+    assert.isUndefined(m1.bidStatus['b3'], 'm1 should not track BidProvider b3');
+
     assert.isDefined(m1.bidStatus['b2'], 'm1 should track BidProvider b2');
     assert.isFalse(m1.bidStatus['b2'], 'BidProvider b2 should not have bid status complete');
 
@@ -221,13 +224,13 @@ describe('Pubfood AuctionMediator', function testPubfoodMediator() {
     Event.publish('BID_COMPLETE', 'b1');
 
     Event.on(Event.EVENT_TYPE.BID_COMPLETE, function(evt) {
-      assert.isDefined(evt.data === 'b1');
+      assert.isTrue(evt.data === 'b1');
     });
 
     m.checkBids_('b1');
 
     Event.on(Event.EVENT_TYPE.AUCTION_GO, function(evt) {
-      assert.isDefined(evt.data === 'p1');
+      assert.isTrue(evt.data === 'p1');
     });
   });
 
