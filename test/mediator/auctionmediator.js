@@ -19,8 +19,51 @@ describe('Pubfood AuctionMediator', function testPubfoodMediator() {
     Event.observeImmediate_ = {};
   }
 
+  var TEST_MEDIATOR;
   beforeEach(function() {
     clearEvents();
+
+    TEST_MEDIATOR = null;
+    TEST_MEDIATOR = new AuctionMediator();
+
+    TEST_MEDIATOR.addSlot({
+      name: '/abc/123',
+      sizes: [
+        [728, 90]
+      ],
+      elementId: 'div-leaderboard',
+      bidProviders: ['b1']
+    });
+
+    TEST_MEDIATOR.addBidProvider({
+      name: 'b1',
+      libUri: '../test/fixture/lib.js',
+      init: function(slots, pushBid, done) {
+        pushBid({
+          slot: '/abc/123',
+          value: '235',
+          sizes: [728, 90],
+          targeting: { foo: 'bar' }
+        });
+
+        done();
+      },
+      refresh: function(slots, pushBid, done) {
+        done();
+      }
+    });
+
+    TEST_MEDIATOR.setAuctionProvider({
+      name: 'provider1',
+      libUri: '../test/fixture/lib.js',
+      init: function(targeting, done) {
+        done();
+      },
+      refresh: function(targeting, done) {
+        done();
+      }
+    });
+
   });
 
   afterEach(function() {
@@ -452,8 +495,6 @@ describe('Pubfood AuctionMediator', function testPubfoodMediator() {
       }
     });
 
-    m.init();
-
     Event.on(Event.EVENT_TYPE.BID_COMPLETE, function(event) {
       assert.isTrue(m.bids_[0].value === '235', 'bidProvider p1 should pushNext value');
       assert.deepEqual(m.bids_[0].targeting, { foo: 'bar' }, 'bidProvider p1 should pushNext targeting');
@@ -505,8 +546,6 @@ describe('Pubfood AuctionMediator', function testPubfoodMediator() {
       }
     });
 
-    m.init();
-
     m.start();
 
     assert.isTrue(m.bids_[0]['value'] === '235', 'bidProvider p1 should pushNext');
@@ -540,5 +579,45 @@ describe('Pubfood AuctionMediator', function testPubfoodMediator() {
     b.label = null;
     bidKey = m.getBidKey(b);
     assert.isTrue(bidKey === 'bid', 'should not have a prefix.');
+  });
+
+  describe('Auction Triggers', function() {
+
+    var ctx = {
+      called: false
+    };
+
+    it('should handle an auction trigger without context object', function() {
+
+      TEST_MEDIATOR.setAuctionTrigger(function(startAuction) {
+        ctx.called = true;
+        console.log(this);
+        setTimeout(function() {
+          startAuction();
+        }, 1);
+      });
+
+      TEST_MEDIATOR.start();
+
+      assert.isTrue(ctx.called, 'trigger function global context not used');
+    });
+
+    it('should handle an auction trigger with a context object', function() {
+
+      ctx.called = false;
+
+      TEST_MEDIATOR.setAuctionTrigger(function(startAuction) {
+        assert.isFalse(ctx.called, 'context object value should be false');
+        ctx.called = true;
+        setTimeout(function() {
+          startAuction();
+        }, 1);
+      },
+      ctx);
+
+      TEST_MEDIATOR.start();
+
+      assert.isTrue(ctx.called, 'trigger function did not set context object');
+    });
   });
 });

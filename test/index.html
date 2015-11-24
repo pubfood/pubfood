@@ -93,17 +93,21 @@
           assert.equal(pf.getSlots().length, 2, 'mediator did not add slot');
         });
 
-        it('should augment auction bids', function() {
-
+        it('should set an auction trigger', function() {
           var trigger = function(startAuction) {
+            assert.equal(window, this, 'trigger should have global context');
+            // Do some business/other logic before starting the auction
             setTimeout(function() {
               startAuction();
             }, 6000);
           };
-          pf.setAuctionTrigger(trigger);
-
           // alternatively for timeout, use pubfood.timeout(millis); e.g.
           // pf.timeout(6000);
+          pf.setAuctionTrigger(trigger);
+        });
+
+        it('should augment auction bids', function() {
+
           function augmentBids(bids, params) {
             for (var i = 0; i < bids.length; i++) {
               bids[i]['targeting'].code = (0 | Math.random() * 36).toString(36);
