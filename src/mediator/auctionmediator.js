@@ -6,7 +6,7 @@
 
 var util = require('../util');
 var Slot = require('../model/slot');
-var BidMediator = require('./bidmediator');
+var Bid = require('../model/bid');
 var BidAssembler = require('../assembler/bidassembler');
 var RequestAssembler = require('../assembler/requestassembler');
 var TransformOperator = require('../assembler/transformoperator');
@@ -42,9 +42,10 @@ function AuctionMediator(config) {
   this.trigger_ = null;
   this.initDoneTimeout_ = 2000;
   this.processTargetingCounter_ = 0;
-  this.bidMediator = new BidMediator(this);
   this.bidAssembler = new BidAssembler();
   this.requestAssembler = new RequestAssembler();
+  this.callbackTimeout_ = 2000;
+  this.processCounter_ = 0;
 }
 
 /**
@@ -53,8 +54,6 @@ function AuctionMediator(config) {
  * @return {AuctionMediator}
  */
 AuctionMediator.prototype.init = function() {
-  Event.on(Event.EVENT_TYPE.BID_COMPLETE, util.bind(this.checkBids_, this));
-  Event.on(Event.EVENT_TYPE.BID_PUSH_NEXT, util.bind(this.pushBid_, this));
   Event.on(Event.EVENT_TYPE.AUCTION_TRIGGER, util.bind(this.triggerAuction_, this));
   return this;
 };
@@ -156,6 +155,7 @@ AuctionMediator.prototype.setAuctionTrigger = function(triggerFn) {
 };
 
 /**
+ * Start the process to build and send publisher ad server auction request.
  * @private
  */
 AuctionMediator.prototype.startAuction_ = function() {
@@ -197,20 +197,19 @@ AuctionMediator.prototype.triggerAuction_ = function() {
 };
 
 /**
- * Adds bid on {pubfood.PubfoodEvent.BID_PUSH_NEXT} event.
+ * Adds a bid for processing via [AuctionMediator.processBids]{@link pubfood#mediator.AuctionMediator#processBids}.
  *
- * @param {object} event event object containing data payload
+ * If a bid is pushed after the [startAuction_]{@link pubfood#mediator.AuctionMediator#startAuction_} is triggered, bids are
+ * added to the [lateBids_]{@link pubfood#mediator.AuctionMediator} array.
+ * @param {Bid} bid the bid object
  * @private
- * @return {AuctionMediator}
  */
-AuctionMediator.prototype.pushBid_ = function(event) {
+AuctionMediator.prototype.pushBid_ = function(bid) {
   if (!this.inAuction) {
-    var bid = event.data;
     this.bids_.push(bid);
   } else {
-    this.lateBids_.push(event.data);
+    this.lateBids_.push(bid);
   }
-  return this;
 };
 
 /**
@@ -235,14 +234,9 @@ AuctionMediator.prototype.allBiddersDone = function() {
  *
  * If all bidders are complete, start the auction.
  *
- * @param {PubfoodEvent} event BID_COMPLETE
- * @param {string} event.data the [BidProvider.name]{@link pubfood#provider.BidProvider}
  * @private
  */
-AuctionMediator.prototype.checkBids_ = function(event) {
-  var provider = event.data;
-  this.bidStatus[provider] = true;
-
+AuctionMediator.prototype.checkBids_ = function() {
   if (this.allBiddersDone()) {
     this.startAuction_();
   }
@@ -419,7 +413,7 @@ AuctionMediator.prototype.bidProviderExists_ = function(name){
  * @param {number} millis timeout in milliseconds
  */
 AuctionMediator.prototype.setBidProviderCbTimeout = function(millis){
-  this.bidMediator.setBidProviderCbTimeout(millis);
+  this.setBidProviderCbTimeout(millis);
 };
 
 /**
@@ -540,7 +534,7 @@ AuctionMediator.prototype.start = function(randomizeBidRequests) {
 
   var bidderSlots = this.getBidderSlots();
 
-  this.bidMediator.processBids(bidderSlots);
+  this.processBids(bidderSlots);
   return this;
 };
 
@@ -578,7 +572,7 @@ AuctionMediator.prototype.refresh = function(slotNames) {
 
       // trigger bid provider refresh
       var bidderSlots = this.getBidderSlots();
-      this.bidMediator.processBids(bidderSlots);
+      this.processBids(bidderSlots);
 
       // trigger auction provider refresh
       var doneCalled = false;
@@ -601,6 +595,94 @@ AuctionMediator.prototype.refresh = function(slotNames) {
     }
   }
   return this;
+};
+
+/**
+ * Process tht bidders bids
+ *
+ * @param {BidderSlots[]} bidderSlots object containing slots per bidder
+ */
+AuctionMediator.prototype.processBids = function(bidderSlots) {
+  this.processCounter_++;
+  for (var k in bidderSlots) {
+    this.getBids_(bidderSlots[k].provider, bidderSlots[k].slots);
+  }
+};
+
+/**
+ * The maximum time the bid provider has before calling `done` inside the `init` method
+ *
+ * @param {number} millis timeout in milliseconds
+ */
+AuctionMediator.prototype.setBidProviderCbTimeout = function(millis){
+  this.callbackTimeout_ = typeof millis === 'number' ? millis : 2000;
+};
+
+/**
+ * @param {object} provider
+ * @param {object} slots
+ * @private
+ */
+AuctionMediator.prototype.getBids_ = function(provider, slots) {
+  var self = this;
+  var name = provider.name;
+  var doneCalled = false;
+
+  var pushBidCb = function(bid){
+    self.pushBid(bid, name);
+  };
+
+  var bidDoneCb = function(){
+    if(!doneCalled) {
+      doneCalled = true;
+      self.doneBid(name);
+    }
+  };
+
+  setTimeout(function(){
+    if(!doneCalled) {
+      Event.publish(Event.EVENT_TYPE.WARN, 'Warning: The bid done callback for "'+name+'" hasn\'t been called within the allotted time (2sec)');
+      bidDoneCb();
+    }
+  }, this.callbackTimeout_);
+
+  Event.publish(Event.EVENT_TYPE.BID_START, name);
+  if(this.processCounter_ === 1){
+    provider.init(slots, pushBidCb, bidDoneCb);
+  } else {
+    provider.refresh(slots, pushBidCb, bidDoneCb);
+  }
+};
+
+/**
+ * Raises an event to notify listeners of a [Bid]{@link pubfood#model.Bid} available.
+ *
+ * @param {Bid} bid The bid id
+ * @param {string} providerName the name of the [BidProvider]{@link pubfood#provider.BidProvider}
+ * @fires pubfood.PubfoodEvent.BID_PUSH_NEXT
+ */
+AuctionMediator.prototype.pushBid = function(bid, providerName) {
+  var b = Bid.fromObject(bid);
+  if (b) {
+    b.provider = providerName;
+    Event.publish(Event.EVENT_TYPE.BID_PUSH_NEXT, b);
+    this.pushBid_(b);
+  } else {
+    Event.publish(Event.EVENT_TYPE.WARN, 'Invalid bid object: ' + JSON.stringify(bid || {}));
+  }
+};
+
+/**
+ * Notification that the [BidProvider]{@link pubfood#provider.BidProvider} bidding is complete.
+ *
+ * @param {string} bidProvider The [BidProvider]{@link pubfood#provider.BidProvider} name
+ * @fires pubfood.PubfoodEvent.BID_COMPLETE
+ */
+AuctionMediator.prototype.doneBid = function(bidProvider) {
+  // TODO consider having useful bid data available upon completion like the bids
+  Event.publish(Event.EVENT_TYPE.BID_COMPLETE, bidProvider);
+  this.bidStatus[bidProvider] = true;
+  this.checkBids_();
 };
 
 module.exports = AuctionMediator;

@@ -227,8 +227,6 @@ describe('Pubfood AuctionMediator', function testPubfoodMediator() {
       assert.isTrue(evt.data === 'b1');
     });
 
-    m.checkBids_('b1');
-
     Event.on(Event.EVENT_TYPE.AUCTION_GO, function(evt) {
       assert.isTrue(evt.data === 'p1');
     });
@@ -253,10 +251,11 @@ describe('Pubfood AuctionMediator', function testPubfoodMediator() {
     m.setAuctionProvider({
       name: 'provider1',
       libUri: '../test/fixture/lib.js',
-      init: function(slots, bids, done) {
-
+      init: function(targeting, done) {
+        done();
       },
-      refresh: function(slots, targeting, done) {
+      refresh: function(targeting, done) {
+        done();
       }
     });
 
@@ -288,10 +287,11 @@ describe('Pubfood AuctionMediator', function testPubfoodMediator() {
     m.setAuctionProvider({
       name: 'provider1',
       libUri: '../test/fixture/lib.js',
-      init: function(slots, bids, done) {
-
+      init: function(targeting, done) {
+        done();
       },
-      refresh: function(slots, targeting, done) {
+      refresh: function(targeting, done) {
+        done();
       }
     });
 
@@ -314,10 +314,11 @@ describe('Pubfood AuctionMediator', function testPubfoodMediator() {
     m.setAuctionProvider({
       name: 'provider1',
       libUri: '../test/fixture/lib.js',
-      init: function(slots, bids, done) {
-
+      init: function(targeting, done) {
+        done();
       },
-      refresh: function(slots, targeting, done) {
+      refresh: function(targeting, done) {
+        done();
       }
     });
 
@@ -330,10 +331,11 @@ describe('Pubfood AuctionMediator', function testPubfoodMediator() {
     var providerDelegate = {
       name: 'provider1',
       libUri: '../test/fixture/lib.js',
-      init: function(slots, bids, done) {
-
+      init: function(targeting, done) {
+        done();
       },
-      refresh: function(slots, targeting, done) {
+      refresh: function(targeting, done) {
+        done();
       }
     };
 
@@ -347,7 +349,7 @@ describe('Pubfood AuctionMediator', function testPubfoodMediator() {
 
   });
 
-  it('should build provider slot array', function() {
+  it('should build provider slot array', function(done) {
     var m = new AuctionMediator();
 
     m.addSlot({
@@ -371,33 +373,42 @@ describe('Pubfood AuctionMediator', function testPubfoodMediator() {
       name: 'p1',
       libUri: 'someUri',
       init: function(slots, pushBid, done) {
-
+        done();
       },
       refresh: function(slots, pushBid, done) {
+        done();
       }
     });
     m.addBidProvider({
       name: 'p2',
       libUri: 'someUri',
       init: function(slots, pushBid, done) {
-
+        done();
       },
       refresh: function(slots, pushBid, done) {
+        done();
       }
     });
 
     m.setAuctionProvider({
       name: 'provider1',
       libUri: '../test/fixture/lib.js',
-      init: function(slots, bids, done) {
-
+      init: function(targeting, done) {
+        done();
       },
-      refresh: function(slots, targeting, done) {
+      refresh: function(targeting, done) {
+        done();
       }
     });
 
     m.start();
 
+    assert.isTrue(m.slots.length === 2, 'should have two slots');
+    assert.isTrue(m.auctionProvider.name === 'provider1', 'should have the named auctionProvider');
+    assert.isDefined(m.bidProviders['p1'], 'bidProvider p1 should be defined');
+    assert.isDefined(m.bidProviders['p2'], 'bidProvider p2 should be defined');
+
+    done();
   });
 
   it('should handle push next', function() {
@@ -410,34 +421,100 @@ describe('Pubfood AuctionMediator', function testPubfoodMediator() {
         [728, 90]
       ],
       elementId: 'div-leaderboard',
-      bidProviders: {
-        p1: {
-          slot: 's1'
-        }
-      }
+      bidProviders: ['b1']
     });
 
     m.addBidProvider({
-      name: 'p1',
-      libUri: '',
+      name: 'b1',
+      libUri: '../test/fixture/lib.js',
       init: function(slots, pushBid, done) {
-
+        pushBid({
+          slot: '/abc/123',
+          value: '235',
+          sizes: [728, 90],
+          targeting: { foo: 'bar' }
+        });
+        done();
       },
       refresh: function(slots, pushBid, done) {
+        done();
+      }
+    });
+
+    m.setAuctionProvider({
+      name: 'provider1',
+      libUri: '../test/fixture/lib.js',
+      init: function(targeting, done) {
+        done();
+      },
+      refresh: function(targeting, done) {
+        done();
       }
     });
 
     m.init();
-    var b = Bid.fromObject({
-      slot: '/abc/123',
-      value: '235',
-      sizes: [728, 90],
-      targeting: { foo: 'bar' }
-    });
-    Event.publish(Event.EVENT_TYPE.BID_PUSH_NEXT, b, 'p1');
 
-    var log = logger.history[logger.history.length - 1];
-    assert.isTrue(log.args[2] === 'p1');
+    Event.on(Event.EVENT_TYPE.BID_COMPLETE, function(event) {
+      assert.isTrue(m.bids_[0].value === '235', 'bidProvider p1 should pushNext value');
+      assert.deepEqual(m.bids_[0].targeting, { foo: 'bar' }, 'bidProvider p1 should pushNext targeting');
+      assert.isTrue(event.data === 'b1', 'bidProvider b1 should be doneBid');
+    });
+
+    m.start();
+  });
+
+  it('should handle processBids', function(done) {
+
+    var m = new AuctionMediator();
+
+    m.addSlot({
+      name: '/abc/123',
+      sizes: [
+        [728, 90]
+      ],
+      elementId: 'div-leaderboard',
+      bidProviders: ['b1']
+    });
+
+    m.addBidProvider({
+      name: 'b1',
+      libUri: '../test/fixture/lib.js',
+      init: function(slots, pushBid, done) {
+        pushBid({
+          slot: '/abc/123',
+          value: '235',
+          sizes: [728, 90],
+          targeting: { foo: 'bar' }
+        });
+
+        done();
+      },
+      refresh: function(slots, pushBid, done) {
+        done();
+      }
+    });
+
+    m.setAuctionProvider({
+      name: 'provider1',
+      libUri: '../test/fixture/lib.js',
+      init: function(targeting, done) {
+        done();
+      },
+      refresh: function(targeting, done) {
+        done();
+      }
+    });
+
+    m.init();
+
+    m.start();
+
+    assert.isTrue(m.bids_[0]['value'] === '235', 'bidProvider p1 should pushNext');
+
+    Event.on(Event.EVENT_TYPE.BID_COMPLETE, function(event) {
+      assert.isTrue(event.data === 'b1', 'bidProvider b1 should be doneBid');
+      done();
+    });
   });
 
   it('should set a bid prefix', function() {
