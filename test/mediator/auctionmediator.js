@@ -583,15 +583,14 @@ describe('Pubfood AuctionMediator', function testPubfoodMediator() {
 
   describe('Auction Triggers', function() {
 
-    var ctx = {
+    global.ctx = {
       called: false
     };
 
-    it('should handle an auction trigger without context object', function() {
+    it('should handle an auction trigger', function() {
 
       TEST_MEDIATOR.setAuctionTrigger(function(startAuction) {
         ctx.called = true;
-        console.log(this);
         setTimeout(function() {
           startAuction();
         }, 1);
@@ -602,22 +601,14 @@ describe('Pubfood AuctionMediator', function testPubfoodMediator() {
       assert.isTrue(ctx.called, 'trigger function global context not used');
     });
 
-    it('should handle an auction trigger with a context object', function() {
-
-      ctx.called = false;
-
-      TEST_MEDIATOR.setAuctionTrigger(function(startAuction) {
-        assert.isFalse(ctx.called, 'context object value should be false');
-        ctx.called = true;
-        setTimeout(function() {
-          startAuction();
-        }, 1);
-      },
-      ctx);
-
+    it('should not error on undefined auction trigger', function() {
+      TEST_MEDIATOR.setAuctionTrigger();
       TEST_MEDIATOR.start();
+    });
 
-      assert.isTrue(ctx.called, 'trigger function did not set context object');
+    it('should not error on invalid auction trigger', function() {
+      TEST_MEDIATOR.setAuctionTrigger('function');
+      TEST_MEDIATOR.start();
     });
   });
 });

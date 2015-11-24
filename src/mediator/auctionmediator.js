@@ -39,7 +39,7 @@ function AuctionMediator(config) {
   this.bidStatus = {};
   this.inAuction = false;
   this.timeout_ = -1;
-  this.trigger_ = {fn: null, ctx: null};
+  this.trigger_ = null;
   this.initDoneTimeout_ = 2000;
   this.processTargetingCounter_ = 0;
   this.bidAssembler = new BidAssembler();
@@ -141,13 +141,11 @@ AuctionMediator.prototype.setAuctionProviderCbTimeout = function(millis){
  * to start the auction.
  * <p>
  * If you have business or other logic that determines when the
- * auction timeout must start a trigger function can be used. The triggerCtx
- * optional parameter allows you to set the 'this' context for the trigger function.
+ * auction must start a trigger function can be used.
  *
  * Otherwise, use [timeout()]{@link pubfood#mediator.AuctionMediator#timeout}.
  *
  * @param {function} triggerFn custom function with startAuction callback parameter
- * @param {object} [triggerCtx] context for apply execution of triggerFn. Default: null
  * @example
  var trigger = function(startAuction) {
    setTimeout(function() {
@@ -156,9 +154,8 @@ AuctionMediator.prototype.setAuctionProviderCbTimeout = function(millis){
  };
  pf.setAuctionTrigger(trigger);
  */
-AuctionMediator.prototype.setAuctionTrigger = function(triggerFn, triggerCtx) {
-  this.trigger_.fn = triggerFn;
-  this.trigger_.ctx = triggerCtx || null;
+AuctionMediator.prototype.setAuctionTrigger = function(triggerFn) {
+  this.trigger_ = triggerFn;
 };
 
 /**
@@ -189,7 +186,7 @@ AuctionMediator.prototype.startTimeout_ = function() {
  * @return {AuctionMediator}
  */
 AuctionMediator.prototype.triggerAuction_ = function() {
-  if (!this.trigger_.fn) {
+  if (util.asType(this.trigger_) !== 'function') {
     this.startTimeout_();
     return;
   }
@@ -198,7 +195,7 @@ AuctionMediator.prototype.triggerAuction_ = function() {
     this.startAuction_();
   }
 
-  this.trigger_.fn.apply(this.trigger_.ctx, [util.bind(triggerAuction, this)]);
+  this.trigger_.apply(null, [util.bind(triggerAuction, this)]);
 
   return this;
 };

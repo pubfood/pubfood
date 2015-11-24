@@ -239,11 +239,11 @@ var defaultBidProvider = require('./interfaces').BidDelegate;
    * Sets a function delegate to initiate the publisher ad server request.
    *
    * @param {AuctionTriggerFn} delegate the function that makes the callback to start the auction
-   * @param {object} [context] th trigger function context to use when function called with apply
+   * @return {pubfood}
    */
-  api.prototype.setAuctionTrigger = function(delegate, context) {
+  api.prototype.setAuctionTrigger = function(delegate) {
     logger.logCall('api.setAuctionTrigger', arguments);
-    this.library.mediator.setAuctionTrigger(delegate, context);
+    this.library.mediator.setAuctionTrigger(delegate);
     return this;
   };
 

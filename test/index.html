@@ -94,8 +94,10 @@
         });
 
         it('should set an auction trigger', function() {
+          window.triggerTest = 0;
           var trigger = function(startAuction) {
-            assert.equal(window, this, 'trigger should have global context');
+            triggerTest++;
+            assert.isTrue(triggerTest === 1, 'trigger test should have been incremented');
             // Do some business/other logic before starting the auction
             setTimeout(function() {
               startAuction();
