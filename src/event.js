@@ -17,10 +17,17 @@ var EventEmitter = require('eventemitter3');
  * @property {string} type The event type
  * @property {string} provider The type of provider. Defaults to <i>pubfood</i>
  * @property {object|string} data Data structure for each event type
- * @return {pubfood.PubfoodEvent}
+ * @return {PubfoodEvent}
+ * @extends EventEmitter
+ * @see https://github.com/primus/eventemitter3
  */
 function PubfoodEvent() {
   this.auction_ = 1;
+  /**
+   * Map of emitted events without registered handlers.
+   *
+   * @private
+   */
   this.observeImmediate_ = {};
   // PubfoodEvent constructor
 }
@@ -181,60 +188,25 @@ PubfoodEvent.prototype.publish = function(eventType, data, eventContext) {
   });
 };
 
-/**
- * Emit an event to all registered event listeners.
- * @function emit
- * @memberof pubfood.PubfoodEvent
- * @see https://github.com/primus/eventemitter3
- * @private
- */
-
-/**
- * Register a new EventListener for the given event.
- * @function on
- * @memberof pubfood.PubfoodEvent
- * @see https://github.com/primus/eventemitter3
-  */
-
-/**
- * Add an EventListener that's only called once.
- * @function once
- * @memberof pubfood.PubfoodEvent
- * @see https://github.com/primus/eventemitter3
- * @private
- */
-
-/**
- * Remove event listeners.
- * @function removeListener
- * @memberof pubfood.PubfoodEvent
- * @see https://github.com/primus/eventemitter3
- * @private
- */
-
-/**
- * Remove all listeners or only the listeners for the specified event.
- * @function removeAllListeners
- * @memberof pubfood.PubfoodEvent
- * @see https://github.com/primus/eventemitter3
- * @private
- */
-
-/**
- * Return a list of assigned event listeners.
- * @function listeners
- * @memberof pubfood.PubfoodEvent
- * @see https://github.com/primus/eventemitter3
- * @private
- */
-
 util.extends(PubfoodEvent, EventEmitter);
 
+/**
+ * Emit event, but keep events without a registered listener.
+ *
+ * Emitted events without a listener are stored as events to
+ * be immediately observed by listeners; if a listener is added
+ * subsequently.
+ *
+ * @see https://github.com/primus/eventemitter3
+ *
+ * @param {string} event the event type
+ * @return {boolean} - true if the event was emitted. false otherwise.
+ * @extends EventEmitter
+ * @private
+ */
 PubfoodEvent.prototype.emit = function(event) {
   var ret = EventEmitter.prototype.emit.apply(this, arguments);
 
-  // Always allow AUCTION_POST_RUN events to execute immediately
-  // after the emitted event
   if (!ret || this.EVENT_TYPE.AUCTION_POST_RUN === event) {
     ret = true;
     this.observeImmediate_[event] = this.observeImmediate_[event] || [];
@@ -243,6 +215,20 @@ PubfoodEvent.prototype.emit = function(event) {
   return ret;
 };
 
+/**
+ * Register an event listener.
+ *
+ * Registeres a listener for the event type. If events for the specified type
+ * have already been emitted, the registered handler function is invoked immediately.
+ *
+ * @see https://github.com/primus/eventemitter3
+ *
+ * @param {string} event the event type
+ * @param {function} fn the event handler function
+ * @return {PubfoodEvent} - this
+ * @extends EventEmitter
+ * @private
+ */
 PubfoodEvent.prototype.on = function(event, fn) {
   var emitted = this.observeImmediate_[event] || null;
   if (emitted) {
@@ -254,6 +240,19 @@ PubfoodEvent.prototype.on = function(event, fn) {
   return EventEmitter.prototype.on.apply(this, arguments);
 };
 
+/**
+ * Remove all event listeners.
+ *
+ * Removes both extended EventEmitter listeners and internal
+ * {@link pubfood#PubfoodEvent.emit} immediate listeners.
+ *
+ * @see https://github.com/primus/eventemitter3
+ *
+ * @param {string} event the event type
+ * @return {PubfoodEvent} - this
+ * @extends EventEmitter
+ * @private
+ */
 PubfoodEvent.prototype.removeAllListeners = function(event) {
   EventEmitter.prototype.removeAllListeners.call(this, event);
 

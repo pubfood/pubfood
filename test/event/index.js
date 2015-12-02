@@ -5,6 +5,7 @@
 
 var sinon = require('sinon');
 var Event = require('../../src/event');
+var assert = require('chai').assert;
 
 /*eslint no-undef: 0*/
 describe('Event - Tests', function () {
@@ -13,17 +14,39 @@ describe('Event - Tests', function () {
   });
   it('should remove all listeners', function(done) {
     var spy = sinon.spy();
-    Event.on('hello', spy);
-    Event.emit('hello', 1);
-    sinon.assert.called(spy, 'listener not called');
+
+    Event.on('hello', spy); // hello listener 1
+    Event.emit('hello', 1); // call-1
+    sinon.assert.calledOnce(spy, 'listener should be called once');
 
     Event.removeAllListeners();
-    Event.emit('hello', 1);
-    sinon.assert.calledOnce(spy, 'listener called more than once');
 
-    Event.on('hello', spy);
-    Event.emit('hello', 1);
-    sinon.assert.calledTwice(spy, 'listener not called twice');
+    Event.on('hello', spy); // hello listener 1
+    Event.emit('hello', 2); // call-2
+    sinon.assert.calledTwice(spy, 'listener should be called twice');
+
+    Event.on('hello', spy); // hello listener 2
+    Event.emit('hello', 3); // call-3, call-4
+    sinon.assert.callCount(spy, 4, 'listener should be called four times');
+
+    done();
+  });
+  it('should remove immediate listeners', function(done) {
+    var spy = sinon.spy();
+
+    Event.emit('hello'); // call-1
+    Event.on('hello', spy); // hello listener 1
+    sinon.assert.calledOnce(spy, 'listener should be called once');
+
+    Event.removeAllListeners();
+
+    Event.emit('hello'); // call-2
+    Event.on('hello', spy); // hello listener 1
+    sinon.assert.calledTwice(spy, 'listener should be called twice');
+
+    Event.emit('hello'); // call-3, call-4
+    Event.on('hello', spy); // hello listener 2
+    sinon.assert.callCount(spy, 4, 'listener should be called four times');
 
     done();
   });
