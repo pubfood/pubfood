@@ -10,8 +10,22 @@ var Event = require('../../src/event');
 describe('Event - Tests', function () {
   beforeEach(function() {
     Event.removeAllListeners();
-    // TODO consider if this should be a formal API instead
-    Event.observeImmediate_ = {};
+  });
+  it('should remove all listeners', function(done) {
+    var spy = sinon.spy();
+    Event.on('hello', spy);
+    Event.emit('hello', 1);
+    sinon.assert.called(spy, 'listener not called');
+
+    Event.removeAllListeners();
+    Event.emit('hello', 1);
+    sinon.assert.calledOnce(spy, 'listener called more than once');
+
+    Event.on('hello', spy);
+    Event.emit('hello', 1);
+    sinon.assert.calledTwice(spy, 'listener not called twice');
+
+    done();
   });
   it('should invoke the done callback', function(done) {
     Event.on('hello', done);

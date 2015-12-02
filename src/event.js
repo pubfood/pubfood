@@ -254,4 +254,12 @@ PubfoodEvent.prototype.on = function(event, fn) {
   return EventEmitter.prototype.on.apply(this, arguments);
 };
 
+PubfoodEvent.prototype.removeAllListeners = function(event) {
+  EventEmitter.prototype.removeAllListeners.call(this, event);
+
+  this.observeImmediate_ = {};
+
+  return this;
+};
+
 module.exports = new PubfoodEvent();
