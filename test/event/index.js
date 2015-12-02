@@ -5,7 +5,6 @@
 
 var sinon = require('sinon');
 var Event = require('../../src/event');
-var assert = require('chai').assert;
 
 /*eslint no-undef: 0*/
 describe('Event - Tests', function () {
