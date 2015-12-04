@@ -30,6 +30,35 @@ describe('Event - Tests', function () {
 
     done();
   });
+  it('should remove all listeners when event argument supplied', function(done) {
+    var spy = sinon.spy();
+
+    Event.on('hello', spy); // hello listener 1
+    Event.emit('hello', 1); // call-1
+    sinon.assert.calledOnce(spy, 'listener should be called once');
+
+    Event.removeAllListeners('hello');
+
+    Event.on('hello', spy); // hello listener 1
+    Event.emit('hello', 2); // call-2
+    sinon.assert.calledTwice(spy, 'listener should be called twice');
+
+    Event.removeAllListeners(0);
+
+    // Invert on/emit calls for immediate observer removal
+    Event.emit('hello', 3); // call-3
+    Event.on('hello', spy); // hello listener 1
+    sinon.assert.calledThrice(spy, 'listener should be called thrice');
+
+    var foo;
+    Event.removeAllListeners(foo);
+
+    Event.emit('hello', 3); // call-4
+    Event.on('hello', spy); // hello listener 1
+    sinon.assert.called(spy, 4, 'listener should be called four times');
+
+    done();
+  });
   it('should remove immediate listeners', function(done) {
     var spy = sinon.spy();
 

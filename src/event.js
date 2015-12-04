@@ -248,13 +248,12 @@ PubfoodEvent.prototype.on = function(event, fn) {
  *
  * @see https://github.com/primus/eventemitter3
  *
- * @param {string} event the event type
  * @return {PubfoodEvent} - this
  * @extends EventEmitter
  * @private
  */
-PubfoodEvent.prototype.removeAllListeners = function(event) {
-  EventEmitter.prototype.removeAllListeners.call(this, event);
+PubfoodEvent.prototype.removeAllListeners = function() {
+  EventEmitter.prototype.removeAllListeners.call(this);
 
   this.observeImmediate_ = {};
 
