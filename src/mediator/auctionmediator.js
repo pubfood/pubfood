@@ -384,7 +384,7 @@ AuctionMediator.prototype.addSlot = function(slotConfig) {
   } else {
     Event.publish(Event.EVENT_TYPE.WARN, 'Invalid slot object: ' + JSON.stringify(slotConfig || {}));
   }
-  return this;
+  return slot;
 };
 
 /**

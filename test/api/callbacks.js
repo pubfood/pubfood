@@ -2,7 +2,6 @@
  * pubfood
  *
  * - check to make sure that the bidder's done callback was called
- * - check for core api method calls
  */
 
 /* global describe, it */
@@ -12,30 +11,12 @@
 /*eslint no-unused-vars: 0*/
 /*eslint no-undef: 0*/
 
-// set up some dom stuff
-// @todo think about using `node-jsdom` for this
-var fakeDom = {
-  appendChild: function() {
-    return {};
-  },
-  createElement: function() {
-    return {};
-  },
-};
-
-global.window = {};
-if (!global.document) {
-  global.document = fakeDom;
-  global.document.head = fakeDom;
-  global.document.body = fakeDom;
-  global.document.documentElement = fakeDom;
-}
-
+require('../common');
+var pubfood = require('../../src/pubfood');
 var assert = require('chai').assert;
 var expect = require('chai').expect;
-var pubfood = require('../src/pubfood');
-var Event = require('../src/event');
-var auctionExample = require('./fixture/auctionexample1');
+var Event = require('../../src/event');
+var auctionExample = require('../fixture/auctionexample1');
 
 describe('Api Callbacks - Tests', function() {
 

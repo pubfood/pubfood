@@ -5,7 +5,7 @@
 'use strict';
 
 var util = require('../util');
-var BaseModelObject = require('./basemodelobject');
+var PubfoodObject = require('../pubfoodobject');
 var slotConfig = require('../interfaces').SlotConfig;
 
 /**
@@ -98,5 +98,5 @@ Slot.prototype.addBidProvider = function(bidProvider) {
   return this;
 };
 
-util.extends(Slot, BaseModelObject);
+util.extends(Slot, PubfoodObject);
 module.exports = Slot;

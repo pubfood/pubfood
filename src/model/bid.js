@@ -5,7 +5,7 @@
 'use strict';
 
 var util = require('../util');
-var BaseModelObject = require('./basemodelobject');
+var PubfoodObject = require('../pubfoodobject');
 var BidObject = require('../interfaces').BidObject;
 
 /**
@@ -61,7 +61,8 @@ Bid.fromObject = function(config) {
       b[k] = config[k];
     }
   }
-  b.type = util.asType(b.value);
+  var vType = util.asType(b.value);
+  b.type = vType !== 'undefined' ? vType : '';
   return b;
 };
 
@@ -93,5 +94,5 @@ Bid.prototype.addSize = function(w, h) {
   return this;
 };
 
-util.extends(Bid, BaseModelObject);
+util.extends(Bid, PubfoodObject);
 module.exports = Bid;

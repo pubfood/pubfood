@@ -10,6 +10,7 @@ var Event = require('./event');
 var util = require('./util');
 var logger = require('./logger');
 var defaultBidProvider = require('./interfaces').BidDelegate;
+var AuctionMediator = require('./mediator/auctionmediator');
 
 (function(global, undefined, ctor) {
 
@@ -39,18 +40,18 @@ var defaultBidProvider = require('./interfaces').BidDelegate;
 
   pubfood.library = pubfood.prototype = {
     version: 'APP_VERSION',
-    mediator: require('./mediator').mediatorBuilder(),
     PubfoodError: require('./errors'),
     logger: logger
   };
 
   /**
    * validate the api configurations
+   * @param {object} pfo a the pubfood object
    * @private
    * @return {{hasError: boolean, details: string[]}}
    */
-  var validateConfig = function() {
-    var bidProviders = api.prototype.getBidProviders();
+  var validateConfig = function(pfo) {
+    var bidProviders = pfo.getBidProviders();
 
     // check for core api method calls
     for (var apiMethod in requiredApiCalls) {
@@ -60,7 +61,7 @@ var defaultBidProvider = require('./interfaces').BidDelegate;
     }
 
     // validate through all the slots bid provider
-    var slots = api.prototype.getSlots();
+    var slots = pfo.getSlots();
     for (var i = 0; i < slots.length; i++) {
       for (var k = 0; k < slots[i].bidProviders.length; k++) {
         var providerName = slots[i].bidProviders[k];
@@ -96,6 +97,7 @@ var defaultBidProvider = require('./interfaces').BidDelegate;
       this.bidProviderTimeout_ = config.bidProviderCbTimeout || 2000;
       this.randomizeBidRequests_ = !!config.randomizeBidRequests;
     }
+    this.mediator = new AuctionMediator();
     return this;
   };
 
@@ -118,15 +120,15 @@ var defaultBidProvider = require('./interfaces').BidDelegate;
 
     if (!util.isArray(slot.bidProviders) || slot.bidProviders.length === 0) {
       slot.bidProviders = ['__default__'];
-      if(!this.library.mediator.bidProviderExists_('__default__')){
-        this.library.mediator.addBidProvider(defaultBidProvider);
+      if(!this.mediator.bidProviderExists_('__default__')){
+        this.mediator.addBidProvider(defaultBidProvider);
       }
     }
 
     logger.logCall('api.addSlot', arguments);
-    this.library.mediator.addSlot(slot);
+    var slotObject = this.mediator.addSlot(slot);
     requiredApiCalls.addSlot++;
-    return this;
+    return slotObject;
   };
 
   /**
@@ -135,7 +137,17 @@ var defaultBidProvider = require('./interfaces').BidDelegate;
    */
   api.prototype.getSlots = function() {
     logger.logCall('api.getSlots', arguments);
-    return this.library.mediator.slots;
+    return this.mediator.slots;
+  };
+
+  /**
+   * Get a slot object
+   * @param {string} name the slot name
+   * @return {Slot}
+   */
+  api.prototype.getSlot = function(name) {
+    logger.logCall('api.getSlot', arguments);
+    return this.mediator.slotMap[name];
   };
 
   /**
@@ -143,17 +155,17 @@ var defaultBidProvider = require('./interfaces').BidDelegate;
    *
    * @function
    * @param {AuctionDelegate} delegate Auction provider configuration
-   * @return {pubfood}
+   * @return {AuctionProvider|null}
    */
   api.prototype.setAuctionProvider = function(delegate) {
     logger.logCall('api.setAuctionProvider', arguments);
-    var provider = this.library.mediator.setAuctionProvider(delegate);
-    this.library.mediator.setAuctionProviderCbTimeout(this.auctionProviderTimeout_);
+    var provider = this.mediator.setAuctionProvider(delegate);
+    this.mediator.setAuctionProviderCbTimeout(this.auctionProviderTimeout_);
     requiredApiCalls.setAuctionProvider++;
     if (!provider) {
       configErrors.push('Invalid auction provider config');
     }
-    return this;
+    return provider;
   };
 
   /**
@@ -162,7 +174,7 @@ var defaultBidProvider = require('./interfaces').BidDelegate;
    */
   api.prototype.getAuctionProvider = function() {
     logger.logCall('api.getAuctionProvider', arguments);
-    return this.library.mediator.auctionProvider;
+    return this.mediator.auctionProvider;
   };
 
   /**
@@ -171,12 +183,12 @@ var defaultBidProvider = require('./interfaces').BidDelegate;
    * @function
    * @param {BidDelegate} delegate Bid provider configuaration
    * @example {file} ../examples/add-bid-provider.js
-   * @return {pubfood}
+   * @return {BidProvider|null}
    */
   api.prototype.addBidProvider = function(delegate) {
     logger.logCall('api.addBidProvider', arguments);
-    var provider = this.library.mediator.addBidProvider(delegate);
-    this.library.mediator.setBidProviderCbTimeout(this.bidProviderTimeout_);
+    var provider = this.mediator.addBidProvider(delegate);
+    this.mediator.setBidProviderCbTimeout(this.bidProviderTimeout_);
     requiredApiCalls.addBidProvider++;
     if (!provider) {
       configErrors.push('Invalid bid provider config for ' + delegate.name);
@@ -187,16 +199,26 @@ var defaultBidProvider = require('./interfaces').BidDelegate;
     if(typeof delegate.refresh === 'function' && delegate.refresh.length !== 3) {
       configErrors.push('Bid provider ' + delegate.name + '\'s refresh method requires 3 arguments');
     }
-    return this;
+    return provider;
   };
 
   /**
-   * Gets a list of bidproviders
+   * Gets a list of bid providers
    * @return {object.<BidProvider>}}
    */
   api.prototype.getBidProviders = function() {
+    logger.logCall('api.getBidProviders', arguments);
+    return this.mediator.bidProviders;
+  };
+
+  /**
+   * Gets a bid provider
+   * @param {string} name the bid provider name
+   * @return {BidProvider}
+   */
+  api.prototype.getBidProvider = function(name) {
     logger.logCall('api.getBidProvider', arguments);
-    return this.library.mediator.bidProviders;
+    return this.mediator.bidProviders[name];
   };
 
   /**
@@ -231,7 +253,7 @@ var defaultBidProvider = require('./interfaces').BidDelegate;
    */
   api.prototype.timeout = function(millis) {
     logger.logCall('api.timeout', arguments);
-    this.library.mediator.timeout(millis);
+    this.mediator.timeout(millis);
     return this;
   };
 
@@ -243,7 +265,7 @@ var defaultBidProvider = require('./interfaces').BidDelegate;
    */
   api.prototype.setAuctionTrigger = function(delegate) {
     logger.logCall('api.setAuctionTrigger', arguments);
-    this.library.mediator.setAuctionTrigger(delegate);
+    this.mediator.setAuctionTrigger(delegate);
     return this;
   };
 
@@ -255,7 +277,7 @@ var defaultBidProvider = require('./interfaces').BidDelegate;
    */
   api.prototype.addBidTransform = function(delegate) {
     logger.logCall('api.addBidTransform', arguments);
-    this.library.mediator.addBidTransform(delegate);
+    this.mediator.addBidTransform(delegate);
     return this;
   };
 
@@ -267,7 +289,7 @@ var defaultBidProvider = require('./interfaces').BidDelegate;
    */
   api.prototype.addRequestTransform = function(delegate) {
     logger.logCall('api.addRequestTransform', arguments);
-    this.library.mediator.addRequestTransform(delegate);
+    this.mediator.addRequestTransform(delegate);
     return this;
   };
 
@@ -281,7 +303,7 @@ var defaultBidProvider = require('./interfaces').BidDelegate;
     Event.publish(Event.EVENT_TYPE.PUBFOOD_API_START, startTimestamp);
     logger.logCall('api.start', arguments);
 
-    var configStatus = validateConfig();
+    var configStatus = validateConfig(this);
 
     if(typeof startCb === 'function'){
       startCb(configStatus.hasError, configStatus.details);
@@ -289,7 +311,7 @@ var defaultBidProvider = require('./interfaces').BidDelegate;
 
     // only continue of there aren't any config errors
     if (!configStatus.hasError) {
-      this.library.mediator.start(this.randomizeBidRequests_);
+      this.mediator.start(this.randomizeBidRequests_);
     }
 
     return this;
@@ -304,7 +326,7 @@ var defaultBidProvider = require('./interfaces').BidDelegate;
   api.prototype.refresh = function(slotNames) {
     logger.auction++;
     logger.logCall('api.refresh', arguments);
-    this.library.mediator.refresh(slotNames);
+    this.mediator.refresh(slotNames);
     return this;
   };
 

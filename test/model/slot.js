@@ -90,4 +90,75 @@ describe('Slot', function testSlotBuilder() {
         .addSize('728.999', '-90.2');
     assert.deepEqual(slot.sizes, [ [300, 0], [0, 0], [0, 600], [728, 90] ], 'dimensions not equal');
   });
+
+  describe('Set Custom Parameters', function() {
+    it('will set and get custom parameters', function() {
+      var slot = new Slot();
+
+      slot.setParam('aString', 'theString');
+      assert.isTrue(slot.getParam('aString') === 'theString', 'should have parameter value: \"theString\"');
+
+      slot.setParam('aBoolean', true);
+      assert.isTrue(slot.getParam('aBoolean'), 'should have parameter value: true');
+
+      slot.setParam('aNumber', 3.14);
+      assert.isTrue(slot.getParam('aNumber') === 3.14, 'should have parameter value: 3.14');
+
+      slot.setParam('anObject', {key: 'value'});
+      assert.deepEqual(slot.getParam('anObject'), {key: 'value'}, 'should have parameter value: {key: \"value\}"');
+
+      slot.setParam('anArray', ['value', 3.14]);
+      assert.deepEqual(slot.getParam('anArray'), ['value', 3.14], 'should have parameter value: [\"value\", 3.14]');
+
+      var aFunction = function(num) {
+        return ++num;
+      };
+      slot.setParam('aFunction', aFunction);
+      assert.isTrue(slot.getParam('aFunction').call(null, 0) === 1, 'should execute the function');
+    });
+
+    it('should allow fluent param creation', function() {
+      var slot = new Slot();
+
+      slot.setParam('p1', 0)
+        .setParam('p2', 1)
+        .setParam('p3', 2)
+        .setParam('p4', 4)
+        .setParam('p5', 6)
+        .setParam('p6', 8);
+
+      var keys = slot.getParamKeys();
+
+      var sum = 0;
+      keys.map(function(v) {
+        sum += v;
+      });
+      assert.isTrue(sum === 21, 'key iteration should produce value of 21');
+
+    });
+
+    it('should not set parameter with undefined name', function() {
+      var slot = new Slot();
+      var foo;
+      slot.setParam(foo, 0).
+        setParam('p1', 1);
+      assert.isTrue(slot.getParamKeys().length === 1, 'should only have 1 key');
+      assert.isTrue(slot.getParam('p1') === 1, 'parameter \"p1\" should have value of 1');
+    });
+
+    it('should only add string, number or boolean parameter keys', function() {
+      var slot = new Slot();
+
+      slot.setParam({p1: 'p1'}, 0)
+        .setParam(['p2'], 1)
+        .setParam(0, 2)
+        .setParam(1.01, 2.1)
+        .setParam('p4', 4)
+        .setParam('', 4.1)
+        .setParam(function(){}, 6)
+        .setParam(true, 8);
+
+      assert.isTrue(slot.getParamKeys().length === 5, 'should only have 5 keys');
+    });
+  });
 });

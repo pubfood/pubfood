@@ -12,7 +12,7 @@ require('./model/bid');
  * Coordinates and orchestrates domain model instances.
  *
  * @memberof pubfood
- * @property {function} getType Returns an instances of [Model]{@link pubfood#model.BaseModelObject}
+ * @property {function} getType Returns an instance of Bid or Slot model [PubfoodObject]{@link pubfood#PubfoodObject}
  * @private
  */
 var model = {
