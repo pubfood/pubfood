@@ -39,27 +39,16 @@ var auctionExample = require('./fixture/auctionexample1');
 
 describe('Api Callbacks - Tests', function() {
 
-  function clearEvents() {
-    Event.removeAllListeners();
-    Event.observeImmediate_ = null;
-    Event.observeImmediate_ = {};
-  }
-
   beforeEach(function() {
-    clearEvents();
-  });
-
-  afterEach(function() {
-    clearEvents();
+    Event.removeAllListeners();
   });
 
   it('should call all the callbacks', function(done) {
 
-    //
     var bidProviderDoneCalled = {
-      //yieldbot: false,
-      //bidderFast: false,
-      //bidderSlow: false
+      yieldbot: false,
+      bidderFast: false,
+      bidderSlow: false
     };
 
     var pf = new pubfood({

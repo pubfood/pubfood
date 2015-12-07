@@ -13,15 +13,9 @@ var Bid = require('../../src/model/bid');
 /** @todo generalize fixture config to improve readability of tests */
 describe('Pubfood AuctionMediator', function testPubfoodMediator() {
 
-  function clearEvents() {
-    Event.removeAllListeners();
-    Event.observeImmediate_ = null;
-    Event.observeImmediate_ = {};
-  }
-
   var TEST_MEDIATOR;
   beforeEach(function() {
-    clearEvents();
+    Event.removeAllListeners();
 
     TEST_MEDIATOR = null;
     TEST_MEDIATOR = new AuctionMediator();
@@ -64,10 +58,6 @@ describe('Pubfood AuctionMediator', function testPubfoodMediator() {
       }
     });
 
-  });
-
-  afterEach(function() {
-    clearEvents();
   });
 
   it('should set a timeout', function() {

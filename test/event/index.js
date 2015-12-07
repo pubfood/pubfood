@@ -10,8 +10,73 @@ var Event = require('../../src/event');
 describe('Event - Tests', function () {
   beforeEach(function() {
     Event.removeAllListeners();
-    // TODO consider if this should be a formal API instead
-    Event.observeImmediate_ = {};
+  });
+  it('should remove all listeners', function(done) {
+    var spy = sinon.spy();
+
+    Event.on('hello', spy); // hello listener 1
+    Event.emit('hello', 1); // call-1
+    sinon.assert.calledOnce(spy, 'listener should be called once');
+
+    Event.removeAllListeners();
+
+    Event.on('hello', spy); // hello listener 1
+    Event.emit('hello', 2); // call-2
+    sinon.assert.calledTwice(spy, 'listener should be called twice');
+
+    Event.on('hello', spy); // hello listener 2
+    Event.emit('hello', 3); // call-3, call-4
+    sinon.assert.callCount(spy, 4, 'listener should be called four times');
+
+    done();
+  });
+  it('should remove all listeners when event argument supplied', function(done) {
+    var spy = sinon.spy();
+
+    Event.on('hello', spy); // hello listener 1
+    Event.emit('hello', 1); // call-1
+    sinon.assert.calledOnce(spy, 'listener should be called once');
+
+    Event.removeAllListeners('hello');
+
+    Event.on('hello', spy); // hello listener 1
+    Event.emit('hello', 2); // call-2
+    sinon.assert.calledTwice(spy, 'listener should be called twice');
+
+    Event.removeAllListeners(0);
+
+    // Invert on/emit calls for immediate observer removal
+    Event.emit('hello', 3); // call-3
+    Event.on('hello', spy); // hello listener 1
+    sinon.assert.calledThrice(spy, 'listener should be called thrice');
+
+    var foo;
+    Event.removeAllListeners(foo);
+
+    Event.emit('hello', 3); // call-4
+    Event.on('hello', spy); // hello listener 1
+    sinon.assert.called(spy, 4, 'listener should be called four times');
+
+    done();
+  });
+  it('should remove immediate listeners', function(done) {
+    var spy = sinon.spy();
+
+    Event.emit('hello'); // call-1
+    Event.on('hello', spy); // hello listener 1
+    sinon.assert.calledOnce(spy, 'listener should be called once');
+
+    Event.removeAllListeners();
+
+    Event.emit('hello'); // call-2
+    Event.on('hello', spy); // hello listener 1
+    sinon.assert.calledTwice(spy, 'listener should be called twice');
+
+    Event.emit('hello'); // call-3, call-4
+    Event.on('hello', spy); // hello listener 2
+    sinon.assert.callCount(spy, 4, 'listener should be called four times');
+
+    done();
   });
   it('should invoke the done callback', function(done) {
     Event.on('hello', done);
