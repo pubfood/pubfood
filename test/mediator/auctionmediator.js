@@ -60,10 +60,6 @@ describe('Pubfood AuctionMediator', function testPubfoodMediator() {
 
   });
 
-  afterEach(function() {
-    Event.removeAllListeners();
-  });
-
   it('should set a timeout', function() {
     var m = new AuctionMediator();
     m.timeout(1000);

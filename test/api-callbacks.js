@@ -43,17 +43,12 @@ describe('Api Callbacks - Tests', function() {
     Event.removeAllListeners();
   });
 
-  afterEach(function() {
-    Event.removeAllListeners();
-  });
-
   it('should call all the callbacks', function(done) {
 
-    //
     var bidProviderDoneCalled = {
-      //yieldbot: false,
-      //bidderFast: false,
-      //bidderSlow: false
+      yieldbot: false,
+      bidderFast: false,
+      bidderSlow: false
     };
 
     var pf = new pubfood({
