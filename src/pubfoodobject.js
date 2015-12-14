@@ -11,7 +11,6 @@ var util = require('./util');
  *
  * @class
  * @memberof pubfood
- * @ignore
  */
 function PubfoodObject() {
   this.id = util.newId();
