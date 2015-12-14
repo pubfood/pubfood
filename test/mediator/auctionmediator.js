@@ -67,7 +67,22 @@ describe('Pubfood AuctionMediator', function testPubfoodMediator() {
     assert.isTrue(m.getTimeout() === 1000, 'timeout not set');
   });
 
-  it('should count bid providers by slot allocation', function() {
+  it('should keep bidder status flag', function() {
+    var m1 = new AuctionMediator();
+    m1.bidStatus['b1'] = true;
+    m1.bidStatus['b2'] = true;
+    m1.bidStatus['b3'] = true;
+    m1.bidStatus['b4'] = true;
+    assert.isTrue(m1.allBiddersDone(), 'all bidders should be done');
+
+    m1.bidStatus['b1'] = true;
+    m1.bidStatus['b2'] = false;
+    m1.bidStatus['b3'] = true;
+    m1.bidStatus['b4'] = false;
+    assert.isFalse(m1.allBiddersDone(), 'all bidders should not be done');
+  });
+
+  it('should test bid providers done by status flag', function() {
     var m1 = new AuctionMediator();
 
     m1.addSlot({
@@ -84,137 +99,50 @@ describe('Pubfood AuctionMediator', function testPubfoodMediator() {
       ]
     });
 
-    var bidderSlots = m1.getBidderSlots();
-
-    assert.isTrue(bidderSlots.length === 0, 'm1 should have zero BidProviders for requests');
-    assert.isUndefined(m1.bidStatus['b1'], 'm1 should not track BidProvider b1');
-    assert.isUndefined(m1.bidStatus['b2'], 'm1 should not track BidProvider b2');
-    assert.isUndefined(m1.bidStatus['b3'], 'm1 should not track BidProvider b3');
-
-    m1 = null;
-    m1 = new AuctionMediator();
-
-    m1.addSlot({
-      name: '/0000000/multi-size',
-      sizes: [
-        [300, 250],
-        [300, 600]
-      ],
-      elementId: 'div-multi-size',
-      bidProviders: [
-        'b1',
-        'b2',
-        'b3'
-      ]
+    m1.addBidProvider({
+      name: 'b1',
+      libUri: 'someUri',
+      init: function(slots, pushBid, done) {
+        done();
+      },
+      refresh: function(slots, pushBid, done) {
+      }
     });
 
     m1.addBidProvider({
       name: 'b2',
       libUri: 'someUri',
       init: function(slots, pushBid, done) {
-
+        done();
       },
       refresh: function(slots, pushBid, done) {
       }
     });
 
-    bidderSlots = m1.getBidderSlots();
-
-    assert.isTrue(bidderSlots.length === 1, 'm1 should have one BidProvider for requests');
-    assert.isUndefined(m1.bidStatus['b1'], 'm1 should not track BidProvider b1');
-    assert.isUndefined(m1.bidStatus['b3'], 'm1 should not track BidProvider b3');
-
-    assert.isDefined(m1.bidStatus['b2'], 'm1 should track BidProvider b2');
-    assert.isFalse(m1.bidStatus['b2'], 'BidProvider b2 should not have bid status complete');
-
-    var m2 = new AuctionMediator();
-
-    m2.addBidProvider({
-      name: 'b2',
+    m1.addBidProvider({
+      name: 'b3',
       libUri: 'someUri',
       init: function(slots, pushBid, done) {
-
+        done();
       },
       refresh: function(slots, pushBid, done) {
       }
     });
 
-    bidderSlots = m2.getBidderSlots();
-
-    assert.isTrue(bidderSlots.length === 0, 'm2 should have zero BidProviders for requests');
-    assert.isUndefined(m2.bidStatus['b2'], 'm2 should not track BidProvider b2');
-
-    m2 = null;
-    m2 = new AuctionMediator();
-
-    m2.addBidProvider({
-      name: 'b2',
-      libUri: 'someUri',
-      init: function(slots, pushBid, done) {
-
+    m1.setAuctionProvider({
+      name: 'p1',
+      libUri: '../test/fixture/lib.js',
+      init: function(targeting, done) {
+        done();
       },
-      refresh: function(slots, pushBid, done) {
+      refresh: function(targeting, done) {
+        done();
       }
     });
 
-    m2.addSlot({
-      name: '/0000000/multi-size',
-      sizes: [
-        [300, 250],
-        [300, 600]
-      ],
-      elementId: 'div-multi-size',
-      bidProviders: [
-        'b3'
-      ]
-    });
+    m1.start();
 
-    bidderSlots = m2.getBidderSlots();
-
-    assert.isTrue(bidderSlots.length === 0, 'm2 should have zero BidProviders for requests');
-    assert.isUndefined(m2.bidStatus['b3'], 'm2 should not track BidProvider b3');
-
-    m2 = null;
-    m2 = new AuctionMediator();
-
-    m2.addBidProvider({
-      name: 'b2',
-      libUri: 'someUri',
-      init: function(slots, pushBid, done) {
-
-      },
-      refresh: function(slots, pushBid, done) {
-      }
-    });
-
-    m2.addSlot({
-      name: '/0000000/multi-size',
-      sizes: [
-        [300, 250],
-        [300, 600]
-      ],
-      elementId: 'div-multi-size',
-      bidProviders: [
-        'b3'
-      ]
-    });
-
-    m2.addSlot({
-      name: '/0000000/leaderboard',
-      sizes: [
-        [728, 90]
-      ],
-      elementId: 'div-leaderboard',
-      bidProviders: [
-        'b2'
-      ]
-    });
-
-    bidderSlots = m2.getBidderSlots();
-
-    assert.isTrue(bidderSlots.length === 1, 'm2 should have one BidProvider for requests');
-    assert.isDefined(m2.bidStatus['b2'], 'm2 should track BidProvider b2');
-    assert.isFalse(m2.bidStatus['b2'], 'm2 BidProvider b2 should not have bid status complete');
+    assert.equal(m1.allBiddersDone(), true, 'all bidders done should be true');
   });
 
   it('should start an auction when all bidders are done', function() {
@@ -245,10 +173,10 @@ describe('Pubfood AuctionMediator', function testPubfoodMediator() {
     m.setAuctionProvider({
       name: 'p1',
       libUri: '../test/fixture/lib.js',
-      init: function(slots, bids, done) {
+      init: function(targeting, done) {
         done();
       },
-      refresh: function(slots, targeting, done) {
+      refresh: function(targeting, done) {
         done();
       }
     });
@@ -600,6 +528,118 @@ describe('Pubfood AuctionMediator', function testPubfoodMediator() {
     it('should not error on invalid auction trigger', function() {
       TEST_MEDIATOR.setAuctionTrigger('function');
       TEST_MEDIATOR.start();
+    });
+  });
+
+  describe('Build targeting', function() {
+    it('should build a bid map for slots', function() {
+      var bid = new Bid(87);
+      bid.slot = TEST_MEDIATOR.slots[0].name;
+      TEST_MEDIATOR.bids_.push(bid);
+      var bidMap = TEST_MEDIATOR.getBidMap_();
+      assert.equal(bidMap[TEST_MEDIATOR.slots[0].name].length, 1, 'should have one slot targeting bidMap entry');
+    });
+
+    it('should build a bid map for a page', function() {
+      var bid = new Bid(87);
+      TEST_MEDIATOR.bids_.push(bid);
+      var bidMap = TEST_MEDIATOR.getBidMap_();
+      assert.equal(bidMap[AuctionMediator.PAGE_BIDS].length, 1, 'should have one page targeting bidMap entry');
+    });
+
+    it('should build a bid map for a slot and page', function() {
+      var bid = new Bid(87);
+      bid.slot = TEST_MEDIATOR.slots[0].name;
+      TEST_MEDIATOR.bids_.push(bid);
+      TEST_MEDIATOR.bids_.push(new Bid(37));
+      var bidMap = TEST_MEDIATOR.getBidMap_();
+      assert.equal(bidMap[TEST_MEDIATOR.slots[0].name].length, 1, 'should have one slot and one page targeting bidMap entry');
+      assert.equal(bidMap[AuctionMediator.PAGE_BIDS].length, 1, 'should have one slot and one page targeting bidMap entry');
+    });
+
+    it('should build slot targeting', function() {
+      var bid = new Bid(87);
+      bid.slot = TEST_MEDIATOR.slots[0].name;
+      TEST_MEDIATOR.bids_.push(bid);
+      var auctionTargeting = TEST_MEDIATOR.buildTargeting_();
+      assert.equal(auctionTargeting.length, 1, 'should have one targeting object');
+      assert.equal(auctionTargeting[0].name, bid.slot, 'should have slot name: ' + bid.slot);
+    });
+
+    it('should build page targeting', function() {
+      var bid = new Bid(87);
+      TEST_MEDIATOR.bids_.push(bid);
+      var auctionTargeting = TEST_MEDIATOR.buildTargeting_();
+      assert.equal(auctionTargeting.length, 2, 'should have two targeting objects');
+      assert.isUndefined(auctionTargeting[1].name, 'should have page targeting object');
+    });
+
+    it('should build slot targeting without a bid', function() {
+      var auctionTargeting = TEST_MEDIATOR.buildTargeting_();
+      assert.equal(auctionTargeting.length, 1, 'should have one slot targeting object without a bid');
+      assert.equal(auctionTargeting[0].name, TEST_MEDIATOR.slots[0].name, 'should have slot name: ' + TEST_MEDIATOR.slots[0].name);
+    });
+
+    it('should build a bid key', function() {
+      var bid = new Bid(87);
+      for (var i in TEST_MEDIATOR.bidProviders) {
+        bid.provider = TEST_MEDIATOR.bidProviders[i].name;
+      }
+      var bidKey = TEST_MEDIATOR.getBidKey(bid);
+      assert.equal(bidKey, bid.provider + '_bid', 'bid key should be \"' + bid.provider + '_bid\"');
+    });
+
+    it('should build a bid key with label', function() {
+      var bid = new Bid(87);
+      bid.label = 'zzz';
+      for (var i in TEST_MEDIATOR.bidProviders) {
+        bid.provider = TEST_MEDIATOR.bidProviders[i].name;
+      }
+      var bidKey = TEST_MEDIATOR.getBidKey(bid);
+      assert.equal(bidKey, bid.provider + '_zzz', 'bid key should be \"' + bid.provider + '_zzz\"');
+    });
+
+    it('should build a bid key with label and without prefix', function() {
+      var bid = new Bid(87);
+      bid.label = 'zzz';
+      TEST_MEDIATOR.prefix = false;
+      for (var i in TEST_MEDIATOR.bidProviders) {
+        bid.provider = TEST_MEDIATOR.bidProviders[i].name;
+      }
+      var bidKey = TEST_MEDIATOR.getBidKey(bid);
+      assert.equal(bidKey, 'zzz', 'bid key should be \"zzz\"');
+    });
+  });
+
+  describe('Timeout values', function() {
+    it('should set the timeout value', function() {
+      TEST_MEDIATOR.timeout(5);
+      assert.equal(TEST_MEDIATOR.getTimeout(), 5, 'timeout value should be 5');
+    });
+
+    it('timeout should be a numeric type', function() {
+      TEST_MEDIATOR.timeout('5');
+      assert.equal(TEST_MEDIATOR.getTimeout(), 2000, 'timeout value should be the default: 2000');
+    });
+
+    it('should set the auction provider callback timeout value', function() {
+      TEST_MEDIATOR.setAuctionProviderCbTimeout(5);
+      assert.equal(TEST_MEDIATOR.initDoneTimeout_, 5, 'auction provider callback timeout value should be 5');
+    });
+
+    it('auction provider callback timeout should be a numeric type', function() {
+      TEST_MEDIATOR.setAuctionProviderCbTimeout('5');
+      assert.equal(TEST_MEDIATOR.initDoneTimeout_, 2000, 'auction provider timeout value should be the default: 2000');
+    });
+
+    it('should set the bid provider callback timeout value', function() {
+      TEST_MEDIATOR.setBidProviderCbTimeout(5);
+      assert.equal(TEST_MEDIATOR.callbackTimeout_, 5, 'bid provider callback timeout value should be 5');
+    });
+
+    it('bid provider callback timeout should be a numeric type', function() {
+      TEST_MEDIATOR.setBidProviderCbTimeout('5');
+      assert.equal(TEST_MEDIATOR.callbackTimeout_, 2000, 'bid provider timeout value should be the default: 2000');
     });
   });
 });

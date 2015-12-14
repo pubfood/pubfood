@@ -1,4 +1,4 @@
-/**
+ /**
  * pubfood
  *
  * Pubfood - A browser client header bidding JavaScript library.
@@ -18,7 +18,7 @@ var AuctionMediator = require('./mediator/auctionmediator');
     module.exports = ctor(global, global.pfConfig || {});
   }
 
-}(window || {}, undefined, function(global/*, config*/) {
+}(window || {}, undefined, function(global) {
 
   if(global.pubfood){
     global.pubfood.library.logger.logEvent(Event.EVENT_TYPE.WARN, ['multiple api load']);
@@ -32,8 +32,6 @@ var AuctionMediator = require('./mediator/auctionmediator');
   var configErrors = [];
 
   var requiredApiCalls = {
-    //observe: 0,
-    addSlot: 0,
     setAuctionProvider: 0,
     addBidProvider: 0,
   };

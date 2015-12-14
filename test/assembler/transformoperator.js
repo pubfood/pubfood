@@ -10,9 +10,48 @@ var assert = require('chai').assert;
 var expect = require('chai').expect;
 var TransformOperator = require('../../src/assembler/transformoperator');
 var Bid = require('../../src/model/bid');
-var bid1 = require('../fixture/bid1');
 
 describe('TransformOperator', function() {
+
+  var BIDS = [
+    {
+      sizes: [300, 250],
+      slot: '1',
+      value: 1
+    },
+    {
+      targeting: {
+      },
+      sizes: [300, 250],
+      slot: '/this/is/a/slot',
+      value: '1'
+    },
+    {
+      targeting: {
+        yes: 'yes',
+      },
+      sizes: [[300, 600], [300, 250]],
+      slot: '/this/is/a/slot',
+      value: 1
+    },
+    {
+      targeting: {
+        no: 'no'
+      },
+      sizes: [[728, 90]],
+      slot: '/this/is/a/slot',
+      value: .2
+    },
+    {
+      targeting: {
+        yes: 'yes'
+      },
+      sizes: [300, 250],
+      slot: '/this/is/a/slot',
+      value: '1.75'
+    }
+  ];
+
   it('should be valid', function() {
     var t = TransformOperator.withDelegate(function(bids, params) {});
 
@@ -31,7 +70,7 @@ describe('TransformOperator', function() {
       return bids;
     });
 
-    var outBids = t.process(bid1.valid);
+    var outBids = t.process(BIDS);
     expect(outBids).not.to.be.empty;
 
   });
@@ -55,8 +94,8 @@ describe('TransformOperator', function() {
     });
 
     var inBids = [];
-    for (var k = 0; k < bid1.valid.length; k++) {
-      inBids.push(Bid.fromObject(bid1.valid[k]));
+    for (var k = 0; k < BIDS.length; k++) {
+      inBids.push(Bid.fromObject(BIDS[k]));
     }
 
     var outBids = t0.process(inBids);

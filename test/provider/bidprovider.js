@@ -130,4 +130,45 @@ describe('Pubfood BidProvider', function() {
       assert.isTrue(bidProvider.getParamKeys().length === 5, 'should only have 5 keys');
     });
   });
+
+  it('should have a default enabled status of true', function() {
+    var bidProvider = new BidProvider();
+    assert.isTrue(bidProvider.enabled(), 'bid provider should be enabled by default');
+  });
+
+  it('should set enabled to false', function() {
+    var bidProvider = new BidProvider();
+    bidProvider.enabled(false);
+    assert.isFalse(bidProvider.enabled(), 'bid provider should be disabled');
+  });
+
+  it('should set enabled to true', function() {
+    var bidProvider = new BidProvider();
+    bidProvider.enabled(false);
+    assert.isFalse(bidProvider.enabled(), 'bid provider should be disabled');
+    bidProvider.enabled(true);
+    assert.isTrue(bidProvider.enabled(), 'bid provider should be enabled');
+  });
+
+  it('should only accept a boolean argument for enabled status', function() {
+    var bidProvider = new BidProvider();
+    bidProvider.enabled(0);
+    assert.isTrue(bidProvider.enabled(), 'bid provider should be enabled');
+
+    bidProvider.enabled(null);
+    assert.isTrue(bidProvider.enabled(), 'bid provider should be enabled');
+
+    bidProvider.enabled({});
+    assert.isTrue(bidProvider.enabled(), 'bid provider should be enabled');
+
+    bidProvider.enabled([]);
+    assert.isTrue(bidProvider.enabled(), 'bid provider should be enabled');
+
+    var foo;
+    bidProvider.enabled(foo);
+    assert.isTrue(bidProvider.enabled(), 'bid provider should be enabled');
+
+    bidProvider.enabled(function() {});
+    assert.isTrue(bidProvider.enabled(), 'bid provider should be enabled');
+  });
 });

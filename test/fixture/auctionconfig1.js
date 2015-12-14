@@ -21,8 +21,7 @@ var pubfoodContrib = {
       ],
       elementId: 'div-multi-size',
       bidProviders: [
-        'yieldbot',
-        'walkathon'
+        'yieldbot'
       ]
     },
     {
@@ -33,7 +32,6 @@ var pubfoodContrib = {
       elementId: 'div-leaderboard',
       bidProviders: [
         'yieldbot',
-        'walkathon',
         'carsales'
       ]
     }
@@ -80,13 +78,17 @@ var pubfoodContrib = {
       googletag.cmd.push(function() {
         var i;
         for (i = 0; i < targeting.length; i++) {
-          var slot = targeting[i];
+          var tgtObject = targeting[i];
 
-          var gptslot = googletag.defineSlot(slot.name, slot.sizes, slot.elementId)
+          var gptObject;
+          if (tgtObject.name) {
+            gptObject = googletag.defineSlot(tgtObject.name, tgtObject.sizes, tgtObject.elementId)
               .addService(googletag.pubads());
-
-          for (var p in slot.targeting) {
-            gptslot.setTargeting(p, slot.targeting[p]);
+          } else {
+            gptObject = googletag.pubads();
+          }
+          for (var p in tgtObject.targeting) {
+            gptObject.setTargeting(p, tgtObject.targeting[p]);
           }
         }
       });
@@ -176,6 +178,16 @@ var pubfoodContrib = {
             delete bidObject.value; // pubfood core should not fail with missing value property
             pushBid(bidObject);
           }
+
+          pushBid({
+            value: bid,
+            sizes: sizes,
+            targeting: {
+              ybot_ad: 'y',
+              ybot_criteria: yieldbot.getPageCriteria()
+            },
+            label: 'ybc'
+          });
 
           done();
         });
