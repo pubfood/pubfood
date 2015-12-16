@@ -7,6 +7,7 @@
 var util = require('../util');
 var AuctionDelegate = require('../interfaces').AuctionDelegate;
 var Event = require('../event');
+var PubfoodObject = require('../pubfoodobject');
 
 /**
  * AuctionProvider decorates the {@link AuctionDelegate} to implement the publisher ad server requests.
@@ -15,11 +16,16 @@ var Event = require('../event');
  * @property {string} name the name of the provider
  * @memberof pubfood#provider
  * @param {AuctionDelegate} auctionDelegate the delegate object that implements [libUri()]{@link pubfood#provider.AuctionProvider#libUri}, [init()]{@link pubfood#provider.AuctionProvider#init} and [refresh()]{@link pubfood#provider.AuctionProvider#refresh}
+ * @augments pubfood.PubfoodObject
  */
 function AuctionProvider(auctionDelegate) {
-  this.name = auctionDelegate.name || '';
+  if (this.init_) {
+    this.init_();
+  }
+  var delegate = auctionDelegate || {};
+  this.name = delegate.name || '';
   this.slots_ = [];
-  this.auctionDelegate = auctionDelegate;
+  this.auctionDelegate = delegate;
   this.mediator = null;
 }
 
@@ -98,4 +104,5 @@ AuctionProvider.prototype.refresh = function(targeting, done) {
   refresh(targeting, done);
 };
 
+util.extends(AuctionProvider, PubfoodObject);
 module.exports = AuctionProvider;

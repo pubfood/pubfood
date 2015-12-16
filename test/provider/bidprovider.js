@@ -59,4 +59,75 @@ describe('Pubfood BidProvider', function() {
     bp2.refresh();
     assert.isTrue(testRefresh, 'refresh delegate not called');
   });
+
+  describe('Set Custom Parameters', function() {
+    it('will set and get custom parameters', function() {
+      var bidProvider = new BidProvider();
+
+      bidProvider.setParam('aString', 'theString');
+      assert.isTrue(bidProvider.getParam('aString') === 'theString', 'should have parameter value: \"theString\"');
+
+      bidProvider.setParam('aBoolean', true);
+      assert.isTrue(bidProvider.getParam('aBoolean'), 'should have parameter value: true');
+
+      bidProvider.setParam('aNumber', 3.14);
+      assert.isTrue(bidProvider.getParam('aNumber') === 3.14, 'should have parameter value: 3.14');
+
+      bidProvider.setParam('anObject', {key: 'value'});
+      assert.deepEqual(bidProvider.getParam('anObject'), {key: 'value'}, 'should have parameter value: {key: \"value\"}');
+
+      bidProvider.setParam('anArray', ['value', 3.14]);
+      assert.deepEqual(bidProvider.getParam('anArray'), ['value', 3.14], 'should have parameter value: [\"value\", 3.14]');
+
+      var aFunction = function(num) {
+        return ++num;
+      };
+      bidProvider.setParam('aFunction', aFunction);
+      assert.isTrue(bidProvider.getParam('aFunction').call(null, 0) === 1, 'should execute the function');
+    });
+
+    it('should allow fluent param creation', function() {
+      var bidProvider = new BidProvider();
+
+      bidProvider.setParam('p1', 0)
+        .setParam('p2', 1)
+        .setParam('p3', 2)
+        .setParam('p4', 4)
+        .setParam('p5', 6)
+        .setParam('p6', 8);
+
+      var keys = bidProvider.getParamKeys();
+
+      var sum = 0;
+      keys.map(function(v) {
+        sum += v;
+      });
+      assert.isTrue(sum === 21, 'key iteration should produce value of 21');
+
+    });
+
+    it('should not set parameter with undefined name', function() {
+      var bidProvider = new BidProvider();
+      var foo;
+      bidProvider.setParam(foo, 0).
+        setParam('p1', 1);
+      assert.isTrue(bidProvider.getParamKeys().length === 1, 'should only have 1 key');
+      assert.isTrue(bidProvider.getParam('p1') === 1, 'parameter \"p1\" should have value of 1');
+    });
+
+    it('should only add string, number or boolean parameter keys', function() {
+      var bidProvider = new BidProvider();
+
+      bidProvider.setParam({p1: 'p1'}, 0)
+        .setParam(['p2'], 1)
+        .setParam(0, 2)
+        .setParam(1.01, 2.1)
+        .setParam('p4', 4)
+        .setParam('', 4.1)
+        .setParam(function(){}, 6)
+        .setParam(true, 8);
+
+      assert.isTrue(bidProvider.getParamKeys().length === 5, 'should only have 5 keys');
+    });
+  });
 });

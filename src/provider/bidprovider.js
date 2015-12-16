@@ -7,6 +7,7 @@
 var util = require('../util');
 var BidDelegate = require('../interfaces').BidDelegate;
 var Event = require('../event');
+var PubfoodObject = require('../pubfoodobject');
 
 /**
  * BidProvider implements bidding partner requests.
@@ -14,9 +15,14 @@ var Event = require('../event');
  * @class
  * @param {BidDelegate} delegate the delegate object that implements [libUri()]{@link pubfood#provider.BidProvider#libUri}, [init()]{@link pubfood#provider.BidProvider#init} and [refresh()]{@link pubfood#provider.BidProvider#refresh}
  * @property {string} name the name of the provider
+ * @augments pubfood.PubfoodObject
  * @memberof pubfood#provider
  */
-function BidProvider(delegate) {
+function BidProvider(bidDelegate) {
+  if (this.init_) {
+    this.init_();
+  }
+  var delegate = bidDelegate || {};
   this.name = delegate.name || '';
   this.bidDelegate = delegate;
 }
@@ -107,4 +113,5 @@ BidProvider.prototype.refresh = function(slots, pushBid, done) {
   refresh(slots, pushBid, done);
 };
 
+util.extends(BidProvider, PubfoodObject);
 module.exports = BidProvider;

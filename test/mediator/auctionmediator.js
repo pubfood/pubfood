@@ -5,6 +5,7 @@
 
 /*eslint no-unused-vars: 0*/
 /*eslint no-undef: 0*/
+require('../common');
 var assert = require('chai').assert;
 var AuctionMediator = require('../../src/mediator/auctionmediator');
 var Event = require('../../src/event');
