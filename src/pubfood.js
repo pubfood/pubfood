@@ -180,7 +180,16 @@ var AuctionMediator = require('./mediator/auctionmediator');
    *
    * @function
    * @param {BidDelegate} delegate Bid provider configuaration
-   * @example {file} ../examples/add-bid-provider.js
+   * @example
+   var pf = new pubfood();
+   pf.addBidProvider({
+     name: 'BidProvider1',
+     libUrl: '',
+     init: function(slots, pushBid, done) {
+     },
+     refresh: function(slots, pushBid, done) {
+     }
+   });
    * @return {BidProvider|null}
    */
   api.prototype.addBidProvider = function(delegate) {
@@ -224,7 +233,12 @@ var AuctionMediator = require('./mediator/auctionmediator');
    * @param {string} [eventType] the event to bind this reporter to
    * @param {reporter} reporter Custom reporter
    * @return {pubfood}
-   * @example {file} ../examples/reporter.js
+   * @example
+   var pf = new pubfood();
+   var reporter = function(event){
+     console.log('my reporter', event.data);
+   };
+   pf.observe(reporter);
    */
   api.prototype.observe = function(eventType, reporter) {
     logger.logCall('api.observe', arguments);
