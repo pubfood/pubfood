@@ -115,7 +115,7 @@ BidProvider.prototype.refresh = function(slots, pushBid, done) {
 };
 
 /**
- * Get or set the bid provided enabled status.
+ * Get or set the bid provider enabled status.
  *
  * Bid providers are enabled to be part of auction bid requests by default.<p>
  * If a bid provider is not to be included in an auction `init` or `refresh` request,<br>
