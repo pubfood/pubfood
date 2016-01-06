@@ -25,6 +25,7 @@ function BidProvider(bidDelegate) {
   var delegate = bidDelegate || {};
   this.name = delegate.name || '';
   this.bidDelegate = delegate;
+  this.enabled_ = true;
 }
 
 /**
@@ -111,6 +112,21 @@ BidProvider.prototype.refresh = function(slots, pushBid, done) {
     return;
   }
   refresh(slots, pushBid, done);
+};
+
+/**
+ * Get or set the bid provider enabled status.
+ *
+ * Bid providers are enabled to be part of auction bid requests by default.<p>
+ * If a bid provider is not to be included in an auction `init` or `refresh` request,<br>
+ * the bid provider may be disabled to prevent the provider bid request.
+ * @returns {boolean} true if enabled for bid requests, false otherwise.
+ */
+BidProvider.prototype.enabled = function(status) {
+  if (util.asType(status) === 'boolean') {
+    this.enabled_ = status;
+  }
+  return this.enabled_;
 };
 
 util.extends(BidProvider, PubfoodObject);

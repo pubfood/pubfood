@@ -82,7 +82,7 @@ AuctionProvider.prototype.libUri = function() {
  *
  * The AuctionProvider delegate Javascript and other tag setup is done here.
  *
- * @param {array.<SlotTargetingObject>} targeting - objects with bid targeting
+ * @param {array.<TargetingObject>} targeting - objects with bid targeting
  * @param {auctionDoneCallback} done - a callback to execute on init complete
  */
 AuctionProvider.prototype.init = function(targeting, done) {
@@ -92,7 +92,7 @@ AuctionProvider.prototype.init = function(targeting, done) {
 /**
  * Refresh for ad slots
  *
- * @param {array.<SlotTargetingObject>} targeting - objects with bid level targeting
+ * @param {array.<TargetingObject>} targeting - objects with bid level targeting
  * @param {auctionDoneCallback} done a callback to execute on init complete
  */
 AuctionProvider.prototype.refresh = function(targeting, done) {

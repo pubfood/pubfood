@@ -9,10 +9,48 @@
 var assert = require('chai').assert;
 var BidAssembler = require('../../src/assembler/bidassembler');
 var TransformOperator = require('../../src/assembler/transformoperator');
-var bid1 = require('../fixture/bid1');
 var Bid = require('../../src/model/bid');
 
 describe('BidAssembler', function testBidAssembler() {
+
+  var BIDS  = [
+    {
+      sizes: [300, 250],
+      slot: '1',
+      value: 1
+    },
+    {
+      targeting: {
+      },
+      sizes: [300, 250],
+      slot: '/this/is/a/slot',
+      value: '1'
+    },
+    {
+      targeting: {
+        yes: 'yes',
+      },
+      sizes: [[300, 600], [300, 250]],
+      slot: '/this/is/a/slot',
+      value: 1
+    },
+    {
+      targeting: {
+        no: 'no'
+      },
+      sizes: [[728, 90]],
+      slot: '/this/is/a/slot',
+      value: .2
+    },
+    {
+      targeting: {
+        yes: 'yes'
+      },
+      sizes: [300, 250],
+      slot: '/this/is/a/slot',
+      value: '1.75'
+    }
+  ];
 
   it('should add a transform operator', function() {
     var assembler = new BidAssembler();
@@ -45,15 +83,16 @@ describe('BidAssembler', function testBidAssembler() {
     function noop(bid, params) {
     }
     assembler.addOperator(new TransformOperator(noop));
-    var bids = assembler.process(bid1.valid);
+
+    var bids = assembler.process(BIDS);
 
   });
 
 
   it('should run process on >1 operators', function() {
     var inBids = [];
-    for (var k = 0; k < bid1.valid.length; k++) {
-      inBids.push(Bid.fromObject(bid1.valid[k]));
+    for (var k = 0; k < BIDS.length; k++) {
+      inBids.push(Bid.fromObject(BIDS[k]));
     }
 
     var assembler = new BidAssembler();

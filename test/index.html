@@ -68,10 +68,10 @@
 
           expect(pf.getBidProviders()).not.to.be.empty;
 
-          pf.addBidProvider(pubfoodContrib.bidProviders[1]);
+          pf.addBidProvider(pubfoodContrib.bidProviders[1]).enabled(false);
           assert.equal(Object.keys(pf.getBidProviders()).length, 2, 'bid provider not added');
 
-          pf.addBidProvider(pubfoodContrib.bidProviders[2]);
+          pf.addBidProvider(pubfoodContrib.bidProviders[2]).enabled();;
           assert.equal(Object.keys(pf.getBidProviders()).length, 3, 'bid provider not added');
         });
 
@@ -85,8 +85,8 @@
 
         it('should start an auction', function() {
           pf.addBidProvider(pubfoodContrib.bidProviders[0]);
-          pf.addBidProvider(pubfoodContrib.bidProviders[1]);
-          pf.addBidProvider(pubfoodContrib.bidProviders[2]);
+          pf.addBidProvider(pubfoodContrib.bidProviders[1]).enabled(false);
+          pf.addBidProvider(pubfoodContrib.bidProviders[2]).enabled(false);;
 
           pf.addSlot(pubfoodContrib.slots[1]);
 
@@ -114,7 +114,7 @@
             for (var i = 0; i < bids.length; i++) {
               bids[i]['targeting'].code = (0 | Math.random() * 36).toString(36);
 
-              bids[i].baseValue = bids[i].value;
+              bids[i].baseValue = bids[i].value || 0;
               bids[i].value = bids[i].value + 9;
             }
             return bids;

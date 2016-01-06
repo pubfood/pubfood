@@ -9,4 +9,5 @@ describe('API - Tests', function () {
   require('./objects');
   require('./callbacks');
   require('./customparams');
+  require('./buildtargeting');
 });

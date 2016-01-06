@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>YB PgLvl Bid</title>
+    <script src="../../../../build/pubfood.js"></script>
+</head>
+<body>
+    <h2><em>Yieldbot Page-Level Targeting Example</em></h2>
+
+    <!-- Ad appended here -->
+    <div id='div-medrec'></div>
+
+    <script>
+     window.googletag = window.googletag || {};
+     googletag.cmd = googletag.cmd || [];
+     var ybotq = ybotq || [];
+
+     var pf = new pubfood();
+     pf.observe('AUCTION_POST_RUN', function() {
+         googletag.cmd.push(function() { googletag.display('div-medrec'); });
+     });
+    </script>
+
+    <script>
+     var slot = pf.addSlot({
+         name: '/6355419/Travel/Europe/France/Paris',
+         sizes: [
+             [300, 250]
+         ],
+         elementId: 'div-medrec',
+         bidProviders: [
+             'yieldbot'
+         ]
+     });
+     slot.setParam('yieldbot', { slot: 'medrec' });
+
+     var yieldbotProvider = pf.addBidProvider({
+         name: 'yieldbot',
+         libUri: 'http://cdn.yldbt.com/js/yieldbot.intent.js',
+         init: function(slots, pushBid, done) {
+             var YB_SLOT_PARAMS = pf.getSlot(slot.name).getParam(this.name);
+
+             ybotq.push(function() {
+                 yieldbot.psn('0000');
+                 for (var k = 0; k < slots.length; k++) {
+                     var slot = slots[k];
+                     var ybslotName = YB_SLOT_PARAMS.slot;
+
+                     yieldbot.defineSlot(ybslotName, {
+                         sizes: slot.sizes
+                     });
+                 }
+                 yieldbot.enableAsync();
+                 yieldbot.go();
+             });
+
+             ybotq.push(function() {
+                 pushBid({
+                     targeting: {
+                         ybot: yieldbot.getPageCriteria() // e.g. medrec:300x250:300
+                     }
+                 });
+                 done();
+             });
+         }
+     });
+
+     var noSlotsProvider = pf.addBidProvider({
+         name: 'noSlots',
+         libUri: 'http://', // see: https://github.com/pubfood/pubfood/issues/20
+         init: function(slots, pushBid, done) {
+             pushBid({
+                 value: '1000000.99',
+                 targeting: {
+                     ns_unit: 'everything'
+                 }
+             });
+             done();
+         }
+     });
+
+     pf.setAuctionProvider({
+         name: 'Google',
+         libUri: 'http://www.googletagservices.com/tag/js/gpt.js',
+         init: function(targeting, done) {
+             googletag.cmd.push(function() {
+                 for (var i = 0; i < targeting.length; i++) {
+                     var tgtObject = targeting[i];
+
+                     var gptObject;
+                     if (tgtObject.name) {
+                         gptObject = googletag.defineSlot(tgtObject.name, tgtObject.sizes, tgtObject.elementId)
+                                         .addService(googletag.pubads());
+                     } else {
+                         gptObject = googletag.pubads();
+                     }
+                     for (var p in tgtObject.targeting) {
+                         gptObject.setTargeting(p, tgtObject.targeting[p]);
+                     }
+                 }
+             });
+             googletag.cmd.push(function() {
+                 googletag.pubads().enableSingleRequest();
+                 googletag.enableServices();
+                 done();
+             });
+         }
+     });
+
+     pf.start();
+    </script>
+</body>
+</html>

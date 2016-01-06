@@ -15,10 +15,10 @@
  * @property {string} name Auction provider delegate name
  * @property {string} libUri
  * @property {function} init Auction provider delegate initial auction request.<br>Called at startup.
- * @property {array.<SlotTargetingObject>} init.targeting
+ * @property {array.<TargetingObject>} init.targeting
  * @property {auctionDoneCallback} init.done Callback to execute on done
  * @property {function} [refresh] Auction provider delegate refresh auction request.<br>Called at startup.
- * @property {array.<SlotTargetingObject>} refresh.targeting
+ * @property {array.<TargetingObject>} refresh.targeting
  * @property {auctionDoneCallback} refresh.done Callback to execute on done
  * @property {function} [trigger] Auction provider delegate function to trigger the auction. Default: [pubfood.timeout]{@link pubfood#timeout}
  * @property {auctionDoneCallback} trigger.done Callback to initialize the auction provider
@@ -162,9 +162,9 @@ var apiStartCallback = function(hasErrors, errors){
  * Bid object structure for the {@link pushBidCallback}.
  *
  * @typedef {BidObject} BidObject
- * @property {string} slot - slot name
- * @property {string} value - publisher adserver targeting bid value. Default: empty string.
- * @property {array.array.<number, number>} sizes - array of sizes for the slot the bid is for
+ * @property {string} [slot] - slot name
+ * @property {string} [value] - publisher adserver targeting bid value. Default: empty string.
+ * @property {array.array.<number, number>} [sizes] - array of sizes for the slot the bid is for
  * @property {number} sizes.0 width
  * @property {number} sizes.1 height
  * @property {object} [targeting] - key/value pairs for additional adserver targeting
@@ -177,11 +177,6 @@ var bidObject = {
   sizes: [],
   targeting: {},
   label: ''
-};
-bidObject.optional = {
-  targeting: true,
-  label: true,
-  value: true
 };
 
 /**
@@ -220,16 +215,16 @@ var slotConfig = {
  */
 
 /**
- * @typedef {SlotTargetingObject} SlotTargetingObject
+ * @typedef {TargetingObject} TargetingObject
  *
- * Key value targeting for a specific slot.
+ * Key value targeting for a specific slot or the page.
  *
- * @property {string} type the targeting level [slot|page]
- * @property {string} [name] the [Slot.name]{@link pubfood#mode.Slot#name} if type is 'slot'
- * @property {string} id the generated identifier of the object
- * @property {string} [elementId] the target DOM element id for the slot
- * @property {array.<number, number>} sizes array of slot sizes
+ * @property {string} [name] the [Slot.name]{@link pubfood#model.Slot#name}
+ * @property {string} [id] if targeting object is for a slot, the generated identifier of the slot
+ * @property {string} [elementId] the target DOM element id
+ * @property {array.<number, number>} [sizes] array of slot sizes
  * @property {object.<string, string>} targeting object containing key/value pair targeting
+ * @property {array.<object>} bids source bids for the targeting object
  * @memberof typeDefs
  */
 

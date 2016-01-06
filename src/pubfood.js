@@ -1,4 +1,4 @@
-/**
+ /**
  * pubfood
  *
  * Pubfood - A browser client header bidding JavaScript library.
@@ -18,7 +18,7 @@ var AuctionMediator = require('./mediator/auctionmediator');
     module.exports = ctor(global, global.pfConfig || {});
   }
 
-}(window || {}, undefined, function(global/*, config*/) {
+}(window || {}, undefined, function(global) {
 
   if(global.pubfood){
     global.pubfood.library.logger.logEvent(Event.EVENT_TYPE.WARN, ['multiple api load']);
@@ -32,8 +32,6 @@ var AuctionMediator = require('./mediator/auctionmediator');
   var configErrors = [];
 
   var requiredApiCalls = {
-    //observe: 0,
-    addSlot: 0,
     setAuctionProvider: 0,
     addBidProvider: 0,
   };
@@ -182,7 +180,16 @@ var AuctionMediator = require('./mediator/auctionmediator');
    *
    * @function
    * @param {BidDelegate} delegate Bid provider configuaration
-   * @example {file} ../examples/add-bid-provider.js
+   * @example
+   var pf = new pubfood();
+   pf.addBidProvider({
+     name: 'BidProvider1',
+     libUrl: '',
+     init: function(slots, pushBid, done) {
+     },
+     refresh: function(slots, pushBid, done) {
+     }
+   });
    * @return {BidProvider|null}
    */
   api.prototype.addBidProvider = function(delegate) {
@@ -226,7 +233,12 @@ var AuctionMediator = require('./mediator/auctionmediator');
    * @param {string} [eventType] the event to bind this reporter to
    * @param {reporter} reporter Custom reporter
    * @return {pubfood}
-   * @example {file} ../examples/reporter.js
+   * @example
+   var pf = new pubfood();
+   var reporter = function(event){
+     console.log('my reporter', event.data);
+   };
+   pf.observe(reporter);
    */
   api.prototype.observe = function(eventType, reporter) {
     logger.logCall('api.observe', arguments);

@@ -5,7 +5,6 @@
 
 var assert = require('chai').assert;
 var util = require('../../src/util');
-var BidObject = require('../../src/interfaces').BidObject;
 
 /*eslint no-unused-vars: 0*/
 /*eslint no-undef: 0*/
@@ -106,6 +105,18 @@ describe('Util - Tests', function () {
 
   it('should validate object properties', function() {
 
+    var BidObject = {
+      slot: '',
+      value: '',
+      sizes: [],
+      targeting: {},
+      label: ''
+    };
+    BidObject.optional = {
+      targeting: true,
+      label: true,
+      value: true
+    };
     assert.isFalse(util.validate(BidObject, {}), 'empty object should not be valid');
 
     var BID_REQUIRED_EMPTY_STR = {
