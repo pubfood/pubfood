@@ -22,7 +22,7 @@ var EventEmitter = require('eventemitter3');
  * @see https://github.com/primus/eventemitter3
  */
 function PubfoodEvent() {
-  this.auction_ = 1;
+  this.auctionId = 'pubfood:' + Date.now();
   /**
    * Map of emitted events without registered handlers.
    *
@@ -31,6 +31,17 @@ function PubfoodEvent() {
   this.observeImmediate_ = {};
   // PubfoodEvent constructor
 }
+
+/**
+ * Set the pubfood auctionId
+ * @param {string} auctionId the auction identifier
+*/
+PubfoodEvent.prototype.setAuctionId = function(auctionId) {
+  var type = util.asType(auctionId);
+  if (type === 'string' || type === 'number') {
+    this.auctionId = auctionId;
+  }
+};
 
 /**
  * @description Available event types
@@ -50,11 +61,19 @@ PubfoodEvent.prototype.EVENT_TYPE = {
    */
   PUBFOOD_API_START: 'PUBFOOD_API_START',
   /**
+   * Api library refresh
+   * @event PubfoodEvent.PUBFOOD_API_REFRESH
+   * @property {number} data api refresh timestamp
+   * @private
+   */
+  PUBFOOD_API_REFRESH: 'PUBFOOD_API_REFRESH',
+  /**
    * Bid provider library load started
    * @event PubfoodEvent.BID_LIB_START
    * @private
    */
   BID_LIB_START: 'BID_LIB_START',
+  BID_LIB_LOAD: 'BID_LIB_LOAD',
   /**
    * Bid provider library loaded
    * @event PubfoodEvent.BID_LIB_LOADED
@@ -101,6 +120,7 @@ PubfoodEvent.prototype.EVENT_TYPE = {
    * @private
    */
   AUCTION_LIB_START: 'AUCTION_LIB_START',
+  AUCTION_LIB_LOAD: 'AUCTION_LIB_LOAD',
   /**
    * Auction provider library loaded
    * @event PubfoodEvent.AUCTION_LIB_LOADED
@@ -114,6 +134,7 @@ PubfoodEvent.prototype.EVENT_TYPE = {
    * @property {string} data [AuctionProvider.name]{@link pubfood#provider.AuctionProvider}
    */
   AUCTION_GO: 'AUCTION_GO',
+  AUCTION_START: 'AUCTION_START',
   /**
    * Start the publisher auction from a business rule.
    * e.g. a bidder timeout
@@ -123,7 +144,7 @@ PubfoodEvent.prototype.EVENT_TYPE = {
    */
   AUCTION_TRIGGER: 'AUCTION_TRIGGER',
   /**
-   * The auction was restarted
+   * The auction was refreshed
    * @event PubfoodEvent.AUCTION_REFRESH
    * @property {string} data [AuctionProvider.name]{@link pubfood#provider.AuctionProvider}
    * @private
@@ -178,14 +199,16 @@ PubfoodEvent.prototype.publish = function(eventType, data, eventContext) {
     ts = data;
   }
 
-  logger.logEvent(eventType, arguments);
-
-  return this.emit(eventType, {
+  var event = {
+    auctionId: this.auctionId,
     ts: ts,
     type: eventType,
     eventContext: eventContext || 'pubfood',
     data: data || ''
-  });
+  };
+  logger.logEvent(eventType, this.auctionId, event);
+
+  return this.emit(eventType, event);
 };
 
 util.extends(PubfoodEvent, EventEmitter);

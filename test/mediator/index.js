@@ -7,4 +7,6 @@
 /*eslint no-undef: 0*/
 describe('Mediator - Tests', function () {
   require('./auctionmediator');
+  require('./auctionmediatorrefresh');
+  require('./auctionmediatorlatebids');
 });

@@ -193,7 +193,55 @@ var pubfoodContrib = {
         });
       },
       refresh: function(slots, pushBid, done) {
-        done();
+        var slotParams = {
+          '/2476204/multi-size': 'medrec',
+          '/2476204/leaderboard': 'leaderboard'
+        };
+        ybotq.push(function() {
+          yieldbot.nextPageview();
+        });
+
+        ybotq.push(function() {
+          var i;
+
+          var pageCriteria = yieldbot.getPageCriteria(); //sidebar:300x250:800,test_slot:300x250:200
+          var pageSlots = pageCriteria !== '' ? pageCriteria.split(',') : [];
+          for (i = 0; i < pageSlots.length; i++) {
+
+            var slotInfo = pageSlots[i].split(':'); //sidebar:300x250:800
+            var slot = slotInfo[0];
+            var size = slotInfo[1];
+            var bid = 0;
+            if (slotInfo.length && slotInfo[2]) {
+              bid = parseFloat(slotInfo[2], 10);
+            }
+
+            var sizes = size.split('x');
+            sizes[0] = parseInt(sizes[0], 10);
+            sizes[1] = parseInt(sizes[1], 10);
+
+            var pubSlot = '';
+            for (var k in slotParams) {
+              if (slotParams[k] === slot) {
+                pubSlot = k;
+                break;
+              }
+            }
+            // submit my bid...
+            var bidObject = {
+              slot: pubSlot || 'undefined_slot',
+              value: bid,
+              sizes: sizes,
+              targeting: {
+                ybot_ad: 'y',
+                ybot_slot: slot
+              },
+              label: 'price'
+            };
+            pushBid(bidObject);
+          }
+          done();
+        });
       }
     },
     {

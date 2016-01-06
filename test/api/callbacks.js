@@ -87,10 +87,10 @@ describe('Api Callbacks - Tests', function() {
     pf.addBidProvider(auctionExample.bidProviders[2]);
 
     var now = +(new Date());
+    var testDone = done;
     pf.start(now, function(hasErrors, details) {
       if(hasErrors){
-        console.log('hasErrors', hasErrors, details);
-        done();
+        testDone();
       }
     });
   });

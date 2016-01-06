@@ -27,7 +27,7 @@ describe('Pubfood AuctionProvider', function() {
       var ap = AuctionProvider.withDelegate(providers[i]);
       assert.isNull(ap, 'auction provider should be created');
       var log = logger.history[logger.history.length - 1];
-      assert.match(log.args[1].msg, /^Warn: invalid auction delegate/, 'was not a validation error on delegate');
+      assert.match(log.event.data.msg, /^Warn: invalid auction delegate/, 'was not a validation error on delegate');
     }
   });
 
@@ -45,7 +45,7 @@ describe('Pubfood AuctionProvider', function() {
 
     ap.refresh();
     var log = logger.history[logger.history.length - 1];
-    assert.match(log.args[1], /^AuctionProvider.auctionDelegate.refresh/, 'should get auctionDelegate warning');
+    assert.match(log.event.data, /^AuctionProvider.auctionDelegate.refresh/, 'should get auctionDelegate warning');
 
     var AUCTION_PROVIDER_WITH_REFRESH = {
       name: 'refresh',
