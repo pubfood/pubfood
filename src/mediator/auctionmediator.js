@@ -123,7 +123,6 @@ AuctionMediator.prototype.validate = function(isRefresh) {
 AuctionMediator.prototype.newAuctionRun = function(slotNames) {
   var idx = ++this.auctionIdx_;
   var auctionSlots = [];
-  var bidProviderNames = [];
   if (util.isArray(slotNames) && slotNames.length > 0) {
     for (var i = 0; i < slotNames.length; i++) {
       var slot = slotNames[i];
@@ -131,13 +130,11 @@ AuctionMediator.prototype.newAuctionRun = function(slotNames) {
         Event.publish(Event.EVENT_TYPE.WARN, 'Can\'t refresh slot "'+ slot +'", because it wasn\'t defined');
       } else {
         auctionSlots.push(this.slotMap[slot]);
-        Array.prototype.push.apply(bidProviderNames, this.slotMap[slot].bidProviders || []);
       }
     }
   } else {
     for (var k in this.slotMap) {
       auctionSlots.push(this.slotMap[k]);
-      Array.prototype.push.apply(bidProviderNames, this.slotMap[k].bidProviders || []);
     }
   }
 
@@ -150,10 +147,10 @@ AuctionMediator.prototype.newAuctionRun = function(slotNames) {
     targeting: []
   };
   // reset bidder status
-  for (var k in bidProviderNames) {
-    var name = bidProviderNames[k];
-    if (!(name in auctionRun.bidStatus) && this.bidProviders[name]) {
-      auctionRun.bidStatus[name] = false;
+  for (var k in this.bidProviders) {
+    var provider = this.bidProviders[k];
+    if (provider && !(provider.name in auctionRun.bidStatus) && provider.enabled()) {
+      auctionRun.bidStatus[provider.name] = false;
     }
   }
   this.auctionRun[idx] = auctionRun;
@@ -337,7 +334,7 @@ AuctionMediator.prototype.mergeKeys = function(slotTargeting, bidTargeting) {
  * @private
  * @return {object.<string, Bid>} targeting objects
  */
-AuctionMediator.prototype.getBidMap_ = function(auctionIdx, slotName) {
+AuctionMediator.prototype.getBidMap_ = function(auctionIdx) {
   var bidMap = {};
   bidMap[AuctionMediator.PAGE_BIDS] = [];
   var bids = this.getAuctionRunBids(auctionIdx);;
@@ -367,7 +364,7 @@ AuctionMediator.prototype.getBidMap_ = function(auctionIdx, slotName) {
 AuctionMediator.prototype.buildTargeting_ = function(auctionIdx) {
   var auctionTargeting = [];
   var bidSet;
-  var bidMap = this.getBidMap_();
+  var bidMap = this.getBidMap_(auctionIdx);
 
   // Slot-level targeting
   var auctionSlots = this.getAuctionRunSlots(auctionIdx);
@@ -474,7 +471,8 @@ AuctionMediator.prototype.processTargeting_ = function(auctionIdx, auctionType) 
  */
 AuctionMediator.prototype.auctionDone = function(auctionIdx, data) {
   this.auctionRun[auctionIdx].inAuction = AuctionMediator.IN_AUCTION.DONE;
-  Event.publish(Event.EVENT_TYPE.AUCTION_COMPLETE, data);
+  var auctionTargeting = this.getAuctionRun(auctionIdx).targeting;
+  Event.publish(Event.EVENT_TYPE.AUCTION_COMPLETE, { name: data, targeting: auctionTargeting });
   setTimeout(function() {
     // push this POST event onto the next tick of the event loop
     Event.publish(Event.EVENT_TYPE.AUCTION_POST_RUN, data);
@@ -521,15 +519,6 @@ AuctionMediator.prototype.addBidProvider = function(delegateConfig) {
 
 AuctionMediator.prototype.bidProviderExists_ = function(name){
   return !!this.bidProviders[name];
-};
-
-/**
- * The maximum time the bid provider has before calling `done` inside the `init` method
- *
- * @param {number} millis timeout in milliseconds
- */
-AuctionMediator.prototype.setBidProviderCbTimeout = function(millis){
-  this.setBidProviderCbTimeout(millis);
 };
 
 /**
@@ -625,15 +614,15 @@ AuctionMediator.prototype.getBidderSlots = function(slots) {
     for (k = 0; k < slot.bidProviders.length; k++) {
       var provider = slot.bidProviders[k];
 
-      var bSlots = bidderSlots[provider] = bidderSlots[provider] || [];
-      bSlots.push(slot);
+      bidderSlots[provider] = bidderSlots[provider] || [];
+      bidderSlots[provider].push(slot);;
     }
   }
 
-  for (k in bidderSlots) {
+  for (k in this.bidProviders) {
     var provider = this.bidProviders[k];
-    if (provider && this.bidProviders[k].enabled()) {
-      ret.push({provider: provider, slots: bidderSlots[k]});
+    if (provider && provider.enabled()) {
+      ret.push({provider: provider, slots: bidderSlots[k] || []});
     }
   }
   return ret;
@@ -677,6 +666,8 @@ AuctionMediator.prototype.refresh = function(slotNames) {
   var auctionIdx = this.newAuctionRun(slotNames);
   Event.setAuctionId(this.getAuctionId(auctionIdx));
   Event.publish(Event.EVENT_TYPE.PUBFOOD_API_REFRESH);
+
+  this.initAuctionTrigger_(auctionIdx, AuctionMediator.AUCTION_TYPE.REFRESH);
 
   var auctionSlots = this.getAuctionRunSlots(auctionIdx);
   var bidderSlots = this.getBidderSlots(auctionSlots);
@@ -848,7 +839,7 @@ AuctionMediator.prototype.getAuctionRunLateBids = function(auctionIdx) {
 /**
  * Get the targeting objects of an auction run.<br>
  * @param {number} [auctionIdx] the auction count index
- * @return {array.<SlotTargetingObject>}
+ * @return {array.<TargetingObject>}
  * @private
  */
 AuctionMediator.prototype.getAuctionRunTargeting = function(auctionIdx) {

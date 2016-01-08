@@ -24,6 +24,7 @@
      var ybotq = ybotq || [];
 
      var pf = new pubfood();
+     pf.timeout(10);
      pf.observe('AUCTION_POST_RUN', function() {
          googletag.cmd.push(function() { googletag.display('div-medrec'); });
      });
@@ -60,7 +61,7 @@
                      });
                  }
                  done();
-             }, 10);
+             }, 200);
          },
          refresh: function(slots, pushBid, done) {
              var m1s = pf.getBidProvider('mock1').getParam('m1s');
@@ -77,7 +78,7 @@
                      });
                  }
                  done();
-             }, 10);
+             }, 200);
          }
      });
 
@@ -209,6 +210,7 @@
      pf.observe('AUCTION_LIB_LOAD', function(event) { logPubfoodEvent(event); });
      pf.observe('BID_START', function(event) { logPubfoodEvent(event); });
      pf.observe('BID_PUSH_NEXT', function(event) { logPubfoodEvent(event); });
+     pf.observe('BID_PUSH_NEXT_LATE', function(event) { logPubfoodEvent(event); });
      pf.observe('BID_COMPLETE', function(event) { logPubfoodEvent(event); });
      pf.observe('AUCTION_START', function(event) { logPubfoodEvent(event); });
      pf.observe('AUCTION_REFRESH', function(event) { logPubfoodEvent(event); });

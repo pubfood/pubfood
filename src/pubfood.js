@@ -78,13 +78,11 @@ var AuctionMediator = require('./mediator/auctionmediator');
    */
   var api = pubfood.library.init = function(config) {
     if (config) {
-      this.id = config.id || util.newId();
       this.auctionProviderTimeout_ = config.auctionProviderCbTimeout || 2000;
       this.bidProviderTimeout_ = config.bidProviderCbTimeout || 2000;
       this.randomizeBidRequests_ = !!config.randomizeBidRequests;
     }
     this.mediator = new AuctionMediator();
-    this.auctionIdx = 1;
 
     Event.publish(Event.EVENT_TYPE.PUBFOOD_API_LOAD);
     this.pushApiCall_('api.init', arguments);

@@ -34,13 +34,15 @@ function PubfoodEvent() {
 
 /**
  * Set the pubfood auctionId
- * @param {string} auctionId the auction identifier
+ * @param {string|number} auctionId the auction identifier
+ * @private
 */
 PubfoodEvent.prototype.setAuctionId = function(auctionId) {
   var type = util.asType(auctionId);
   if (type === 'string' || type === 'number') {
     this.auctionId = auctionId;
   }
+  return this.auctionId;
 };
 
 /**
@@ -100,6 +102,18 @@ PubfoodEvent.prototype.EVENT_TYPE = {
    */
   BID_PUSH_NEXT: 'BID_PUSH_NEXT',
   /**
+   *  Next item in data stream was late meeting the auction timeout.
+   *
+   * @event PubfoodEvent.BID_PUSH_NEXT_LATE
+   * @property {object} data @see [Bid]{@link pubfood#model.Bid}
+   * @property {string} data.id
+   * @property {array.<number, number>} data.sizes
+   * @property {string} data.value
+   * @property {object} data.targeting
+   * @private
+   */
+  BID_PUSH_NEXT_LATE: 'BID_PUSH_NEXT_LATE',
+  /**
    * Action is complete
    * @event PubfoodEvent.BID_COMPLETE
    * @property {string} data [BidProvider.name]{@link pubfood#provider.BidProvider}
@@ -147,20 +161,20 @@ PubfoodEvent.prototype.EVENT_TYPE = {
    * The auction was refreshed
    * @event PubfoodEvent.AUCTION_REFRESH
    * @property {string} data [AuctionProvider.name]{@link pubfood#provider.AuctionProvider}
-   * @private
    */
   AUCTION_REFRESH: 'AUCTION_REFRESH',
   /**
-   * The auction has completed
+   * The auction has finished running
    * @event PubfoodEvent.AUCTION_COMPLETE
-   * @property {string} data [AuctionProvider.name]{@link pubfood#provider.AuctionProvider}
+   * @property {object} data
+   * @property {string} data.name the [AuctionProvider.name]{@link pubfood#provider.AuctionProvider} property value
+   * @property {array.<TargetingObject>} data.targeting targeting data used in the auction
    */
   AUCTION_COMPLETE: 'AUCTION_COMPLETE',
   /**
-   * The auction has finished running
+   * Functions dependent on the completed auction can be called
    * @event PubfoodEvent.AUCTION_POST_RUN
    * @property {string} data [AuctionProvider.name]{@link pubfood#provider.AuctionProvider}
-   * @private
    */
   AUCTION_POST_RUN: 'AUCTION_POST_RUN',
   /**
