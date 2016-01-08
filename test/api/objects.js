@@ -14,7 +14,46 @@ require('../common');
 var pubfood = require('../../src/pubfood');
 
 describe('Object Creation', function() {
-  it('should create a BidProvider', function() {
+
+  beforeEach(function() {
+    Event.removeAllListeners();
+  });
+
+  it('should not error adding undefined objects', function(done) {
+    var pf = new pubfood();
+
+    pf.addSlot();
+    pf.addBidProvider();
+    pf.setAuctionProvider();
+    pf.timeout(1);
+
+    Event.on(Event.EVENT_TYPE.WARN, function(event) {
+
+    });
+    pf.start();
+    pf.refresh();
+
+    done();
+  });
+
+  it('should not error adding ill-defined objects', function(done) {
+    var pf = new pubfood();
+
+    pf.addSlot({});
+    pf.addBidProvider({});
+    pf.setAuctionProvider({});
+    pf.timeout(1);
+
+    Event.on(Event.EVENT_TYPE.WARN, function(event) {
+
+    });
+    pf.start();
+    pf.refresh();
+
+    done();
+  });
+
+  it('should create a BidProvider', function(done) {
 
     var pf = new pubfood();
     var bidProvider = pf.addBidProvider({
@@ -29,9 +68,11 @@ describe('Object Creation', function() {
     });
     assert.isDefined(bidProvider);
     assert.isDefined(bidProvider.id);
+
+    done();
   });
 
-  it('should create an AuctionProvider', function() {
+  it('should create an AuctionProvider', function(done) {
     var pf = new pubfood();
     var auctionProvider = pf.setAuctionProvider({
       name: 'ap1',
@@ -45,9 +86,11 @@ describe('Object Creation', function() {
     });
     assert.isDefined(auctionProvider);
     assert.isDefined(auctionProvider.id);
+
+    done();
   });
 
-  it('should create a Slot', function() {
+  it('should create a Slot', function(done) {
     var pf = new pubfood();
     var slot = pf.addSlot({
       name: 'slot1',
@@ -58,5 +101,7 @@ describe('Object Creation', function() {
 
     assert.isDefined(slot);
     assert.isDefined(slot.id);
+
+    done();
   });
 });

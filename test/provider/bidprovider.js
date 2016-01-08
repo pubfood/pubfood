@@ -27,7 +27,7 @@ describe('Pubfood BidProvider', function() {
       var ap = BidProvider.withDelegate(providers[i]);
       assert.isNull(ap, 'bid provider should be created');
       var log = logger.history[logger.history.length - 1];
-      assert.match(log.args[1].msg, /^Warn: invalid bidder delegate/, 'was not a validation error on delegate');
+      assert.match(log.event.data.msg, /^Warn: invalid bidder delegate/, 'was not a validation error on delegate');
     }
   });
 
@@ -45,7 +45,7 @@ describe('Pubfood BidProvider', function() {
 
     bp.refresh();
     var log = logger.history[logger.history.length - 1];
-    assert.match(log.args[1], /^BidProvider.bidDelegate.refresh/, 'should get bidDelegate warning');
+    assert.match(log.event.data, /^BidProvider.bidDelegate.refresh/, 'should get bidDelegate warning');
 
     var BID_PROVIDER_WITH_REFRESH = {
       name: 'no-refresh',

@@ -13,6 +13,7 @@ var TransformOperator = require('../assembler/transformoperator');
 var AuctionProvider = require('../provider/auctionprovider');
 var BidProvider = require('../provider/bidprovider');
 var Event = require('../event');
+var PubfoodObject = require('../pubfoodobject');
 
 /**
  * AuctionMediator coordiates requests to Publisher Ad Servers.
@@ -22,32 +23,31 @@ var Event = require('../event');
  * @private
  */
 function AuctionMediator(config) {
-  if (config && config.optionalId) {
-    this.id = config.optionalId;
+  if (this.init_) {
+    this.init_();
   }
 
   /** @property {boolean} prefix if false, do not add bid provider name to bid targeting key. Default: true */
   this.prefix = config && config.hasOwnProperty('prefix') ? config.prefix : true;
-  this.slots = [];
   // store slots by name for easy lookup
   this.slotMap = {};
   this.bidProviders = {};
   this.auctionProvider = null;
-  this.bids_ = [];
-  this.lateBids_ = [];
-  this.bidStatus = {};
-  this.inAuction = false;
-  this.timeout_ = -1;
+  this.auctionRun = {};
+  this.timeout_ = AuctionMediator.NO_TIMEOUT;
   this.trigger_ = null;
   this.initDoneTimeout_ = 2000;
-  this.processTargetingCounter_ = 0;
   this.bidAssembler = new BidAssembler();
   this.requestAssembler = new RequestAssembler();
   this.callbackTimeout_ = 2000;
-  this.processCounter_ = 0;
+  this.auctionIdx_ = 0;
+  Event.setAuctionId(this.getAuctionId());
 }
 
 AuctionMediator.PAGE_BIDS = 'page';
+AuctionMediator.AUCTION_TYPE = { START: 'init', REFRESH: 'refresh'};
+AuctionMediator.IN_AUCTION = { FALSE: false, PENDING: 'pending', DONE: 'done'};
+AuctionMediator.NO_TIMEOUT = -1;
 
 /**
  * Validate provider and slot dependencies.
@@ -78,12 +78,17 @@ AuctionMediator.prototype.validate = function(isRefresh) {
       return ret;
     },
     hasSlots: function() {
-      return this.slots.length !== 0;
+      /* eslint-disable no-unused-vars */
+      for (var i in this.slotMap) {
+        /* eslint-enable no-unused-vars */
+        return true;
+      }
+      return false;
     },
     hasAllSlotsBidder: function() {
       var noBidders = [];
-      for (var i = 0; i < this.slots.length; i++) {
-        var slot = this.slots[i];
+      for (var k in this.slotMap) {
+        var slot = this.slotMap[k];
         if (!slot.bidProviders || !slot.bidProviders[0]) {
           noBidders.push(slot.name);
         }
@@ -106,6 +111,79 @@ AuctionMediator.prototype.validate = function(isRefresh) {
   }
 
   return isValid;
+};
+
+/**
+ * Create a new [AuctionRun]{@link typeDefs.AuctionRun} data object.
+ *
+ * @param {array.<string>} [slotNames] the slot names to include in the auction
+ * @return {number} - the auction count index
+ * @private
+ */
+AuctionMediator.prototype.newAuctionRun = function(slotNames) {
+  var idx = ++this.auctionIdx_;
+  var auctionSlots = [];
+  if (util.isArray(slotNames) && slotNames.length > 0) {
+    for (var i = 0; i < slotNames.length; i++) {
+      var slot = slotNames[i];
+      if(!this.slotMap[slot]){
+        Event.publish(Event.EVENT_TYPE.WARN, 'Can\'t refresh slot "'+ slot +'", because it wasn\'t defined');
+      } else {
+        auctionSlots.push(this.slotMap[slot]);
+      }
+    }
+  } else {
+    for (var k in this.slotMap) {
+      auctionSlots.push(this.slotMap[k]);
+    }
+  }
+
+  var auctionRun  = {
+    inAuction: AuctionMediator.IN_AUCTION.FALSE,
+    slots: auctionSlots,
+    bids: [],
+    lateBids: [],
+    bidStatus: {},
+    targeting: []
+  };
+  // reset bidder status
+  for (var k in this.bidProviders) {
+    var provider = this.bidProviders[k];
+    if (provider && !(provider.name in auctionRun.bidStatus) && provider.enabled()) {
+      auctionRun.bidStatus[provider.name] = false;
+    }
+  }
+  this.auctionRun[idx] = auctionRun;
+  return idx;
+};
+
+/**
+ * Get the bidding status of a provider.
+ * <br>
+ * <ul>
+ * <li>-1: if provider is not bidding in the auction</li>
+ * <li>true: if bidding in the auction and complete</li>
+ * <li>false: if bidding in the auction and in process</li>
+ * </ul>
+ * @param {string} providerName the name of the [BidProvider]{@link pubfood#provider.BidProvider}
+ * @param {string} auctionIdx the index number of the init/refresh auction
+ * @return {boolean|number}
+ * -1 if provider is not bidding in the auction
+ * @private
+ */
+AuctionMediator.prototype.getBidStatus = function(providerName, auctionIdx) {
+  var ret = [];
+  if (auctionIdx) {
+    var run = this.auctionRun[auctionIdx];
+    var status = run ? run.bidStatus[providerName] : '';
+    ret = util.asType(status) === 'boolean' ? status : -1;
+  } else {
+    for (var i in this.auctionRun) {
+      var status = this.auctionRun[i].bidStatus[providerName];
+      ret.push(util.asType(status) === 'boolean' ? status : -1);
+    }
+  }
+  return ret;
 };
 
 /**
@@ -163,12 +241,12 @@ AuctionMediator.prototype.setAuctionTrigger = function(triggerFn) {
  * Start the process to build and send publisher ad server auction request.
  * @private
  */
-AuctionMediator.prototype.startAuction_ = function() {
+AuctionMediator.prototype.startAuction_ = function(auctionIdx, auctionType) {
   Event.publish(Event.EVENT_TYPE.BID_ASSEMBLER, 'AuctionMediator');
   if (this.bidAssembler.operators.length > 0) {
-    this.bidAssembler.process(this.bids_);
+    this.bidAssembler.process(this.auctionRun[auctionIdx].bids);
   }
-  this.processTargeting_();
+  this.processTargeting_(auctionIdx, auctionType);
 };
 
 /**
@@ -176,9 +254,14 @@ AuctionMediator.prototype.startAuction_ = function() {
  * @private
  * @return {AuctionMediator}
  */
-AuctionMediator.prototype.startTimeout_ = function() {
-  if (this.timeout_ !== -1 && this.timeout_ >= 0) {
-    setTimeout(util.bind(this.startAuction_, this), this.timeout_);
+AuctionMediator.prototype.startTimeout_ = function(auctionIdx, auctionType) {
+  if (this.timeout_ !== AuctionMediator.NO_TIMEOUT && this.timeout_ >= 0) {
+    var idx = auctionIdx,
+      type = auctionType,
+      startFn = util.bind(this.startAuction_, this);;
+    setTimeout(function() {
+      startFn(idx, type);
+    }, this.timeout_);
   }
   return this;
 };
@@ -188,14 +271,18 @@ AuctionMediator.prototype.startTimeout_ = function() {
  * @private
  * @return {AuctionMediator}
  */
-AuctionMediator.prototype.triggerAuction_ = function() {
+AuctionMediator.prototype.initAuctionTrigger_ = function(auctionIdx, auctionType) {
   if (util.asType(this.trigger_) !== 'function') {
-    this.startTimeout_();
+    this.startTimeout_(auctionIdx, auctionType);
     return;
   }
 
+  var idx = auctionIdx,
+    type = auctionType;
   function triggerAuction() {
-    this.startAuction_();
+    if (!this.auctionRun[idx].inAuction) {
+      this.startAuction_(idx, type);
+    }
   }
 
   this.trigger_.apply(null, [util.bind(triggerAuction, this)]);
@@ -209,10 +296,11 @@ AuctionMediator.prototype.triggerAuction_ = function() {
  * @returns {boolean} true if all bidders are complete. False otherwise.
  *
  */
-AuctionMediator.prototype.allBiddersDone = function() {
+AuctionMediator.prototype.allBiddersDone = function(auctionIdx) {
   var allDone = true;
-  for (var provider in this.bidStatus) {
-    if (!this.bidStatus[provider]) {
+  var bidStatus = this.auctionRun[auctionIdx].bidStatus;
+  for (var provider in bidStatus) {
+    if (!bidStatus[provider]) {
       allDone = false;
       break;
     }
@@ -227,9 +315,9 @@ AuctionMediator.prototype.allBiddersDone = function() {
  *
  * @private
  */
-AuctionMediator.prototype.checkBids_ = function() {
-  if (this.allBiddersDone()) {
-    this.startAuction_();
+AuctionMediator.prototype.checkBids_ = function(auctionIdx, auctionType) {
+  if (this.allBiddersDone(auctionIdx)) {
+    this.startAuction_(auctionIdx, auctionType);
   }
 };
 
@@ -246,11 +334,12 @@ AuctionMediator.prototype.mergeKeys = function(slotTargeting, bidTargeting) {
  * @private
  * @return {object.<string, Bid>} targeting objects
  */
-AuctionMediator.prototype.getBidMap_ = function() {
+AuctionMediator.prototype.getBidMap_ = function(auctionIdx) {
   var bidMap = {};
   bidMap[AuctionMediator.PAGE_BIDS] = [];
-  for (var i = 0; i < this.bids_.length; i++) {
-    var bid = this.bids_[i];
+  var bids = this.getAuctionRunBids(auctionIdx);;
+  for (var i = 0; i < bids.length; i++) {
+    var bid = bids[i];
     if (bid.slot) {
       bidMap[bid.slot] = bidMap[bid.slot] || [];
       bidMap[bid.slot].push(bid);
@@ -272,16 +361,17 @@ AuctionMediator.prototype.getBidMap_ = function() {
  * @private
  * @return {object[]} targeting objects
  */
-AuctionMediator.prototype.buildTargeting_ = function() {
+AuctionMediator.prototype.buildTargeting_ = function(auctionIdx) {
   var auctionTargeting = [];
   var bidSet;
-  var bidMap = this.getBidMap_();
+  var bidMap = this.getBidMap_(auctionIdx);
 
   // Slot-level targeting
-  for (var i = 0; i < this.slots.length; i++) {
+  var auctionSlots = this.getAuctionRunSlots(auctionIdx);
+  for (var i = 0; i < auctionSlots.length; i++) {
     var tgtObject = {bids: [], targeting: {}};
 
-    var slot = this.slots[i];
+    var slot = auctionSlots[i];
     tgtObject.name = slot.name;
     tgtObject.id = slot.id;
     tgtObject.elementId = slot.elementId || '';
@@ -332,33 +422,41 @@ AuctionMediator.prototype.buildTargeting_ = function() {
  * process the targeting for the auction provider
  * @private
  */
-AuctionMediator.prototype.processTargeting_ = function() {
-  if (this.inAuction) return;
-  this.inAuction = true;
+AuctionMediator.prototype.processTargeting_ = function(auctionIdx, auctionType) {
+  if (this.auctionRun[auctionIdx].inAuction) return;
+  this.auctionRun[auctionIdx].inAuction = AuctionMediator.IN_AUCTION.PENDING;
 
   var self = this;
   var doneCalled = false;
   var name = self.auctionProvider.name;
-  self.processTargetingCounter_++;
-
+  var idx = auctionIdx;
+  var cbTimeout = self.initDoneTimeout_;
   var doneCb = function() {
     if (!doneCalled) {
       doneCalled = true;
-      self.auctionDone(name);
+      self.auctionDone(idx, name);
     }
   };
 
   setTimeout(function() {
     if (!doneCalled) {
-      Event.publish(Event.EVENT_TYPE.WARN, 'Warning: The auction done callback for "' + name + '" hasn\'t been called within the allotted time (' + (self.initDoneTimeout_ / 1000) + 'sec)');
+      Event.publish(Event.EVENT_TYPE.WARN, 'Warning: The auction done callback for "' + name + '" hasn\'t been called within the allotted time (' + (cbTimeout / 1000) + 'sec)');
       doneCb();
     }
-  }, self.initDoneTimeout_);
+  }, cbTimeout);
 
-  Event.publish(Event.EVENT_TYPE.AUCTION_GO, name);
+  // publish events to include buildTargeting_ in auction timing
+  if (auctionType === AuctionMediator.AUCTION_TYPE.START) {
+    Event.publish(Event.EVENT_TYPE.AUCTION_GO, name);
+    Event.publish(Event.EVENT_TYPE.AUCTION_START, name);
+  } else {
+    Event.publish(Event.EVENT_TYPE.AUCTION_REFRESH, name);
+  }
 
-  var targeting = self.buildTargeting_();
-  if (self.processTargetingCounter_ === 1) {
+  var targeting = self.buildTargeting_(idx);
+  this.auctionRun[idx].targeting = targeting;
+
+  if (auctionType === AuctionMediator.AUCTION_TYPE.START) {
     self.auctionProvider.init(targeting, doneCb);
   } else {
     self.auctionProvider.refresh(targeting, doneCb);
@@ -371,8 +469,10 @@ AuctionMediator.prototype.processTargeting_ = function() {
  * @param {string} data The auction mediator's name
  * @fires AUCTION_COMPLETE
  */
-AuctionMediator.prototype.auctionDone = function(data) {
-  Event.publish(Event.EVENT_TYPE.AUCTION_COMPLETE, data);
+AuctionMediator.prototype.auctionDone = function(auctionIdx, data) {
+  this.auctionRun[auctionIdx].inAuction = AuctionMediator.IN_AUCTION.DONE;
+  var auctionTargeting = this.getAuctionRun(auctionIdx).targeting;
+  Event.publish(Event.EVENT_TYPE.AUCTION_COMPLETE, { name: data, targeting: auctionTargeting });
   setTimeout(function() {
     // push this POST event onto the next tick of the event loop
     Event.publish(Event.EVENT_TYPE.AUCTION_POST_RUN, data);
@@ -389,7 +489,6 @@ AuctionMediator.prototype.auctionDone = function(data) {
 AuctionMediator.prototype.addSlot = function(slotConfig) {
   var slot = Slot.fromObject(slotConfig);
   if (slot) {
-    this.slots.push(slot);
     this.slotMap[slot.name] = slot;
   } else {
     Event.publish(Event.EVENT_TYPE.WARN, 'Invalid slot object: ' + JSON.stringify(slotConfig || {}));
@@ -412,22 +511,14 @@ AuctionMediator.prototype.addBidProvider = function(delegateConfig) {
       this.bidProviders[bidProvider.name] = bidProvider;
     }
   } else {
-    Event.publish(Event.EVENT_TYPE.WARN, 'Warning: invalid bid provider: ' + delegateConfig.name);
+    var name = delegateConfig && delegateConfig.name ? delegateConfig.name : 'undefined';
+    Event.publish(Event.EVENT_TYPE.WARN, 'Warning: invalid bid provider: ' + name);
   }
   return bidProvider;
 };
 
 AuctionMediator.prototype.bidProviderExists_ = function(name){
   return !!this.bidProviders[name];
-};
-
-/**
- * The maximum time the bid provider has before calling `done` inside the `init` method
- *
- * @param {number} millis timeout in milliseconds
- */
-AuctionMediator.prototype.setBidProviderCbTimeout = function(millis){
-  this.setBidProviderCbTimeout(millis);
 };
 
 /**
@@ -440,11 +531,11 @@ AuctionMediator.prototype.setAuctionProvider = function(delegateConfig) {
     Event.publish(Event.EVENT_TYPE.WARN, 'Warning: auction provider exists: ' + this.auctionProvider.name);
   }
   var auctionProvider = AuctionProvider.withDelegate(delegateConfig);
-  if(auctionProvider){
+  if (auctionProvider) {
     this.auctionProvider = auctionProvider;
-    this.auctionProvider.setMediator(this);
   } else {
-    Event.publish(Event.EVENT_TYPE.WARN, 'Warning: invalid auction provider: ' + delegateConfig.name);
+    var name = delegateConfig && delegateConfig.name ? delegateConfig.name : 'undefined';
+    Event.publish(Event.EVENT_TYPE.WARN, 'Warning: invalid auction provider: ' + name);
   }
   return auctionProvider;
 };
@@ -490,6 +581,8 @@ AuctionMediator.prototype.loadProviders = function(randomizeBidRequests) {
   for (var i = 0; i < keys.length; i++) {
     var key = keys[i];
     if (this.bidProviders[key].libUri) {
+      Event.publish(Event.EVENT_TYPE.BID_LIB_LOAD, this.bidProviders[key].name);
+
       uri = this.bidProviders[key].libUri() || '';
       var sync = this.bidProviders[key].sync();
       util.loadUri(uri, sync);
@@ -497,7 +590,7 @@ AuctionMediator.prototype.loadProviders = function(randomizeBidRequests) {
   }
 
   if (this.auctionProvider && this.auctionProvider.libUri()) {
-    Event.publish(Event.EVENT_TYPE.AUCTION_LIB_LOADED, this.auctionProvider.name);
+    Event.publish(Event.EVENT_TYPE.AUCTION_LIB_LOAD, this.auctionProvider.name);
 
     uri = this.auctionProvider.libUri();
     // @todo get sync going here
@@ -511,26 +604,25 @@ AuctionMediator.prototype.loadProviders = function(randomizeBidRequests) {
  * @returns {BidderSlots[]} bidderSlots an object containing an array of slots for each bidder.
  *
  */
-AuctionMediator.prototype.getBidderSlots = function() {
+AuctionMediator.prototype.getBidderSlots = function(slots) {
   var bidderSlots = {};
   var ret = [];
   var i, k;
 
-  for (i = 0; i < this.slots.length; i++) {
-    var slot = this.slots[i];
+  for (i = 0; i < slots.length; i++) {
+    var slot = slots[i];
     for (k = 0; k < slot.bidProviders.length; k++) {
       var provider = slot.bidProviders[k];
 
-      var bSlots = bidderSlots[provider] = bidderSlots[provider] || [];
-      bSlots.push(slot);
+      bidderSlots[provider] = bidderSlots[provider] || [];
+      bidderSlots[provider].push(slot);;
     }
   }
 
   for (k in this.bidProviders) {
     var provider = this.bidProviders[k];
-    if (provider.enabled()) {
+    if (provider && provider.enabled()) {
       ret.push({provider: provider, slots: bidderSlots[k] || []});
-      this.bidStatus[k] = false;
     }
   }
   return ret;
@@ -541,14 +633,22 @@ AuctionMediator.prototype.getBidderSlots = function() {
  * @param {boolean} randomizeBidRequests
  * @returns {pubfood#mediator.AuctionMediator}
  */
-AuctionMediator.prototype.start = function(randomizeBidRequests) {
-  this.triggerAuction_();
+AuctionMediator.prototype.start = function(randomizeBidRequests, startTimestamp) {
+  if (!this.auctionProvider) {
+    Event.publish(Event.EVENT_TYPE.WARN, 'Warning: auction provider is not defined.');
+    return this;
+  }
+  var auctionIdx = this.newAuctionRun();
+  Event.setAuctionId(this.getAuctionId(auctionIdx));
+  Event.publish(Event.EVENT_TYPE.PUBFOOD_API_START, startTimestamp);
+
+  this.initAuctionTrigger_(auctionIdx, AuctionMediator.AUCTION_TYPE.START);
 
   this.loadProviders(randomizeBidRequests);
+  var auctionSlots = this.getAuctionRunSlots(auctionIdx);
+  var bidderSlots = this.getBidderSlots(auctionSlots);
 
-  var bidderSlots = this.getBidderSlots();
-
-  this.processBids(bidderSlots);
+  this.processBids(auctionIdx, AuctionMediator.AUCTION_TYPE.START, bidderSlots);
   return this;
 };
 
@@ -559,67 +659,31 @@ AuctionMediator.prototype.start = function(randomizeBidRequests) {
  * @returns {pubfood#mediator.AuctionMediator}
  */
 AuctionMediator.prototype.refresh = function(slotNames) {
-  if(!util.isArray(slotNames)){
-    Event.publish(Event.EVENT_TYPE.WARN, 'Invalid data structure, "refresh" accepts an array of strings (slot names)');
-  } else {
-    var i, slot;
-    var self = this;
-
-    // reset the slots
-    this.slots = [];
-
-    for (i=0; i< slotNames.length; i++) {
-      slot = slotNames[i];
-      if(!this.slotMap[slot]){
-        Event.publish(Event.EVENT_TYPE.WARN, 'Can\'t refresh slot "'+ slot +'", because it wasn\'t defined');
-      } else {
-        this.slots.push(this.slotMap[slot]);
-      }
-    }
-
-    if(this.slots.length > 0) {
-      var name = this.auctionProvider.name;
-      Event.publish(Event.EVENT_TYPE.AUCTION_REFRESH, name);
-
-      this.bids_ = [];
-      this.lateBids_ = [];
-
-      // trigger bid provider refresh
-      var bidderSlots = this.getBidderSlots();
-      this.processBids(bidderSlots);
-
-      // trigger auction provider refresh
-      var doneCalled = false;
-      var doneCb = function() {
-        if (!doneCalled) {
-          doneCalled = true;
-          self.auctionDone(name);
-        }
-      };
-
-      setTimeout(function(){
-        if (!doneCalled) {
-          Event.publish(Event.EVENT_TYPE.WARN, 'Warning: The auction done callback for "'+name+'" hasn\'t been called within the allotted time (' + (self.initDoneTimeout_/1000) + 'sec)');
-          doneCb();
-        }
-      }, this.initDoneTimeout_);
-
-      var targeting = this.buildTargeting_();
-      this.auctionProvider.refresh(targeting, doneCb);
-    }
+  if (!this.auctionProvider) {
+    Event.publish(Event.EVENT_TYPE.WARN, 'Warning: auction provider is not defined.');
+    return this;
   }
+  var auctionIdx = this.newAuctionRun(slotNames);
+  Event.setAuctionId(this.getAuctionId(auctionIdx));
+  Event.publish(Event.EVENT_TYPE.PUBFOOD_API_REFRESH);
+
+  this.initAuctionTrigger_(auctionIdx, AuctionMediator.AUCTION_TYPE.REFRESH);
+
+  var auctionSlots = this.getAuctionRunSlots(auctionIdx);
+  var bidderSlots = this.getBidderSlots(auctionSlots);
+  this.processBids(auctionIdx, AuctionMediator.AUCTION_TYPE.REFRESH, bidderSlots);
+
   return this;
 };
 
 /**
- * Process tht bidders bids
+ * Process the bid provider bids
  *
  * @param {BidderSlots[]} bidderSlots object containing slots per bidder
  */
-AuctionMediator.prototype.processBids = function(bidderSlots) {
-  this.processCounter_++;
+AuctionMediator.prototype.processBids = function(auctionIdx, auctionType, bidderSlots) {
   for (var k in bidderSlots) {
-    this.getBids_(bidderSlots[k].provider, bidderSlots[k].slots);
+    this.getBids_(auctionIdx, auctionType, bidderSlots[k].provider, bidderSlots[k].slots);
   }
 };
 
@@ -637,31 +701,33 @@ AuctionMediator.prototype.setBidProviderCbTimeout = function(millis){
  * @param {object} slots
  * @private
  */
-AuctionMediator.prototype.getBids_ = function(provider, slots) {
+AuctionMediator.prototype.getBids_ = function(auctionIdx, auctionType, provider, slots) {
   var self = this;
   var name = provider.name;
   var doneCalled = false;
-
+  var idx = auctionIdx;
+  var cbTimeout = self.callbackTimeout_;
   var pushBidCb = function(bid){
-    self.pushBid(bid, name);
+    bid.auctionIdx = idx;
+    self.pushBid(idx, bid, name);
   };
 
   var bidDoneCb = function(){
     if(!doneCalled) {
       doneCalled = true;
-      self.doneBid(name);
+      self.doneBid(idx, auctionType, name);
     }
   };
 
   setTimeout(function(){
     if(!doneCalled) {
-      Event.publish(Event.EVENT_TYPE.WARN, 'Warning: The bid done callback for "'+name+'" hasn\'t been called within the allotted time (2sec)');
+      Event.publish(Event.EVENT_TYPE.WARN, 'Warning: The bid done callback for "'+name+'" hasn\'t been called within the allotted time (' + (cbTimeout/1000) + 'sec)');
       bidDoneCb();
     }
-  }, this.callbackTimeout_);
+  }, cbTimeout);
 
   Event.publish(Event.EVENT_TYPE.BID_START, name);
-  if(this.processCounter_ === 1){
+  if (auctionType === AuctionMediator.AUCTION_TYPE.START) {
     provider.init(slots, pushBidCb, bidDoneCb);
   } else {
     provider.refresh(slots, pushBidCb, bidDoneCb);
@@ -675,15 +741,15 @@ AuctionMediator.prototype.getBids_ = function(provider, slots) {
  * @param {string} providerName the name of the [BidProvider]{@link pubfood#provider.BidProvider}
  * @fires pubfood.PubfoodEvent.BID_PUSH_NEXT
  */
-AuctionMediator.prototype.pushBid = function(bidObject, providerName) {
+AuctionMediator.prototype.pushBid = function(auctionIdx, bidObject, providerName) {
   var bid = Bid.fromObject(bidObject);
   if (bid) {
     bid.provider = providerName;
     Event.publish(Event.EVENT_TYPE.BID_PUSH_NEXT, bid);
-    if (!this.inAuction) {
-      this.bids_.push(bid);
+    if (!this.auctionRun[auctionIdx].inAuction) {
+      this.auctionRun[auctionIdx].bids.push(bid);
     } else {
-      this.lateBids_.push(bid);
+      this.auctionRun[auctionIdx].lateBids.push(bid);
     }
   } else {
     Event.publish(Event.EVENT_TYPE.WARN, 'Invalid bid object: ' + JSON.stringify(bidObject || {}));
@@ -696,11 +762,90 @@ AuctionMediator.prototype.pushBid = function(bidObject, providerName) {
  * @param {string} bidProvider The [BidProvider]{@link pubfood#provider.BidProvider} name
  * @fires pubfood.PubfoodEvent.BID_COMPLETE
  */
-AuctionMediator.prototype.doneBid = function(bidProvider) {
+AuctionMediator.prototype.doneBid = function(auctionIdx, auctionType, bidProvider) {
   // TODO consider having useful bid data available upon completion like the bids
   Event.publish(Event.EVENT_TYPE.BID_COMPLETE, bidProvider);
-  this.bidStatus[bidProvider] = true;
-  this.checkBids_();
+  this.auctionRun[auctionIdx].bidStatus[bidProvider] = true;
+  this.checkBids_(auctionIdx, auctionType);
 };
 
+/**
+ * Get the auction count.
+ * @return {number} the auction index
+ * @private
+ */
+AuctionMediator.prototype.getAuctionCount = function() {
+  return this.auctionIdx_;
+};
+
+/**
+ * Get the auction identifier.<br>
+ * @example
+ * getAuctionId()
+ * => iis9xx46a6v2x58e1b:3
+ * @param {number} [auctionIdx] the auction count index
+ * @return {string} the auction index
+ * @private
+ */
+AuctionMediator.prototype.getAuctionId = function(auctionIdx) {
+  var idx = auctionIdx || this.auctionIdx_;
+  return this.id + ':' + idx;
+};
+
+/**
+ * Get an auction run data set.<br>
+ * @param {number} [auctionIdx] the auction count index
+ * @return {AuctionRun}
+ * @private
+ */
+AuctionMediator.prototype.getAuctionRun = function(auctionIdx) {
+  var run = this.auctionRun[auctionIdx];
+  return util.asType(run) === 'undefined' ? {} : run;
+};
+
+/**
+ * Get the slots of an auction run.<br>
+ * @param {number} [auctionIdx] the auction count index
+ * @return {array.<Slot>}
+ * @private
+ */
+AuctionMediator.prototype.getAuctionRunSlots = function(auctionIdx) {
+  var run = this.auctionRun[auctionIdx];
+  return util.asType(run) === 'undefined' ? {} : run.slots;
+};
+
+/**
+ * Get the bids of an auction run.<br>
+ * @param {number} [auctionIdx] the auction count index
+ * @return {array.<Bid>}
+ * @private
+ */
+AuctionMediator.prototype.getAuctionRunBids = function(auctionIdx) {
+  var run = this.auctionRun[auctionIdx];
+  return util.asType(run) === 'undefined' ? [] : run.bids;
+};
+
+/**
+ * Get the late bids of an auction run.<br>
+ * @param {number} [auctionIdx] the auction count index
+ * @return {array.<Bid>}
+ * @private
+ */
+AuctionMediator.prototype.getAuctionRunLateBids = function(auctionIdx) {
+  var run = this.auctionRun[auctionIdx];
+  return util.asType(run) === 'undefined' ? [] : run.lateBids;
+};
+
+/**
+ * Get the targeting objects of an auction run.<br>
+ * @param {number} [auctionIdx] the auction count index
+ * @return {array.<TargetingObject>}
+ * @private
+ */
+AuctionMediator.prototype.getAuctionRunTargeting = function(auctionIdx) {
+  var run = this.auctionRun[auctionIdx];
+  return util.asType(run) === 'undefined' ? [] : run.targeting;
+};
+
+util.extends(AuctionMediator, PubfoodObject);
 module.exports = AuctionMediator;

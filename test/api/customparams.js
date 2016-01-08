@@ -107,7 +107,12 @@ describe('Object Custom Parameters', function() {
     var bidProvider = pf.addBidProvider(bidDelegate);
     bidProvider.setParam(P1, V1);
 
-    pf.start();
+    pf.start(Date.now(), function(err, errors) {
+      if (err) {
+        console.log(errors);
+        done();
+      }
+    } );
   });
 
   it('should have BidProvider parameters available in delegate functions', function(done) {

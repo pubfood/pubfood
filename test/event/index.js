@@ -5,6 +5,7 @@
 
 var sinon = require('sinon');
 var Event = require('../../src/event');
+var assert = require('chai').assert;
 
 /*eslint no-undef: 0*/
 describe('Event - Tests', function () {
@@ -168,4 +169,15 @@ describe('Event - Tests', function () {
   });
   it.skip('should exercise publish');
   it.skip('should consider pubfood.observe usage');
+  it('should have a default auctionId', function(done) {
+    assert.match(Event.auctionId, /^pubfood:[0-9]+/, 'default auctionId should be \"pubfood:<Date.now()>\"');
+    done();
+  });
+  it('should set an auctionId', function(done) {
+    Event.setAuctionId('123');
+    assert.equal(Event.auctionId, '123', 'auctionId should be the string \"123\"');
+    Event.setAuctionId(456);
+    assert.equal(Event.auctionId, 456, 'auctionId should be the number 456');
+    done();
+  });
 });

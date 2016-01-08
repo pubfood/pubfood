@@ -17,15 +17,21 @@
  * @private
  */
 var logger = {
-  auction: 1,
   history: [],
   dumpLog: function(type) {
     if (console && console.log) {
+      var re;
+      if (type) {
+        re = new RegExp(type, 'g');
+      }
       for (var i = 0; i < this.history.length; i++) {
         var log = this.history[i];
-        if(type){
-          type = type || '';
-          if(type.match(/event/) && log.eventName) {
+        if(re){
+          re.lastIndex = 0;
+          if(log.eventName && re.test(log.eventName)) {
+            console.log(log);
+          }
+          if(log.functionName && re.test(log.functionName)) {
             console.log(log);
           }
         } else {
@@ -34,20 +40,20 @@ var logger = {
       }
     }
   },
-  logCall: function(name, args) {
+  logCall: function(name, auctionId, args) {
     this.history.push({
       ts: (+new Date()),
-      auction: this.auction,
+      auctionId: auctionId,
       functionName: name,
       args: Array.prototype.slice.call(args)
     });
   },
-  logEvent: function(name, args){
+  logEvent: function(name, auctionId, event){
     this.history.push({
       ts: (+new Date()),
-      auction: this.auction,
+      auctionId: auctionId,
       eventName: name,
-      args: Array.prototype.slice.call(args)
+      event: event
     });
   }
 };

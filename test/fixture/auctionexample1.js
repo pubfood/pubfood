@@ -43,9 +43,11 @@ var auctionexample1 = {
   auctionProvider: {
     name: 'auctionProvider',
     libUri: '../test/fixture/lib.js',
-    init: function(targets, options, done) {
+    init: function(targeting, done) {
+      done();
     },
-    refresh: function(targets, done) {
+    refresh: function(targeting, done) {
+      done();
     },
     trigger: function(done) {
       setTimeout(function() {
@@ -58,24 +60,30 @@ var auctionexample1 = {
       name: 'yieldbot',
       libUri: '//cdn.yldbt.com/js/yieldbot.intent.js',
       init: function(slots, pushBid, done) {
+        done();
       },
       refresh: function(slots, pushBid, done) {
+        done();
       }
     },
     {
       name: 'bidderFast',
       libUri: '../test/fixture/lib.js',
       init: function(slots, pushBid, done) {
+        done();
       },
       refresh: function(slots, pushBid, done) {
+        done();
       }
     },
     {
       name: 'bidderSlow',
       libUri: '../test/fixture/lib.js',
       init: function(slots, pushBid, done) {
+        done();
       },
       refresh: function(slots, pushBid, done) {
+        done();
       }
     }
   ]

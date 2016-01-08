@@ -245,6 +245,18 @@ var PubfoodConfig = {
   randomizeBidRequests: false
 };
 
+/**
+ * @typedef {AuctionRun} AuctionRun - data pertaining to an init or refresh auction execution
+ * @property {boolean} inAuction false if bidding still in process
+ * @property {array.<Slot>} slots the slots to be filled for the auction
+ * @property {array.<Bid>} bids the bids for the auction run
+ * @property {array.<Bid>} lateBids bids that did not get pushed before the timeout to participate in the auction
+ * @property {object.<string, boolean>} bidStatus flag to indicate if a bid provider is completed bidding
+ * @property {array.<TargetingObject>} targeting the targeting objects used in the auction run 
+ * @memberof typeDefs
+ * @private
+ */
+
 module.exports = {
   BidDelegate: bidDelegate,
   AuctionDelegate: auctionDelegate,

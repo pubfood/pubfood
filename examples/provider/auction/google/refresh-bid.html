@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Refresh Bids</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=0">
+        <script src="../../../../build/pubfood.js"></script>
+        <script src="./lib/jquery-1.11.0.min.js"></script>
+        <script src="./lib/jquery-migrate-1.2.1.min.js"></script>
+        <script src="./lib/slick/slick.js"></script>
+        <link rel="stylesheet" type="text/css" href="lib/slick/slick.css"/>
+        <link rel="stylesheet" type="text/css" href="lib/slick/slick-theme.css"/>
+        <style>
+         body { background: gray; }
+         .image-item { width: 300px; height: 250px }
+         .footer-item { position: absolute; bottom: 0px; }
+        </style>
+    </head>
+<body>
+    <h2><em>Image Carousel Refresh Example</em></h2>
+    <script>
+     window.googletag = window.googletag || {};
+     googletag.cmd = googletag.cmd || [];
+     var ybotq = ybotq || [];
+
+     var pf = new pubfood();
+     pf.timeout(10);
+     pf.observe('AUCTION_POST_RUN', function() {
+         googletag.cmd.push(function() { googletag.display('div-medrec'); });
+     });
+    </script>
+
+    <script>
+     var slot = pf.addSlot({
+         name: '/6355419/Travel/Europe/France/Paris',
+         sizes: [
+             [300, 250]
+         ],
+         elementId: 'div-medrec',
+         bidProviders: [
+             'mock1',
+             'mock2'
+         ]
+     });
+
+     var mockProvider1 = pf.addBidProvider({
+         name: 'mock1',
+         libUri: 'http://', // see: https://github.com/pubfood/pubfood/issues/20
+         init: function(slots, pushBid, done) {
+             var m1s = pf.getBidProvider('mock1').getParam('m1s');
+             setTimeout(function() { // simulate some latency
+                 for (var i in slots) {
+                     pushBid({
+                         slot: slots[i].name,
+                         sizes: [300, 250],
+                         value: '1000000.99',
+                         targeting: {
+                             ns1_unit: 'everything',
+                             m1s: m1s
+                         }
+                     });
+                 }
+                 done();
+             }, 200);
+         },
+         refresh: function(slots, pushBid, done) {
+             var m1s = pf.getBidProvider('mock1').getParam('m1s');
+             setTimeout(function() { // simulate some latency
+                 for (var i in slots) {
+                     pushBid({
+                         slot: slots[i].name,
+                         sizes: [300, 250],
+                         value: '2000000.99',
+                         targeting: {
+                             ns1_unit: 'asBefore',
+                             m1s: m1s
+                         }
+                     });
+                 }
+                 done();
+             }, 200);
+         }
+     });
+
+     var mockProvider2 = pf.addBidProvider({
+         name: 'mock2',
+         libUri: 'http://', // see: https://github.com/pubfood/pubfood/issues/20
+         init: function(slots, pushBid, done) {
+             var m2s = pf.getBidProvider('mock2').getParam('m2s');
+             for (var i in slots) {
+                 pushBid({
+                     slot: slots[i].name,
+                     sizes: [300, 250],
+                     value: '11111111.99',
+                     targeting: {
+                         ns2_unit: 'allUnits',
+                         m2s: m2s
+                     }
+                 });
+             }
+             done();
+         },
+         refresh: function(slots, pushBid, done) {
+             var m2s = pf.getBidProvider('mock2').getParam('m2s');
+             for (var i in slots) {
+                 pushBid({
+                     slot: slots[i].name,
+                     sizes: [300, 250],
+                     value: '22222222.99',
+                     targeting: {
+                         ns2_unit: 'lotsaUnits',
+                         m2s: m2s
+                     }
+                 });
+             }
+             done();
+         }
+     });
+
+     pf.setAuctionProvider({
+         name: 'Google',
+         libUri: 'http://www.googletagservices.com/tag/js/gpt.js',
+         init: function(targeting, done) {
+             googletag.cmd.push(function() {
+                 var slots = {};
+                 for (var i = 0; i < targeting.length; i++) {
+                     var tgtObject = targeting[i];
+                     var gptObject;
+
+                     if (tgtObject.name) {
+                         gptObject = googletag.defineSlot(tgtObject.name, tgtObject.sizes, tgtObject.elementId)
+                                              .addService(googletag.pubads());
+                         slots[tgtObject.name] = gptObject;
+                     } else {
+                         gptObject = googletag.pubads();
+                     }
+                     for (var p in tgtObject.targeting) {
+                         gptObject.setTargeting(p, tgtObject.targeting[p]);
+                     }
+                     var slide = pf.getSlot('/6355419/Travel/Europe/France/Paris').getParam('slide');
+                     gptObject.setTargeting('slide', slide);
+                 }
+                 pf.getAuctionProvider().setParam('slots', slots);
+             });
+             googletag.cmd.push(function() {
+                 googletag.pubads().enableSingleRequest();
+                 googletag.enableServices();
+                 done();
+             });
+         },
+         refresh: function(targeting, done) {
+             googletag.cmd.push(function() {
+                 var slots = pf.getAuctionProvider().getParam('slots');
+                 for (var i = 0; i < targeting.length; i++) {
+                     var tgtObject = targeting[i];
+                     var gptObject;
+
+                     if (tgtObject.name) {
+                         gptObject = slots[tgtObject.name] || null;
+                     } else {
+                         gptObject = googletag.pubads();
+                     }
+                     for (var p in tgtObject.targeting) {
+                         gptObject.setTargeting(p, tgtObject.targeting[p]);
+                     }
+                     var slide = pf.getSlot('/6355419/Travel/Europe/France/Paris').getParam('slide');
+                     gptObject.setTargeting('slide', slide);
+                 }
+                 googletag.pubads().refresh();
+                 done();
+             });
+         }
+     });
+
+    </script>
+
+    <div class="content" style="margin:30px">
+        <div class="slider single-item"  style="width:350px; height:300px">
+	    <div class="image-item">
+                <img data-lazy="./img/refresh-slide1.png"></img>
+            </div>
+	    <div class="image-item">
+                <img data-lazy="./img/refresh-slide2.png"></img>
+            </div>
+            <div class="image-item">
+                <img data-lazy="./img/refresh-slide3.png"></img>
+            </div>
+            <div class="image-item">
+                <img data-lazy="./img/refresh-slide4.png"></img>
+            </div>
+            <div class="image-item">
+                <img data-lazy="./img/refresh-slide5.png"></img>
+            </div>
+            <div class="image-item">
+                <img data-lazy="./img/refresh-slide6.png"></img>
+            </div>
+        </div>
+        <!-- Ad appended here -->
+        <div id='div-medrec'></div>
+    </div>
+
+    <script type="text/javascript">
+     function logPubfoodEvent(event) {
+         console.log('%c' + event.type, 'padding-right:5px;font-weight:bold;display:block;', 'auctionId: ' + event.auctionId, 'timeStamp: ' + event.ts + ' : ' + event.data || 'n/a');
+     }
+     // Observe Pubfood Events
+     pf.observe('PUBFOOD_API_START', function(event) { logPubfoodEvent(event); });
+     pf.observe('PUBFOOD_API_REFRESH', function(event) { logPubfoodEvent(event); });
+     pf.observe('BID_LIB_LOAD', function(event) { logPubfoodEvent(event); });
+     pf.observe('AUCTION_LIB_LOAD', function(event) { logPubfoodEvent(event); });
+     pf.observe('BID_START', function(event) { logPubfoodEvent(event); });
+     pf.observe('BID_PUSH_NEXT', function(event) { logPubfoodEvent(event); });
+     pf.observe('BID_PUSH_NEXT_LATE', function(event) { logPubfoodEvent(event); });
+     pf.observe('BID_COMPLETE', function(event) { logPubfoodEvent(event); });
+     pf.observe('AUCTION_START', function(event) { logPubfoodEvent(event); });
+     pf.observe('AUCTION_REFRESH', function(event) { logPubfoodEvent(event); });
+     pf.observe('AUCTION_COMPLETE', function(event) { logPubfoodEvent(event); });
+     pf.observe('AUCTION_POST_RUN', function(event) { logPubfoodEvent(event); });
+
+     // Initialize carousel
+     $('.single-item').on('init', function(event, slick){
+         pf.getSlot('/6355419/Travel/Europe/France/Paris').setParam('slide', '0');
+         pf.getBidProvider('mock1').setParam('m1s', '0');
+         pf.getBidProvider('mock2').setParam('m2s', '0');
+         pf.start();
+     });
+     // On next slide
+     $('.single-item').on('afterChange', function(event, slick, currentSlide, nextSlide){
+         $('#div-medrec').empty();
+         pf.getSlot('/6355419/Travel/Europe/France/Paris').setParam('slide', currentSlide || '0');
+         pf.getBidProvider('mock1').setParam('m1s', currentSlide * .1 || '0');
+         pf.getBidProvider('mock2').setParam('m2s', currentSlide * .2 || '0');
+         pf.refresh();
+     });
+    </script>
+
+    <script type="text/javascript">
+     $(document).ready(function() {
+         $('.single-item').slick({
+             lazyLoad: 'ondemand',
+             dots: true,
+             infinite: true,
+             speed: 500,
+             slidesToShow: 1,
+             slidesToScroll: 1,
+             respondTo: 'min'
+         });
+     });
+    </script>
+    <em><a class="footer-item" href="http://kenwheeler.github.io/slick/">http://kenwheeler.github.io/slick/</a></em>
+</body>
+</html>

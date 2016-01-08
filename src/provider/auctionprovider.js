@@ -24,20 +24,8 @@ function AuctionProvider(auctionDelegate) {
   }
   var delegate = auctionDelegate || {};
   this.name = delegate.name || '';
-  this.slots_ = [];
   this.auctionDelegate = delegate;
-  this.mediator = null;
 }
-
-/**
- * Set the central auction mediator that orchestrates the auctions.
- *
- * @param {AuctionMediator} mediator - the auction mediator
- * @private
- */
-AuctionProvider.prototype.setMediator = function(mediator) {
-  this.mediator = mediator;
-};
 
 /**
  * Create a new [AuctionProvider]{@link pubfood#provider.AuctionProvider} from an object.

@@ -9,6 +9,11 @@ var util = require('../../src/util');
 /*eslint no-unused-vars: 0*/
 /*eslint no-undef: 0*/
 describe('Util - Tests', function () {
+  it('should generate an 18 character ascii string', function() {
+    var id = util.newId();
+    assert.match(id, /[0-9a-z]{18}/, 'expected an ascii string of length 18');
+  });
+
   it('should test array type', function() {
     assert.isTrue(util.isArray([]), 'empty array should be an array');
     assert.isTrue(util.isArray([1, 2, 3]), 'should be an array');
