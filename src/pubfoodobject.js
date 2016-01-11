@@ -10,7 +10,6 @@ var util = require('./util');
  * PubfoodObject is a base type for pubfood types.
  *
  * @class
- * @memberof pubfood
  */
 function PubfoodObject() {
   this.id = util.newId();
