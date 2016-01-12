@@ -14,7 +14,7 @@ var slotConfig = require('../interfaces').SlotConfig;
  * @class
  * @param {string} name the slot name
  * @param {string} elementId target DOM element id for the slot
- * @augments pubfood.PubfoodObject
+ * @augments PubfoodObject
  * @memberof pubfood#model
  */
 function Slot(name, elementId) {

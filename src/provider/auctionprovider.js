@@ -16,7 +16,7 @@ var PubfoodObject = require('../pubfoodobject');
  * @property {string} name the name of the provider
  * @memberof pubfood#provider
  * @param {AuctionDelegate} auctionDelegate the delegate object that implements [libUri()]{@link pubfood#provider.AuctionProvider#libUri}, [init()]{@link pubfood#provider.AuctionProvider#init} and [refresh()]{@link pubfood#provider.AuctionProvider#refresh}
- * @augments pubfood.PubfoodObject
+ * @augments PubfoodObject
  */
 function AuctionProvider(auctionDelegate) {
   if (this.init_) {

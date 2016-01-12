@@ -15,7 +15,7 @@ var PubfoodObject = require('../pubfoodobject');
  * @class
  * @param {BidDelegate} delegate the delegate object that implements [libUri()]{@link pubfood#provider.BidProvider#libUri}, [init()]{@link pubfood#provider.BidProvider#init} and [refresh()]{@link pubfood#provider.BidProvider#refresh}
  * @property {string} name the name of the provider
- * @augments pubfood.PubfoodObject
+ * @augments PubfoodObject
  * @memberof pubfood#provider
  */
 function BidProvider(bidDelegate) {
