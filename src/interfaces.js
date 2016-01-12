@@ -218,7 +218,8 @@ var slotConfig = {
  * @typedef {TargetingObject} TargetingObject
  *
  * Key value targeting for a specific slot or the page.
- *
+ * @property {string} [type] the targeting level [slot|page]
+ * @deprecated Property, <code>TargetingObject.type [slot|page]</code>.<br> Use the existence of "<em><code>TargetingObject.name</code></em>" to detect targeting is slot-level
  * @property {string} [name] the [Slot.name]{@link pubfood#model.Slot#name}
  * @property {string} [id] if targeting object is for a slot, the generated identifier of the slot
  * @property {string} [elementId] the target DOM element id

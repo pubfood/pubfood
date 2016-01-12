@@ -376,6 +376,7 @@ AuctionMediator.prototype.buildTargeting_ = function(auctionIdx) {
     tgtObject.id = slot.id;
     tgtObject.elementId = slot.elementId || '';
     tgtObject.sizes = slot.sizes;
+    tgtObject.type = 'slot';
 
     bidSet = bidMap[slot.name] || [];
     for (var j = 0; j < bidSet.length; j++) {
@@ -413,6 +414,7 @@ AuctionMediator.prototype.buildTargeting_ = function(auctionIdx) {
     this.mergeKeys(pgTgtObject.targeting, bid.targeting);
   }
   if (pgTgtObject.bids.length > 0) {
+    pgTgtObject.type = 'page';
     auctionTargeting.push(pgTgtObject);
   }
   return auctionTargeting;
