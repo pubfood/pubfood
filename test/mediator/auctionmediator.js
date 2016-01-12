@@ -701,6 +701,7 @@ describe('Pubfood AuctionMediator', function testPubfoodMediator() {
       var auctionTargeting = TEST_MEDIATOR.buildTargeting_(auctionIdx);
       assert.equal(auctionTargeting.length, 1, 'should have one targeting object');
       assert.equal(auctionTargeting[0].name, bid.slot, 'should have slot name: ' + bid.slot);
+      assert.equal(auctionTargeting[0].type, 'slot', 'should have type: slot');
     });
 
     it('should build page targeting', function() {
@@ -708,8 +709,10 @@ describe('Pubfood AuctionMediator', function testPubfoodMediator() {
       var auctionIdx = TEST_MEDIATOR.getAuctionCount();
       TEST_MEDIATOR.auctionRun[auctionIdx].bids.push(bid);
       var auctionTargeting = TEST_MEDIATOR.buildTargeting_(auctionIdx);
-      assert.equal(auctionTargeting.length, 2, 'should have two targeting objects');
+      assert.equal(auctionTargeting.length, 2, 'should have two targeting objects: one for page targeting, the other for the slot');
+      assert.equal(auctionTargeting[0].bids.length, 0, 'slot should exist, but the targeting should not have bids specifically for the slot');
       assert.isUndefined(auctionTargeting[1].name, 'should have page targeting object');
+      assert.equal(auctionTargeting[1].type, 'page', 'should have type: page');
     });
 
     it('should build slot targeting without a bid', function() {

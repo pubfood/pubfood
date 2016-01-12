@@ -25,7 +25,7 @@ function Bid(value) {
   this.value = value || 0;
   /** @property {string} type bid value type derived from {@link util.asType}  */
   this.type = util.asType(this.value);
-  /** @property {string} [label] optional label for adserver key targeting for bid value e.g. <label>=2.00 */
+  /** @property {string} [label] optional label for adserver key targeting for bid value e.g. <code>label=2.00</code> */
   this.label;
   /** @property {string} [provider] the bid provider name */
   this.provider;
