@@ -747,11 +747,12 @@ AuctionMediator.prototype.pushBid = function(auctionIdx, bidObject, providerName
   var bid = Bid.fromObject(bidObject);
   if (bid) {
     bid.provider = providerName;
-    Event.publish(Event.EVENT_TYPE.BID_PUSH_NEXT, bid);
     if (!this.auctionRun[auctionIdx].inAuction) {
       this.auctionRun[auctionIdx].bids.push(bid);
+      Event.publish(Event.EVENT_TYPE.BID_PUSH_NEXT, bid);
     } else {
       this.auctionRun[auctionIdx].lateBids.push(bid);
+      Event.publish(Event.EVENT_TYPE.BID_PUSH_NEXT_LATE, bid);
     }
   } else {
     Event.publish(Event.EVENT_TYPE.WARN, 'Invalid bid object: ' + JSON.stringify(bidObject || {}));
