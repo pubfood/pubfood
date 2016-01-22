@@ -46,8 +46,7 @@ var util = {
 
     child.prototype.init_ = function() {
       var parents = this.parents || [];
-
-      for (var i in parents) {
+      for (var i = 0; i < parents.length; i++) {
         parents[i]().call(this);
       }
     };

@@ -684,7 +684,7 @@ AuctionMediator.prototype.refresh = function(slotNames) {
  * @param {BidderSlots[]} bidderSlots object containing slots per bidder
  */
 AuctionMediator.prototype.processBids = function(auctionIdx, auctionType, bidderSlots) {
-  for (var k in bidderSlots) {
+  for (var k = 0; k < bidderSlots.length; k++) {
     this.getBids_(auctionIdx, auctionType, bidderSlots[k].provider, bidderSlots[k].slots);
   }
 };
