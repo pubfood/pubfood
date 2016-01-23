@@ -11,24 +11,27 @@ var PubfoodObject = require('../pubfoodobject');
  * Bid is the result of a partner [BidProvider]{@link pubfood/provider.BidProvider} request.
  *
  * @class
- * @param {string} slot the slot name
  * @param {string|number} value the bid value. Default: empty string.
- * @param {Array.<number, number>} sizes the dimension sizes of the slot bid
  * @memberof pubfood#model
  */
 function Bid(value) {
   if (this.init_) {
     this.init_();
   }
+  /** @property {Array.<number, number>} [sizes] the dimension sizes of the slot bid */
   this.sizes =  [];
+  /** @property {string} [slot] the slot name */
   this.slot;
+  /** @property {string|number} value the bid value. Default: empty string */
   this.value = value || 0;
-  /** @property {string} type bid value type derived from {@link util.asType}  */
+  /** @property {string} type derived bid value type: from {@link util.asType}  */
   this.type = util.asType(this.value);
   /** @property {string} [label] optional label for adserver key targeting for bid value e.g. <code>label=2.00</code> */
   this.label;
   /** @property {string} [provider] the bid provider name */
   this.provider;
+  /** @property {object} [targeting] ad server targeting key/values in addition to the bid value */
+  this.targeting = {};
 }
 
 /**
@@ -50,7 +53,7 @@ Bid.fromObject = function(config) {
 
 /**
  * Sets the bid's value
- * @param {string|number} v
+ * @param {string|number} v the bid value for the ad server key/value targeting
  * @return {pubfood#model.Bid}
  */
 Bid.prototype.setValue = function(v) {
