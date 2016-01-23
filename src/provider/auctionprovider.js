@@ -25,6 +25,7 @@ function AuctionProvider(auctionDelegate) {
   var delegate = auctionDelegate || {};
   this.name = delegate.name || '';
   this.auctionDelegate = delegate;
+  this.timeout_ = delegate && delegate.timeout ? delegate.timeout : 0;
 }
 
 /**
@@ -90,6 +91,24 @@ AuctionProvider.prototype.refresh = function(targeting, done) {
     return;
   }
   refresh(targeting, done);
+};
+
+/**
+ * Set the timeout by which a auction provider must call done
+ * @param {number} millis the millisecond duration the auction provider has to push bids
+ * @private
+ */
+AuctionProvider.prototype.timeout = function(millis) {
+  this.timeout_ = util.asType(millis) === 'number' ? millis : 0;
+};
+
+/**
+ * Get the timeout by which a auction provider must call done
+ * @return {number} the millisecond duration the auction provider has to push bids
+ * @private
+ */
+AuctionProvider.prototype.getTimeout = function() {
+  return this.timeout_;
 };
 
 util.extends(AuctionProvider, PubfoodObject);

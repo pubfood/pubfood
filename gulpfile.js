@@ -22,7 +22,7 @@ gulp.task('browserify-unit-tests', function() {
 });
 
 gulp.task('test', function() {
-  return gulp.src(['./test/unittestindex.js', './test/apitestindex.js'])
+  return gulp.src(['./test/index.js'])
     .pipe(mocha({reporter: 'spec'}))
     .pipe(exit());
 });

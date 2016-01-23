@@ -8,6 +8,7 @@
 describe('API - Tests', function () {
   require('./objects');
   require('./callbacks');
+  require('./donecallbacktimeout');
   require('./customparams');
   require('./buildtargeting');
   require('./events');

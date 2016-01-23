@@ -27,11 +27,13 @@
 var auctionDelegate = {
   name: '',
   libUri: '',
+  timeout: 0,
   init: function(targeting, done) {},
   refresh: function(targeting, done) {}
 };
 auctionDelegate.optional = {
-  refresh: true
+  refresh: true,
+  timeout: true
 };
 
 /**
@@ -53,6 +55,7 @@ auctionDelegate.optional = {
 var bidDelegate = {
   name: '__default__',
   libUri: ' ',
+  timeout: 0,
   init: function(slots, pushBid, done) {
     done();
   },
@@ -61,7 +64,8 @@ var bidDelegate = {
   }
 };
 bidDelegate.optional = {
-  refresh: true
+  refresh: true,
+  timeout: true
 };
 
 /**
@@ -231,16 +235,14 @@ var slotConfig = {
 
 /**
  *
- * @typedef {PubfoodConfig} PubfoodConfig - all properties are optional
- * @property {string} id
- * @property {number} auctionProviderCbTimeout The maximum time the auction provider has before calling {@link auctionDoneCallback} inside the [AuctionProvider.init]{@link pubfood#provider.AuctionProvider#init} or [AuctionProvider.refresh]{@link pubfood#provider.AuctionProvider#refresh} methods
- * @property {number} bidProviderCbTimeout The maximum time the bid provider has before calling {@link bidDoneCallback} inside the [BidProvider.init]{@link pubfood#provider.BidProvider#init} or [BidProvider.refresh]{@link pubfood#provider.BidProvider#refresh} methods
- * @property {boolean} randomizeBidRequests Randomize the order in which [BidProvider]{@link pubfood#provider.BidProvider} requests are made.
+ * @typedef {PubfoodConfig} PubfoodConfig [pubfood]{@link pubfood} constructor configuration
+ * @property {number} [auctionProviderCbTimeout] The maximum time the auction provider has before calling [done()]{@link typeDefs.auctionDoneCallback} inside the [AuctionProvider.init]{@link pubfood#provider.AuctionProvider#init} or [AuctionProvider.refresh]{@link pubfood#provider.AuctionProvider#refresh} methods
+ * @property {number} [bidProviderCbTimeout] The maximum time the bid provider has before calling [done()]{@link typeDefs.bidDoneCallback} inside the [BidProvider.init]{@link pubfood#provider.BidProvider#init} or [BidProvider.refresh]{@link pubfood#provider.BidProvider#refresh} methods
+ * @property {boolean} [randomizeBidRequests] Randomize the order in which [BidProvider]{@link pubfood#provider.BidProvider} requests are made. Default: false.
  * @memberof typeDefs
- * @private
+ * @deprecated the PubfoodConfig configuration object will be replaced in a future major release. [pubfood]{@link pubfood} methods for configuraion properties will be available.
  */
 var PubfoodConfig = {
-  id: '',
   auctionProviderCbTimeout: 2000,
   bidProviderCbTimeout: 2000,
   randomizeBidRequests: false

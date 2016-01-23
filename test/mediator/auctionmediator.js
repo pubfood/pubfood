@@ -754,34 +754,68 @@ describe('Pubfood AuctionMediator', function testPubfoodMediator() {
   });
 
   describe('Timeout values', function() {
-    it('should set the timeout value', function() {
+    it('should have NO_TIMEOUT if timeout not explicitly set', function() {
+      assert.equal(TEST_MEDIATOR.getTimeout(), AuctionMediator.NO_TIMEOUT, 'timeout value should be the default: -1 (no timeout)');
+    });
+
+    it('should have NO_TIMEOUT if timeout not > 0', function() {
+      TEST_MEDIATOR.timeout(0);
+      assert.equal(TEST_MEDIATOR.getTimeout(), AuctionMediator.NO_TIMEOUT, 'timeout value should be the default: -1 (no timeout)');
+
+      TEST_MEDIATOR.timeout(-7);
+      assert.equal(TEST_MEDIATOR.getTimeout(), AuctionMediator.NO_TIMEOUT, 'timeout value should be the default: -1 (no timeout)');
+    });
+
+    it('should set the auction mediator timeout property value', function() {
       TEST_MEDIATOR.timeout(5);
       assert.equal(TEST_MEDIATOR.getTimeout(), 5, 'timeout value should be 5');
     });
 
-    it('timeout should be a numeric type', function() {
+    it('should set the auction mediator timeout property to a numeric type', function() {
       TEST_MEDIATOR.timeout('5');
-      assert.equal(TEST_MEDIATOR.getTimeout(), 2000, 'timeout value should be the default: 2000');
+      assert.equal(TEST_MEDIATOR.getTimeout(), -1, 'timeout value should be the default: -1 (no timeout)');
     });
 
-    it('should set the auction provider callback timeout value', function() {
+    it('should set the bid provider callback timeout property to a numeric type', function() {
+      TEST_MEDIATOR.setBidProviderCbTimeout('5');
+      assert.equal(TEST_MEDIATOR.callbackTimeout_, 5000, 'bid provider timeout value should be the default: 5000');
+    });
+
+    it('should set the auction provider callback timeout property to a numeric type', function() {
+      TEST_MEDIATOR.setAuctionProviderCbTimeout('5');
+      assert.equal(TEST_MEDIATOR.initDoneTimeout_, 5000, 'auction provider timeout value should be the default: 5000');
+    });
+
+    it('should set the auction provider callback timeout property value to the default when given an argument value of zero', function() {
+      TEST_MEDIATOR.setAuctionProviderCbTimeout(0);
+      assert.equal(TEST_MEDIATOR.initDoneTimeout_, 5000, 'auction provider callback timeout value should be 5000');
+    });
+
+    it('should set the auction provider callback timeout property value to doneCallbackOffset if set, when given an argument value of zero', function() {
+      TEST_MEDIATOR.doneCallbackOffset(2000);
+      TEST_MEDIATOR.setAuctionProviderCbTimeout(0);
+      assert.equal(TEST_MEDIATOR.initDoneTimeout_, 2000, 'auction provider callback timeout value should be 5000');
+    });
+
+    it('should set the auction provider callback timeout property value', function() {
       TEST_MEDIATOR.setAuctionProviderCbTimeout(5);
       assert.equal(TEST_MEDIATOR.initDoneTimeout_, 5, 'auction provider callback timeout value should be 5');
     });
 
-    it('auction provider callback timeout should be a numeric type', function() {
-      TEST_MEDIATOR.setAuctionProviderCbTimeout('5');
-      assert.equal(TEST_MEDIATOR.initDoneTimeout_, 2000, 'auction provider timeout value should be the default: 2000');
+    it('should set the bid provider callback timeout property value to the default when given an argument value of zero', function() {
+      TEST_MEDIATOR.setBidProviderCbTimeout(0);
+      assert.equal(TEST_MEDIATOR.callbackTimeout_, 5000, 'auction provider callback timeout value should be 5000');
     });
 
-    it('should set the bid provider callback timeout value', function() {
+    it('should set the bid provider callback timeout property value to doneCallbackOffset if given an argument value of zero', function() {
+      TEST_MEDIATOR.doneCallbackOffset(2000);
+      TEST_MEDIATOR.setBidProviderCbTimeout(0);
+      assert.equal(TEST_MEDIATOR.callbackTimeout_, 2000, 'auction provider callback timeout value should be 5000');
+    });
+
+    it('should set the bid provider callback timeout property value', function() {
       TEST_MEDIATOR.setBidProviderCbTimeout(5);
       assert.equal(TEST_MEDIATOR.callbackTimeout_, 5, 'bid provider callback timeout value should be 5');
-    });
-
-    it('bid provider callback timeout should be a numeric type', function() {
-      TEST_MEDIATOR.setBidProviderCbTimeout('5');
-      assert.equal(TEST_MEDIATOR.callbackTimeout_, 2000, 'bid provider timeout value should be the default: 2000');
     });
   });
 });

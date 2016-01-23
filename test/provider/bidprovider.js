@@ -7,13 +7,60 @@
 /*eslint no-undef: 0*/
 var assert = require('chai').assert;
 var BidProvider = require('../../src/provider/bidprovider');
-var bidProvider1 = require('../fixture/bidprovider1');
 var Event = require('../../src/event');
 var logger = require('../../src/logger');
 
 describe('Pubfood BidProvider', function() {
+
+  var bidProviders = {
+    valid: [
+      {
+        name: 'bidder1',
+        libUri: '//localhost/cdn/bidder1.js',
+        init: function(slots, pushBid, done) {
+        },
+        refresh: function(slots, pushBid, done) {
+        }
+      },
+      {
+        name: 'bidder1',
+        libUri: '//localhost/cdn/bidder1.js',
+        init: function(slots, pushBid, done) {
+        }
+      }
+    ],
+    invalid: [
+      {
+        name: 'bidder1',
+      },
+      {
+        name: 'bidder1',
+        init: function(slots, pushBid, done) {
+        }
+      },
+      {
+        name: 'bidder1',
+        libUri: '//localhost/cdn/bidder1.js',
+        refresh: function(slots, pushBid, done) {
+        }
+      },
+      {
+        name: 'bidder1',
+        init: function(slots, pushBid, done) {
+        },
+        refresh: function(slots, pushBid, done) {
+        }
+      },
+      {
+        init: function(slots, pushBid, done) {
+        },
+        refresh: function(slots, pushBid, done) {
+        }
+      }
+    ]};
+
   it('should should be valid', function() {
-    var providers = bidProvider1.valid;
+    var providers = bidProviders.valid;
     for (var i = 0; i < providers.length; i++) {
       var bp = BidProvider.withDelegate(providers[i]);
       assert.isDefined(bp, 'bid provider should be created');
@@ -22,7 +69,7 @@ describe('Pubfood BidProvider', function() {
 
   it('should not create invalid provider', function() {
 
-    var providers = bidProvider1.invalid;
+    var providers = bidProviders.invalid;
     for (var i = 0; i < providers.length; i++) {
       var ap = BidProvider.withDelegate(providers[i]);
       assert.isNull(ap, 'bid provider should be created');
@@ -170,5 +217,39 @@ describe('Pubfood BidProvider', function() {
 
     bidProvider.enabled(function() {});
     assert.isTrue(bidProvider.enabled(), 'bid provider should be enabled');
+  });
+
+  it('should have a default timeout value of zero', function() {
+    var bidProvider = new BidProvider();
+    assert.equal(bidProvider.getTimeout(), 0, 'bid provider done timeout should be 0');
+  });
+
+  it('should allow get and set of a timeout value', function() {
+    var bidProvider = new BidProvider();
+    bidProvider.timeout(500);
+    assert.equal(bidProvider.getTimeout(), 500, 'bid provider done timeout should be set');
+  });
+
+  it('should set timeout to zero (0) for non-numeric argument', function() {
+    var bidProvider = new BidProvider();
+    bidProvider.timeout('500');
+    assert.equal(bidProvider.getTimeout(), 0, 'bid provider done timeout should be 0');
+    bidProvider.timeout({timeout: 500});
+    assert.equal(bidProvider.getTimeout(), 0, 'bid provider done timeout should be 0');
+    bidProvider.timeout([500]);
+    assert.equal(bidProvider.getTimeout(), 0, 'bid provider done timeout should be 0');
+    bidProvider.timeout(function() { return 500; });
+    assert.equal(bidProvider.getTimeout(), 0, 'bid provider done timeout should be 0');
+  });
+
+  it('should construct a provider timeout from a withDelegate', function() {
+    var bidProvider = BidProvider.withDelegate({
+      name: 'bp',
+      libUri: 'http://',
+      init: function(slots, pushBid, done) {},
+      refresh: function(slots, pushBid, done) {},
+      timeout: 87
+    });
+    assert.equal(bidProvider.getTimeout(), 87, 'provider timeout value should have been set withDelegate');
   });
 });

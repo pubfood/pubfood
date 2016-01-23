@@ -24,7 +24,7 @@
      var ybotq = ybotq || [];
 
      var pf = new pubfood();
-     pf.timeout(10);
+     pf.timeout(100);
      pf.observe('AUCTION_POST_RUN', function() {
          googletag.cmd.push(function() { googletag.display('div-medrec'); });
      });
@@ -103,17 +103,19 @@
          refresh: function(slots, pushBid, done) {
              var m2s = pf.getBidProvider('mock2').getParam('m2s');
              for (var i in slots) {
-                 pushBid({
-                     slot: slots[i].name,
-                     sizes: [300, 250],
-                     value: '22222222.99',
-                     targeting: {
-                         ns2_unit: 'lotsaUnits',
-                         m2s: m2s
-                     }
-                 });
+                 setTimeout(function() {
+                     pushBid({
+                         slot: slots[i].name,
+                         sizes: [300, 250],
+                         value: '22222222.99',
+                         targeting: {
+                             ns2_unit: 'lotsaUnits',
+                             m2s: m2s
+                         }
+                     });
+                     done();
+                 }, 3);
              }
-             done();
          }
      });
 

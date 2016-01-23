@@ -130,4 +130,27 @@ describe('Pubfood AuctionProvider', function() {
       assert.isTrue(auctionProvider.getParamKeys().length === 5, 'should only have 5 keys');
     });
   });
+
+  it('should have a default timeout value of zero', function() {
+    var auctionProvider = new AuctionProvider();
+    assert.equal(auctionProvider.getTimeout(), 0, 'auction provider done timeout should be 0');
+  });
+
+  it('should allow get and set of a timeout value', function() {
+    var auctionProvider = new AuctionProvider();
+    auctionProvider.timeout(500);
+    assert.equal(auctionProvider.getTimeout(), 500, 'auction provider done timeout should be set');
+  });
+
+  it('should set timeout to zero (0) for non-numeric argument', function() {
+    var auctionProvider = new AuctionProvider();
+    auctionProvider.timeout('500');
+    assert.equal(auctionProvider.getTimeout(), 0, 'auction provider done timeout should be 0');
+    auctionProvider.timeout({timeout: 500});
+    assert.equal(auctionProvider.getTimeout(), 0, 'auction provider done timeout should be 0');
+    auctionProvider.timeout([500]);
+    assert.equal(auctionProvider.getTimeout(), 0, 'auction provider done timeout should be 0');
+    auctionProvider.timeout(function() { return 500; });
+    assert.equal(auctionProvider.getTimeout(), 0, 'auction provider done timeout should be 0');
+  });
 });
