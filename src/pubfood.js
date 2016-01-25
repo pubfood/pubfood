@@ -74,15 +74,21 @@ var AuctionMediator = require('./mediator/auctionmediator');
    *
    * @alias pubfood
    * @constructor
+   * @param {PubfoodConfig} [config] configuration properties object
    * @return {pubfood}
+   * @deprecated pubfood constructor configuration object, see [PubfoodConfig]{@link typeDefs.PubfoodConfig}.
+   * @example
+   *   new pubfood({randomizeBidRequests: true,
+   *                bidProviderCbTimeout: 5000,
+   *                auctionProviderCbTimeout: 5000});
    */
   var api = pubfood.library.init = function(config) {
-    if (config) {
-      this.auctionProviderTimeout_ = config.auctionProviderCbTimeout || 2000;
-      this.bidProviderTimeout_ = config.bidProviderCbTimeout || 2000;
-      this.randomizeBidRequests_ = !!config.randomizeBidRequests;
-    }
     this.mediator = new AuctionMediator();
+    if (config) {
+      this.randomizeBidRequests_ = !!config.randomizeBidRequests;
+      this.mediator.setBidProviderCbTimeout(config.bidProviderCbTimeout);
+      this.mediator.setAuctionProviderCbTimeout(config.auctionProviderCbTimeout);
+    }
 
     Event.publish(Event.EVENT_TYPE.PUBFOOD_API_LOAD);
     this.pushApiCall_('api.init', arguments);
@@ -184,7 +190,6 @@ var AuctionMediator = require('./mediator/auctionmediator');
       this.configErrors.push('Invalid auction provider: ' + delegateName);
       return null;
     }
-    this.mediator.setAuctionProviderCbTimeout(this.auctionProviderTimeout_);
     this.requiredApiCalls.setAuctionProvider++;
     return provider;
   };
@@ -224,7 +229,6 @@ var AuctionMediator = require('./mediator/auctionmediator');
       this.configErrors.push('Invalid bid provider: ' + delegateName);
       return null;
     }
-    this.mediator.setBidProviderCbTimeout(this.bidProviderTimeout_);
     this.requiredApiCalls.addBidProvider++;
 
     if(util.asType(delegate.init) === 'function' && delegate.init.length !== 3){
@@ -294,6 +298,20 @@ var AuctionMediator = require('./mediator/auctionmediator');
     this.pushApiCall_('api.timeout', arguments);
     this.mediator.timeout(millis);
     return this;
+  };
+
+  /**
+   * Sets the default done callback timeout offset. Default: <code>5000ms</code>
+   * <p>
+   * If a [BidProvider.timeout]{@link pubfood#provider.BidProvider#timeout} value is not set, specifies the additional time in which a provider gets to push late bids and call [done()]{@link typeDefs.bidDoneCallback}.
+   * <p>Assists capturing late bid data for analytics and reporting by giving additional timeout "grace" period.
+   * <p>Bid provider timeout calculated as the following if not otherwise set:
+   * <li><code>timeout(millis) + doneCallbackOffset(millis)</code></li>
+   * <p>If the timeout elapses, done() is called on behalf of the provider.
+   * @param {number} millis - milliseconds to set the timeout
+   */
+  api.prototype.doneCallbackOffset = function(millis) {
+    this.mediator.doneCallbackOffset(millis);
   };
 
   /**

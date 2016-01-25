@@ -36,11 +36,10 @@ function AuctionMediator(config) {
   this.auctionRun = {};
   this.timeout_ = AuctionMediator.NO_TIMEOUT;
   this.trigger_ = null;
-  this.initDoneTimeout_ = 2000;
   this.bidAssembler = new BidAssembler();
   this.requestAssembler = new RequestAssembler();
-  this.callbackTimeout_ = 2000;
   this.auctionIdx_ = 0;
+  this.doneCallbackOffset_ = AuctionMediator.DEFAULT_DONE_CALLBACK_OFFSET;
   Event.setAuctionId(this.getAuctionId());
 }
 
@@ -48,6 +47,7 @@ AuctionMediator.PAGE_BIDS = 'page';
 AuctionMediator.AUCTION_TYPE = { START: 'init', REFRESH: 'refresh'};
 AuctionMediator.IN_AUCTION = { FALSE: false, PENDING: 'pending', DONE: 'done'};
 AuctionMediator.NO_TIMEOUT = -1;
+AuctionMediator.DEFAULT_DONE_CALLBACK_OFFSET = 5000;
 
 /**
  * Validate provider and slot dependencies.
@@ -192,7 +192,7 @@ AuctionMediator.prototype.getBidStatus = function(providerName, auctionIdx) {
  * @param {number} millis - milliseconds to set the timeout
  */
 AuctionMediator.prototype.timeout = function(millis) {
-  this.timeout_ = util.asType(millis) === 'number' ? millis : 2000;
+  this.timeout_ = util.asType(millis) === 'number' && millis > 0 ? millis : AuctionMediator.NO_TIMEOUT;
 };
 
 /**
@@ -205,12 +205,34 @@ AuctionMediator.prototype.getTimeout = function() {
 };
 
 /**
+ * Sets the default done callback timeout offset. Default: <code>5000ms</code>
+ * <p>
+  * If a [BidProvider.timeout]{@link pubfood#provider.BidProvider#timeout} or [AuctionProvider.timeout]{@link pubfood#provider.AuctionProvider#timeout} do not have their timeout property value set, specifies the additional time in which a provider needs to call [done()]{@link typeDefs.bidDoneCallback} / [done()]{@link typeDefs.auctionDoneCallback} respectively is:
+ *   <code>timeout(millis) + doneCallbackOffset(millis)</code><br>
+ * <p>If the timeout elapses, done() is called on behalf of the provider.
+ * <p>Assists capturing late bid data for analytics and reporting by giving additional timeout "grace" period.
+ * @param {number} millis - milliseconds to set the timeout
+ */
+AuctionMediator.prototype.doneCallbackOffset = function(millis) {
+  this.doneCallbackOffset_ = util.asType(millis) === 'number' ? millis : AuctionMediator.DEFAULT_DONE_CALLBACK_OFFSET;
+};
+
+/**
+ * Gets the default done callback timeout offset.
+ *
+ * @return {number} the timeout in milliseconds
+ */
+AuctionMediator.prototype.getDoneCallbackOffset = function() {
+  return this.doneCallbackOffset_;
+};
+
+/**
  * The maximum time the auction provider has before calling `done` inside the `init` method
  *
  * @param {number} millis timeout in milliseconds
  */
 AuctionMediator.prototype.setAuctionProviderCbTimeout = function(millis){
-  this.initDoneTimeout_ = util.asType(millis) === 'number' ? millis : 2000;
+  this.initDoneTimeout_ = util.asType(millis) === 'number' && millis > 0 ? millis : this.doneCallbackOffset_;
 };
 
 /**
@@ -316,7 +338,7 @@ AuctionMediator.prototype.allBiddersDone = function(auctionIdx) {
  * @private
  */
 AuctionMediator.prototype.checkBids_ = function(auctionIdx, auctionType) {
-  if (this.allBiddersDone(auctionIdx)) {
+  if (this.allBiddersDone(auctionIdx) && !this.auctionRun[auctionIdx].inAuction) {
     this.startAuction_(auctionIdx, auctionType);
   }
 };
@@ -351,12 +373,12 @@ AuctionMediator.prototype.getBidMap_ = function(auctionIdx) {
 };
 
 /**
- * Builds targeting objects for {AuctionDelegate} requests.
+ * Builds targeting objects for [AuctionDelegate]{@link typeDefs.AuctionDelegate} requests.
  *
  * Flattens all bid targeting into targeting object property. All bid specific
- * targeting is kept in the bid added to bids[].
+ * targeting is kept in the bid added to [bids]{@link typeDefs.TargetingObject}.
  *
- * First bid with targeting[key] wins in top level flattened object.
+ * First bid with [targeting]{@link typeDefs.TargetingObject}[key] wins in top level flattened object.
  *
  * @private
  * @return {object[]} targeting objects
@@ -432,15 +454,18 @@ AuctionMediator.prototype.processTargeting_ = function(auctionIdx, auctionType) 
   var doneCalled = false;
   var name = self.auctionProvider.name;
   var idx = auctionIdx;
-  var cbTimeout = self.initDoneTimeout_;
+  var cbTimeout = self.auctionProvider.getTimeout();
+
+  var timeoutId;
   var doneCb = function() {
     if (!doneCalled) {
       doneCalled = true;
+      clearTimeout(timeoutId);
       self.auctionDone(idx, name);
     }
   };
 
-  setTimeout(function() {
+  timeoutId = setTimeout(function() {
     if (!doneCalled) {
       Event.publish(Event.EVENT_TYPE.WARN, 'Warning: The auction done callback for "' + name + '" hasn\'t been called within the allotted time (' + (cbTimeout / 1000) + 'sec)');
       doneCb();
@@ -499,17 +524,55 @@ AuctionMediator.prototype.addSlot = function(slotConfig) {
 };
 
 /**
+ * Get the bid/auction provider done callback timeout
+ * @param {BidDelegate|AuctionDelegate} delegate the provider delegate object
+ * @private
+ */
+AuctionMediator.prototype.getProviderDoneTimeout_ = function(delegate) {
+  var providerDoneTimeout = this.timeout_ + this.doneCallbackOffset_;
+  if (delegate.timeout) {
+    providerDoneTimeout = delegate.timeout;
+  }
+  return providerDoneTimeout;
+};
+
+/**
+ * Get bid provider done timeout
+ * @deprecated to be refactored when {@link typeDefs.PubfoodConfig} removed
+ */
+AuctionMediator.prototype.getBidProviderDoneTimeout_ = function(delegate) {
+  var doneTimeout = this.getProviderDoneTimeout_(delegate);
+  if (this.callbackTimeout_) {
+    doneTimeout = this.callbackTimeout_;
+  }
+  return doneTimeout;
+};
+
+/**
+ * Get auction provider done timeout
+ * @deprecated to be refactored when {@link typeDefs.PubfoodConfig} removed
+ */
+AuctionMediator.prototype.getAuctionProviderDoneTimeout_ = function(delegate) {
+  var doneTimeout = this.getProviderDoneTimeout_(delegate);
+  if (this.initDoneTimeout_) {
+    doneTimeout = this.initDoneTimeout_;
+  }
+  return doneTimeout;
+};
+
+/**
  * Add a [BidProvider]{@link pubfood#provider.BidProvider} configuration object.
  * @param {BidDelegate} delegateConfig - configuration for a [BidProvider]{@link pubfood#provider.BidProvider}
  * @returns {pubfood#provider.BidProvider}
  */
 AuctionMediator.prototype.addBidProvider = function(delegateConfig) {
-
   var bidProvider = BidProvider.withDelegate(delegateConfig);
   if (bidProvider) {
     if(this.bidProviders[bidProvider.name]){
       Event.publish(Event.EVENT_TYPE.WARN, 'Warning: bid provider ' + bidProvider.name + ' is already added');
     } else {
+      var bidDoneTimeout = this.getBidProviderDoneTimeout_(delegateConfig);
+      bidProvider.timeout(bidDoneTimeout);
       this.bidProviders[bidProvider.name] = bidProvider;
     }
   } else {
@@ -534,6 +597,8 @@ AuctionMediator.prototype.setAuctionProvider = function(delegateConfig) {
   }
   var auctionProvider = AuctionProvider.withDelegate(delegateConfig);
   if (auctionProvider) {
+    var auctionDoneTimeout = this.getAuctionProviderDoneTimeout_(delegateConfig);
+    auctionProvider.timeout(auctionDoneTimeout);
     this.auctionProvider = auctionProvider;
   } else {
     var name = delegateConfig && delegateConfig.name ? delegateConfig.name : 'undefined';
@@ -695,7 +760,7 @@ AuctionMediator.prototype.processBids = function(auctionIdx, auctionType, bidder
  * @param {number} millis timeout in milliseconds
  */
 AuctionMediator.prototype.setBidProviderCbTimeout = function(millis){
-  this.callbackTimeout_ = util.asType(millis) === 'number' ? millis : 2000;
+  this.callbackTimeout_ = util.asType(millis) === 'number' && millis > 0 ? millis : this.doneCallbackOffset_;
 };
 
 /**
@@ -708,20 +773,22 @@ AuctionMediator.prototype.getBids_ = function(auctionIdx, auctionType, provider,
   var name = provider.name;
   var doneCalled = false;
   var idx = auctionIdx;
-  var cbTimeout = self.callbackTimeout_;
+  var cbTimeout = provider.getTimeout();
   var pushBidCb = function(bid){
     bid.auctionIdx = idx;
     self.pushBid(idx, bid, name);
   };
 
+  var timeoutId;
   var bidDoneCb = function(){
     if(!doneCalled) {
       doneCalled = true;
+      clearTimeout(timeoutId);
       self.doneBid(idx, auctionType, name);
     }
   };
 
-  setTimeout(function(){
+  timeoutId = setTimeout(function(){
     if(!doneCalled) {
       Event.publish(Event.EVENT_TYPE.WARN, 'Warning: The bid done callback for "'+name+'" hasn\'t been called within the allotted time (' + (cbTimeout/1000) + 'sec)');
       bidDoneCb();

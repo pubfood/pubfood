@@ -26,6 +26,7 @@ function BidProvider(bidDelegate) {
   this.name = delegate.name || '';
   this.bidDelegate = delegate;
   this.enabled_ = true;
+  this.timeout_ = delegate && delegate.timeout ? delegate.timeout : 0;
 }
 
 /**
@@ -128,6 +129,22 @@ BidProvider.prototype.enabled = function(status) {
     this.enabled_ = status;
   }
   return this.enabled_;
+};
+
+/**
+ * Set the timeout by which a bid provider must call done
+ * @param {number} millis the millisecond duration the bid provider has to push bids
+ */
+BidProvider.prototype.timeout = function(millis) {
+  this.timeout_ = util.asType(millis) === 'number' ? millis : 0;
+};
+
+/**
+ * Get the timeout by which a bid provider must call done
+ * @return {number} the millisecond duration the bid provider has to push bids
+ */
+BidProvider.prototype.getTimeout = function() {
+  return this.timeout_;
 };
 
 util.extends(BidProvider, PubfoodObject);

@@ -16,9 +16,8 @@ var pubfood = require('../../src/pubfood');
 var assert = require('chai').assert;
 var expect = require('chai').expect;
 var Event = require('../../src/event');
-var auctionExample = require('../fixture/auctionexample1');
 
-describe('Api Callbacks - Tests', function() {
+describe('Callbacks', function() {
 
   beforeEach(function() {
     Event.removeAllListeners();
@@ -27,7 +26,7 @@ describe('Api Callbacks - Tests', function() {
   it('should call all the callbacks', function(done) {
 
     var bidProviderDoneCalled = {
-      yieldbot: false,
+      bidderAvg: false,
       bidderFast: false,
       bidderSlow: false
     };
@@ -38,10 +37,47 @@ describe('Api Callbacks - Tests', function() {
       bidProviderCbTimeout: 1
     });
 
+    var slots = [
+      {
+        name: '/00000000/multi-size',
+        sizes: [
+          [300, 250],
+          [300, 600]
+        ],
+        elementId: 'div-multi-size',
+        bidProviders: [
+          'bidderAvg',
+          'bidderFast',
+          'bidderSlow'
+        ]
+      },
+      {
+        name: '/0000001/another-size',
+        sizes: [
+          [300, 250],
+          [300, 450]
+        ],
+        elementId: 'div-another-size',
+        bidProviders: [
+        ]
+      },
+      {
+        name: '/0000010/another',
+        sizes: [
+          [300, 250],
+          [300, 450]
+        ],
+        elementId: 'div-another',
+      }
+    ];
+
+    for (var i in slots) {
+      pf.addSlot(slots[i]);
+    }
     var checkDoneCallbacks = function(_key) {
       describe(_key + ' done callback called', function() {
         it('should be called', function(d) {
-          assert(bidProviderDoneCalled[_key], 'done callback was triggered for ' + _key);
+          assert.equal(bidProviderDoneCalled[_key], true, 'done callback was triggered for ' + _key);
           d();
         });
       });
@@ -73,18 +109,60 @@ describe('Api Callbacks - Tests', function() {
       done();
     });
 
-    // add slot
-    pf.addSlot(auctionExample.slots[0]);
-    pf.addSlot(auctionExample.slots[1]);
-    pf.addSlot(auctionExample.slots[2]);
-
     // set the auction provider
-    pf.setAuctionProvider(auctionExample.auctionProvider);
+    pf.setAuctionProvider({
+      name: 'auctionProvider',
+      libUri: '../test/fixture/lib.js',
+      init: function(targeting, done) {
+        done();
+      },
+      refresh: function(targeting, done) {
+        done();
+      },
+      trigger: function(done) {
+        setTimeout(function() {
+          done();
+        }, 100);
+      }
+    });
 
     // add bid providers
-    pf.addBidProvider(auctionExample.bidProviders[0]);
-    pf.addBidProvider(auctionExample.bidProviders[1]);
-    pf.addBidProvider(auctionExample.bidProviders[2]);
+    var bidProviders = [
+      {
+        name: 'bidderAvg',
+        libUri: '../test/fixture/lib.js',
+        init: function(slots, pushBid, done) {
+          done();
+        },
+        refresh: function(slots, pushBid, done) {
+          done();
+        }
+      },
+      {
+        name: 'bidderFast',
+        libUri: '../test/fixture/lib.js',
+        init: function(slots, pushBid, done) {
+          done();
+        },
+        refresh: function(slots, pushBid, done) {
+          done();
+        }
+      },
+      {
+        name: 'bidderSlow',
+        libUri: '../test/fixture/lib.js',
+        init: function(slots, pushBid, done) {
+          done();
+        },
+        refresh: function(slots, pushBid, done) {
+          done();
+        }
+      }
+    ];
+
+    for (var k in bidProviders) {
+      pf.addBidProvider(bidProviders[k]);
+    }
 
     var now = +(new Date());
     var testDone = done;
