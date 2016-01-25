@@ -10,7 +10,8 @@ var gulp = require('gulp'),
   mocha = require('gulp-mocha'),
   rename = require('gulp-rename'),
   replace = require('gulp-replace'),
-  uglify = require('gulp-uglify');
+  uglify = require('gulp-uglify'),
+  exit = require('gulp-exit');
 
 gulp.task('browserify-unit-tests', function() {
   var b = browserify();
@@ -22,7 +23,8 @@ gulp.task('browserify-unit-tests', function() {
 
 gulp.task('test', function() {
   return gulp.src(['./test/unittestindex.js', './test/apitestindex.js'])
-    .pipe(mocha({reporter: 'spec'}));
+    .pipe(mocha({reporter: 'spec'}))
+    .pipe(exit());
 });
 
 gulp.task('lint', function() {
