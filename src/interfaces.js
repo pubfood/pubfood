@@ -41,7 +41,7 @@ auctionDelegate.optional = {
  *
  * @typedef {BidDelegate} BidDelegate
  * @property {string} name Bid provider delegate name.
- * @property {string} libUri location of the delegate JavaScript library/tag.
+ * @property {string} [libUri] location of the delegate JavaScript library/tag.
  * @property {function} init Initial bid request for [BidProvider.init]{@link pubfood#provider.BidProvider#init} delegate.
  * @property {Slot[]} init.slots slots to bid on
  * @property {pushBidCallback} init.pushBid Callback to execute on next bid available
@@ -64,6 +64,7 @@ var bidDelegate = {
   }
 };
 bidDelegate.optional = {
+  libUri: true,
   refresh: true,
   timeout: true
 };

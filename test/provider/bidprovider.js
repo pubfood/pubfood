@@ -23,47 +23,58 @@ describe('Pubfood BidProvider', function() {
         }
       },
       {
-        name: 'bidder1',
+        name: 'bidder2',
         libUri: '//localhost/cdn/bidder1.js',
         init: function(slots, pushBid, done) {
+        }
+      },
+      {
+        name: 'bidder3',
+        init: function(slots, pushBid, done) {
+        }
+      },
+      {
+        name: 'bidder4',
+        init: function(slots, pushBid, done) {
+        },
+        refresh: function(slots, pushBid, done) {
         }
       }
     ],
     invalid: [
       {
-        name: 'bidder1',
+        name: 'bidder5',
       },
       {
-        name: 'bidder1',
-        init: function(slots, pushBid, done) {
-        }
-      },
-      {
-        name: 'bidder1',
+        name: 'bidder6',
         libUri: '//localhost/cdn/bidder1.js',
         refresh: function(slots, pushBid, done) {
         }
       },
       {
-        name: 'bidder1',
         init: function(slots, pushBid, done) {
         },
         refresh: function(slots, pushBid, done) {
         }
       },
       {
-        init: function(slots, pushBid, done) {
-        },
+        name: 'bidder7',
+        refresh: function(slots, pushBid, done) {
+        }
+      },
+      {
+        libUri: '',
         refresh: function(slots, pushBid, done) {
         }
       }
+
     ]};
 
-  it('should should be valid', function() {
+  it('should be valid', function() {
     var providers = bidProviders.valid;
     for (var i = 0; i < providers.length; i++) {
       var bp = BidProvider.withDelegate(providers[i]);
-      assert.isDefined(bp, 'bid provider should be created');
+      assert.notEqual(bp, null, 'bid provider should not be null:\n' + JSON.stringify(providers[i], null, '  ') + '\n');
     }
   });
 
@@ -72,7 +83,7 @@ describe('Pubfood BidProvider', function() {
     var providers = bidProviders.invalid;
     for (var i = 0; i < providers.length; i++) {
       var ap = BidProvider.withDelegate(providers[i]);
-      assert.isNull(ap, 'bid provider should be created');
+      assert.isNull(ap, 'bid provider object should not have been created');
       var log = logger.history[logger.history.length - 1];
       assert.match(log.event.data.msg, /^Warn: invalid bidder delegate/, 'was not a validation error on delegate');
     }

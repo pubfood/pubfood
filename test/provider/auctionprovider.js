@@ -16,7 +16,7 @@ describe('Pubfood AuctionProvider', function() {
     var providers = auctionProvider1.valid;
     for (var i = 0; i < providers.length; i++) {
       var ap = AuctionProvider.withDelegate(providers[i]);
-      assert.isDefined(ap, 'auction provider should be created');
+      assert.notEqual(ap, null, 'auction provider should be created');
     }
   });
 
