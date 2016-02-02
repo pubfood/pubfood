@@ -40,6 +40,7 @@ function AuctionMediator(config) {
   this.requestAssembler = new RequestAssembler();
   this.auctionIdx_ = 0;
   this.doneCallbackOffset_ = AuctionMediator.DEFAULT_DONE_CALLBACK_OFFSET;
+  this.omitDefaultBidKey_ = false;
   Event.setAuctionId(this.getAuctionId());
 }
 
@@ -410,8 +411,10 @@ AuctionMediator.prototype.buildTargeting_ = function(auctionIdx) {
         targeting: bid.targeting || {}
       });
 
-      var bidKey = this.getBidKey(bid);
-      tgtObject.targeting[bidKey] = tgtObject.targeting[bidKey] || (bid.value || '');
+      if (!this.omitDefaultBidKey()) {
+        var bidKey = this.getBidKey(bid);
+        tgtObject.targeting[bidKey] = tgtObject.targeting[bidKey] || (bid.value || '');
+      }
       this.mergeKeys(tgtObject.targeting, bid.targeting);
     }
     auctionTargeting.push(tgtObject);
@@ -431,8 +434,10 @@ AuctionMediator.prototype.buildTargeting_ = function(auctionIdx) {
       targeting: bid.targeting
     });
 
-    var bidKey = this.getBidKey(bid);
-    pgTgtObject.targeting[bidKey] = pgTgtObject.targeting[bidKey] || (bid.value || '');
+    if (!this.omitDefaultBidKey()) {
+      var bidKey = this.getBidKey(bid);
+      pgTgtObject.targeting[bidKey] = pgTgtObject.targeting[bidKey] || (bid.value || '');
+    }
     this.mergeKeys(pgTgtObject.targeting, bid.targeting);
   }
   if (pgTgtObject.bids.length > 0) {
@@ -915,6 +920,30 @@ AuctionMediator.prototype.getAuctionRunLateBids = function(auctionIdx) {
 AuctionMediator.prototype.getAuctionRunTargeting = function(auctionIdx) {
   var run = this.auctionRun[auctionIdx];
   return util.asType(run) === 'undefined' ? [] : run.targeting;
+};
+
+/**
+ * Prefix the bid provider default targeting key with the provider name.
+ * @param {boolean} usePrefix turn prefixing off if false. Default: true.
+ * @private
+ */
+AuctionMediator.prototype.prefixDefaultBidKey = function(usePrefix) {
+  if (util.asType(usePrefix) === 'boolean') {
+    this.prefix = usePrefix;
+  }
+  return this.prefix;
+};
+
+/**
+ * Omit sending the bid provider default key/value to ad server.
+ * @param {boolean} defaultBidKeyOff turn bid provider default targeting key off if false. Default: true.
+ * @private
+ */
+AuctionMediator.prototype.omitDefaultBidKey = function(defaultBidKeyOff) {
+  if (util.asType(defaultBidKeyOff) === 'boolean') {
+    this.omitDefaultBidKey_ = defaultBidKeyOff;
+  }
+  return this.omitDefaultBidKey_;
 };
 
 util.extends(AuctionMediator, PubfoodObject);

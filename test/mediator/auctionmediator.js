@@ -722,6 +722,83 @@ describe('Pubfood AuctionMediator', function testPubfoodMediator() {
       assert.equal(auctionTargeting[0].name, '/abc/123', 'should have slot name');
     });
 
+    it('should turn off bid provider name prefix from default targeting key', function() {
+
+      TEST_MEDIATOR.prefixDefaultBidKey(false);
+
+      var bid = new Bid(87);
+      bid.slot = '/abc/123';
+      bid.provider = 'frotz';
+      bid.targeting = {otherAdServerKey: 87};
+      bid.label = 'price';
+      var auctionIdx = TEST_MEDIATOR.getAuctionCount();
+      TEST_MEDIATOR.auctionRun[auctionIdx].bids.push(bid);
+      var auctionTargeting = TEST_MEDIATOR.buildTargeting_(auctionIdx);
+      assert.equal(auctionTargeting[0].targeting.price, 87, 'should have a default bid targeting key without prefix of bid provider name');
+    });
+
+    it('should turn on bid provider name prefix for default targeting key', function() {
+
+      TEST_MEDIATOR.prefixDefaultBidKey(true);
+
+      var bid = new Bid(87);
+      bid.slot = '/abc/123';
+      bid.provider = 'frotz';
+      var auctionIdx = TEST_MEDIATOR.getAuctionCount();
+      TEST_MEDIATOR.auctionRun[auctionIdx].bids.push(bid);
+      var auctionTargeting = TEST_MEDIATOR.buildTargeting_(auctionIdx);
+      assert.equal(auctionTargeting[0].targeting.frotz_bid, 87, 'should have a default bid targeting key including prefix of bid provider name');
+    });
+
+    it('should omit the bid default key from ad server targeting', function() {
+
+      TEST_MEDIATOR.omitDefaultBidKey(true);
+
+      var bid = new Bid(87);
+      bid.slot = '/abc/123';
+      bid.provider = 'frotz';
+      bid.targeting = {otherAdServerKey: 87};
+      bid.label = 'price';
+      var auctionIdx = TEST_MEDIATOR.getAuctionCount();
+      TEST_MEDIATOR.auctionRun[auctionIdx].bids.push(bid);
+      var auctionTargeting = TEST_MEDIATOR.buildTargeting_(auctionIdx);
+      assert.isUndefined(auctionTargeting[0].targeting.frotz_price, 'should not have a <provider>_<label> bid targeting key');
+      assert.equal(auctionTargeting[0].targeting.otherAdServerKey, 87, 'should have custom targeting set');
+    });
+
+    it('should not omit the bid default key from ad server targeting', function() {
+
+      TEST_MEDIATOR.omitDefaultBidKey(false);
+
+      var bid = new Bid(87);
+      bid.slot = '/abc/123';
+      bid.provider = 'frotz';
+      bid.targeting = {otherAdServerKey: 87};
+      bid.label = 'price';
+      var auctionIdx = TEST_MEDIATOR.getAuctionCount();
+      TEST_MEDIATOR.auctionRun[auctionIdx].bids.push(bid);
+      var auctionTargeting = TEST_MEDIATOR.buildTargeting_(auctionIdx);
+      assert.equal(auctionTargeting[0].targeting.frotz_price, 87, 'should have a <provider>_<label> bid targeting key');
+      assert.equal(auctionTargeting[0].targeting.otherAdServerKey, 87, 'should have custom targeting set');
+    });
+
+    it('should not omit the bid default, non-prefixed, key from ad server targeting', function() {
+
+      TEST_MEDIATOR.omitDefaultBidKey(false);
+      TEST_MEDIATOR.prefixDefaultBidKey(false);
+
+      var bid = new Bid(87);
+      bid.slot = '/abc/123';
+      bid.provider = 'frotz';
+      bid.targeting = {otherAdServerKey: 87};
+      bid.label = 'price';
+      var auctionIdx = TEST_MEDIATOR.getAuctionCount();
+      TEST_MEDIATOR.auctionRun[auctionIdx].bids.push(bid);
+      var auctionTargeting = TEST_MEDIATOR.buildTargeting_(auctionIdx);
+      assert.equal(auctionTargeting[0].targeting.price, 87, 'should have a <label> bid targeting key without bid provider name prefix');
+      assert.equal(auctionTargeting[0].targeting.otherAdServerKey, 87, 'should have custom targeting set');
+    });
+
     it('should build a bid key', function() {
       var bid = new Bid(87);
       for (var i in TEST_MEDIATOR.bidProviders) {
