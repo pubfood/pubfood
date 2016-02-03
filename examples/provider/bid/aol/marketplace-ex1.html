@@ -152,7 +152,7 @@
 
              // For pubApiOK access to bid params closure, use callback
              // function factory
-             aolProviderParams.params.callback = 'aolAdtechCallback_' + pf.util.newId();
+             aolProviderParams.params.callback = 'aolAdtechCallback_' + (Math.round(Math.random() * 2147483647).toString(36));
              window[aolProviderParams.params.callback] = aolProvider.bidHandlerFactory(slot);
 
              var bidRequest = pf.util.mergeToObject({}, aolProviderParams);
