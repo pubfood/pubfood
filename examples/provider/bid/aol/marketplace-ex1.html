@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AOL Marketplace Ex1</title>
+    <script src="../../../../build/pubfood.js"></script>
+    <script src="http://aka-cdn.adtechus.com/dt/common/DAC.js"></script>
+</head>
+<body>
+    <h2><em>AOL Marketplace Bid Provider - Example1</em></h2>
+    <p></p>
+    This page illustrates one approach to implementing an AOL Marketplace bid provider.<b></b>
+    <ul>
+        <li>The example uses the AOL API (<em><code>DAC.js</code></em>) library directly</li>
+        <li>The use of the publisher API callback <em><code>pubApiOK</code></em> is maintained to give access to response object functions</li>
+        <li>For the AOL bid provider, <em><code>init</code></em> and <em><code>refresh</code></em> can share the same code</li>
+        <li>AOL API configuration values is borrowed from the AOL demo: <a href="http://iqtestsites.adtech.de/sancho/marketplace/" target="_blank">http://iqtestsites.adtech.de/sancho/marketplace/</a></li>
+    </ul>
+    <p></p>
+    <script>
+     function refreshAllAds() {
+         pf.refresh();
+     }
+    </script>
+    <button id="reload-all-btn" onclick="refreshAllAds()">Reload All Ads</button>
+    <p></p>
+    <!-- Ads appended here -->
+    <div id="div-gpt-ad-1438955597722-1"></div>
+    <div id="div-gpt-ad-1438955597722-0"></div>
+    <div id="div-gpt-ad-1439394117151-0"></div>
+    <div id="div-gpt-ad-1439394117151-1"></div>
+    <script>
+     window.googletag = window.googletag || {};
+     googletag.cmd = googletag.cmd || [];
+     window.ADTECH = window.ADTECH || {};
+
+     var pf = new pubfood();
+     pf.timeout(3000);
+     pf.observe('AUCTION_POST_RUN', function() {
+         googletag.cmd.push(function() { googletag.display('div-gpt-ad-1438955597722-1'); });
+         googletag.cmd.push(function() { googletag.display('div-gpt-ad-1438955597722-0'); });
+         googletag.cmd.push(function() { googletag.display('div-gpt-ad-1439394117151-0'); });
+         googletag.cmd.push(function() { googletag.display('div-gpt-ad-1439394117151-1'); });
+     });
+    </script>
+
+    <script>
+     var slot = pf.addSlot({
+         name: '/2476204/leaderboard',
+         sizes: [
+             [728, 90]
+         ],
+         elementId: 'div-gpt-ad-1438955597722-1',
+         bidProviders: [
+             'aol'
+         ]
+     });
+     slot.setParam('aol', {
+         placement: 3611252,
+         alias: '728x90atf',
+         mpAliasKey: 'mpalias',
+         sizeId: 225,
+         secure: false,
+         performScreenDetection: false
+     });
+
+     var slot2 = pf.addSlot({
+         name: '/2476204/medium-rectangle',
+         sizes: [
+             [300, 250]
+         ],
+         elementId: 'div-gpt-ad-1438955597722-0',
+         bidProviders: [
+             'aol'
+         ]
+     });
+     slot2.setParam('aol', {
+         placement: 3611253,
+         alias: '300x250atf',
+         mpAliasKey: 'mpalias',
+         sizeId: 170,
+         secure: false,
+         performScreenDetection: false
+     });
+
+     var slot3 = pf.addSlot({
+         name: '/2476204/leaderboard-btf',
+         sizes: [
+             [728, 90]
+         ],
+         elementId: 'div-gpt-ad-1439394117151-0',
+         bidProviders: [
+             'aol'
+         ]
+     });
+     slot3.setParam('aol', {
+         placement: 3617719,
+         alias: "728x90btf",
+         mpAliasKey: 'mpalias',
+         sizeId: 225,
+         secure: false,
+         performScreenDetection: false,
+     });
+
+     var slot4 = pf.addSlot({
+         name: '/2476204/medium-rectangle-btf',
+         sizes: [
+             [300, 250]
+         ],
+         elementId: 'div-gpt-ad-1439394117151-1',
+         bidProviders: [
+             'aol'
+         ]
+     });
+     slot4.setParam('aol', {
+         placement: 3617677,
+         alias: "300x250btf",
+         mpAliasKey: 'mpalias',
+         sizeId: 170,
+         secure: false,
+         performScreenDetection: false
+      });
+
+     var aolProvider = pf.addBidProvider({
+         name: 'aol',
+         init: function(slots, pushBid, done) {
+             aolProvider.requestBids(slots, pushBid, done);
+         },
+         refresh: function(slots, pushBid, done) {
+             aolProvider.requestBids(slots, pushBid, done);
+         }
+     });
+     aolProvider.setParam('bidRequestConfig', {
+         params: {
+             bidFloor: '',
+             cmd: 'bid',
+             cors: 'no'
+         },
+         network: '9599.1',
+         defaultKey: 'aolbid',
+         secure: false,
+         server: 'adserver.adtechus.com',
+         serviceType: 'pubapi',
+         sizeId: 225,
+         roundingConfig: [{from: 0, to: 999, roundFunction: 'hundredCeil'}],
+         adjustment: 100
+     });
+     aolProvider.requestBids = function(slots, pushBid, done) {
+         var bidCount = 0;
+         for (var index in slots) {
+             var slot = slots[index],
+                 aolProviderParams = aolProvider.getParam('bidRequestConfig');
+
+             // For pubApiOK access to bid params closure, use callback
+             // function factory
+             aolProviderParams.params.callback = 'aolAdtechCallback_' + pf.util.newId();
+             window[aolProviderParams.params.callback] = aolProvider.bidHandlerFactory(slot);
+
+             var bidRequest = pf.util.mergeToObject({}, aolProviderParams);
+             pf.util.mergeToObject(bidRequest, slot.getParam('aol'));
+
+             bidRequest.pubApiConfig = {
+                 defaultKey: aolProviderParams.defaultKey,
+                 pubApiER: function() { console.log('pubApiER'); },
+                 pubApiOK: function(response, params) {
+                     var targetingKeyValues = response.getBidKeyValueObj();
+                     targetingKeyValues.mpalias = response.data.aliasName;
+                     pushBid({
+                         slot: response.data.slotName,
+                         value: response.getRoundedCPM(),
+                         targeting: targetingKeyValues
+                     });
+                     aolProvider.setParam(response.data.aliasName, response);
+                     bidCount++;
+                     if (bidCount === slots.length) {
+                         done();
+                     }
+                 },
+                 roundingConfig: aolProviderParams.roundingConfig
+             };
+             window.ADTECH.loadAd(bidRequest);
+         }
+     };
+     aolProvider.bidHandlerFactory = function(slot) {
+         return function(response, params) {
+             // Convenience function to set config properties on the bid
+             // response; then call the standard ADTECH.pubApiHandler which
+             // makes the pubApiOK callback
+             response.slotName = slot.name;
+             response.aliasName = slot.getParam('aol').alias;
+             response.adContainerId = slot.elementId;
+             ADTECH.pubApiHandler(response, params);
+         };
+     }
+     // Aol creative rendering handler per pubtaglib.min.js
+     aolProvider.dacRenderAd = function(event) {
+         var data = event.data;
+         var msg = 'adtech_pub_page::';
+         if (data.match && data.match(msg)) {
+             var alias = data.split(msg)[1];
+             var response = aolProvider.getParam(alias);
+             if (response) {
+                 var divId = response.data.adContainerId,
+                     divEl = document.getElementById(divId);
+                 if (divEl) {
+                     divEl.innerHTML = "";
+
+                     var creativeHtml = response.getCreative();
+                     var ifr = document.createElement("iframe");
+
+                     ifr.seamless = "seamless",
+                         ifr.width = response.getAdWidth(),
+                         ifr.height = response.getAdHeight(),
+                         ifr.id = "adtpub-frame-" + response.adContainerId,
+                         ifr.name = ifr.id,
+                         ifr.style.border = "0px",
+                         ifr.scrolling = "no",
+                         ifr.frameborder = 0,
+                         ifr.allowtransparency = !0,
+                         ifr.setAttribute("allowFullScreen", "true"),
+                         ifr.setAttribute("mozallowFullScreen", "true"),
+                         ifr.setAttribute("webkitAllowFullScreen", "true");
+                     divEl.appendChild(ifr);
+                     var f = '<head></head><body><style>body,html{margin:0;padding:0;}</style><scr' + 'ipt>var inFiF=inDapIF=true;</scr' + 'ipt>' + creativeHtml + '</body>';
+                     ifr.contentWindow.document.open();
+                     ifr.contentWindow.document.write(f);
+                     ifr.contentWindow.document.close();
+                 }
+             }
+         }
+     }
+     // AOL creative will postMessage
+     window.addEventListener ? window.addEventListener('message', aolProvider.dacRenderAd, false) : window.attachEvent ? window.attachEvent('onmessage', aolProvider.dacRenderAd) : window['onmessage'] = aolProvider.dacRenderAd;
+
+     pf.setAuctionProvider({
+         name: 'Google',
+         libUri: 'http://www.googletagservices.com/tag/js/gpt.js',
+         init: function(targeting, done) {
+             googletag.cmd.push(function() {
+                 var slots = {};
+                 for (var i = 0; i < targeting.length; i++) {
+                     var tgtObject = targeting[i];
+
+                     var gptObject;
+                     if (tgtObject.name) {
+                         gptObject = googletag.defineSlot(tgtObject.name, tgtObject.sizes, tgtObject.elementId)
+                                              .addService(googletag.pubads());
+                         slots[tgtObject.name] = gptObject;
+                     } else {
+                         gptObject = googletag.pubads();
+                     }
+                     for (var p in tgtObject.targeting) {
+                         gptObject.setTargeting(p, tgtObject.targeting[p]);
+                     }
+                 }
+                 pf.getAuctionProvider().setParam('slots', slots);
+             });
+             googletag.cmd.push(function() {
+                 googletag.pubads().collapseEmptyDivs();
+                 googletag.pubads().enableSingleRequest();
+                 googletag.enableServices();
+                 done();
+             });
+         },
+         refresh: function(targeting, done) {
+             googletag.cmd.push(function() {
+                 var slots = pf.getAuctionProvider().getParam('slots');
+                 for (var i = 0; i < targeting.length; i++) {
+                     var tgtObject = targeting[i];
+                     var gptObject;
+
+                     if (tgtObject.name) {
+                         gptObject = slots[tgtObject.name] || null;
+                     } else {
+                         gptObject = googletag.pubads();
+                     }
+                     for (var p in tgtObject.targeting) {
+                         gptObject.setTargeting(p, tgtObject.targeting[p]);
+                     }
+                 }
+                 googletag.pubads().refresh();
+                 done();
+             });
+         }
+     });
+
+     pf.start();
+    </script>
+</body>
+</html>

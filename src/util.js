@@ -5,12 +5,11 @@
 'use strict';
 /**
  * @namespace util
- * @private
  */
 var util = {
   /**
    * Get the type name of an object.
-   *
+   * For behavior,
    * @see https://javascriptweblog.wordpress.com/2011/08/08/fixing-the-javascript-typeof-operator/
    *
    * @function asType
@@ -89,6 +88,13 @@ var util = {
       fn.apply(ctx, Array.prototype.slice.call(arguments));
     };
   },
+  /**
+   * Merge two objects.
+   * Where source and target share the same keys, source overwrites target key.
+   * @param {object} target the target object
+   * @param {object} source the source object
+   * @return {object} the contents of o2 merged into o1
+   */
   mergeToObject: function(o1, o2) {
     for (var p in o2) {
       if (o2.hasOwnProperty(p)) {
