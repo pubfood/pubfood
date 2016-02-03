@@ -97,6 +97,7 @@ var AuctionMediator = require('./mediator/auctionmediator');
       setAuctionProvider: 0,
       addBidProvider: 0,
     };
+    this.util = util;
     return this;
   };
 
