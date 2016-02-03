@@ -385,6 +385,43 @@ var AuctionMediator = require('./mediator/auctionmediator');
     return this;
   };
 
+  /**
+   * Prefix the bid provider default targeting key with the provider name.
+   * @param {boolean} usePrefix turn prefixing off if false. Default: true.
+   * @private
+   */
+  api.prototype.prefixDefaultBidKey = function(usePrefix) {
+    this.mediator.prefixDefaultBidKey(usePrefix);
+    return this;
+  };
+
+  /**
+   * Omit the bid provider default key/value being sent to the ad server.
+   * <p>
+   * Pubfood will add the bid provider default key/value to the ad server
+   * request unless omitted explicitly. Default key of the form: <code>&lt;name&gt;_&lt;label|bid&gt;=&lt;value&gt;</code>
+   * <p>
+   * If the default bid provider key/value is omitted, all ad server targeting
+   * is dependent on the [TargetingObject.targeting]{@link typeDefs.TargetingObject} property.
+   * @param {boolean} defaultBidKeyOff true turns the default bid key/value feature off.
+   * @return {pubfood}
+   * @example
+   *
+   * pubfood.omitDefaultBidKey(true)
+   *
+   * e.g. for the bid provider name: 'foo', prevents the 'foo_bid=' parameters shown below
+   *
+   * prev_iu_szs:300x250|300x600,728x90
+   * prev_scp:foo_bid=400|foo_bid=200
+   *
+   * where;
+   * <bidder>_<label|bid>=<value>
+   */
+  api.prototype.omitDefaultBidKey = function(defaultBidKeyOff) {
+    this.mediator.omitDefaultBidKey(defaultBidKeyOff);
+    return this;
+  };
+
   api.prototype.library = pubfood.library;
 
   global.pubfood = pubfood;

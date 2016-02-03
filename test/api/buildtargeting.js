@@ -170,7 +170,84 @@ describe('Build slot and page bids', function() {
       for (var i in targeting) {
         var tgtObject = targeting[i];
         if (!tgtObject.name) {
+          assert.equal(targeting[1].targeting.bid_slot, 'any', 'should have bid targeting key \"bid_slot\"');
           assert.equal(targeting[1].targeting.will_bid, 'y', 'should have bid targeting key \"will_bid\"');
+          assert.equal(targeting[1].targeting.bp1_price, 'goobleplex', 'should have <provider>_<label> targeting key \"b1_price\"');
+        }
+      }
+      pfDone();
+
+      done();
+    };
+    pf.start();
+  });
+
+  it('should not prefix bid default key with bid provider name', function(done) {
+    var pf = new pubfood();
+
+    pf.prefixDefaultBidKey(false);
+
+    var slot = pf.addSlot(SLOT);
+    var bidProvider = pf.addBidProvider(BID_PROVIDER);
+    var auctionProvider = pf.setAuctionProvider(AUCTION_PROVIDER);
+    bidProvider.init = function(slots, pushBid, pfDone) {
+      var BID_OBJECT = {
+        value: 'goobleplex',
+        sizes: [[728, 90], [300, 250]],
+        targeting: {
+          will_bid: 'y'
+        },
+        label: 'noBidProviderNamePrefix'
+      };
+      pushBid(BID_OBJECT);
+      pfDone();
+    };
+    auctionProvider.init = function(targeting, pfDone) {
+      assert.equal(targeting.length, 2, 'should have slot AND page level targeting when both added');
+
+      for (var i in targeting) {
+        var tgtObject = targeting[i];
+        if (!tgtObject.name) {
+          assert.equal(targeting[1].targeting.will_bid, 'y', 'should have bid targeting key \"will_bid\"');
+          assert.equal(targeting[1].targeting.noBidProviderNamePrefix, 'goobleplex', 'should have <label> targeting key without the bid provider name prefix');
+        }
+      }
+      pfDone();
+
+      done();
+    };
+    pf.start();
+  });
+
+  it('should omit bid default key from ad server targeting', function(done) {
+    var pf = new pubfood();
+
+    pf.omitDefaultBidKey(true);
+
+    var slot = pf.addSlot(SLOT);
+    var bidProvider = pf.addBidProvider(BID_PROVIDER);
+    var auctionProvider = pf.setAuctionProvider(AUCTION_PROVIDER);
+    bidProvider.init = function(slots, pushBid, pfDone) {
+      var BID_OBJECT = {
+        value: 'goobleplex',
+        sizes: [[728, 90], [300, 250]],
+        targeting: {
+          will_bid: 'y',
+          bid_slot: 'any'
+        },
+        label: 'price'
+      };
+      pushBid(BID_OBJECT);
+      pfDone();
+    };
+    auctionProvider.init = function(targeting, pfDone) {
+      assert.equal(targeting.length, 2, 'should have slot AND page level targeting when both added');
+
+      for (var i in targeting) {
+        var tgtObject = targeting[i];
+        if (!tgtObject.name) {
+          assert.equal(targeting[1].targeting.will_bid, 'y', 'should have bid targeting key \"will_bid\"');
+          assert.isUndefined(targeting[1].targeting.bp1_price, 'should not have default targeting key \"b1_price\"');
         }
       }
       pfDone();
