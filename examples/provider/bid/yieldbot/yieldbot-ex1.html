@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Yieldbot Ex1</title>
+  </head>
+  <body>
+    <script src="../../../../build/pubfood.js"></script>
+
+    <iframe src="//i.yldbt.com/m/start-testing" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" height="0" width="0" style="display: none"></iframe>
+    <script type="text/javascript">
+     window.googletag = window.googletag || {};
+     googletag.cmd = googletag.cmd || [];
+     var ybotq = ybotq || [];
+
+     var pf = new pubfood();
+
+     pf.omitDefaultBidKey(true);
+     var batch = [];
+
+     // this reporter listens on all events and pushes the event data to a queue `batch`
+     pf.observe(function(event) {
+         batch.push(event);
+     });
+
+     // this reporter only listens on the `AUCTION_COMPLETE` event, then loops over and displays the event data
+     pf.observe('AUCTION_COMPLETE', function(event) {
+         console.log('---------------------------------------');
+         for (var i = 0; i < batch.length; i++) {
+             console.log('%c' + batch[i].type, 'padding-right:5px;font-weight:bold;display:block;', JSON.stringify(batch[i]));
+         }
+     });
+
+     var slot = pf.addSlot({
+         name: '/2476204/multi-size',
+         sizes: [
+             [300, 250],
+             [300, 600]
+         ],
+         elementId: 'div-multi-size',
+         bidProviders: [
+             'yieldbot'
+         ]
+     });
+     slot.setParam('yieldbot', {
+         slot: 'medrec'
+     });
+
+     slot = pf.addSlot({
+         name: '/2476204/leaderboard',
+         sizes: [
+             [728, 90]
+         ],
+         elementId: 'div-leaderboard',
+         bidProviders: [
+             'yieldbot'
+         ]
+     });
+     slot.setParam('yieldbot', {
+         slot: 'leaderboard'
+     });
+
+     pf.addBidProvider({
+         name: 'yieldbot',
+         libUri: '//cdn.yldbt.com/js/yieldbot.intent.js',
+         init: function(slots, pushBid, done) {
+             var slotMap = {};
+             ybotq.push(function() {
+                 yieldbot.psn('1234');
+
+                 for (var k = 0; k < slots.length; k++) {
+                     var slot = slots[k],
+                         slotParams = slot.getParam('yieldbot');
+                     yieldbot.defineSlot(slotParams.slot, {
+                         sizes: slot.sizes
+                     });
+                     slotMap[slotParams.slot] = slot.name;
+                 }
+                 yieldbot.enableAsync();
+                 yieldbot.go();
+             });
+
+             ybotq.push(function() {
+                 var pageCriteria = yieldbot.getPageCriteria(),
+                     pageSlots = pageCriteria !== '' ? pageCriteria.split(',') : [];
+                 for (var i = 0; i < pageSlots.length; i++) {
+                     var slotInfo = pageSlots[i].split(':'),
+                         slot = slotInfo[0],
+                         size = slotInfo[1],
+                         bid = 0;
+
+                     if (slotInfo.length && slotInfo[2]) {
+                         bid = parseFloat(slotInfo[2], 10);
+                     }
+
+                     var sizes = size.split('x');
+                     sizes[0] = parseInt(sizes[0], 10);
+                     sizes[1] = parseInt(sizes[1], 10);
+
+                     var bidObject = {
+                         slot: slotMap[slot],
+                         value: bid,
+                         sizes: sizes,
+                         targeting: {
+                             ybot_ad: 'y',
+                             ybot_slot: slot
+                         },
+                         label: 'price'
+                     };
+                     pushBid(bidObject);
+                 }
+
+                 pushBid({
+                     value: bid,
+                     sizes: sizes,
+                     targeting: {
+                         ybot_ad: 'y',
+                         ybot: yieldbot.getPageCriteria()
+                     },
+                     label: 'ybc'
+                 });
+
+                 done();
+             });
+         },
+         refresh: function(slots, pushBid, done) {
+             var slotMap = {};
+             ybotq.push(function() {
+                 var refreshSlots = {};
+                 for (var i = 0; i < slots.length; i++) {
+                     var slot = slots[i],
+                         slotParams = slot.getParam('yieldbot');
+                     refreshSlots[slotParams.slot] = slot.sizes;
+                     slotMap[slotParams.slot] = slot.name;
+                 }
+                 yieldbot.nextPageview(refreshSlots);
+             });
+
+             ybotq.push(function() {
+                 var pageCriteria = yieldbot.getPageCriteria(),
+                     pageSlots = pageCriteria !== '' ? pageCriteria.split(',') : [];
+                 for (var i = 0; i < pageSlots.length; i++) {
+                     var slotInfo = pageSlots[i].split(':'),
+                         slot = slotInfo[0],
+                         size = slotInfo[1],
+                         bid = 0;
+
+                     if (slotInfo.length && slotInfo[2]) {
+                         bid = parseFloat(slotInfo[2], 10);
+                     }
+
+                     var sizes = size.split('x');
+                     sizes[0] = parseInt(sizes[0], 10);
+                     sizes[1] = parseInt(sizes[1], 10);
+
+                     var bidObject = {
+                         slot: slotMap[slot],
+                         value: bid,
+                         sizes: sizes,
+                         targeting: {
+                             ybot_ad: 'y',
+                             ybot_slot: slot
+                         },
+                         label: 'price'
+                     };
+                     pushBid(bidObject);
+                 }
+
+                 pushBid({
+                     value: bid,
+                     sizes: sizes,
+                     targeting: {
+                         ybot_ad: 'y',
+                         ybot: yieldbot.getPageCriteria()
+                     },
+                     label: 'ybc'
+                 });
+
+                 done();
+
+             });
+         }
+     });
+
+     pf.setAuctionProvider({
+         name: 'Google',
+         libUri: '//www.googletagservices.com/tag/js/gpt.js',
+         init: function(targeting, done) {
+             googletag.cmd.push(function() {
+                 pf.getAuctionProvider().setParam('isRefresh', false);
+                 var slots = {};
+                 for (var i = 0; i < targeting.length; i++) {
+                     var tgtObject = targeting[i];
+
+                     var gptObject;
+                     if (tgtObject.name) {
+                         gptObject = googletag.defineSlot(tgtObject.name, tgtObject.sizes, tgtObject.elementId).addService(googletag.pubads());
+                         slots[tgtObject.name] = gptObject;
+
+                     } else {
+                         gptObject = googletag.pubads();
+                     }
+                     for (var p in tgtObject.targeting) {
+                         gptObject.setTargeting(p, tgtObject.targeting[p]);
+                     }
+                     pf.getAuctionProvider().setParam('slots', slots);
+
+                 }
+             });
+             googletag.cmd.push(function() {
+                 googletag.pubads().collapseEmptyDivs();
+                 googletag.pubads().enableSingleRequest();
+                 googletag.enableServices();
+                 done();
+             });
+         },
+         refresh: function(targeting, done) {
+             googletag.cmd.push(function() {
+                 googletag.pubads().clearTargeting();
+                 googletag.pubads().clear();
+             });
+
+             googletag.cmd.push(function() {
+                 pf.getAuctionProvider().setParam('isRefresh', true);
+                 var slots = pf.getAuctionProvider().getParam('slots'),
+                     refreshSlots = [];
+                 for (var i = 0; i < targeting.length; i++) {
+                     var tgtObject = targeting[i],
+                         gptObject = slots[tgtObject.name];
+
+                     gptObject = gptObject ? (refreshSlots.push(gptObject), gptObject) : googletag.pubads();
+                     for (var p in tgtObject.targeting) {
+                         gptObject.setTargeting(p, tgtObject.targeting[p]);
+                     }
+                 }
+                 if (refreshSlots.length > 0) {
+                     googletag.pubads().refresh(refreshSlots);
+                 } else {
+                     googletag.pubads().refresh();
+                 }
+                 done();
+             });
+         }
+     });
+
+     function augmentBids(bids, params) {
+       for (var i = 0; i < bids.length; i++) {
+         bids[i]['targeting'].code = (0 | Math.random() * 36).toString(36);
+         bids[i].baseValue = bids[i].value || 0;
+         bids[i].value = bids[i].value + 9;
+       }
+       return bids;
+     }
+
+     pf.addBidTransform(augmentBids);
+
+     pf.timeout(3000);
+     pf.start(Date.now(), function(hasErros, details) {
+       if (hasErros) {
+         console.log('HAS ERRORS', details);
+       }
+     });
+
+    </script>
+
+    <h2>Yieldbot Bid Provider - Example1</h2>
+    <p>
+    <script>
+     function refreshAds(all) {
+         if (!all) {
+             pf.refresh(['/2476204/multi-size']);
+         } else {
+             pf.refresh();
+         }
+     }
+    </script>
+    <button id="refresh-one-btn" onclick="refreshAds()">Refresh 300x250 ad</button> - <em>or</em> -
+    <button id="refresh-all-btn" onclick="refreshAds(true)">Refresh All</button>
+    <p></p>
+    <h3>Leaderboard 728x90</h3>
+    <div id='div-leaderboard'>
+    </div>
+    <script>
+     pf.observe('AUCTION_POST_RUN', function() {
+         googletag.cmd.push(function() {
+             if (!pf.getAuctionProvider().getParam('isRefresh')) {
+                 googletag.display('div-leaderboard');
+             }
+         });
+     });
+    </script>
+    <h3>Medium Rectangle 300x250</h3>
+    <div id='div-multi-size'>
+    </div>
+    <script>
+     pf.observe('AUCTION_POST_RUN', function() {
+         googletag.cmd.push(function() {
+             if (!pf.getAuctionProvider().getParam('isRefresh')) {
+                 googletag.display('div-multi-size');
+             }
+         });
+     });
+    </script>
+  </body>
+</html>
