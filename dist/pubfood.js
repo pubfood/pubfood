@@ -1,4 +1,4 @@
-/*! pubfood v0.1.14 | (c) pubfood | http://pubfood.org/LICENSE.txt */
+/*! pubfood v0.2.0 | (c) pubfood | http://pubfood.org/LICENSE.txt */
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.pubfood = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 'use strict';
 
@@ -804,11 +804,13 @@ module.exports = new PubfoodEvent();
 var auctionDelegate = {
   name: '',
   libUri: '',
+  timeout: 0,
   init: function(targeting, done) {},
   refresh: function(targeting, done) {}
 };
 auctionDelegate.optional = {
-  refresh: true
+  refresh: true,
+  timeout: true
 };
 
 /**
@@ -816,7 +818,7 @@ auctionDelegate.optional = {
  *
  * @typedef {BidDelegate} BidDelegate
  * @property {string} name Bid provider delegate name.
- * @property {string} libUri location of the delegate JavaScript library/tag.
+ * @property {string} [libUri] location of the delegate JavaScript library/tag.
  * @property {function} init Initial bid request for [BidProvider.init]{@link pubfood#provider.BidProvider#init} delegate.
  * @property {Slot[]} init.slots slots to bid on
  * @property {pushBidCallback} init.pushBid Callback to execute on next bid available
@@ -830,6 +832,7 @@ auctionDelegate.optional = {
 var bidDelegate = {
   name: '__default__',
   libUri: ' ',
+  timeout: 0,
   init: function(slots, pushBid, done) {
     done();
   },
@@ -838,7 +841,9 @@ var bidDelegate = {
   }
 };
 bidDelegate.optional = {
-  refresh: true
+  libUri: true,
+  refresh: true,
+  timeout: true
 };
 
 /**
@@ -1008,16 +1013,14 @@ var slotConfig = {
 
 /**
  *
- * @typedef {PubfoodConfig} PubfoodConfig - all properties are optional
- * @property {string} id
- * @property {number} auctionProviderCbTimeout The maximum time the auction provider has before calling {@link auctionDoneCallback} inside the [AuctionProvider.init]{@link pubfood#provider.AuctionProvider#init} or [AuctionProvider.refresh]{@link pubfood#provider.AuctionProvider#refresh} methods
- * @property {number} bidProviderCbTimeout The maximum time the bid provider has before calling {@link bidDoneCallback} inside the [BidProvider.init]{@link pubfood#provider.BidProvider#init} or [BidProvider.refresh]{@link pubfood#provider.BidProvider#refresh} methods
- * @property {boolean} randomizeBidRequests Randomize the order in which [BidProvider]{@link pubfood#provider.BidProvider} requests are made.
+ * @typedef {PubfoodConfig} PubfoodConfig [pubfood]{@link pubfood} constructor configuration
+ * @property {number} [auctionProviderCbTimeout] The maximum time the auction provider has before calling [done()]{@link typeDefs.auctionDoneCallback} inside the [AuctionProvider.init]{@link pubfood#provider.AuctionProvider#init} or [AuctionProvider.refresh]{@link pubfood#provider.AuctionProvider#refresh} methods
+ * @property {number} [bidProviderCbTimeout] The maximum time the bid provider has before calling [done()]{@link typeDefs.bidDoneCallback} inside the [BidProvider.init]{@link pubfood#provider.BidProvider#init} or [BidProvider.refresh]{@link pubfood#provider.BidProvider#refresh} methods
+ * @property {boolean} [randomizeBidRequests] Randomize the order in which [BidProvider]{@link pubfood#provider.BidProvider} requests are made. Default: false.
  * @memberof typeDefs
- * @private
+ * @deprecated the PubfoodConfig configuration object will be replaced in a future major release. [pubfood]{@link pubfood} methods for configuraion properties will be available.
  */
 var PubfoodConfig = {
-  id: '',
   auctionProviderCbTimeout: 2000,
   bidProviderCbTimeout: 2000,
   randomizeBidRequests: false
@@ -1145,11 +1148,11 @@ function AuctionMediator(config) {
   this.auctionRun = {};
   this.timeout_ = AuctionMediator.NO_TIMEOUT;
   this.trigger_ = null;
-  this.initDoneTimeout_ = 2000;
   this.bidAssembler = new BidAssembler();
   this.requestAssembler = new RequestAssembler();
-  this.callbackTimeout_ = 2000;
   this.auctionIdx_ = 0;
+  this.doneCallbackOffset_ = AuctionMediator.DEFAULT_DONE_CALLBACK_OFFSET;
+  this.omitDefaultBidKey_ = false;
   Event.setAuctionId(this.getAuctionId());
 }
 
@@ -1157,6 +1160,7 @@ AuctionMediator.PAGE_BIDS = 'page';
 AuctionMediator.AUCTION_TYPE = { START: 'init', REFRESH: 'refresh'};
 AuctionMediator.IN_AUCTION = { FALSE: false, PENDING: 'pending', DONE: 'done'};
 AuctionMediator.NO_TIMEOUT = -1;
+AuctionMediator.DEFAULT_DONE_CALLBACK_OFFSET = 5000;
 
 /**
  * Validate provider and slot dependencies.
@@ -1301,7 +1305,7 @@ AuctionMediator.prototype.getBidStatus = function(providerName, auctionIdx) {
  * @param {number} millis - milliseconds to set the timeout
  */
 AuctionMediator.prototype.timeout = function(millis) {
-  this.timeout_ = util.asType(millis) === 'number' ? millis : 2000;
+  this.timeout_ = util.asType(millis) === 'number' && millis > 0 ? millis : AuctionMediator.NO_TIMEOUT;
 };
 
 /**
@@ -1314,12 +1318,34 @@ AuctionMediator.prototype.getTimeout = function() {
 };
 
 /**
+ * Sets the default done callback timeout offset. Default: <code>5000ms</code>
+ * <p>
+  * If a [BidProvider.timeout]{@link pubfood#provider.BidProvider#timeout} or [AuctionProvider.timeout]{@link pubfood#provider.AuctionProvider#timeout} do not have their timeout property value set, specifies the additional time in which a provider needs to call [done()]{@link typeDefs.bidDoneCallback} / [done()]{@link typeDefs.auctionDoneCallback} respectively is:
+ *   <code>timeout(millis) + doneCallbackOffset(millis)</code><br>
+ * <p>If the timeout elapses, done() is called on behalf of the provider.
+ * <p>Assists capturing late bid data for analytics and reporting by giving additional timeout "grace" period.
+ * @param {number} millis - milliseconds to set the timeout
+ */
+AuctionMediator.prototype.doneCallbackOffset = function(millis) {
+  this.doneCallbackOffset_ = util.asType(millis) === 'number' ? millis : AuctionMediator.DEFAULT_DONE_CALLBACK_OFFSET;
+};
+
+/**
+ * Gets the default done callback timeout offset.
+ *
+ * @return {number} the timeout in milliseconds
+ */
+AuctionMediator.prototype.getDoneCallbackOffset = function() {
+  return this.doneCallbackOffset_;
+};
+
+/**
  * The maximum time the auction provider has before calling `done` inside the `init` method
  *
  * @param {number} millis timeout in milliseconds
  */
 AuctionMediator.prototype.setAuctionProviderCbTimeout = function(millis){
-  this.initDoneTimeout_ = util.asType(millis) === 'number' ? millis : 2000;
+  this.initDoneTimeout_ = util.asType(millis) === 'number' && millis > 0 ? millis : this.doneCallbackOffset_;
 };
 
 /**
@@ -1425,7 +1451,7 @@ AuctionMediator.prototype.allBiddersDone = function(auctionIdx) {
  * @private
  */
 AuctionMediator.prototype.checkBids_ = function(auctionIdx, auctionType) {
-  if (this.allBiddersDone(auctionIdx)) {
+  if (this.allBiddersDone(auctionIdx) && !this.auctionRun[auctionIdx].inAuction) {
     this.startAuction_(auctionIdx, auctionType);
   }
 };
@@ -1460,12 +1486,12 @@ AuctionMediator.prototype.getBidMap_ = function(auctionIdx) {
 };
 
 /**
- * Builds targeting objects for {AuctionDelegate} requests.
+ * Builds targeting objects for [AuctionDelegate]{@link typeDefs.AuctionDelegate} requests.
  *
  * Flattens all bid targeting into targeting object property. All bid specific
- * targeting is kept in the bid added to bids[].
+ * targeting is kept in the bid added to [bids]{@link typeDefs.TargetingObject}.
  *
- * First bid with targeting[key] wins in top level flattened object.
+ * First bid with [targeting]{@link typeDefs.TargetingObject}[key] wins in top level flattened object.
  *
  * @private
  * @return {object[]} targeting objects
@@ -1497,8 +1523,10 @@ AuctionMediator.prototype.buildTargeting_ = function(auctionIdx) {
         targeting: bid.targeting || {}
       });
 
-      var bidKey = this.getBidKey(bid);
-      tgtObject.targeting[bidKey] = tgtObject.targeting[bidKey] || (bid.value || '');
+      if (!this.omitDefaultBidKey()) {
+        var bidKey = this.getBidKey(bid);
+        tgtObject.targeting[bidKey] = tgtObject.targeting[bidKey] || (bid.value || '');
+      }
       this.mergeKeys(tgtObject.targeting, bid.targeting);
     }
     auctionTargeting.push(tgtObject);
@@ -1518,8 +1546,10 @@ AuctionMediator.prototype.buildTargeting_ = function(auctionIdx) {
       targeting: bid.targeting
     });
 
-    var bidKey = this.getBidKey(bid);
-    pgTgtObject.targeting[bidKey] = pgTgtObject.targeting[bidKey] || (bid.value || '');
+    if (!this.omitDefaultBidKey()) {
+      var bidKey = this.getBidKey(bid);
+      pgTgtObject.targeting[bidKey] = pgTgtObject.targeting[bidKey] || (bid.value || '');
+    }
     this.mergeKeys(pgTgtObject.targeting, bid.targeting);
   }
   if (pgTgtObject.bids.length > 0) {
@@ -1541,15 +1571,18 @@ AuctionMediator.prototype.processTargeting_ = function(auctionIdx, auctionType) 
   var doneCalled = false;
   var name = self.auctionProvider.name;
   var idx = auctionIdx;
-  var cbTimeout = self.initDoneTimeout_;
+  var cbTimeout = self.auctionProvider.getTimeout();
+
+  var timeoutId;
   var doneCb = function() {
     if (!doneCalled) {
       doneCalled = true;
+      clearTimeout(timeoutId);
       self.auctionDone(idx, name);
     }
   };
 
-  setTimeout(function() {
+  timeoutId = setTimeout(function() {
     if (!doneCalled) {
       Event.publish(Event.EVENT_TYPE.WARN, 'Warning: The auction done callback for "' + name + '" hasn\'t been called within the allotted time (' + (cbTimeout / 1000) + 'sec)');
       doneCb();
@@ -1608,17 +1641,55 @@ AuctionMediator.prototype.addSlot = function(slotConfig) {
 };
 
 /**
+ * Get the bid/auction provider done callback timeout
+ * @param {BidDelegate|AuctionDelegate} delegate the provider delegate object
+ * @private
+ */
+AuctionMediator.prototype.getProviderDoneTimeout_ = function(delegate) {
+  var providerDoneTimeout = this.timeout_ + this.doneCallbackOffset_;
+  if (delegate.timeout) {
+    providerDoneTimeout = delegate.timeout;
+  }
+  return providerDoneTimeout;
+};
+
+/**
+ * Get bid provider done timeout
+ * @deprecated to be refactored when {@link typeDefs.PubfoodConfig} removed
+ */
+AuctionMediator.prototype.getBidProviderDoneTimeout_ = function(delegate) {
+  var doneTimeout = this.getProviderDoneTimeout_(delegate);
+  if (this.callbackTimeout_) {
+    doneTimeout = this.callbackTimeout_;
+  }
+  return doneTimeout;
+};
+
+/**
+ * Get auction provider done timeout
+ * @deprecated to be refactored when {@link typeDefs.PubfoodConfig} removed
+ */
+AuctionMediator.prototype.getAuctionProviderDoneTimeout_ = function(delegate) {
+  var doneTimeout = this.getProviderDoneTimeout_(delegate);
+  if (this.initDoneTimeout_) {
+    doneTimeout = this.initDoneTimeout_;
+  }
+  return doneTimeout;
+};
+
+/**
  * Add a [BidProvider]{@link pubfood#provider.BidProvider} configuration object.
  * @param {BidDelegate} delegateConfig - configuration for a [BidProvider]{@link pubfood#provider.BidProvider}
  * @returns {pubfood#provider.BidProvider}
  */
 AuctionMediator.prototype.addBidProvider = function(delegateConfig) {
-
   var bidProvider = BidProvider.withDelegate(delegateConfig);
   if (bidProvider) {
     if(this.bidProviders[bidProvider.name]){
       Event.publish(Event.EVENT_TYPE.WARN, 'Warning: bid provider ' + bidProvider.name + ' is already added');
     } else {
+      var bidDoneTimeout = this.getBidProviderDoneTimeout_(delegateConfig);
+      bidProvider.timeout(bidDoneTimeout);
       this.bidProviders[bidProvider.name] = bidProvider;
     }
   } else {
@@ -1643,6 +1714,8 @@ AuctionMediator.prototype.setAuctionProvider = function(delegateConfig) {
   }
   var auctionProvider = AuctionProvider.withDelegate(delegateConfig);
   if (auctionProvider) {
+    var auctionDoneTimeout = this.getAuctionProviderDoneTimeout_(delegateConfig);
+    auctionProvider.timeout(auctionDoneTimeout);
     this.auctionProvider = auctionProvider;
   } else {
     var name = delegateConfig && delegateConfig.name ? delegateConfig.name : 'undefined';
@@ -1804,7 +1877,7 @@ AuctionMediator.prototype.processBids = function(auctionIdx, auctionType, bidder
  * @param {number} millis timeout in milliseconds
  */
 AuctionMediator.prototype.setBidProviderCbTimeout = function(millis){
-  this.callbackTimeout_ = util.asType(millis) === 'number' ? millis : 2000;
+  this.callbackTimeout_ = util.asType(millis) === 'number' && millis > 0 ? millis : this.doneCallbackOffset_;
 };
 
 /**
@@ -1817,20 +1890,22 @@ AuctionMediator.prototype.getBids_ = function(auctionIdx, auctionType, provider,
   var name = provider.name;
   var doneCalled = false;
   var idx = auctionIdx;
-  var cbTimeout = self.callbackTimeout_;
+  var cbTimeout = provider.getTimeout();
   var pushBidCb = function(bid){
     bid.auctionIdx = idx;
     self.pushBid(idx, bid, name);
   };
 
+  var timeoutId;
   var bidDoneCb = function(){
     if(!doneCalled) {
       doneCalled = true;
+      clearTimeout(timeoutId);
       self.doneBid(idx, auctionType, name);
     }
   };
 
-  setTimeout(function(){
+  timeoutId = setTimeout(function(){
     if(!doneCalled) {
       Event.publish(Event.EVENT_TYPE.WARN, 'Warning: The bid done callback for "'+name+'" hasn\'t been called within the allotted time (' + (cbTimeout/1000) + 'sec)');
       bidDoneCb();
@@ -1959,6 +2034,30 @@ AuctionMediator.prototype.getAuctionRunTargeting = function(auctionIdx) {
   return util.asType(run) === 'undefined' ? [] : run.targeting;
 };
 
+/**
+ * Prefix the bid provider default targeting key with the provider name.
+ * @param {boolean} usePrefix turn prefixing off if false. Default: true.
+ * @private
+ */
+AuctionMediator.prototype.prefixDefaultBidKey = function(usePrefix) {
+  if (util.asType(usePrefix) === 'boolean') {
+    this.prefix = usePrefix;
+  }
+  return this.prefix;
+};
+
+/**
+ * Omit sending the bid provider default key/value to ad server.
+ * @param {boolean} defaultBidKeyOff turn bid provider default targeting key off if false. Default: true.
+ * @private
+ */
+AuctionMediator.prototype.omitDefaultBidKey = function(defaultBidKeyOff) {
+  if (util.asType(defaultBidKeyOff) === 'boolean') {
+    this.omitDefaultBidKey_ = defaultBidKeyOff;
+  }
+  return this.omitDefaultBidKey_;
+};
+
 util.extends(AuctionMediator, PubfoodObject);
 module.exports = AuctionMediator;
 
@@ -1976,24 +2075,27 @@ var PubfoodObject = require('../pubfoodobject');
  * Bid is the result of a partner [BidProvider]{@link pubfood/provider.BidProvider} request.
  *
  * @class
- * @param {string} slot the slot name
  * @param {string|number} value the bid value. Default: empty string.
- * @param {Array.<number, number>} sizes the dimension sizes of the slot bid
  * @memberof pubfood#model
  */
 function Bid(value) {
   if (this.init_) {
     this.init_();
   }
+  /** @property {Array.<number, number>} [sizes] the dimension sizes of the slot bid */
   this.sizes =  [];
+  /** @property {string} [slot] the slot name */
   this.slot;
+  /** @property {string|number} value the bid value. Default: empty string */
   this.value = value || 0;
-  /** @property {string} type bid value type derived from {@link util.asType}  */
+  /** @property {string} type derived bid value type: from {@link util.asType}  */
   this.type = util.asType(this.value);
   /** @property {string} [label] optional label for adserver key targeting for bid value e.g. <code>label=2.00</code> */
   this.label;
   /** @property {string} [provider] the bid provider name */
   this.provider;
+  /** @property {object} [targeting] ad server targeting key/values in addition to the bid value */
+  this.targeting = {};
 }
 
 /**
@@ -2015,7 +2117,7 @@ Bid.fromObject = function(config) {
 
 /**
  * Sets the bid's value
- * @param {string|number} v
+ * @param {string|number} v the bid value for the ad server key/value targeting
  * @return {pubfood#model.Bid}
  */
 Bid.prototype.setValue = function(v) {
@@ -2177,6 +2279,7 @@ function AuctionProvider(auctionDelegate) {
   var delegate = auctionDelegate || {};
   this.name = delegate.name || '';
   this.auctionDelegate = delegate;
+  this.timeout_ = delegate && delegate.timeout ? delegate.timeout : 0;
 }
 
 /**
@@ -2244,6 +2347,24 @@ AuctionProvider.prototype.refresh = function(targeting, done) {
   refresh(targeting, done);
 };
 
+/**
+ * Set the timeout by which a auction provider must call done
+ * @param {number} millis the millisecond duration the auction provider has to push bids
+ * @private
+ */
+AuctionProvider.prototype.timeout = function(millis) {
+  this.timeout_ = util.asType(millis) === 'number' ? millis : 0;
+};
+
+/**
+ * Get the timeout by which a auction provider must call done
+ * @return {number} the millisecond duration the auction provider has to push bids
+ * @private
+ */
+AuctionProvider.prototype.getTimeout = function() {
+  return this.timeout_;
+};
+
 util.extends(AuctionProvider, PubfoodObject);
 module.exports = AuctionProvider;
 
@@ -2276,6 +2397,7 @@ function BidProvider(bidDelegate) {
   this.name = delegate.name || '';
   this.bidDelegate = delegate;
   this.enabled_ = true;
+  this.timeout_ = delegate && delegate.timeout ? delegate.timeout : 0;
 }
 
 /**
@@ -2380,6 +2502,22 @@ BidProvider.prototype.enabled = function(status) {
   return this.enabled_;
 };
 
+/**
+ * Set the timeout by which a bid provider must call done
+ * @param {number} millis the millisecond duration the bid provider has to push bids
+ */
+BidProvider.prototype.timeout = function(millis) {
+  this.timeout_ = util.asType(millis) === 'number' ? millis : 0;
+};
+
+/**
+ * Get the timeout by which a bid provider must call done
+ * @return {number} the millisecond duration the bid provider has to push bids
+ */
+BidProvider.prototype.getTimeout = function() {
+  return this.timeout_;
+};
+
 util.extends(BidProvider, PubfoodObject);
 module.exports = BidProvider;
 
@@ -2416,7 +2554,7 @@ var AuctionMediator = require('./mediator/auctionmediator');
   };
 
   pubfood.library = pubfood.prototype = {
-    version: '0.1.14',
+    version: '0.2.0',
     PubfoodError: require('./errors'),
     logger: logger
   };
@@ -2460,15 +2598,21 @@ var AuctionMediator = require('./mediator/auctionmediator');
    *
    * @alias pubfood
    * @constructor
+   * @param {PubfoodConfig} [config] configuration properties object
    * @return {pubfood}
+   * @deprecated pubfood constructor configuration object, see [PubfoodConfig]{@link typeDefs.PubfoodConfig}.
+   * @example
+   *   new pubfood({randomizeBidRequests: true,
+   *                bidProviderCbTimeout: 5000,
+   *                auctionProviderCbTimeout: 5000});
    */
   var api = pubfood.library.init = function(config) {
-    if (config) {
-      this.auctionProviderTimeout_ = config.auctionProviderCbTimeout || 2000;
-      this.bidProviderTimeout_ = config.bidProviderCbTimeout || 2000;
-      this.randomizeBidRequests_ = !!config.randomizeBidRequests;
-    }
     this.mediator = new AuctionMediator();
+    if (config) {
+      this.randomizeBidRequests_ = !!config.randomizeBidRequests;
+      this.mediator.setBidProviderCbTimeout(config.bidProviderCbTimeout);
+      this.mediator.setAuctionProviderCbTimeout(config.auctionProviderCbTimeout);
+    }
 
     Event.publish(Event.EVENT_TYPE.PUBFOOD_API_LOAD);
     this.pushApiCall_('api.init', arguments);
@@ -2477,6 +2621,7 @@ var AuctionMediator = require('./mediator/auctionmediator');
       setAuctionProvider: 0,
       addBidProvider: 0,
     };
+    this.util = util;
     return this;
   };
 
@@ -2570,7 +2715,6 @@ var AuctionMediator = require('./mediator/auctionmediator');
       this.configErrors.push('Invalid auction provider: ' + delegateName);
       return null;
     }
-    this.mediator.setAuctionProviderCbTimeout(this.auctionProviderTimeout_);
     this.requiredApiCalls.setAuctionProvider++;
     return provider;
   };
@@ -2610,7 +2754,6 @@ var AuctionMediator = require('./mediator/auctionmediator');
       this.configErrors.push('Invalid bid provider: ' + delegateName);
       return null;
     }
-    this.mediator.setBidProviderCbTimeout(this.bidProviderTimeout_);
     this.requiredApiCalls.addBidProvider++;
 
     if(util.asType(delegate.init) === 'function' && delegate.init.length !== 3){
@@ -2683,6 +2826,20 @@ var AuctionMediator = require('./mediator/auctionmediator');
   };
 
   /**
+   * Sets the default done callback timeout offset. Default: <code>5000ms</code>
+   * <p>
+   * If a [BidProvider.timeout]{@link pubfood#provider.BidProvider#timeout} value is not set, specifies the additional time in which a provider gets to push late bids and call [done()]{@link typeDefs.bidDoneCallback}.
+   * <p>Assists capturing late bid data for analytics and reporting by giving additional timeout "grace" period.
+   * <p>Bid provider timeout calculated as the following if not otherwise set:
+   * <li><code>timeout(millis) + doneCallbackOffset(millis)</code></li>
+   * <p>If the timeout elapses, done() is called on behalf of the provider.
+   * @param {number} millis - milliseconds to set the timeout
+   */
+  api.prototype.doneCallbackOffset = function(millis) {
+    this.mediator.doneCallbackOffset(millis);
+  };
+
+  /**
    * Sets a function delegate to initiate the publisher ad server request.
    *
    * @param {AuctionTriggerFn} delegate the function that makes the callback to start the auction
@@ -2750,6 +2907,43 @@ var AuctionMediator = require('./mediator/auctionmediator');
   api.prototype.refresh = function(slotNames) {
     this.pushApiCall_('api.refresh', arguments);
     this.mediator.refresh(slotNames);
+    return this;
+  };
+
+  /**
+   * Prefix the bid provider default targeting key with the provider name.
+   * @param {boolean} usePrefix turn prefixing off if false. Default: true.
+   * @private
+   */
+  api.prototype.prefixDefaultBidKey = function(usePrefix) {
+    this.mediator.prefixDefaultBidKey(usePrefix);
+    return this;
+  };
+
+  /**
+   * Omit the bid provider default key/value being sent to the ad server.
+   * <p>
+   * Pubfood will add the bid provider default key/value to the ad server
+   * request unless omitted explicitly. Default key of the form: <code>&lt;name&gt;_&lt;label|bid&gt;=&lt;value&gt;</code>
+   * <p>
+   * If the default bid provider key/value is omitted, all ad server targeting
+   * is dependent on the [TargetingObject.targeting]{@link typeDefs.TargetingObject} property.
+   * @param {boolean} defaultBidKeyOff true turns the default bid key/value feature off.
+   * @return {pubfood}
+   * @example
+   *
+   * pubfood.omitDefaultBidKey(true)
+   *
+   * e.g. for the bid provider name: 'foo', prevents the 'foo_bid=' parameters shown below
+   *
+   * prev_iu_szs:300x250|300x600,728x90
+   * prev_scp:foo_bid=400|foo_bid=200
+   *
+   * where;
+   * <bidder>_<label|bid>=<value>
+   */
+  api.prototype.omitDefaultBidKey = function(defaultBidKeyOff) {
+    this.mediator.omitDefaultBidKey(defaultBidKeyOff);
     return this;
   };
 
@@ -2826,12 +3020,11 @@ module.exports = PubfoodObject;
 'use strict';
 /**
  * @namespace util
- * @private
  */
 var util = {
   /**
    * Get the type name of an object.
-   *
+   * For behavior,
    * @see https://javascriptweblog.wordpress.com/2011/08/08/fixing-the-javascript-typeof-operator/
    *
    * @function asType
@@ -2910,6 +3103,13 @@ var util = {
       fn.apply(ctx, Array.prototype.slice.call(arguments));
     };
   },
+  /**
+   * Merge two objects.
+   * Where source and target share the same keys, source overwrites target key.
+   * @param {object} target the target object
+   * @param {object} source the source object
+   * @return {object} the contents of o2 merged into o1
+   */
   mergeToObject: function(o1, o2) {
     for (var p in o2) {
       if (o2.hasOwnProperty(p)) {
