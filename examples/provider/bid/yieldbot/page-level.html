@@ -38,28 +38,26 @@
          name: 'yieldbot',
          libUri: 'http://cdn.yldbt.com/js/yieldbot.intent.js',
          init: function(slots, pushBid, done) {
-             var YB_SLOT_PARAMS = pf.getSlot(slot.name).getParam(this.name);
-
              ybotq.push(function() {
                  yieldbot.psn('0000');
                  for (var k = 0; k < slots.length; k++) {
                      var slot = slots[k];
-                     var ybslotName = YB_SLOT_PARAMS.slot;
-
-                     yieldbot.defineSlot(ybslotName, {
+                     yieldbot.defineSlot(slot.getParam('yieldbot').slot, {
                          sizes: slot.sizes
                      });
                  }
                  yieldbot.enableAsync();
                  yieldbot.go();
              });
-
              ybotq.push(function() {
-                 pushBid({
-                     targeting: {
-                         ybot: yieldbot.getPageCriteria() // e.g. medrec:300x250:300
-                     }
-                 });
+                 var criteria = yieldbot.getPageCriteria(); // e.g. medrec:300x250:300
+                 if (criteria) {
+                     pushBid({
+                         targeting: {
+                             ybot: criteria
+                         }
+                     });
+                 }
                  done();
              });
          }
@@ -67,7 +65,6 @@
 
      var noSlotsProvider = pf.addBidProvider({
          name: 'noSlots',
-         libUri: 'http://', // see: https://github.com/pubfood/pubfood/issues/20
          init: function(slots, pushBid, done) {
              pushBid({
                  value: '1000000.99',
