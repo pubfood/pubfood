@@ -405,7 +405,7 @@ AuctionMediator.prototype.buildTargeting_ = function(auctionIdx) {
     for (var j = 0; j < bidSet.length; j++) {
       var bid = bidSet[j];
       tgtObject.bids.push({
-        value: bid.value || '',
+        value: bid.value,
         provider: bid.provider,
         id: bid.id,
         targeting: bid.targeting || {}
@@ -413,7 +413,7 @@ AuctionMediator.prototype.buildTargeting_ = function(auctionIdx) {
 
       if (!this.omitDefaultBidKey()) {
         var bidKey = this.getBidKey(bid);
-        tgtObject.targeting[bidKey] = tgtObject.targeting[bidKey] || (bid.value || '');
+        tgtObject.targeting[bidKey] = tgtObject.targeting[bidKey] || bid.value;
       }
       this.mergeKeys(tgtObject.targeting, bid.targeting);
     }
@@ -428,7 +428,7 @@ AuctionMediator.prototype.buildTargeting_ = function(auctionIdx) {
     var bid = bidSet[k];
 
     pgTgtObject.bids.push({
-      value: bid.value || '',
+      value: bid.value,
       provider: bid.provider,
       id: bid.id,
       targeting: bid.targeting
@@ -436,7 +436,7 @@ AuctionMediator.prototype.buildTargeting_ = function(auctionIdx) {
 
     if (!this.omitDefaultBidKey()) {
       var bidKey = this.getBidKey(bid);
-      pgTgtObject.targeting[bidKey] = pgTgtObject.targeting[bidKey] || (bid.value || '');
+      pgTgtObject.targeting[bidKey] = pgTgtObject.targeting[bidKey] || bid.value;
     }
     this.mergeKeys(pgTgtObject.targeting, bid.targeting);
   }

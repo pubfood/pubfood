@@ -182,6 +182,45 @@ describe('Build slot and page bids', function() {
     pf.start();
   });
 
+  it('should push a zero slot-level bid and a zero page-level bid', function(done) {
+    var pf = new pubfood();
+    var slot = pf.addSlot(SLOT);
+    var bidProvider = pf.addBidProvider(BID_PROVIDER);
+    var auctionProvider = pf.setAuctionProvider(AUCTION_PROVIDER);
+    bidProvider.init = function(slots, pushBid, pfDone) {
+      var SLOT_BID_OBJECT = {
+        slot: 'slot1',
+        value: 0,
+        sizes: [[300, 250]],
+        targeting: {
+          will_bid: 'y',
+          bid_slot: 'any'
+        },
+        label: 'slot_price'
+      };
+      pushBid(SLOT_BID_OBJECT);
+      var PAGE_BID_OBJECT = {
+        value: 0,
+        sizes: [[300, 250]],
+        targeting: {
+          will_bid: 'y',
+          bid_slot: 'any'
+        },
+        label: 'page_price'
+      };
+      pushBid(PAGE_BID_OBJECT);
+      pfDone();
+    };
+    auctionProvider.init = function(targeting, pfDone) {
+      assert.equal(targeting.length, 2, 'should have slot AND page level targeting when both added');
+      assert.equal(targeting[0].targeting.bp1_slot_price, 0, 'should have slot bid targeting key value of zero');
+      assert.equal(targeting[1].targeting.bp1_page_price, 0, 'should have pabe bid targeting key value of zero');
+      pfDone();
+      done();
+    };
+    pf.start();
+  });
+
   it('should not prefix bid default key with bid provider name', function(done) {
     var pf = new pubfood();
 
