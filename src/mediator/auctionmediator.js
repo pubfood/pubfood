@@ -267,7 +267,7 @@ AuctionMediator.prototype.setAuctionTrigger = function(triggerFn) {
 AuctionMediator.prototype.startAuction_ = function(auctionIdx, auctionType) {
   Event.publish(Event.EVENT_TYPE.BID_ASSEMBLER, 'AuctionMediator');
   if (this.bidAssembler.operators.length > 0) {
-    this.bidAssembler.process(this.auctionRun[auctionIdx].bids);
+    this.auctionRun[auctionIdx].bids = this.bidAssembler.process(this.auctionRun[auctionIdx].bids);
   }
   this.processTargeting_(auctionIdx, auctionType);
 };

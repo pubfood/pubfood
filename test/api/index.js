@@ -12,4 +12,5 @@ describe('API - Tests', function () {
   require('./customparams');
   require('./buildtargeting');
   require('./events');
+  require('./transformoperator');
 });
