@@ -7,6 +7,7 @@
 /*eslint no-undef: 0*/
 var assert = require('chai').assert;
 var Bid = require('../../src/model/bid.js');
+var util = require('../../src/util');
 
 describe('Bid', function testBidBuilder() {
 
@@ -117,5 +118,52 @@ describe('Bid', function testBidBuilder() {
     assert.equal(bid.a, 'a', 'bid.a should be \"a\"');
     assert.equal(bid.b.b, 0, 'bid.b.b should be 0');
     assert.equal(bid.c(), 1, 'bid.c should return 1');
+  });
+
+  it('should create a bid object with a numeric zero value', function() {
+    var bid = Bid.fromObject({});
+    assert.equal(bid.value, 0, 'bid value should be zero (0)');
+
+    bid = Bid.fromObject({ zero: 0 });
+    assert.equal(bid.zero, 0, 'bid key \"zero\" should be zero (0)');
+
+    bid = Bid.fromObject({targeting: { zero: 0 }});
+    assert.equal(bid.targeting.zero, 0, 'bid key \"zero\" should be zero (0)');
+  });
+
+  it('should create a bid object with falsey values', function() {
+    var bid = Bid.fromObject({});
+    assert.equal(bid.value, 0, 'bid value should be zero (0)');
+
+    bid = Bid.fromObject({ value: 0 });
+    assert.equal(bid.value, 0, 'bid key \"value\" should be zero (0)');
+
+    bid = Bid.fromObject({targeting: { empty: '' }});
+    assert.equal(bid.targeting.empty, '', 'bid key \"empty\" should be an empty string');
+
+    bid = Bid.fromObject({targeting: { 'undefined': undefined }});
+    assert.equal(bid.targeting['undefined'], undefined, 'bid key \"undefined\" should be undefined');
+  });
+
+  it('should set Bid object value with falsey values', function() {
+    var bid = new Bid(5);
+    assert.equal(bid.value, 5, 'bid value should be five (5)');
+
+    bid.setValue(0);
+    assert.equal(bid.value, 0, 'bid value should be zero (0)');
+    assert.equal(util.asType(bid.value), 'number', 'bid value should be numeric');
+
+    bid.setValue('');
+    assert.equal(bid.value, '', 'bid value should be an empty string');
+    assert.equal(util.asType(bid.value), 'string', 'bid value should be string');
+
+    bid.setValue(false);
+    assert.equal(bid.value, false, 'bid value should be a boolean false');
+    assert.equal(util.asType(bid.value), 'boolean', 'bid value should be boolean');
+
+    bid.setValue();
+    assert.equal(bid.value, '', 'bid value should be an empty string');
+    assert.equal(util.asType(bid.value), 'string', 'bid value should be a string');
+
   });
 });

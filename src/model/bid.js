@@ -23,7 +23,7 @@ function Bid(value) {
   /** @property {string} [slot] the slot name */
   this.slot;
   /** @property {string|number} value the bid value. Default: empty string */
-  this.value = value || 0;
+  this.value = util.asType(value) === 'undefined' ? '' : value;
   /** @property {string} type derived bid value type: from {@link util.asType}  */
   this.type = util.asType(this.value);
   /** @property {string} [label] optional label for adserver key targeting for bid value e.g. <code>label=2.00</code> */
@@ -57,7 +57,7 @@ Bid.fromObject = function(config) {
  * @return {pubfood#model.Bid}
  */
 Bid.prototype.setValue = function(v) {
-  this.value = v || '';
+  this.value = util.asType(v) === 'undefined' ? '' : v;
   this.type = util.asType(this.value);
   return this;
 };

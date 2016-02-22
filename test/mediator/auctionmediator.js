@@ -722,6 +722,36 @@ describe('Pubfood AuctionMediator', function testPubfoodMediator() {
       assert.equal(auctionTargeting[0].name, '/abc/123', 'should have slot name');
     });
 
+    it('should build slot and page targeting with a numeric zero bid', function() {
+      var slotBid = Bid.fromObject({ value: 0, slot: '/abc/123', targeting: { zero: 0 }});
+      var pageBid = Bid.fromObject({ value: 0, targeting: { zero: 0 }});
+
+      var auctionIdx = TEST_MEDIATOR.getAuctionCount();
+      TEST_MEDIATOR.auctionRun[auctionIdx].bids.push(slotBid);
+      TEST_MEDIATOR.auctionRun[auctionIdx].bids.push(pageBid);
+      var auctionTargeting = TEST_MEDIATOR.buildTargeting_(auctionIdx);
+
+      assert.equal(auctionTargeting[0].targeting.bid, 0, 'Slot targeting bid value should be zero');
+      assert.equal(auctionTargeting[0].bids[0].value, 0, 'Slot bid value should be zero');
+      assert.equal(auctionTargeting[1].targeting.bid, 0, 'Page targeting bid value should be zero');
+      assert.equal(auctionTargeting[1].bids[0].value, 0, 'Page bid value should be zero');
+    });
+
+    it('should build slot and page targeting with a falsey empty string bid', function() {
+      var slotBid = Bid.fromObject({ value: '', slot: '/abc/123', targeting: { zero: '' }});
+      var pageBid = Bid.fromObject({ value: '', targeting: { zero: '' }});
+
+      var auctionIdx = TEST_MEDIATOR.getAuctionCount();
+      TEST_MEDIATOR.auctionRun[auctionIdx].bids.push(slotBid);
+      TEST_MEDIATOR.auctionRun[auctionIdx].bids.push(pageBid);
+      var auctionTargeting = TEST_MEDIATOR.buildTargeting_(auctionIdx);
+
+      assert.equal(auctionTargeting[0].targeting.bid, '', 'Slot targeting bid value should be an empty string');
+      assert.equal(auctionTargeting[0].bids[0].value, '', 'Slot bid value should be an empty string');
+      assert.equal(auctionTargeting[1].targeting.bid, '', 'Page targeting bid value should be an empty string');
+      assert.equal(auctionTargeting[1].bids[0].value, '', 'Page bid value should be an empty string');
+    });
+
     it('should turn off bid provider name prefix from default targeting key', function() {
 
       TEST_MEDIATOR.prefixDefaultBidKey(false);
