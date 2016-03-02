@@ -54,6 +54,7 @@
                             id: "T1_" + r.id,
                             width: r.width,
                             height: r.height,
+                            /* Replace with your casale Site ID */
                             siteID: 164873
                         };
                 s.push(u)
@@ -272,16 +273,19 @@
     };
     cygnus_index_args = {
         timeout: 300,
+        /* Replace with your casale Site ID */
         siteID: 164874,
         slots: [{
             id: "1",
             width: 728,
             height: 90,
+            /* Replace with your casale Site ID */
             siteID: 164874
         }, {
             id: "2",
             width: 300,
             height: 250,
+            /* Replace with your casale Site ID */
             siteID: 164874
         }]
     };
@@ -290,18 +294,18 @@
         name: 'casale',
         init: function(slots, pushBid, done) {
             var scriptTag = document.createElement("script");
-            scriptTag.setAttribute("src", cygnus_index_start()); // TODO: replace
+            scriptTag.setAttribute("src", cygnus_index_start());
             scriptTag.setAttribute("type", "text/javascript");
             var firstScript = document.getElementsByTagName("script")[0];
             if (firstScript.parentNode) {
                 firstScript.parentNode.insertBefore(scriptTag, firstScript);
             }
-            window.cygnus_index_ready_state = done; // TODO: replace
+            window.cygnus_index_ready_state = done;
             done();
         },
         refresh: function(slots, pushBid, done) {
             var scriptTag = document.createElement("script");
-            scriptTag.setAttribute("src", cygnus_index_start()); // TODO: replace
+            scriptTag.setAttribute("src", cygnus_index_start());
 
             scriptTag.setAttribute("type", "text/javascript");
             var firstScript = document.getElementsByTagName("script")[0];
