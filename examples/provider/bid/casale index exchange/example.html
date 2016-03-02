@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Casale Index Exchange -- Example 1</title>
+</head>
+<body>
+<script src="../../../../build/pubfood.js"></script>
+
+<iframe src="//i.yldbt.com/m/start-testing" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" height="0" width="0" style="display: none"></iframe>
+<script type="text/javascript">
+    window.googletag = window.googletag || {};
+    googletag.cmd = googletag.cmd || [];
+    var pf = new pubfood();
+    pf.omitDefaultBidKey(true);
+    var batch = [];
+    // this reporter listens on all events and pushes the event data to a queue `batch`
+    pf.observe(function(event) {
+        batch.push(event);
+    });
+    // this reporter only listens on the `AUCTION_COMPLETE` event, then loops over and displays the event data
+    pf.observe('AUCTION_COMPLETE', function(event) {
+        console.log('---------------------------------------');
+        for (var i = 0; i < batch.length; i++) {
+            console.log('%c' + batch[i].type, 'padding-right:5px;font-weight:bold;display:block;', JSON.stringify(batch[i]));
+        }
+    });
+    // Casale specific code
+    // TODO: change siteIDs to 000000
+    var cygnus_index_primary_request = true;
+    var cygnus_index_parse_res = function () {
+    };
+
+    window.cygnus_index_args = {};
+
+    var cygnus_index_adunits =  [[728, 90], [120, 600], [300, 250], [160, 600], [336, 280], [234, 60], [300, 600], [300, 50], [320, 50], [970, 250], [300, 1050], [970, 90], [180, 150]]; // jshint ignore:line
+
+    var cygnus_index_start = function () {
+        window.cygnus_index_args.parseFn = cygnus_index_parse_res;
+        var escapable = /[\\\"\x00-\x1f\x7f-\x9f\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g;
+        var meta = {
+            '\b': '\\b',
+            '\t': '\\t',
+            '\n': '\\n',
+            '\f': '\\f',
+            '\r': '\\r',
+            '"': '\\"',
+            '\\': '\\\\'
+        };
+        if (cygnus_index_primary_request) {
+            for (var s = [], n = 0; n < cygnus_index_args.slots.length; n++) {
+                var r = cygnus_index_args.slots[n],
+                        u = {
+                            id: "T1_" + r.id,
+                            width: r.width,
+                            height: r.height,
+                            siteID: 164873
+                        };
+                s.push(u)
+            }
+            for (n = 0; n < s.length; n++) cygnus_index_args.slots.push(s[n]);
+            cygnus_index_primary_request = false;
+        }
+        function escapeCharacter(character) {
+            var escaped = meta[character];
+            if (typeof escaped === 'string') {
+                return escaped;
+            } else {
+                return '\\u' + ('0000' + character.charCodeAt(0).toString(16)).slice(-4);
+            }
+        }
+
+        function quote(string) {
+            escapable.lastIndex = 0;
+            if (escapable.test(string)) {
+                return string.replace(escapable, escapeCharacter);
+            } else {
+                return string;
+            }
+        }
+        function OpenRTBRequest(siteID, parseFn, timeoutDelay) {
+            this.initialized = false;
+            if (typeof siteID !== 'number' || siteID % 1 !== 0 || siteID < 0) {
+                throw 'Invalid Site ID';
+            }
+
+            if (typeof timeoutDelay === 'number' && timeoutDelay % 1 === 0 && timeoutDelay >= 0) {
+                this.timeoutDelay = timeoutDelay;
+            }
+
+            this.siteID = siteID;
+            this.impressions = [];
+            this._parseFnName = undefined;
+            if (top === self) {
+                this.sitePage = location.href;
+                this.topframe = 1;
+            } else {
+                this.sitePage = document.referrer;
+                this.topframe = 0;
+            }
+
+            if (typeof parseFn !== 'undefined') {
+                if (typeof parseFn === 'function') {
+                    this._parseFnName = 'cygnus_index_args.parseFn';
+                } else {
+                    throw 'Invalid jsonp target function';
+                }
+            }
+
+            if (typeof _IndexRequestData.requestCounter === 'undefined') {
+                _IndexRequestData.requestCounter = Math.floor(Math.random() * 256);
+            } else {
+                _IndexRequestData.requestCounter = (_IndexRequestData.requestCounter + 1) % 256;
+            }
+
+            this.requestID = String((new Date().getTime() % 2592000) * 256 + _IndexRequestData.requestCounter + 256);
+            this.initialized = true;
+        }
+
+        OpenRTBRequest.prototype.serialize = function () {
+            var json = '{"id":' + this.requestID + ',"site":{"page":"' + quote(this.sitePage) + '"';
+            if (typeof document.referrer === 'string') {
+                json += ',"ref":"' + quote(document.referrer) + '"';
+            }
+
+            json += '},"imp":[';
+            for (var i = 0; i < this.impressions.length; i++) {
+                var impObj = this.impressions[i];
+                var ext = [];
+                json += '{"id":"' + impObj.id + '", "banner":{"w":' + impObj.w + ',"h":' + impObj.h + ',"topframe":' + String(this.topframe) + '}';
+                if (typeof impObj.bidfloor === 'number') {
+                    json += ',"bidfloor":' + impObj.bidfloor;
+                    if (typeof impObj.bidfloorcur === 'string') {
+                        json += ',"bidfloorcur":"' + quote(impObj.bidfloorcur) + '"';
+                    }
+                }
+
+                if (typeof impObj.slotID === 'string' && (!impObj.slotID.match(/^\s*$/))) {
+                    ext.push('"sid":"' + quote(impObj.slotID) + '"');
+                }
+
+                if (typeof impObj.siteID === 'number') {
+                    ext.push('"siteID":' + impObj.siteID);
+                }
+
+                if (ext.length > 0) {
+                    json += ',"ext": {' + ext.join() + '}';
+                }
+
+                if (i + 1 === this.impressions.length) {
+                    json += '}';
+                } else {
+                    json += '},';
+                }
+            }
+
+            json += ']}';
+            return json;
+        };
+
+        OpenRTBRequest.prototype.setPageOverride = function (sitePageOverride) {
+            if (typeof sitePageOverride === 'string' && (!sitePageOverride.match(/^\s*$/))) {
+                this.sitePage = sitePageOverride;
+                return true;
+            } else {
+                return false;
+            }
+        };
+
+        OpenRTBRequest.prototype.addImpression = function (width, height, bidFloor, bidFloorCurrency, slotID, siteID) {
+            var impObj = {
+                id: String(this.impressions.length + 1)
+            };
+            if (typeof width !== 'number' || width <= 1) {
+                return null;
+            }
+
+            if (typeof height !== 'number' || height <= 1) {
+                return null;
+            }
+
+            if ((typeof slotID === 'string' || typeof slotID === 'number') && String(slotID).length <= 50) {
+                impObj.slotID = String(slotID);
+            }
+
+            impObj.w = width;
+            impObj.h = height;
+            if (bidFloor !== undefined && typeof bidFloor !== 'number') {
+                return null;
+            }
+
+            if (typeof bidFloor === 'number') {
+                if (bidFloor < 0) {
+                    return null;
+                }
+
+                impObj.bidfloor = bidFloor;
+                if (bidFloorCurrency !== undefined && typeof bidFloorCurrency !== 'string') {
+                    return null;
+                }
+
+                impObj.bidfloorcur = bidFloorCurrency;
+            }
+
+            if (typeof siteID !== 'undefined') {
+                if (typeof siteID === 'number' && siteID % 1 === 0 && siteID >= 0) {
+                    impObj.siteID = siteID;
+                } else {
+                    return null;
+                }
+            }
+
+            this.impressions.push(impObj);
+            return impObj.id;
+        };
+
+        OpenRTBRequest.prototype.buildRequest = function () {
+            if (this.impressions.length === 0 || this.initialized !== true) {
+                return;
+            }
+
+            var jsonURI = encodeURIComponent(this.serialize());
+            var scriptSrc = window.location.protocol === 'https:' ? 'https://as-sec.casalemedia.com' : 'http://as.casalemedia.com';
+            scriptSrc += '/headertag?v=9&x3=1&fn=cygnus_index_parse_res&s=' + this.siteID + '&r=' + jsonURI;
+            if (typeof this.timeoutDelay === 'number' && this.timeoutDelay % 1 === 0 && this.timeoutDelay >= 0) {
+                scriptSrc += '&t=' + this.timeoutDelay;
+            }
+
+            return scriptSrc;
+        };
+
+        try {
+            if (typeof cygnus_index_args === 'undefined' || typeof cygnus_index_args.siteID === 'undefined' || typeof cygnus_index_args.slots === 'undefined') {
+                return;
+            }
+
+            if (typeof _IndexRequestData === 'undefined') {
+                _IndexRequestData = {};
+                _IndexRequestData.impIDToSlotID = {};
+                _IndexRequestData.reqOptions = {};
+            }
+
+            var req = new OpenRTBRequest(cygnus_index_args.siteID, cygnus_index_args.parseFn, cygnus_index_args.timeout);
+            if (cygnus_index_args.url && typeof cygnus_index_args.url === 'string') {
+                req.setPageOverride(cygnus_index_args.url);
+            }
+
+            _IndexRequestData.impIDToSlotID[req.requestID] = {};
+            _IndexRequestData.reqOptions[req.requestID] = {};
+            var slotDef, impID;
+
+            for (var i = 0; i < cygnus_index_args.slots.length; i++) {
+                slotDef = cygnus_index_args.slots[i];
+
+                impID = req.addImpression(slotDef.width, slotDef.height, slotDef.bidfloor, slotDef.bidfloorcur, slotDef.id, slotDef.siteID);
+                if (impID) {
+                    _IndexRequestData.impIDToSlotID[req.requestID][impID] = String(slotDef.id);
+                }
+            }
+
+            if (typeof cygnus_index_args.targetMode === 'number') {
+                _IndexRequestData.reqOptions[req.requestID].targetMode = cygnus_index_args.targetMode;
+            }
+
+            if (typeof cygnus_index_args.callback === 'function') {
+                _IndexRequestData.reqOptions[req.requestID].callback = cygnus_index_args.callback;
+            }
+
+            return req.buildRequest();
+        } catch (e) {
+        }
+    };
+    cygnus_index_args = {
+        timeout: 300,
+        siteID: 164874,
+        slots: [{
+            id: "1",
+            width: 728,
+            height: 90,
+            siteID: 164874
+        }, {
+            id: "2",
+            width: 300,
+            height: 250,
+            siteID: 164874
+        }]
+    };
+    // End Casale specific code
+    pf.addBidProvider({
+        name: 'casale',
+        init: function(slots, pushBid, done) {
+            var scriptTag = document.createElement("script");
+            scriptTag.setAttribute("src", cygnus_index_start()); // TODO: replace
+            scriptTag.setAttribute("type", "text/javascript");
+            var firstScript = document.getElementsByTagName("script")[0];
+            if (firstScript.parentNode) {
+                firstScript.parentNode.insertBefore(scriptTag, firstScript);
+            }
+            window.cygnus_index_ready_state = done; // TODO: replace
+            done();
+        },
+        refresh: function(slots, pushBid, done) {
+            var scriptTag = document.createElement("script");
+            scriptTag.setAttribute("src", cygnus_index_start()); // TODO: replace
+
+            scriptTag.setAttribute("type", "text/javascript");
+            var firstScript = document.getElementsByTagName("script")[0];
+            if (firstScript.parentNode) {
+                firstScript.parentNode.insertBefore(scriptTag, firstScript);
+            }
+            done();
+        }
+    });
+    pf.setAuctionProvider({
+        name: 'Google',
+        libUri: '//www.googletagservices.com/tag/js/gpt.js',
+        init: function(targeting, done) {
+            googletag.cmd.push(function() {
+                pf.getAuctionProvider().setParam('isRefresh', false);
+                var slots = {};
+                for (var i = 0; i < targeting.length; i++) {
+                    var tgtObject = targeting[i];
+                    var gptObject;
+                    if (tgtObject.name) {
+                        gptObject = googletag.defineSlot(tgtObject.name, tgtObject.sizes, tgtObject.elementId).addService(googletag.pubads());
+                        slots[tgtObject.name] = gptObject;
+                    } else {
+                        gptObject = googletag.pubads();
+                    }
+                    for (var p in tgtObject.targeting) {
+                        gptObject.setTargeting(p, tgtObject.targeting[p]);
+                    }
+                    pf.getAuctionProvider().setParam('slots', slots);
+                }
+            });
+            googletag.cmd.push(function() {
+                googletag.pubads().collapseEmptyDivs();
+                googletag.pubads().enableSingleRequest();
+                googletag.enableServices();
+                done();
+            });
+        },
+        refresh: function(targeting, done) {
+            googletag.cmd.push(function() {
+                googletag.pubads().clearTargeting();
+                googletag.pubads().clear();
+            });
+            googletag.cmd.push(function() {
+                pf.getAuctionProvider().setParam('isRefresh', true);
+                var slots = pf.getAuctionProvider().getParam('slots'),
+                        refreshSlots = [];
+                for (var i = 0; i < targeting.length; i++) {
+                    var tgtObject = targeting[i],
+                            gptObject = slots[tgtObject.name];
+                    gptObject = gptObject ? (refreshSlots.push(gptObject), gptObject) : googletag.pubads();
+                    for (var p in tgtObject.targeting) {
+                        gptObject.setTargeting(p, tgtObject.targeting[p]);
+                    }
+                }
+                if (refreshSlots.length > 0) {
+                    googletag.pubads().refresh(refreshSlots);
+                } else {
+                    googletag.pubads().refresh();
+                }
+                done();
+            });
+        }
+    });
+    function augmentBids(bids, params) {
+        for (var i = 0; i < bids.length; i++) {
+            bids[i]['targeting'].code = (0 | Math.random() * 36).toString(36);
+            bids[i].baseValue = bids[i].value || 0;
+            bids[i].value = bids[i].value + 9;
+        }
+        return bids;
+    }
+    pf.addBidTransform(augmentBids);
+    pf.timeout(3000);
+    pf.start(Date.now(), function(hasErros, details) {
+        if (hasErros) {
+            console.log('HAS ERRORS', details);
+        }
+    });
+</script>
+
+<h2>Yieldbot Bid Provider - Example1</h2>
+<p>
+    <script>
+        function refreshAds(all) {
+            if (!all) {
+                pf.refresh(['/2476204/multi-size']);
+            } else {
+                pf.refresh();
+            }
+        }
+    </script>
+    <button id="refresh-one-btn" onclick="refreshAds()">Refresh 300x250 ad</button> - <em>or</em> -
+    <button id="refresh-all-btn" onclick="refreshAds(true)">Refresh All</button>
+<p></p>
+<h3>Leaderboard 728x90</h3>
+<div id='div-leaderboard'>
+</div>
+<script>
+    pf.observe('AUCTION_POST_RUN', function() {
+        googletag.cmd.push(function() {
+            if (!pf.getAuctionProvider().getParam('isRefresh')) {
+                googletag.display('div-leaderboard');
+            }
+        });
+    });
+</script>
+<h3>Medium Rectangle 300x250</h3>
+<div id='div-multi-size'>
+</div>
+<script>
+    pf.observe('AUCTION_POST_RUN', function() {
+        googletag.cmd.push(function() {
+            if (!pf.getAuctionProvider().getParam('isRefresh')) {
+                googletag.display('div-multi-size');
+            }
+        });
+    });
+</script>
+</body>
+</html>
