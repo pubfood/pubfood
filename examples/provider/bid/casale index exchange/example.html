@@ -274,22 +274,49 @@
     cygnus_index_args = {
         timeout: 300,
         /* Replace with your casale Site ID */
-        siteID: 164874,
-        slots: [{
-            id: "1",
-            width: 728,
-            height: 90,
-            /* Replace with your casale Site ID */
-            siteID: 164874
-        }, {
-            id: "2",
-            width: 300,
-            height: 250,
-            /* Replace with your casale Site ID */
-            siteID: 164874
-        }]
+        siteID: 164874
     };
     // End Casale specific code
+    var slot = pf.addSlot({
+        name: '/2476204/multi-size',
+        elementId: 'div-multi-size',
+        sizes: [
+            [300, 250]
+        ],
+        bidProviders: [
+                'casale'
+        ]
+    });
+    // Add provider specific keys to slot
+    slot.setParam('casale', {
+       slotId: 'medrec'
+    });
+    slot = pf.addSlot({
+        name: '/2476204/leaderboard',
+        elementId: 'div-leaderboard',
+        sizes: [
+            [728, 90]
+        ],
+        bidProviders: [
+            'casale'
+        ]
+    });
+    slot.setParam('casale', {
+        slotId: 'leaderboard'
+    });
+    function convertSlotForCasale(slots) {
+        slots.forEach(function(slot) {
+            if (typeof cygnus_index_args.slots === 'undefined') {
+                cygnus_index_args.slots = [];
+            }
+            cygnus_index_args.slots.push({
+                id: slot.getParam(casale).slotID,
+                width: slot.sizes[0][0],
+                height: slot.sizes[0][1],
+                siteId: cygnus_index_args.siteID
+            })
+        });
+    }
     pf.addBidProvider({
         name: 'casale',
         init: function(slots, pushBid, done) {
