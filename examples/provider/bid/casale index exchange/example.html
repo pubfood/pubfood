@@ -305,31 +305,49 @@
         slotId: 'leaderboard'
     });
     function convertSlotsForCasale(slots) {
-        slots.forEach(function(slot) {
-            if (typeof cygnus_index_args.slots === 'undefined') {
-                cygnus_index_args.slots = [];
-            }
-            cygnus_index_args.slots.push({
-                id: slot.getParam(casale).slotID,
-                width: slot.sizes[0][0],
-                height: slot.sizes[0][1],
-                siteId: cygnus_index_args.siteID
-            })
+        var p = new Promise(function (resolve, reject) {
+            slots.forEach(function(slot) {
+                if (typeof cygnus_index_args.slots === 'undefined') {
+                    cygnus_index_args.slots = [];
+                }
+                cygnus_index_args.slots.push({
+                    id: slot.getParam(casale).slotID,
+                    width: slot.sizes[0][0],
+                    height: slot.sizes[0][1],
+                    siteId: cygnus_index_args.siteID
+                })
+            });
+            cygnus_index_args.callback = parseCasaleResponse;
+            resolve();
         });
+        return p;
+    }
+    function parseCasaleResponse(id, data) {
+        if (typeof data[0] === 'object') {
+            var bids = [];
+            data.forEach(function (bid) {
+                bids.push({
+                    slot: bid.slotID,
+                    value: bid.target.slice(2),
+                    label: bid.target.slice(0, 1)
+                })
+            });
+        }
     }
     pf.addBidProvider({
         name: 'casale',
         init: function(slots, pushBid, done) {
-            convertSlotsForCasale(slots);
-            var scriptTag = document.createElement("script");
-            scriptTag.setAttribute("src", cygnus_index_start());
-            scriptTag.setAttribute("type", "text/javascript");
-            var firstScript = document.getElementsByTagName("script")[0];
-            if (firstScript.parentNode) {
-                firstScript.parentNode.insertBefore(scriptTag, firstScript);
-            }
-            window.cygnus_index_ready_state = done;
-            done();
+            convertSlotsForCasale(slots).then(function () {
+                var scriptTag = document.createElement("script");
+                scriptTag.setAttribute("src", cygnus_index_start());
+                scriptTag.setAttribute("type", "text/javascript");
+                var firstScript = document.getElementsByTagName("script")[0];
+                if (firstScript.parentNode) {
+                    firstScript.parentNode.insertBefore(scriptTag, firstScript);
+                }
+                window.cygnus_index_ready_state = done;
+                done();
+            });
         },
         refresh: function(slots, pushBid, done) {
             var scriptTag = document.createElement("script");
