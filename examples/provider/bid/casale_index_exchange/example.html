@@ -317,26 +317,38 @@
                     siteId: cygnus_index_args.siteID
                 })
             });
-            cygnus_index_args.callback = parseCasaleResponse;
             resolve();
         });
         return p;
     }
-    function parseCasaleResponse(id, data) {
-        if (typeof data[0] === 'object') {
-            var bids = [];
-            data.forEach(function (bid) {
-                bids.push({
-                    slot: bid.slotID,
-                    value: bid.target.slice(2),
-                    label: bid.target.slice(0, 1)
-                })
-            });
-        }
-    }
     pf.addBidProvider({
         name: 'casale',
         init: function(slots, pushBid, done) {
+            var fancyWorkAround = (function () {
+                function parseCasaleResponse(id, data) {
+                    if (typeof data[0] === 'object') {
+                        var bids = [];
+                        data.forEach(function (bid) {
+                            bids.push({
+                                slot: bid.slotID,
+                                value: bid.target.slice(2),
+                                label: bid.target.slice(0, 1)
+                            })
+                        });
+                    }
+                    return bids;
+                }
+                return {
+                    parseResponse: function (id, data) {
+                        var bids = parseCasaleResponse(id, data);
+                        bids.forEach(function (bid) {
+                            pushBid(bid);
+                        });
+                        done();
+                    }
+                }
+            })();
+            cygnus_index_args.callback = fancyWorkAround.parseResponse;
             convertSlotsForCasale(slots).then(function () {
                 var scriptTag = document.createElement("script");
                 scriptTag.setAttribute("src", cygnus_index_start());
@@ -345,8 +357,7 @@
                 if (firstScript.parentNode) {
                     firstScript.parentNode.insertBefore(scriptTag, firstScript);
                 }
-                window.cygnus_index_ready_state = done;
-                done();
+                // this might result in targeting being done by both Casale and PubFood.
             });
         },
         refresh: function(slots, pushBid, done) {
