@@ -46,21 +46,22 @@
             '"': '\\"',
             '\\': '\\\\'
         };
-        if (cygnus_index_primary_request) {
-            for (var s = [], n = 0; n < cygnus_index_args.slots.length; n++) {
-                var r = cygnus_index_args.slots[n],
-                        u = {
-                            id: "T1_" + r.id,
-                            width: r.width,
-                            height: r.height,
-                            /* Replace with your casale Site ID */
-                            siteID: 999990
-                        };
-                s.push(u)
-            }
-            for (n = 0; n < s.length; n++) cygnus_index_args.slots.push(s[n]);
-            cygnus_index_primary_request = false;
-        }
+//        if (cygnus_index_primary_request) {
+//            // This seems to just add a duplicate slot for each slot, prefixed with T1
+//            for (var s = [], n = 0; n < cygnus_index_args.slots.length; n++) {
+//                var r = cygnus_index_args.slots[n],
+//                        u = {
+//                            id: "T1_" + r.id,
+//                            width: r.width,
+//                            height: r.height,
+//                            /* Replace with your casale Site ID */
+//                            siteID: 999990
+//                        };
+//                s.push(u)
+//            }
+//            for (n = 0; n < s.length; n++) cygnus_index_args.slots.push(s[n]);
+//            cygnus_index_primary_request = false;
+//        }
         function escapeCharacter(character) {
             var escaped = meta[character];
             if (typeof escaped === 'string') {
@@ -272,7 +273,7 @@
     };
     cygnus_index_args = {
         timeout: 300,
-        /* Replace with your casale Site ID */
+        /* Replace with your tier 1 Casale Site ID */
         siteID: 999990
     };
     // End Casale specific code
@@ -329,24 +330,45 @@
         init: function(slots, pushBid, done) {
             console.log('bidProvider.init.');
             var fancyWorkAround = (function () {
+                const OPEN_MARKET = 'O';
+                const PRIVATE_MARKET = 'P';
+                var bids = [];
                 function parseCasaleResponse(data) {
+                    console.log('_IndexRequestData:');
+                    console.log(_IndexRequestData);
                     console.log('parsing Response:');
                     console.log(data);
-                    if (typeof data === 'object') {
-                        var bids = [];
-                        data.forEach(function (bid) {
+                    var impIdToSlotId = _IndexRequestData.impIDToSlotID[data.id];
+                    var reqOptions = _IndexRequestData.reqOptions[data.id];
+                    var targetMode = typeof reqOptions.targetMode === 'number' ? reqOptions.targetMode : 0;
+                    // parse the response in to something we care about.
+                    for (var i= 0; i < data.seatbid.length; i++) {
+                        var seatBid = data.seatbid[i];
+                        for(var x= 0; x < data.seatbid[i].bid.length; x++) {
+                            var bid = seatBid.bid[x];
+                            var market = typeof bid.ext.dealid === 'string' ? PRIVATE_MARKET : OPEN_MARKET;
+                            var slotId = impIdToSlotId[bid.impid];
+                            var value;
+                            if (market === PRIVATE_MARKET && targetMode === 0) {
+                                value = slotId + bid.ext.dealid;
+                            } else {
+                                value = slotId + bid.ext.pricelevel;
+                            }
                             bids.push({
-                                slot: bid.slotID,
-                                value: bid.target.slice(2),
-                                label: bid.target.slice(0, 1)
-                            })
-                        });
+                                slot: slotId,
+                                value: value,
+                                label: market
+                            });
+                        }
                     }
                     return bids;
                 }
                 return {
-                    parseResponse: function (id, data) {
-                        var bids = parseCasaleResponse(id, data);
+                    parseResponse: function (data) {
+                        var bids = parseCasaleResponse(data);
+                        console.log('Bids to be pushed to pubFood from Casale:');
+                        console.log(bids);
+                        // push all bids to pubFood.
                         bids.forEach(function (bid) {
                             pushBid(bid);
                         });
@@ -370,24 +392,45 @@
             });
         },
         refresh: function(slots, pushBid, done) {
-            console.log('bidProvider.init.');
+            console.log('bidProvider.refresh.');
             var fancyWorkAround = (function () {
-                function parseCasaleResponse(id, data) {
-                    if (typeof data === 'object') {
-                        var bids = [];
-                        data.forEach(function (bid) {
+                const OPEN_MARKET = 'O';
+                const PRIVATE_MARKET = 'P';
+                var bids = [];
+                function parseCasaleResponse(data) {
+                    console.log('_IndexRequestData:');
+                    console.log(_IndexRequestData);
+                    console.log('parsing Response:');
+                    console.log(data);
+                    var impIdToSlotId = _IndexRequestData.impIDToSlotID[data.id];
+                    var reqOptions = _IndexRequestData.reqOptions[data.id];
+                    var targetMode = typeof reqOptions.targetMode === 'number' ? reqOptions.targetMode : 0;
+                    // parse the response in to something we care about.
+                    for (var i= 0; i < data.seatbid.length; i++) {
+                        var seatBid = data.seatbid[i];
+                        for(var x= 0; x < data.seatbid[i].bid.length; x++) {
+                            var bid = seatBid.bid[x];
+                            var market = typeof bid.ext.dealid === 'string' ? PRIVATE_MARKET : OPEN_MARKET;
+                            var slotId = impIdToSlotId[bid.impid];
+                            var value;
+                            if (market === PRIVATE_MARKET && targetMode === 0) {
+                                value = slotId + '_' + bid.ext.dealid;
+                            } else {
+                                value = slotId + '_' + bid.ext.pricelevel;
+                            }
                             bids.push({
-                                slot: bid.slotID,
-                                value: bid.target.slice(2),
-                                label: bid.target.slice(0, 1)
-                            })
-                        });
+                                slot: slotId,
+                                value: value,
+                                label: market
+                            });
+                        }
                     }
                     return bids;
                 }
                 return {
-                    parseResponse: function (id, data) {
-                        var bids = parseCasaleResponse(id, data);
+                    parseResponse: function (data) {
+                        var bids = parseCasaleResponse(data);
+                        // push all bids to pubFood.
                         bids.forEach(function (bid) {
                             pushBid(bid);
                         });
