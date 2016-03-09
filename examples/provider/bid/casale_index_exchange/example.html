@@ -12,7 +12,7 @@
     window.googletag = window.googletag || {};
     googletag.cmd = googletag.cmd || [];
     var pf = new pubfood();
-    pf.omitDefaultBidKey(true);
+//    pf.omitDefaultBidKey(true);
     var batch = [];
     // this reporter listens on all events and pushes the event data to a queue `batch`
     pf.observe(function(event) {
@@ -287,10 +287,6 @@
                 'casale'
         ]
     });
-    // Add provider specific keys to slot
-    slot.setParam('casale', {
-       slotId: 'medrec'
-    });
     slot = pf.addSlot({
         name: '/2476204/leaderboard',
         elementId: 'div-leaderboard',
@@ -301,20 +297,19 @@
             'casale'
         ]
     });
-    slot.setParam('casale', {
-        slotId: 'leaderboard'
-    });
     function convertSlotsForCasale(slots) {
         var p = new Promise(function (resolve, reject) {
             if (typeof cygnus_index_args.slots === 'undefined') {
                 cygnus_index_args.slots = [];
             }
+            var i = 0;
             slots.forEach(function(slot) {
+                i++;
                 if (typeof slot.getParam('casale') !== 'undefined') {
                     console.log('casale param');
                     console.log(slot.getParam('casale'));
                     cygnus_index_args.slots.push({
-                        id: slot.getParam('casale').slotId,
+                        id: i.toString(10),
                         width: slot.sizes[0][0],
                         height: slot.sizes[0][1],
                         siteId: cygnus_index_args.siteID
@@ -506,15 +501,6 @@
             });
         }
     });
-    function augmentBids(bids, params) {
-        for (var i = 0; i < bids.length; i++) {
-            bids[i]['targeting'].code = (0 | Math.random() * 36).toString(36);
-            bids[i].baseValue = bids[i].value || 0;
-            bids[i].value = bids[i].value + 9;
-        }
-        return bids;
-    }
-    pf.addBidTransform(augmentBids);
     pf.timeout(3000);
     pf.start(Date.now(), function(hasErros, details) {
         if (hasErros) {
@@ -523,7 +509,7 @@
     });
 </script>
 
-<h2>Yieldbot Bid Provider - Example1</h2>
+<h2>Casale Index Exchange Bid Provider - Example1</h2>
 <p>
     <script>
         function refreshAds(all) {
