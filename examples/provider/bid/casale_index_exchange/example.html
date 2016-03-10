@@ -329,6 +329,9 @@
                     console.log(_IndexRequestData);
                     console.log('parsing Response:');
                     console.log(data);
+                    if (typeof _IndexRequestData.targetIDToBid === 'undefined') {
+                        _IndexRequestData.targetIDToBid = {};
+                    }
                     var impIdToSlotId = _IndexRequestData.impIDToSlotID[data.id];
                     var reqOptions = _IndexRequestData.reqOptions[data.id];
                     var targetMode = typeof reqOptions.targetMode === 'number' ? reqOptions.targetMode : 0;
