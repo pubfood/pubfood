@@ -395,6 +395,9 @@
                     console.log(_IndexRequestData);
                     console.log('parsing Response:');
                     console.log(data);
+                    if (typeof _IndexRequestData.targetIDToBid === 'undefined') {
+                        _IndexRequestData.targetIDToBid = {};
+                    }
                     var impIdToSlotId = _IndexRequestData.impIDToSlotID[data.id];
                     var reqOptions = _IndexRequestData.reqOptions[data.id];
                     var targetMode = typeof reqOptions.targetMode === 'number' ? reqOptions.targetMode : 0;
@@ -407,12 +410,13 @@
                             var slotId = impIdToSlotId[bid.impid];
                             var value;
                             if (market === PRIVATE_MARKET && targetMode === 0) {
-                                value = slotId + '_' + bid.ext.dealid;
+                                value = slotId + bid.ext.dealid;
                             } else {
-                                value = slotId + '_' + bid.ext.pricelevel;
+                                value = slotId + bid.ext.pricelevel;
                             }
+                            _IndexRequestData.targetIDToBid[value] = [bid.adm];
                             bids.push({
-                                slot: slotId,
+                                slot: slots[slotId].name,
                                 value: value,
                                 label: market
                             });
@@ -423,6 +427,8 @@
                 return {
                     parseResponse: function (data) {
                         var bids = parseCasaleResponse(data);
+                        console.log('Bids to be pushed to pubFood from Casale:');
+                        console.log(bids);
                         // push all bids to pubFood.
                         bids.forEach(function (bid) {
                             pushBid(bid);
