@@ -349,7 +349,7 @@
                             } else {
                                 value = slotId + bid.ext.pricelevel;
                             }
-                            _IndexRequestData.targetIDToBid[value] = bid.adm;
+                            _IndexRequestData.targetIDToBid[value] = [bid.adm];
                             bids.push({
                                 slot: slots[slotId].name,
                                 value: value,
