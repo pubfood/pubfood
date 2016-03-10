@@ -13,6 +13,7 @@
     googletag.cmd = googletag.cmd || [];
     var pf = new pubfood();
 //    pf.omitDefaultBidKey(true);
+    pf.prefixDefaultBidKey(false);
     var batch = [];
     // this reporter listens on all events and pushes the event data to a queue `batch`
     pf.observe(function(event) {
