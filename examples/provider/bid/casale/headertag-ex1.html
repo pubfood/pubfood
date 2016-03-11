@@ -24,53 +24,16 @@
         }
     });
     // Casale specific code
-    var cygnus_index_primary_request = true;
-    var cygnus_index_parse_res = function () {
+    window.cygnus_index_args = {
+        timeout: 300,
+        /* Replace with your tier 1 Casale Site ID */
+        siteID: 999990
     };
-
-    window.cygnus_index_args = {};
-
     var cygnus_index_start = function () {
-        var escapable = /[\\\"\x00-\x1f\x7f-\x9f\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g;
-        var meta = {
-            '\b': '\\b',
-            '\t': '\\t',
-            '\n': '\\n',
-            '\f': '\\f',
-            '\r': '\\r',
-            '"': '\\"',
-            '\\': '\\\\'
-        };
-        function escapeCharacter(character) {
-            var escaped = meta[character];
-            if (typeof escaped === 'string') {
-                return escaped;
-            } else {
-                return '\\u' + ('0000' + character.charCodeAt(0).toString(16)).slice(-4);
-            }
-        }
-
-        function quote(string) {
-            escapable.lastIndex = 0;
-            if (escapable.test(string)) {
-                return string.replace(escapable, escapeCharacter);
-            } else {
-                return string;
-            }
-        }
-        function OpenRTBRequest(siteID, parseFn, timeoutDelay) {
+        function OpenRTBRequest() {
             this.initialized = false;
-            if (typeof siteID !== 'number' || siteID % 1 !== 0 || siteID < 0) {
-                throw 'Invalid Site ID';
-            }
-
-            if (typeof timeoutDelay === 'number' && timeoutDelay % 1 === 0 && timeoutDelay >= 0) {
-                this.timeoutDelay = timeoutDelay;
-            }
-
-            this.siteID = siteID;
+            this.indexArgs = cygnus_index_args;
             this.impressions = [];
-            this._parseFnName = undefined;
             if (top === self) {
                 this.sitePage = location.href;
                 this.topframe = 1;
@@ -78,15 +41,7 @@
                 this.sitePage = document.referrer;
                 this.topframe = 0;
             }
-
-            if (typeof parseFn !== 'undefined') {
-                if (typeof parseFn === 'function') {
-                    this._parseFnName = 'cygnus_index_args.parseFn';
-                } else {
-                    throw 'Invalid jsonp target function';
-                }
-            }
-
+            var validatedArgs = this.validateArgs();
             if (typeof _IndexRequestData.requestCounter === 'undefined') {
                 _IndexRequestData.requestCounter = Math.floor(Math.random() * 256);
             } else {
@@ -96,11 +51,19 @@
             this.requestID = String((new Date().getTime() % 2592000) * 256 + _IndexRequestData.requestCounter + 256);
             this.initialized = true;
         }
-
-        OpenRTBRequest.prototype.serialize = function () {
-            var json = '{"id":' + this.requestID + ',"site":{"page":"' + quote(this.sitePage) + '"';
+        OpenRTBRequest.prototype.validateArgs = function () {
+            if (typeof this.indexArgs.parseFn === 'undefined') {
+                this.indexArgs.parseFn = null;
+            }
+            if (typeof this.indexArgs.timeout !== 'number') {
+                this.indexArgs.timeout = 300;
+            }
+            return true;
+        };
+        OpenRTBRequest.prototype.buildUriObject = function () {
+            var json = '{"id":' + this.requestID + ',"site":{"page":"' + this.sitePage + '"';
             if (typeof document.referrer === 'string') {
-                json += ',"ref":"' + quote(document.referrer) + '"';
+                json += ',"ref":"' + document.referrer + '"';
             }
 
             json += '},"imp":[';
@@ -111,12 +74,12 @@
                 if (typeof impObj.bidfloor === 'number') {
                     json += ',"bidfloor":' + impObj.bidfloor;
                     if (typeof impObj.bidfloorcur === 'string') {
-                        json += ',"bidfloorcur":"' + quote(impObj.bidfloorcur) + '"';
+                        json += ',"bidfloorcur":"' + impObj.bidfloorcur + '"';
                     }
                 }
 
                 if (typeof impObj.slotID === 'string' && (!impObj.slotID.match(/^\s*$/))) {
-                    ext.push('"sid":"' + quote(impObj.slotID) + '"');
+                    ext.push('"sid":"' + impObj.slotID + '"');
                 }
 
                 if (typeof impObj.siteID === 'number') {
@@ -136,15 +99,6 @@
 
             json += ']}';
             return json;
-        };
-
-        OpenRTBRequest.prototype.setPageOverride = function (sitePageOverride) {
-            if (typeof sitePageOverride === 'string' && (!sitePageOverride.match(/^\s*$/))) {
-                this.sitePage = sitePageOverride;
-                return true;
-            } else {
-                return false;
-            }
         };
 
         OpenRTBRequest.prototype.addImpression = function (width, height, bidFloor, bidFloorCurrency, slotID, siteID) {
@@ -199,9 +153,16 @@
                 return;
             }
 
-            var jsonURI = encodeURIComponent(this.serialize());
-            var scriptSrc = window.location.protocol === 'https:' ? 'https://as-sec.casalemedia.com' : 'http://as.casalemedia.com';
-            scriptSrc += '/headertag?v=9&x3=1&fn=' + this._parseFnName + '&s=' + this.siteID + '&r=' + jsonURI;
+            var request = encodeURIComponent(this.buildUriObject());
+            var requestUrl = window.location.protocol === 'https:' ? 'https://as-sec.casalemedia.com' : 'http://as.casalemedia.com';
+            var v = '9';
+            var x3 = '1';
+            var scriptSrc = requestUrl;
+            scriptSrc += '/headertag?v=' + v + '&x3=' + x3;
+            if (typeof cygnus_index_args.parseFn === 'function') {
+                scriptSrc += '&fn=' + 'cygnus_index_args.parseFn';
+            }
+            scriptSrc += '&s=' + this.indexArgs.siteID + '&r=' + request;
             if (typeof this.timeoutDelay === 'number' && this.timeoutDelay % 1 === 0 && this.timeoutDelay >= 0) {
                 scriptSrc += '&t=' + this.timeoutDelay;
             }
@@ -210,19 +171,18 @@
         };
 
         try {
-            if (typeof cygnus_index_args === 'undefined' || typeof cygnus_index_args.siteID === 'undefined' || typeof cygnus_index_args.slots === 'undefined') {
+            if (typeof cygnus_index_args.slots === 'undefined') {
                 return;
             }
-
             if (typeof _IndexRequestData === 'undefined') {
                 _IndexRequestData = {};
                 _IndexRequestData.impIDToSlotID = {};
                 _IndexRequestData.reqOptions = {};
             }
 
-            var req = new OpenRTBRequest(cygnus_index_args.siteID, cygnus_index_args.parseFn, cygnus_index_args.timeout);
-            if (cygnus_index_args.url && typeof cygnus_index_args.url === 'string') {
-                req.setPageOverride(cygnus_index_args.url);
+            var req = new OpenRTBRequest();
+            if (cygnus_index_args.url && typeof cygnus_index_args.url === 'string' && !cygnus_index_args.url.match(/^\s*$/)) {
+                    this.sitePage = cygnus_index_args.url;
             }
 
             _IndexRequestData.impIDToSlotID[req.requestID] = {};
@@ -249,11 +209,6 @@
             return req.buildRequest();
         } catch (e) {
         }
-    };
-    cygnus_index_args = {
-        timeout: 300,
-        /* Replace with your tier 1 Casale Site ID */
-        siteID: 999990
     };
     // End Casale specific code
     // Add our adUnits/Slots to PubFood
