@@ -2,17 +2,14 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Casale Index Exchange -- Example 1</title>
+    <title>Casale / Index Exchange -- Example 1</title>
 </head>
 <body>
 <script src="../../../../build/pubfood.js"></script>
-
-<iframe src="//i.yldbt.com/m/start-testing" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" height="0" width="0" style="display: none"></iframe>
 <script type="text/javascript">
     window.googletag = window.googletag || {};
     googletag.cmd = googletag.cmd || [];
     var pf = new pubfood();
-//    pf.omitDefaultBidKey(true);
     pf.prefixDefaultBidKey(false);
     var batch = [];
     // this reporter listens on all events and pushes the event data to a queue `batch`
@@ -33,10 +30,7 @@
 
     window.cygnus_index_args = {};
 
-    var cygnus_index_adunits =  [[728, 90], [120, 600], [300, 250], [160, 600], [336, 280], [234, 60], [300, 600], [300, 50], [320, 50], [970, 250], [300, 1050], [970, 90], [180, 150]]; // jshint ignore:line
-
     var cygnus_index_start = function () {
-        // window.cygnus_index_args.parseFn = cygnus_index_parse_res;
         var escapable = /[\\\"\x00-\x1f\x7f-\x9f\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g;
         var meta = {
             '\b': '\\b',
@@ -47,22 +41,6 @@
             '"': '\\"',
             '\\': '\\\\'
         };
-//        if (cygnus_index_primary_request) {
-//            // This seems to just add a duplicate slot for each slot, prefixed with T1
-//            for (var s = [], n = 0; n < cygnus_index_args.slots.length; n++) {
-//                var r = cygnus_index_args.slots[n],
-//                        u = {
-//                            id: "T1_" + r.id,
-//                            width: r.width,
-//                            height: r.height,
-//                            /* Replace with your casale Site ID */
-//                            siteID: 999990
-//                        };
-//                s.push(u)
-//            }
-//            for (n = 0; n < s.length; n++) cygnus_index_args.slots.push(s[n]);
-//            cygnus_index_primary_request = false;
-//        }
         function escapeCharacter(character) {
             var escaped = meta[character];
             if (typeof escaped === 'string') {
@@ -392,9 +370,9 @@
                     console.log('Bids to be pushed to pubFood from Casale:');
                     console.log(bids);
                     // push all bids to pubFood.
-                    bids.forEach(function (bid) {
-                        pushBid(bid);
-                    });
+                    for (var i = 0; i < bids.length; i++) {
+                        pushBid(bids[i]);
+                    }
                     done();
                 }
             }
