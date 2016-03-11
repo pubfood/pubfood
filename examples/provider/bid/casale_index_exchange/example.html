@@ -278,7 +278,8 @@
         siteID: 999990
     };
     // End Casale specific code
-    var slot = pf.addSlot({
+    // Add our adUnits/Slots to PubFood
+    pf.addSlot({
         name: '/2476204/multi-size',
         elementId: 'div-multi-size',
         sizes: [
@@ -288,7 +289,7 @@
                 'casale'
         ]
     });
-    slot = pf.addSlot({
+    pf.addSlot({
         name: '/2476204/leaderboard',
         elementId: 'div-leaderboard',
         sizes: [
@@ -298,158 +299,107 @@
             'casale'
         ]
     });
-    function convertSlotsForCasale(slots) {
-        var p = new Promise(function (resolve, reject) {
+    // Add a bid provider to PubFood for Casale / Index Exchange
+    indexExchange = pf.addBidProvider({
+        name: 'casale',
+        init: function(slots, pushBid, done) {
+            console.log('bidProvider.init.');
+            var fancyWorkAround = indexExchange.parseResponseFactory(slots, pushBid, done);
+            cygnus_index_args.parseFn = fancyWorkAround.parseResponse;
+            var indexExchangeSlots = indexExchange.convertSlots(slots);
             if (typeof cygnus_index_args.slots === 'undefined') {
                 cygnus_index_args.slots = [];
             }
-            for (var i = 0; i < slots.length; i++) {
-                var slot = slots[i];
-                cygnus_index_args.slots.push({
-                    id: i.toString(10),
-                    width: slot.sizes[0][0],
-                    height: slot.sizes[0][1],
-                    siteId: cygnus_index_args.siteID
-                })
-            }
-            resolve();
-        });
-        return p;
-    }
-    pf.addBidProvider({
-        name: 'casale',
-        init: function(slots, pushBid, done) {
-            // add logic to make page level bid if no slots are provided
-            console.log('bidProvider.init.');
-            var fancyWorkAround = (function () {
-                const OPEN_MARKET = 'O';
-                const PRIVATE_MARKET = 'P';
-                var bids = [];
-                function parseCasaleResponse(data) {
-                    console.log('_IndexRequestData:');
-                    console.log(_IndexRequestData);
-                    console.log('parsing Response:');
-                    console.log(data);
-                    if (typeof _IndexRequestData.targetIDToBid === 'undefined') {
-                        _IndexRequestData.targetIDToBid = {};
-                    }
-                    var impIdToSlotId = _IndexRequestData.impIDToSlotID[data.id];
-                    var reqOptions = _IndexRequestData.reqOptions[data.id];
-                    var targetMode = typeof reqOptions.targetMode === 'number' ? reqOptions.targetMode : 0;
-                    // parse the response in to something we care about.
-                    for (var i= 0; i < data.seatbid.length; i++) {
-                        var seatBid = data.seatbid[i];
-                        for(var x= 0; x < data.seatbid[i].bid.length; x++) {
-                            var bid = seatBid.bid[x];
-                            var market = typeof bid.ext.dealid === 'string' ? PRIVATE_MARKET : OPEN_MARKET;
-                            var slotId = impIdToSlotId[bid.impid];
-                            var value;
-                            if (market === PRIVATE_MARKET && targetMode === 0) {
-                                value = slotId + bid.ext.dealid;
-                            } else {
-                                value = slotId + bid.ext.pricelevel;
-                            }
-                            _IndexRequestData.targetIDToBid[value] = [bid.adm];
-                            bids.push({
-                                slot: slots[slotId].name,
-                                value: value,
-                                label: market
-                            });
-                        }
-                    }
-                    return bids;
-                }
-                return {
-                    parseResponse: function (data) {
-                        var bids = parseCasaleResponse(data);
-                        console.log('Bids to be pushed to pubFood from Casale:');
-                        console.log(bids);
-                        // push all bids to pubFood.
-                        bids.forEach(function (bid) {
-                            pushBid(bid);
-                        });
-                        done();
-                    }
-                }
-            })();
-            cygnus_index_args.parseFn = fancyWorkAround.parseResponse;
-            convertSlotsForCasale(slots).then(function () {
-                var scriptTag = document.createElement("script");
-                console.log(cygnus_index_args);
-                scriptTag.setAttribute("src", cygnus_index_start());
-                scriptTag.setAttribute("type", "text/javascript");
-                var firstScript = document.getElementsByTagName("script")[0];
-                if (firstScript.parentNode) {
-                    firstScript.parentNode.insertBefore(scriptTag, firstScript);
-                }
-            });
+            cygnus_index_args.slots = indexExchangeSlots;
+            indexExchange.generateScriptTag();
         },
         refresh: function(slots, pushBid, done) {
             console.log('bidProvider.refresh.');
-            var fancyWorkAround = (function () {
-                const OPEN_MARKET = 'O';
-                const PRIVATE_MARKET = 'P';
-                var bids = [];
-                function parseCasaleResponse(data) {
-                    console.log('_IndexRequestData:');
-                    console.log(_IndexRequestData);
-                    console.log('parsing Response:');
-                    console.log(data);
-                    if (typeof _IndexRequestData.targetIDToBid === 'undefined') {
-                        _IndexRequestData.targetIDToBid = {};
-                    }
-                    var impIdToSlotId = _IndexRequestData.impIDToSlotID[data.id];
-                    var reqOptions = _IndexRequestData.reqOptions[data.id];
-                    var targetMode = typeof reqOptions.targetMode === 'number' ? reqOptions.targetMode : 0;
-                    // parse the response in to something we care about.
-                    for (var i= 0; i < data.seatbid.length; i++) {
-                        var seatBid = data.seatbid[i];
-                        for(var x= 0; x < data.seatbid[i].bid.length; x++) {
-                            var bid = seatBid.bid[x];
-                            var market = typeof bid.ext.dealid === 'string' ? PRIVATE_MARKET : OPEN_MARKET;
-                            var slotId = impIdToSlotId[bid.impid];
-                            var value;
-                            if (market === PRIVATE_MARKET && targetMode === 0) {
-                                value = slotId + bid.ext.dealid;
-                            } else {
-                                value = slotId + bid.ext.pricelevel;
-                            }
-                            _IndexRequestData.targetIDToBid[value] = [bid.adm];
-                            bids.push({
-                                slot: slots[slotId].name,
-                                value: value,
-                                label: market
-                            });
-                        }
-                    }
-                    return bids;
-                }
-                return {
-                    parseResponse: function (data) {
-                        var bids = parseCasaleResponse(data);
-                        console.log('Bids to be pushed to pubFood from Casale:');
-                        console.log(bids);
-                        // push all bids to pubFood.
-                        bids.forEach(function (bid) {
-                            pushBid(bid);
-                        });
-                        done();
-                    }
-                }
-            })();
-            cygnus_index_args.callback = fancyWorkAround.parseResponse;
-            convertSlotsForCasale(slots).then(function () {
-                var scriptTag = document.createElement("script");
-                scriptTag.setAttribute("src", cygnus_index_start());
-                scriptTag.setAttribute("type", "text/javascript");
-                var firstScript = document.getElementsByTagName("script")[0];
-                if (firstScript.parentNode) {
-                    firstScript.parentNode.insertBefore(scriptTag, firstScript);
-                }
-                // this might result in targeting being done by both Casale and PubFood.
-            });
+            var fancyWorkAround = indexExchange.parseResponseFactory(slots, pushBid, done);
+            cygnus_index_args.parseFn = fancyWorkAround.parseResponse;
+            var indexExchangeSlots = indexExchange.convertSlots(slots);
+            if (typeof cygnus_index_args.slots === 'undefined') {
+                cygnus_index_args.slots = [];
+            }
+            cygnus_index_args.slots = indexExchangeSlots;
+            indexExchange.generateScriptTag();
         }
     });
+    indexExchange.generateScriptTag = function() {
+        var scriptTag = document.createElement("script");
+        scriptTag.setAttribute("src", cygnus_index_start());
+        scriptTag.setAttribute("type", "text/javascript");
+        var firstScript = document.getElementsByTagName("script")[0];
+        if (firstScript.parentNode) {
+            firstScript.parentNode.insertBefore(scriptTag, firstScript);
+        }
+    };
+    indexExchange.convertSlots = function(slots) {
+        var indexExchangeSlots = [];
+        for (var i = 0; i < slots.length; i++) {
+            var slot = slots[i];
+            indexExchangeSlots.push({
+                id: i.toString(10),
+                width: slot.sizes[0][0],
+                height: slot.sizes[0][1],
+                siteId: cygnus_index_args.siteID
+            })
+        }
+        return indexExchangeSlots;
+    };
+    indexExchange.parseResponseFactory = function(slots, pushBid, done) {
+        return (function () {
+            const OPEN_MARKET = 'O';
+            const PRIVATE_MARKET = 'P';
+            var bids = [];
+            function parseCasaleResponse(data) {
+                console.log('_IndexRequestData:');
+                console.log(_IndexRequestData);
+                console.log('parsing Response:');
+                console.log(data);
+                if (typeof _IndexRequestData.targetIDToBid === 'undefined') {
+                    _IndexRequestData.targetIDToBid = {};
+                }
+                var impIdToSlotId = _IndexRequestData.impIDToSlotID[data.id];
+                var reqOptions = _IndexRequestData.reqOptions[data.id];
+                var targetMode = typeof reqOptions.targetMode === 'number' ? reqOptions.targetMode : 0;
+                // parse the response in to something we care about.
+                for (var i= 0; i < data.seatbid.length; i++) {
+                    var seatBid = data.seatbid[i];
+                    for(var x= 0; x < data.seatbid[i].bid.length; x++) {
+                        var bid = seatBid.bid[x];
+                        var market = typeof bid.ext.dealid === 'string' ? PRIVATE_MARKET : OPEN_MARKET;
+                        var slotId = impIdToSlotId[bid.impid];
+                        var value;
+                        if (market === PRIVATE_MARKET && targetMode === 0) {
+                            value = slotId + bid.ext.dealid;
+                        } else {
+                            value = slotId + bid.ext.pricelevel;
+                        }
+                        _IndexRequestData.targetIDToBid[value] = [bid.adm];
+                        bids.push({
+                            slot: slots[slotId].name,
+                            value: value,
+                            label: market
+                        });
+                    }
+                }
+                return bids;
+            }
+            return {
+                parseResponse: function (data) {
+                    var bids = parseCasaleResponse(data);
+                    console.log('Bids to be pushed to pubFood from Casale:');
+                    console.log(bids);
+                    // push all bids to pubFood.
+                    bids.forEach(function (bid) {
+                        pushBid(bid);
+                    });
+                    done();
+                }
+            }
+        })();
+    };
     pf.setAuctionProvider({
         name: 'Google',
         libUri: '//www.googletagservices.com/tag/js/gpt.js',
