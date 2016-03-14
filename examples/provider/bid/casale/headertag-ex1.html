@@ -41,12 +41,6 @@
                 this.topframe = 0;
             }
             var validatedArgs = this.validateArgs();
-            if (_IndexRequestData.hasOwnProperty('requestCounter') === false) {
-                _IndexRequestData.requestCounter = Math.floor(Math.random() * 256);
-            } else {
-                _IndexRequestData.requestCounter = (_IndexRequestData.requestCounter + 1) % 256;
-            }
-
             this.requestID = String((new Date().getTime() % 2592000) * 256 + _IndexRequestData.requestCounter + 256);
             this.initialized = true;
         }
@@ -54,23 +48,32 @@
             if (this.indexArgs.hasOwnProperty('parseFn') === false) {
                 this.indexArgs.parseFn = null;
             }
+            if (_IndexRequestData.hasOwnProperty('requestCounter') === false) {
+                _IndexRequestData.requestCounter = Math.floor(Math.random() * 256);
+            } else {
+                _IndexRequestData.requestCounter = (_IndexRequestData.requestCounter + 1) % 256;
+            }
             return true;
         };
         OpenRTBRequest.prototype.buildUriObject = function () {
-            var json = '{"id":' + this.requestID + ',"site":{"page":"' + this.sitePage + '"';
+            var json = '{';
+            json += '"id":' + this.requestID;
+            json += ',"site":{"page":"' + this.sitePage + '"';
             if (pf.util.asType(document.referrer) === 'string') {
                 json += ',"ref":"' + document.referrer + '"';
             }
-
-            json += '},"imp":[';
+            json += '}';
+            json += ',"imp":[';
             for (var i = 0; i < this.impressions.length; i++) {
                 var impObj = this.impressions[i];
                 var ext = [];
-                json += '{"id":"' + impObj.id + '", "banner":{"w":' + impObj.w + ',"h":' + impObj.h + ',"topframe":' + String(this.topframe) + '}';
+                var imp = '{"id":"' + impObj.id + '"';
+                imp += ', "banner":{"w":' + impObj.w + ',"h":' + impObj.h + ',"topframe":' + String(this.topframe) + '}';
+
                 if (pf.util.asType(impObj.bidfloor) === 'number') {
-                    json += ',"bidfloor":' + impObj.bidfloor;
+                    imp += ',"bidfloor":' + impObj.bidfloor;
                     if (pf.util.asType(impObj.bidfloorcur) === 'string') {
-                        json += ',"bidfloorcur":"' + impObj.bidfloorcur + '"';
+                        imp += ',"bidfloorcur":"' + impObj.bidfloorcur + '"';
                     }
                 }
 
@@ -83,14 +86,15 @@
                 }
 
                 if (ext.length > 0) {
-                    json += ',"ext": {' + ext.join() + '}';
+                    imp += ',"ext": {' + ext.join() + '}';
                 }
 
                 if (i + 1 === this.impressions.length) {
-                    json += '}';
+                    imp += '}';
                 } else {
-                    json += '},';
+                    imp += '},';
                 }
+                json += imp;
             }
 
             json += ']}';
