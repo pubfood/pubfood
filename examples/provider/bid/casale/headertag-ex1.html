@@ -25,7 +25,6 @@
     });
     // Casale specific code
     window.cygnus_index_args = {
-        timeout: 300,
         /* Replace with your tier 1 Casale Site ID */
         siteID: 999990
     };
@@ -42,7 +41,7 @@
                 this.topframe = 0;
             }
             var validatedArgs = this.validateArgs();
-            if (typeof _IndexRequestData.requestCounter === 'undefined') {
+            if (_IndexRequestData.hasOwnProperty('requestCounter') === false) {
                 _IndexRequestData.requestCounter = Math.floor(Math.random() * 256);
             } else {
                 _IndexRequestData.requestCounter = (_IndexRequestData.requestCounter + 1) % 256;
@@ -52,17 +51,14 @@
             this.initialized = true;
         }
         OpenRTBRequest.prototype.validateArgs = function () {
-            if (typeof this.indexArgs.parseFn === 'undefined') {
+            if (this.indexArgs.hasOwnProperty('parseFn') === false) {
                 this.indexArgs.parseFn = null;
-            }
-            if (typeof this.indexArgs.timeout !== 'number') {
-                this.indexArgs.timeout = 300;
             }
             return true;
         };
         OpenRTBRequest.prototype.buildUriObject = function () {
             var json = '{"id":' + this.requestID + ',"site":{"page":"' + this.sitePage + '"';
-            if (typeof document.referrer === 'string') {
+            if (pf.util.asType(document.referrer) === 'string') {
                 json += ',"ref":"' + document.referrer + '"';
             }
 
@@ -71,18 +67,18 @@
                 var impObj = this.impressions[i];
                 var ext = [];
                 json += '{"id":"' + impObj.id + '", "banner":{"w":' + impObj.w + ',"h":' + impObj.h + ',"topframe":' + String(this.topframe) + '}';
-                if (typeof impObj.bidfloor === 'number') {
+                if (pf.util.asType(impObj.bidfloor) === 'number') {
                     json += ',"bidfloor":' + impObj.bidfloor;
-                    if (typeof impObj.bidfloorcur === 'string') {
+                    if (pf.util.asType(impObj.bidfloorcur) === 'string') {
                         json += ',"bidfloorcur":"' + impObj.bidfloorcur + '"';
                     }
                 }
 
-                if (typeof impObj.slotID === 'string' && (!impObj.slotID.match(/^\s*$/))) {
+                if (pf.util.asType(impObj.slotID) === 'string' && (!impObj.slotID.match(/^\s*$/))) {
                     ext.push('"sid":"' + impObj.slotID + '"');
                 }
 
-                if (typeof impObj.siteID === 'number') {
+                if (pf.util.asType(impObj.siteID) === 'number') {
                     ext.push('"siteID":' + impObj.siteID);
                 }
 
@@ -105,39 +101,39 @@
             var impObj = {
                 id: String(this.impressions.length + 1)
             };
-            if (typeof width !== 'number' || width <= 1) {
+            if (pf.util.asType(width) !== 'number' || width <= 1) {
                 return null;
             }
 
-            if (typeof height !== 'number' || height <= 1) {
+            if (pf.util.asType(height) !== 'number' || height <= 1) {
                 return null;
             }
 
-            if ((typeof slotID === 'string' || typeof slotID === 'number') && String(slotID).length <= 50) {
+            if ((pf.util.asType(slotID) === 'string' || pf.util.asType(slotID) === 'number') && String(slotID).length <= 50) {
                 impObj.slotID = String(slotID);
             }
 
             impObj.w = width;
             impObj.h = height;
-            if (bidFloor !== undefined && typeof bidFloor !== 'number') {
+            if (pf.util.asType(bidFloor) !== 'undefined' && pf.util.asType(bidFloor) !== 'number') {
                 return null;
             }
 
-            if (typeof bidFloor === 'number') {
+            if (pf.util.asType(bidFloor) === 'number') {
                 if (bidFloor < 0) {
                     return null;
                 }
 
                 impObj.bidfloor = bidFloor;
-                if (bidFloorCurrency !== undefined && typeof bidFloorCurrency !== 'string') {
+                if (pf.util.asType(bidFloorCurrency) !== 'undefined' && pf.util.asType(bidFloorCurrency) !== 'string') {
                     return null;
                 }
 
                 impObj.bidfloorcur = bidFloorCurrency;
             }
 
-            if (typeof siteID !== 'undefined') {
-                if (typeof siteID === 'number' && siteID % 1 === 0 && siteID >= 0) {
+            if (pf.util.asType(siteID) !== 'undefined') {
+                if (pf.util.asType(siteID) === 'number' && siteID % 1 === 0 && siteID >= 0) {
                     impObj.siteID = siteID;
                 } else {
                     return null;
@@ -159,19 +155,15 @@
             var x3 = '1';
             var scriptSrc = requestUrl;
             scriptSrc += '/headertag?v=' + v + '&x3=' + x3;
-            if (typeof cygnus_index_args.parseFn === 'function') {
+            if (pf.util.asType(cygnus_index_args.parseFn) === 'function') {
                 scriptSrc += '&fn=' + 'cygnus_index_args.parseFn';
             }
             scriptSrc += '&s=' + this.indexArgs.siteID + '&r=' + request;
-            if (typeof this.timeoutDelay === 'number' && this.timeoutDelay % 1 === 0 && this.timeoutDelay >= 0) {
-                scriptSrc += '&t=' + this.timeoutDelay;
-            }
-
             return scriptSrc;
         };
 
         try {
-            if (typeof cygnus_index_args.slots === 'undefined') {
+            if (cygnus_index_args.hasOwnProperty('slots') === false) {
                 return;
             }
             if (typeof _IndexRequestData === 'undefined') {
@@ -181,7 +173,7 @@
             }
 
             var req = new OpenRTBRequest();
-            if (cygnus_index_args.url && typeof cygnus_index_args.url === 'string' && !cygnus_index_args.url.match(/^\s*$/)) {
+            if (cygnus_index_args.url && pf.util.asType(cygnus_index_args.url) === 'string' && !cygnus_index_args.url.match(/^\s*$/)) {
                     this.sitePage = cygnus_index_args.url;
             }
 
@@ -198,11 +190,11 @@
                 }
             }
 
-            if (typeof cygnus_index_args.targetMode === 'number') {
+            if (pf.util.asType(cygnus_index_args.targetMode) === 'number') {
                 _IndexRequestData.reqOptions[req.requestID].targetMode = cygnus_index_args.targetMode;
             }
 
-            if (typeof cygnus_index_args.callback === 'function') {
+            if (pf.util.asType(cygnus_index_args.callback) === 'function') {
                 _IndexRequestData.reqOptions[req.requestID].callback = cygnus_index_args.callback;
             }
 
@@ -240,7 +232,7 @@
             var fancyWorkAround = indexExchange.parseResponseFactory(slots, pushBid, done);
             cygnus_index_args.parseFn = fancyWorkAround.parseResponse;
             var indexExchangeSlots = indexExchange.convertSlots(slots);
-            if (typeof cygnus_index_args.slots === 'undefined') {
+            if (cygnus_index_args.hasOwnProperty('slots') === false) {
                 cygnus_index_args.slots = [];
             }
             cygnus_index_args.slots = indexExchangeSlots;
@@ -251,7 +243,7 @@
             var fancyWorkAround = indexExchange.parseResponseFactory(slots, pushBid, done);
             cygnus_index_args.parseFn = fancyWorkAround.parseResponse;
             var indexExchangeSlots = indexExchange.convertSlots(slots);
-            if (typeof cygnus_index_args.slots === 'undefined') {
+            if (cygnus_index_args.hasOwnProperty('slots') === false) {
                 cygnus_index_args.slots = [];
             }
             cygnus_index_args.slots = indexExchangeSlots;
@@ -290,18 +282,18 @@
                 console.log(_IndexRequestData);
                 console.log('parsing Response:');
                 console.log(data);
-                if (typeof _IndexRequestData.targetIDToBid === 'undefined') {
+                if (_IndexRequestData.hasOwnProperty('targetIDToBid') === false) {
                     _IndexRequestData.targetIDToBid = {};
                 }
                 var impIdToSlotId = _IndexRequestData.impIDToSlotID[data.id];
                 var reqOptions = _IndexRequestData.reqOptions[data.id];
-                var targetMode = typeof reqOptions.targetMode === 'number' ? reqOptions.targetMode : 0;
+                var targetMode = pf.util.asType(reqOptions.targetMode) === 'number' ? reqOptions.targetMode : 0;
                 // parse the response in to something we care about.
                 for (var i= 0; i < data.seatbid.length; i++) {
                     var seatBid = data.seatbid[i];
                     for(var x= 0; x < data.seatbid[i].bid.length; x++) {
                         var bid = seatBid.bid[x];
-                        var market = typeof bid.ext.dealid === 'string' ? PRIVATE_MARKET : OPEN_MARKET;
+                        var market = pf.util.asType(bid.ext.dealid) === 'string' ? PRIVATE_MARKET : OPEN_MARKET;
                         var slotId = impIdToSlotId[bid.impid];
                         var value;
                         if (market === PRIVATE_MARKET && targetMode === 0) {
