@@ -393,6 +393,14 @@
 </script>
 
 <h2>Casale Index Exchange Bid Provider - Example1</h2>
+<p></p>
+This page illustrates one approach to implementing a Casale / Index Exchange bid provider.<b></b>
+<ul>
+    <li>The example uses their HeaderTag API.</li>
+    <li>It overrides their parsing function by passing our own parsing function to "fn" in the headerTag query string.</li>
+    <li>For this bid provider, <em><code>init</code></em> and <em><code>refresh</code></em> can share the same code</li>
+</ul>
+<p></p>
 <p>
     <script>
         function refreshAds(all) {
