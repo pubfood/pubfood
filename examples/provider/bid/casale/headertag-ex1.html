@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Casale / Index Exchange -- Example 1</title>
+</head>
+<body>
+<script src="../../../../build/pubfood.js"></script>
+<script type="text/javascript">
+    window.googletag = window.googletag || {};
+    googletag.cmd = googletag.cmd || [];
+    var pf = new pubfood();
+    pf.prefixDefaultBidKey(false);
+    var batch = [];
+    // this reporter listens on all events and pushes the event data to a queue `batch`
+    pf.observe(function(event) {
+        batch.push(event);
+    });
+    // this reporter only listens on the `AUCTION_COMPLETE` event, then loops over and displays the event data
+    pf.observe('AUCTION_COMPLETE', function(event) {
+        console.log('---------------------------------------');
+        for (var i = 0; i < batch.length; i++) {
+            console.log('%c' + batch[i].type, 'padding-right:5px;font-weight:bold;display:block;', JSON.stringify(batch[i]));
+        }
+    });
+    // Casale specific code
+    window.cygnus_index_args = {
+        /* Replace with your tier 1 Casale Site ID */
+        siteID: 999990
+    };
+    var cygnus_index_start = function () {
+        function OpenRTBRequest() {
+            this.initialized = false;
+            this.indexArgs = cygnus_index_args;
+            this.impressions = [];
+            if (top === self) {
+                this.sitePage = location.href;
+                this.topframe = 1;
+            } else {
+                this.sitePage = document.referrer;
+                this.topframe = 0;
+            }
+            var validatedArgs = this.validateArgs();
+            this.requestID = String((new Date().getTime() % 2592000) * 256 + _IndexRequestData.requestCounter + 256);
+            this.initialized = true;
+        }
+        OpenRTBRequest.prototype.validateArgs = function () {
+            if (this.indexArgs.hasOwnProperty('parseFn') === false) {
+                this.indexArgs.parseFn = null;
+            }
+            if (_IndexRequestData.hasOwnProperty('requestCounter') === false) {
+                _IndexRequestData.requestCounter = Math.floor(Math.random() * 256);
+            } else {
+                _IndexRequestData.requestCounter = (_IndexRequestData.requestCounter + 1) % 256;
+            }
+            return true;
+        };
+        OpenRTBRequest.prototype.buildUriObject = function () {
+            var json = '{';
+            json += '"id":' + this.requestID;
+            json += ',"site":{"page":"' + this.sitePage + '"';
+            if (pf.util.asType(document.referrer) === 'string') {
+                json += ',"ref":"' + document.referrer + '"';
+            }
+            json += '}';
+            json += ',"imp":[';
+            for (var i = 0; i < this.impressions.length; i++) {
+                var impObj = this.impressions[i];
+                var ext = [];
+                var imp = '{"id":"' + impObj.id + '"';
+                imp += ', "banner":{"w":' + impObj.w + ',"h":' + impObj.h + ',"topframe":' + String(this.topframe) + '}';
+
+                if (pf.util.asType(impObj.bidfloor) === 'number') {
+                    imp += ',"bidfloor":' + impObj.bidfloor;
+                    if (pf.util.asType(impObj.bidfloorcur) === 'string') {
+                        imp += ',"bidfloorcur":"' + impObj.bidfloorcur + '"';
+                    }
+                }
+
+                if (pf.util.asType(impObj.slotID) === 'string' && (!impObj.slotID.match(/^\s*$/))) {
+                    ext.push('"sid":"' + impObj.slotID + '"');
+                }
+
+                if (pf.util.asType(impObj.siteID) === 'number') {
+                    ext.push('"siteID":' + impObj.siteID);
+                }
+
+                if (ext.length > 0) {
+                    imp += ',"ext": {' + ext.join() + '}';
+                }
+
+                if (i + 1 === this.impressions.length) {
+                    imp += '}';
+                } else {
+                    imp += '},';
+                }
+                json += imp;
+            }
+
+            json += ']}';
+            return json;
+        };
+
+        OpenRTBRequest.prototype.addImpression = function (width, height, bidFloor, bidFloorCurrency, slotID, siteID) {
+            var impObj = {
+                id: String(this.impressions.length + 1)
+            };
+            if (pf.util.asType(width) !== 'number' || width <= 1) {
+                return null;
+            }
+
+            if (pf.util.asType(height) !== 'number' || height <= 1) {
+                return null;
+            }
+
+            if ((pf.util.asType(slotID) === 'string' || pf.util.asType(slotID) === 'number') && String(slotID).length <= 50) {
+                impObj.slotID = String(slotID);
+            }
+
+            impObj.w = width;
+            impObj.h = height;
+            if (pf.util.asType(bidFloor) !== 'undefined' && pf.util.asType(bidFloor) !== 'number') {
+                return null;
+            }
+
+            if (pf.util.asType(bidFloor) === 'number') {
+                if (bidFloor < 0) {
+                    return null;
+                }
+
+                impObj.bidfloor = bidFloor;
+                if (pf.util.asType(bidFloorCurrency) !== 'undefined' && pf.util.asType(bidFloorCurrency) !== 'string') {
+                    return null;
+                }
+
+                impObj.bidfloorcur = bidFloorCurrency;
+            }
+
+            if (pf.util.asType(siteID) !== 'undefined') {
+                if (pf.util.asType(siteID) === 'number' && siteID % 1 === 0 && siteID >= 0) {
+                    impObj.siteID = siteID;
+                } else {
+                    return null;
+                }
+            }
+
+            this.impressions.push(impObj);
+            return impObj.id;
+        };
+
+        OpenRTBRequest.prototype.buildRequest = function () {
+            if (this.impressions.length === 0 || this.initialized !== true) {
+                return;
+            }
+
+            var request = encodeURIComponent(this.buildUriObject());
+            var requestUrl = window.location.protocol === 'https:' ? 'https://as-sec.casalemedia.com' : 'http://as.casalemedia.com';
+            var v = '9';
+            var x3 = '1';
+            var scriptSrc = requestUrl;
+            scriptSrc += '/headertag?v=' + v + '&x3=' + x3;
+            if (pf.util.asType(cygnus_index_args.parseFn) === 'function') {
+                scriptSrc += '&fn=' + 'cygnus_index_args.parseFn';
+            }
+            scriptSrc += '&s=' + this.indexArgs.siteID + '&r=' + request;
+            return scriptSrc;
+        };
+
+        try {
+            if (cygnus_index_args.hasOwnProperty('slots') === false) {
+                return;
+            }
+            if (typeof _IndexRequestData === 'undefined') {
+                _IndexRequestData = {};
+                _IndexRequestData.impIDToSlotID = {};
+                _IndexRequestData.reqOptions = {};
+            }
+
+            var req = new OpenRTBRequest();
+            if (cygnus_index_args.url && pf.util.asType(cygnus_index_args.url) === 'string' && !cygnus_index_args.url.match(/^\s*$/)) {
+                    this.sitePage = cygnus_index_args.url;
+            }
+
+            _IndexRequestData.impIDToSlotID[req.requestID] = {};
+            _IndexRequestData.reqOptions[req.requestID] = {};
+            var slotDef, impID;
+
+            for (var i = 0; i < cygnus_index_args.slots.length; i++) {
+                slotDef = cygnus_index_args.slots[i];
+
+                impID = req.addImpression(slotDef.width, slotDef.height, slotDef.bidfloor, slotDef.bidfloorcur, slotDef.id, slotDef.siteID);
+                if (impID) {
+                    _IndexRequestData.impIDToSlotID[req.requestID][impID] = String(slotDef.id);
+                }
+            }
+
+            if (pf.util.asType(cygnus_index_args.targetMode) === 'number') {
+                _IndexRequestData.reqOptions[req.requestID].targetMode = cygnus_index_args.targetMode;
+            }
+
+            if (pf.util.asType(cygnus_index_args.callback) === 'function') {
+                _IndexRequestData.reqOptions[req.requestID].callback = cygnus_index_args.callback;
+            }
+
+            return req.buildRequest();
+        } catch (e) {
+        }
+    };
+    // End Casale specific code
+    // Add our adUnits/Slots to PubFood
+    pf.addSlot({
+        name: '/2476204/multi-size',
+        elementId: 'div-multi-size',
+        sizes: [
+            [300, 250]
+        ],
+        bidProviders: [
+                'casale'
+        ]
+    });
+    pf.addSlot({
+        name: '/2476204/leaderboard',
+        elementId: 'div-leaderboard',
+        sizes: [
+            [728, 90]
+        ],
+        bidProviders: [
+            'casale'
+        ]
+    });
+    // Add a bid provider to PubFood for Casale / Index Exchange
+    indexExchange = pf.addBidProvider({
+        name: 'casale',
+        init: function(slots, pushBid, done) {
+            console.log('bidProvider.init.');
+            var indexExchangeParser = indexExchange.parseResponseFactory(slots, pushBid, done);
+            cygnus_index_args.parseFn = indexExchangeParser.parseResponse;
+            var indexExchangeSlots = indexExchange.convertSlots(slots);
+            if (cygnus_index_args.hasOwnProperty('slots') === false) {
+                cygnus_index_args.slots = [];
+            }
+            cygnus_index_args.slots = indexExchangeSlots;
+            indexExchange.generateScriptTag();
+        },
+        refresh: function(slots, pushBid, done) {
+            console.log('bidProvider.refresh.');
+            var indexExchangeParser = indexExchange.parseResponseFactory(slots, pushBid, done);
+            cygnus_index_args.parseFn = indexExchangeParser.parseResponse;
+            var indexExchangeSlots = indexExchange.convertSlots(slots);
+            if (cygnus_index_args.hasOwnProperty('slots') === false) {
+                cygnus_index_args.slots = [];
+            }
+            cygnus_index_args.slots = indexExchangeSlots;
+            indexExchange.generateScriptTag();
+        }
+    });
+    indexExchange.generateScriptTag = function() {
+        var scriptTag = document.createElement("script");
+        scriptTag.setAttribute("src", cygnus_index_start());
+        scriptTag.setAttribute("type", "text/javascript");
+        var firstScript = document.getElementsByTagName("script")[0];
+        if (firstScript.parentNode) {
+            firstScript.parentNode.insertBefore(scriptTag, firstScript);
+        }
+    };
+    indexExchange.convertSlots = function(slots) {
+        var indexExchangeSlots = [];
+        for (var i = 0; i < slots.length; i++) {
+            var slot = slots[i];
+            indexExchangeSlots.push({
+                id: i.toString(10),
+                width: slot.sizes[0][0],
+                height: slot.sizes[0][1],
+                siteId: cygnus_index_args.siteID
+            })
+        }
+        return indexExchangeSlots;
+    };
+    indexExchange.parseResponseFactory = function(slots, pushBid, done) {
+        return (function () {
+            const OPEN_MARKET = 'O';
+            const PRIVATE_MARKET = 'P';
+            var bids = [];
+            function parseCasaleResponse(data) {
+                console.log('_IndexRequestData:');
+                console.log(_IndexRequestData);
+                console.log('parsing Response:');
+                console.log(data);
+                if (_IndexRequestData.hasOwnProperty('targetIDToBid') === false) {
+                    _IndexRequestData.targetIDToBid = {};
+                }
+                var impIdToSlotId = _IndexRequestData.impIDToSlotID[data.id];
+                var reqOptions = _IndexRequestData.reqOptions[data.id];
+                var targetMode = pf.util.asType(reqOptions.targetMode) === 'number' ? reqOptions.targetMode : 0;
+                // parse the response in to something we care about.
+                for (var i= 0; i < data.seatbid.length; i++) {
+                    var seatBid = data.seatbid[i];
+                    for(var x= 0; x < data.seatbid[i].bid.length; x++) {
+                        var bid = seatBid.bid[x];
+                        var market = pf.util.asType(bid.ext.dealid) === 'string' ? PRIVATE_MARKET : OPEN_MARKET;
+                        var slotId = impIdToSlotId[bid.impid];
+                        var value;
+                        if (market === PRIVATE_MARKET && targetMode === 0) {
+                            value = slotId + bid.ext.dealid;
+                        } else {
+                            value = slotId + bid.ext.pricelevel;
+                        }
+                        _IndexRequestData.targetIDToBid[value] = [bid.adm];
+                        bids.push({
+                            slot: slots[slotId].name,
+                            value: value,
+                            label: market
+                        });
+                    }
+                }
+                return bids;
+            }
+            return {
+                parseResponse: function (data) {
+                    var bids = parseCasaleResponse(data);
+                    console.log('Bids to be pushed to pubFood from Casale:');
+                    console.log(bids);
+                    // push all bids to pubFood.
+                    for (var i = 0; i < bids.length; i++) {
+                        pushBid(bids[i]);
+                    }
+                    done();
+                }
+            }
+        })();
+    };
+    pf.setAuctionProvider({
+        name: 'Google',
+        libUri: '//www.googletagservices.com/tag/js/gpt.js',
+        init: function(targeting, done) {
+            googletag.cmd.push(function() {
+                pf.getAuctionProvider().setParam('isRefresh', false);
+                var slots = {};
+                for (var i = 0; i < targeting.length; i++) {
+                    var tgtObject = targeting[i];
+                    var gptObject;
+                    if (tgtObject.name) {
+                        gptObject = googletag.defineSlot(tgtObject.name, tgtObject.sizes, tgtObject.elementId).addService(googletag.pubads());
+                        slots[tgtObject.name] = gptObject;
+                    } else {
+                        gptObject = googletag.pubads();
+                    }
+                    for (var p in tgtObject.targeting) {
+                        gptObject.setTargeting(p, tgtObject.targeting[p]);
+                    }
+                    pf.getAuctionProvider().setParam('slots', slots);
+                }
+            });
+            googletag.cmd.push(function() {
+                googletag.pubads().collapseEmptyDivs();
+                googletag.pubads().enableSingleRequest();
+                googletag.enableServices();
+                done();
+            });
+        },
+        refresh: function(targeting, done) {
+            googletag.cmd.push(function() {
+                googletag.pubads().clearTargeting();
+                googletag.pubads().clear();
+            });
+            googletag.cmd.push(function() {
+                pf.getAuctionProvider().setParam('isRefresh', true);
+                var slots = pf.getAuctionProvider().getParam('slots'),
+                        refreshSlots = [];
+                for (var i = 0; i < targeting.length; i++) {
+                    var tgtObject = targeting[i],
+                            gptObject = slots[tgtObject.name];
+                    gptObject = gptObject ? (refreshSlots.push(gptObject), gptObject) : googletag.pubads();
+                    for (var p in tgtObject.targeting) {
+                        gptObject.setTargeting(p, tgtObject.targeting[p]);
+                    }
+                }
+                if (refreshSlots.length > 0) {
+                    googletag.pubads().refresh(refreshSlots);
+                } else {
+                    googletag.pubads().refresh();
+                }
+                done();
+            });
+        }
+    });
+    pf.timeout(3000);
+    pf.start(Date.now(), function(hasErros, details) {
+        if (hasErros) {
+            console.log('HAS ERRORS', details);
+        }
+    });
+</script>
+
+<h2>Casale Index Exchange Bid Provider - Example1</h2>
+<p></p>
+This page illustrates one approach to implementing a Casale / Index Exchange bid provider.<b></b>
+<ul>
+    <li>The example uses their HeaderTag API.</li>
+    <li>It overrides their parsing function by passing our own parsing function to "fn" in the headerTag query string.</li>
+    <li>For this bid provider, <em><code>init</code></em> and <em><code>refresh</code></em> can share the same code</li>
+</ul>
+<p></p>
+<p>
+    <script>
+        function refreshAds(all) {
+            if (!all) {
+                pf.refresh(['/2476204/multi-size']);
+            } else {
+                pf.refresh();
+            }
+        }
+    </script>
+    <button id="refresh-one-btn" onclick="refreshAds()">Refresh 300x250 ad</button> - <em>or</em> -
+    <button id="refresh-all-btn" onclick="refreshAds(true)">Refresh All</button>
+<p></p>
+<h3>Leaderboard 728x90</h3>
+<div id='div-leaderboard'>
+</div>
+<script>
+    pf.observe('AUCTION_POST_RUN', function() {
+        googletag.cmd.push(function() {
+            if (!pf.getAuctionProvider().getParam('isRefresh')) {
+                googletag.display('div-leaderboard');
+            }
+        });
+    });
+</script>
+<h3>Medium Rectangle 300x250</h3>
+<div id='div-multi-size'>
+</div>
+<script>
+    pf.observe('AUCTION_POST_RUN', function() {
+        googletag.cmd.push(function() {
+            if (!pf.getAuctionProvider().getParam('isRefresh')) {
+                googletag.display('div-multi-size');
+            }
+        });
+    });
+</script>
+</body>
+</html>
