@@ -233,8 +233,8 @@
         name: 'casale',
         init: function(slots, pushBid, done) {
             console.log('bidProvider.init.');
-            var fancyWorkAround = indexExchange.parseResponseFactory(slots, pushBid, done);
-            cygnus_index_args.parseFn = fancyWorkAround.parseResponse;
+            var indexExchangeParser = indexExchange.parseResponseFactory(slots, pushBid, done);
+            cygnus_index_args.parseFn = indexExchangeParser.parseResponse;
             var indexExchangeSlots = indexExchange.convertSlots(slots);
             if (cygnus_index_args.hasOwnProperty('slots') === false) {
                 cygnus_index_args.slots = [];
@@ -244,8 +244,8 @@
         },
         refresh: function(slots, pushBid, done) {
             console.log('bidProvider.refresh.');
-            var fancyWorkAround = indexExchange.parseResponseFactory(slots, pushBid, done);
-            cygnus_index_args.parseFn = fancyWorkAround.parseResponse;
+            var indexExchangeParser = indexExchange.parseResponseFactory(slots, pushBid, done);
+            cygnus_index_args.parseFn = indexExchangeParser.parseResponse;
             var indexExchangeSlots = indexExchange.convertSlots(slots);
             if (cygnus_index_args.hasOwnProperty('slots') === false) {
                 cygnus_index_args.slots = [];
