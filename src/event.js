@@ -13,10 +13,9 @@ var EventEmitter = require('eventemitter3');
 /**
  * Pubfood event class
  * @class
- * @property {string} ts The timestamp of the event
- * @property {string} type The event type
- * @property {string} provider The type of provider. Defaults to <i>pubfood</i>
- * @property {object|string} data Data structure for each event type
+ * @property {string} auctionId The auction identifier
+ * @example AuctionId Format - <random string>:<auction count index>
+ * iis9xx46a6v2x58e1b:3
  * @return {PubfoodEvent}
  * @extends EventEmitter
  * @see https://github.com/primus/eventemitter3
@@ -117,6 +116,10 @@ PubfoodEvent.prototype.EVENT_TYPE = {
    * Action is complete
    * @event PubfoodEvent.BID_COMPLETE
    * @property {string} data [BidProvider.name]{@link pubfood#provider.BidProvider}
+   * @property {object} annotations event metadata
+   * @property {string} [annotations.forcedDone] flag to indicate completion was forced
+   * @example
+   * annotations.forcedDone && annotations.forcedDone === 'timeout'
    */
   BID_COMPLETE: 'BID_COMPLETE',
   /**
@@ -203,10 +206,10 @@ PubfoodEvent.prototype.EVENT_TYPE = {
  * publish an event
  * @param {string} eventType The event type
  * @param {*} data the event data
- * @param {string} eventContext The type of provider. ex: <i>bid</i>, <i>auction</i>
+ * @param {object} annotations Contextual metadata for the event
  * @return {boolean} Indication if we've emitted an event.
  */
-PubfoodEvent.prototype.publish = function(eventType, data, eventContext) {
+PubfoodEvent.prototype.publish = function(eventType, data, annotations) {
   var ts = (+new Date());
 
   if (eventType === this.EVENT_TYPE.PUBFOOD_API_START && data) {
@@ -217,7 +220,7 @@ PubfoodEvent.prototype.publish = function(eventType, data, eventContext) {
     auctionId: this.auctionId,
     ts: ts,
     type: eventType,
-    eventContext: eventContext || 'pubfood',
+    annotations: annotations || {},
     data: data || ''
   };
   logger.logEvent(eventType, this.auctionId, event);

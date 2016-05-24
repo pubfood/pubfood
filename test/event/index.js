@@ -180,4 +180,33 @@ describe('Event - Tests', function () {
     assert.equal(Event.auctionId, 456, 'auctionId should be the number 456');
     done();
   });
+  it('should publish event timestamp', function(done) {
+    var timeRef = (+new Date());
+    Event.on('BID_COMPLETE', function(ev) {
+      assert.isAtLeast(ev.ts, timeRef, 'event timestamp should be less than or equal to timeRef');
+      done();
+    });
+    Event.publish('BID_COMPLETE', 'theBidder');
+  });
+  it('should publish event type', function(done) {
+    Event.on('BID_COMPLETE', function(ev) {
+      assert.equal(ev.type, 'BID_COMPLETE', 'event type should be  \"BID_COMPLETE\"');
+      done();
+    });
+    Event.publish('BID_COMPLETE', 'theBidder');
+  });
+  it('should publish event data', function(done) {
+    Event.publish('BID_COMPLETE', 'theBidder');
+    Event.on('BID_COMPLETE', function(ev) {
+      assert.equal(ev.data, 'theBidder', 'bidder should be \"theBidder\"');
+      done();
+    });
+  });
+  it('should publish event annotations', function(done) {
+    Event.publish('BID_COMPLETE', 'theBidder', {forcedDone: 'test'});
+    Event.on('BID_COMPLETE', function(ev) {
+      assert.equal(ev.annotations.forcedDone, 'test', 'forcedDone annotation should be \"test\"');
+      done();
+    });
+  });
 });
