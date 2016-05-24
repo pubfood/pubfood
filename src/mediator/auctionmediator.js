@@ -264,12 +264,12 @@ AuctionMediator.prototype.setAuctionTrigger = function(triggerFn) {
  * Start the process to build and send publisher ad server auction request.
  * @private
  */
-AuctionMediator.prototype.startAuction_ = function(auctionIdx, auctionType) {
+AuctionMediator.prototype.startAuction_ = function(auctionIdx, auctionType, forcedDone) {
   Event.publish(Event.EVENT_TYPE.BID_ASSEMBLER, 'AuctionMediator');
   if (this.bidAssembler.operators.length > 0) {
     this.auctionRun[auctionIdx].bids = this.bidAssembler.process(this.auctionRun[auctionIdx].bids);
   }
-  this.processTargeting_(auctionIdx, auctionType);
+  this.processTargeting_(auctionIdx, auctionType, forcedDone);
 };
 
 /**
@@ -283,7 +283,7 @@ AuctionMediator.prototype.startTimeout_ = function(auctionIdx, auctionType) {
       type = auctionType,
       startFn = util.bind(this.startAuction_, this);;
     setTimeout(function() {
-      startFn(idx, type);
+      startFn(idx, type, true);
     }, this.timeout_);
   }
   return this;
@@ -462,18 +462,18 @@ AuctionMediator.prototype.processTargeting_ = function(auctionIdx, auctionType) 
   var cbTimeout = self.auctionProvider.getTimeout();
 
   var timeoutId;
-  var doneCb = function() {
+  var doneCb = function(forcedDone) {
     if (!doneCalled) {
       doneCalled = true;
       clearTimeout(timeoutId);
-      self.auctionDone(idx, name);
+      self.auctionDone(idx, name, forcedDone);
     }
   };
 
   timeoutId = setTimeout(function() {
     if (!doneCalled) {
       Event.publish(Event.EVENT_TYPE.WARN, 'Warning: The auction done callback for "' + name + '" hasn\'t been called within the allotted time (' + (cbTimeout / 1000) + 'sec)');
-      doneCb();
+      doneCb(true);
     }
   }, cbTimeout);
 
@@ -501,10 +501,10 @@ AuctionMediator.prototype.processTargeting_ = function(auctionIdx, auctionType) 
  * @param {string} data The auction mediator's name
  * @fires AUCTION_COMPLETE
  */
-AuctionMediator.prototype.auctionDone = function(auctionIdx, data) {
+AuctionMediator.prototype.auctionDone = function(auctionIdx, data, forcedDone) {
   this.auctionRun[auctionIdx].inAuction = AuctionMediator.IN_AUCTION.DONE;
   var auctionTargeting = this.getAuctionRun(auctionIdx).targeting;
-  Event.publish(Event.EVENT_TYPE.AUCTION_COMPLETE, { name: data, targeting: auctionTargeting });
+  Event.publish(Event.EVENT_TYPE.AUCTION_COMPLETE, { name: data, targeting: auctionTargeting }, forcedDone ? {forcedDone: 'timeout'} : '');
   setTimeout(function() {
     // push this POST event onto the next tick of the event loop
     Event.publish(Event.EVENT_TYPE.AUCTION_POST_RUN, data);
@@ -785,18 +785,18 @@ AuctionMediator.prototype.getBids_ = function(auctionIdx, auctionType, provider,
   };
 
   var timeoutId;
-  var bidDoneCb = function(){
+  var bidDoneCb = function(forcedDone){
     if(!doneCalled) {
       doneCalled = true;
       clearTimeout(timeoutId);
-      self.doneBid(idx, auctionType, name);
+      self.doneBid(idx, auctionType, name, forcedDone);
     }
   };
 
   timeoutId = setTimeout(function(){
     if(!doneCalled) {
       Event.publish(Event.EVENT_TYPE.WARN, 'Warning: The bid done callback for "'+name+'" hasn\'t been called within the allotted time (' + (cbTimeout/1000) + 'sec)');
-      bidDoneCb();
+      bidDoneCb(true);
     }
   }, cbTimeout);
 
@@ -837,9 +837,9 @@ AuctionMediator.prototype.pushBid = function(auctionIdx, bidObject, providerName
  * @param {string} bidProvider The [BidProvider]{@link pubfood#provider.BidProvider} name
  * @fires pubfood.PubfoodEvent.BID_COMPLETE
  */
-AuctionMediator.prototype.doneBid = function(auctionIdx, auctionType, bidProvider) {
+AuctionMediator.prototype.doneBid = function(auctionIdx, auctionType, bidProvider, forcedDone) {
   // TODO consider having useful bid data available upon completion like the bids
-  Event.publish(Event.EVENT_TYPE.BID_COMPLETE, bidProvider);
+  Event.publish(Event.EVENT_TYPE.BID_COMPLETE, bidProvider, forcedDone ? {forcedDone: 'timeout'} : '');
   this.auctionRun[auctionIdx].bidStatus[bidProvider] = true;
   this.checkBids_(auctionIdx, auctionType);
 };

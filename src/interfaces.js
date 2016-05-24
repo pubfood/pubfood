@@ -185,6 +185,20 @@ var bidObject = {
 };
 
 /**
+ * Event object structure for [observed]{@link pubfood#observe} events.
+ *
+ * @typedef {EventObject} EventObject
+ * @property {string} auctionId the auction identifier
+ * @example AuctionId Format - <random string>:<auction count index>
+ * iis9xx46a6v2x58e1b:3
+ * @property {string} ts the event timestamp
+ * @property {PubfoodEvent#EVENT_TYPE} type the event type
+ * @property {object|string} data the data payload for the [EVENT_TYPE]{@link PubfoodEvent#EVENT_TYPE}
+ * @property {object} annotations event object metadata. See specific [EVENT_TYPE]{@link PubfoodEvent#EVENT_TYPE} for annotatoins
+ * @memberof typeDefs
+ */
+
+/**
  * @typedef {SlotConfig} SlotConfig
  * @property {string} name name of the slot/ad unit in [AuctionProvider]{@link pubfood#provider.AuctionProvider} system e.g. DFP /accountId/mpu-rt
  * @property {string} [elementId] DOM target element id

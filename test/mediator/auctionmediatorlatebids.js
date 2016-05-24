@@ -217,4 +217,190 @@ describe('Late bids', function () {
     m.timeout(1);
     m.start();
   });
+
+  it('should annotate bid provider with forcedDone', function(done) {
+
+    var m = new AuctionMediator();
+    m.doneCallbackOffset(0);
+    m.timeout(1);
+
+    m.addSlot({
+      name: '/abc/123',
+      sizes: [
+        [728, 90]
+      ],
+      elementId: 'div-leaderboard',
+      bidProviders: ['b1']
+    });
+
+    m.addBidProvider({
+      name: 'b1',
+      libUri: '../test/fixture/lib.js',
+      init: function(slots, pushBid, done) {
+        setTimeout(function() {
+          done();
+        }, 5);
+      },
+      refresh: function(slots, pushBid, done) {
+        done();
+      }
+    });
+
+    m.setAuctionProvider({
+      name: 'provider1',
+      libUri: '../test/fixture/lib.js',
+      init: function(targeting, done) {
+        done();
+      },
+      refresh: function(targeting, done) {
+        done();
+      }
+    });
+
+    Event.on(Event.EVENT_TYPE.BID_COMPLETE, function(event) {
+      assert.equal(event.annotations.forcedDone, 'timeout', 'bid provider should have been forced done by timeout');
+      done();
+    });
+
+    m.start();
+  });
+
+  it('if timely, should NOT annotate bid provider with forcedDone', function(done) {
+
+    var m = new AuctionMediator();
+    m.doneCallbackOffset(0);
+    m.timeout(5);
+
+    m.addSlot({
+      name: '/abc/123',
+      sizes: [
+        [728, 90]
+      ],
+      elementId: 'div-leaderboard',
+      bidProviders: ['b1']
+    });
+
+    m.addBidProvider({
+      name: 'b1',
+      libUri: '../test/fixture/lib.js',
+      init: function(slots, pushBid, done) {
+        done();
+      },
+      refresh: function(slots, pushBid, done) {
+        done();
+      }
+    });
+
+    m.setAuctionProvider({
+      name: 'provider1',
+      libUri: '../test/fixture/lib.js',
+      init: function(targeting, done) {
+        setTimeout(function() {
+          done();
+        }, 5);
+      },
+      refresh: function(targeting, done) {
+        done();
+      }
+    });
+
+    Event.on(Event.EVENT_TYPE.BID_COMPLETE, function(event) {
+      assert.isUndefined(event.annotations.forcedDone, 'bid provider should NOT have been forced done');
+      done();
+    });
+
+    m.start();
+  });
+
+  it('should annotate auction provider with forcedDone', function(done) {
+
+    var m = new AuctionMediator();
+    m.doneCallbackOffset(0);
+    m.timeout(1);
+
+    m.addSlot({
+      name: '/abc/123',
+      sizes: [
+        [728, 90]
+      ],
+      elementId: 'div-leaderboard',
+      bidProviders: ['b1']
+    });
+
+    m.addBidProvider({
+      name: 'b1',
+      libUri: '../test/fixture/lib.js',
+      init: function(slots, pushBid, done) {
+        done();
+      },
+      refresh: function(slots, pushBid, done) {
+        done();
+      }
+    });
+
+    m.setAuctionProvider({
+      name: 'provider1',
+      libUri: '../test/fixture/lib.js',
+      init: function(targeting, done) {
+        setTimeout(function() {
+          done();
+        }, 5);
+      },
+      refresh: function(targeting, done) {
+        done();
+      }
+    });
+
+    Event.on(Event.EVENT_TYPE.AUCTION_COMPLETE, function(event) {
+      assert.equal(event.annotations.forcedDone, 'timeout', 'auction provider should have been forced done by timeout');
+      done();
+    });
+
+    m.start();
+  });
+
+  it('if timely, should NOT annotate auction provider with forcedDone', function(done) {
+
+    var m = new AuctionMediator();
+    m.doneCallbackOffset(0);
+    m.timeout(5);
+
+    m.addSlot({
+      name: '/abc/123',
+      sizes: [
+        [728, 90]
+      ],
+      elementId: 'div-leaderboard',
+      bidProviders: ['b1']
+    });
+
+    m.addBidProvider({
+      name: 'b1',
+      libUri: '../test/fixture/lib.js',
+      init: function(slots, pushBid, done) {
+        done();
+      },
+      refresh: function(slots, pushBid, done) {
+        done();
+      }
+    });
+
+    m.setAuctionProvider({
+      name: 'provider1',
+      libUri: '../test/fixture/lib.js',
+      init: function(targeting, done) {
+        done();
+      },
+      refresh: function(targeting, done) {
+        done();
+      }
+    });
+
+    Event.on(Event.EVENT_TYPE.AUCTION_COMPLETE, function(event) {
+      assert.isUndefined(event.annotations.forcedDone, 'auction provider should NOT have been forced done');
+      done();
+    });
+
+    m.start();
+  });
 });
