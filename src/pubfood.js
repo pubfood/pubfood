@@ -114,13 +114,35 @@ var AuctionMediator = require('./mediator/auctionmediator');
   };
 
   /**
-   * Get the auction identifier.
+   * Get the auction identifier.<br>
    *
-   * Returns the <id>:<auction count>
+   * Returns the auction identifier key.
+   * @example Auction Id Format
+   * <id>:<auction count>
    * @return {string} the auctionId
    */
   api.prototype.getAuctionId = function() {
     return this.mediator.getAuctionId();
+  };
+
+  /**
+   * Get the auction count.<br>
+   * Returns the latest auction index.
+   * @return {number}
+   */
+  api.prototype.getAuctionCount = function() {
+    return this.mediator.getAuctionCount();
+  };
+
+  /**
+   * Get the auction run data structure.
+   *
+   * @param {number} idx the integer index of the auction run
+   * @return {AuctionRun}
+   * @see [getAuctionCount()]{@link pubfood#getAuctionCount}, for reference to auction run index
+   */
+  api.prototype.getAuctionRun = function(idx) {
+    return this.mediator.getAuctionRun(idx);
   };
 
   /**
@@ -291,28 +313,36 @@ var AuctionMediator = require('./mediator/auctionmediator');
   };
 
   /**
-   * Sets the time in which bid providers must supply bids.
+   * Gets or sets the time in which bid providers must supply bids.
    *
-   * @param {number} millis - milliseconds to set the timeout
+   * @param {number} [millis] - milliseconds to set the timeout
+   * @returns {number} the auction timeout
    */
   api.prototype.timeout = function(millis) {
     this.pushApiCall_('api.timeout', arguments);
-    this.mediator.timeout(millis);
-    return this;
+    if (util.asType(millis) === 'number') {
+      this.mediator.timeout(millis);
+    }
+    return this.mediator.getTimeout();
   };
 
   /**
-   * Sets the default done callback timeout offset. Default: <code>5000ms</code>
+   * Gets or sets the default done callback timeout offset. Default: <code>5000ms</code>
    * <p>
    * If a [BidProvider.timeout]{@link pubfood#provider.BidProvider#timeout} value is not set, specifies the additional time in which a provider gets to push late bids and call [done()]{@link typeDefs.bidDoneCallback}.
    * <p>Assists capturing late bid data for analytics and reporting by giving additional timeout "grace" period.
    * <p>Bid provider timeout calculated as the following if not otherwise set:
    * <li><code>timeout(millis) + doneCallbackOffset(millis)</code></li>
    * <p>If the timeout elapses, done() is called on behalf of the provider.
-   * @param {number} millis - milliseconds to set the timeout
+   * @param {number} [millis] - milliseconds to set the timeout
+   * @returns {number} the done callback offset
    */
   api.prototype.doneCallbackOffset = function(millis) {
-    this.mediator.doneCallbackOffset(millis);
+    this.pushApiCall_('api.doneCallbackOffset', arguments);
+    if (util.asType(millis) === 'number') {
+      this.mediator.doneCallbackOffset(millis);
+    }
+    return this.mediator.getDoneCallbackOffset();
   };
 
   /**

@@ -13,4 +13,5 @@ describe('API - Tests', function () {
   require('./buildtargeting');
   require('./events');
   require('./transformoperator');
+  require('./auctionrun');
 });
