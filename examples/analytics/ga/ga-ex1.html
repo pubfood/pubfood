@@ -2,22 +2,56 @@
 <head>
   <title>Pubfood - Google Analytics Ex1</title>
   <script src="../../../build/pubfood.js"></script>
-  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
   <script>
 (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
   m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+  })(window,document,'script','http://www.google-analytics.com/analytics.js','ga');
 </script>
 </head>
 <body>
     <!-- Turn Yieldbot integration testing on  -->
-    <iframe src="//i.yldbt.com/m/start-testing" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" height="0" width="0" style="display: none"></iframe>
+    <iframe src="http://i.yldbt.com/m/start-testing" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" height="0" width="0" style="display: none"></iframe>
 
     <script>
+     // Generate a UUID
+     // http://stackoverflow.com/a/2117523/6224807
+     function UUID() {
+         return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+             var r = Math.random()*16|0, v = c == 'x' ? r : (r&0x3|0x8);
+             return v.toString(16);
+         });
+     }
+     // Generate a random number within a range
      // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random#Examples
      function getRandomIntInclusive(min, max) {
          return Math.floor(Math.random() * (max - min + 1)) + min;
+     }
+     // Build array of Url search parameters
+     function getSearchArgs() {
+         var idx = location.href ? location.href.indexOf('?') : -1,
+             searchArgs = (idx > -1) ? location.href.substr(idx + 1).split('&') : [],
+             ret = {};
+         for (var i = 0; i < searchArgs.length; i++) {
+             var argParts = searchArgs[i].split('=');
+             if (argParts.length > 0) {
+                 var argKey = argParts[0].toLowerCase(),
+                     argVal = argParts.length > 1 ? decodeURIComponent(argParts[1]) : '';
+                 ret[argKey] = argVal;
+             }
+         }
+         return ret;
+     }
+
+     var pageArgs = getSearchArgs();
+     function isDebug() {
+         var ret = pageArgs['pfdebug'];
+         return !(!ret || ret == 'false' || parseInt(ret, 10) < 1);
+     }
+     function isAll() {
+         var ret = pageArgs['pfall'];
+         return !(!ret || ret == 'false' || parseInt(ret, 10) < 1);
      }
 
      window.googletag = window.googletag || {};
@@ -26,9 +60,11 @@
 
      var pfTimeReference = +new Date(),
          pf = new pubfood(),
-         bidTimingHits = [];
+         bidTimingHits = [],
+         pfdebug = 0;
 
      pf.omitDefaultBidKey(true);
+     pf.doneCallbackOffset(1000)
      pf.timeout(1000);
 
      pf.observe('PUBFOOD_API_LOAD', function(ev) {
@@ -43,7 +79,7 @@
          ],
          elementId: 'div-medium-rectangle',
          bidProviders: [
-             'criteo', 'sovrn'
+             'criteo', 'sovrn', 'yieldbot'
          ]
      });
 
@@ -53,7 +89,7 @@
 
      pf.addBidProvider({
          name: 'yieldbot',
-         libUri: '//cdn.yldbt.com/js/yieldbot.intent.js',
+         libUri: 'http://cdn.yldbt.com/js/yieldbot.intent.js',
          init: function(slots, pushBid, done) {
              var slotMap = {};
              ybotq.push(function() {
@@ -338,11 +374,18 @@
          return timingHit;
      }
 
+     function buildBatchHit(ev, timeRef, data) {
+
+     }
+
      // Add your accountId here
      ga('create','UA-69476533-3', 'auto', {'name': 'pftest'});
      ga('pftest.send', {hitType: 'pageview'});
 
+     var doAll = isAll();
+     var noSend = isDebug();
      function sendHit(hit) {
+         if (noSend) return;
          ga('pftest.send', {
              hitType: 'timing',
              timingCategory: hit.category,
@@ -352,11 +395,49 @@
          });
      }
 
+     function sendBatchHits(data) {
+         if (!data || typeof data !== 'object') return;
+
+         var payloadHits = [];
+         for (var idx in data) {
+             var hit = data[idx],
+                 hitParams = 'v=1' +
+                             '&t=timing' +
+                             '&tid=UA-69476533-3' +
+                             '&cid=' + UUID() +
+                             '&utc=' + hit.category +
+                             '&utv=' + hit.timingVar +
+                             '&utt=' + hit.timingValue +
+                             '&utl=' + hit.timingLabel;
+             payloadHits.push(hitParams);
+         }
+
+         var data_payload = payloadHits.join('\n'),
+             settings = {
+                 "async": true,
+                 "crossDomain": true,
+                 "url": "https://www.google-analytics.com/batch",
+                 "method": "POST",
+                 "data": data_payload
+             };
+
+         if (noSend) return;
+
+         console.log('Sending Google Analytics Batch');
+         $.ajax(settings).fail(function(jqXHR, status) {
+             console.log('Google Analytics POST failed: ' + status);
+         });
+     }
+
      pf.observe('BID_PUSH_NEXT', function(ev) {
          var hit = buildHit(ev, pfTimeReference);
          if (hit) {
              console.log(JSON.stringify(hit));
-             sendHit(hit);
+             if (doAll) {
+                 sendHit(hit);
+             } else {
+                 bidTimingHits.push(hit);
+             }
          };
      });
 
@@ -364,7 +445,11 @@
          var hit = buildHit(ev, pfTimeReference);
          if (hit) {
              console.log(JSON.stringify(hit));
-             sendHit(hit);
+             if (doAll) {
+                 sendHit(hit);
+             } else {
+                 bidTimingHits.push(hit);
+             }
          };
      });
 
@@ -372,11 +457,38 @@
          var hit = buildHit(ev, pfTimeReference);
          if (hit) {
              console.log(JSON.stringify(hit));
-             sendHit(hit);
+             if (doAll){
+                 sendHit(hit);
+             } else {
+                 bidTimingHits.push(hit);
+             }
          };
      });
 
+     pf.observe('AUCTION_COMPLETE', function(ev) {
+         if (!doAll) {
+             // send analytics batch for those events fired by publisher
+             // ad server request time
+             sendBatchHits(bidTimingHits);
+             bidTimingHits = null;
+             bidTimingHits = [];
+         }
+     });
+
+     if (!doAll) {
+         // give bidders time before sending the 2nd analytics batch
+         // this timeout would be the total inclusive timeout for providers i.e
+         // margin for error + timeout + late offset
+         var auctionRunTimeout =  100 + pf.timeout() + pf.doneCallbackOffset();
+         setTimeout(function() {
+             sendBatchHits(bidTimingHits);
+             bidTimingHits = null;
+             bidTimingHits = [];
+         }, auctionRunTimeout);
+     }
+
      pf.start();
+
     </script>
 
     <p></p>
