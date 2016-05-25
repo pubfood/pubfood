@@ -22,6 +22,22 @@ describe('Provider done callback timeout', function() {
     Event.removeAllListeners();
   });
 
+  describe('get / set auction and done callback timeouts', function() {
+    it('should set and return the same timeout() value set', function(done) {
+      var pf = new pubfood();
+      pf.timeout(1000);
+      assert.equal(pf.timeout(), 1000, 'the timeout() value should be the same');
+      done();
+    });
+
+    it('should set and return the same doneCallbackOffset() value set', function(done) {
+      var pf = new pubfood();
+      pf.doneCallbackOffset(1000);
+      assert.equal(pf.doneCallbackOffset(), 1000, 'the doneCallbackOffset() value should be the same');
+      done();
+    });
+  });
+
   describe('with deprecated pubfood config', function() {
     it('should use the callback timeout value from config', function(done) {
       var pf = new pubfood({

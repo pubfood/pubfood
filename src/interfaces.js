@@ -199,6 +199,22 @@ var bidObject = {
  */
 
 /**
+ * Auction run object structure.
+ *
+ * @typedef {AuctionRun} AuctionRun
+ * @property {string|boolean} inAuction in auction state of false, 'pending' or 'done'
+ * @property {Slot[]} slots slots defined for the auction run
+ * @property {Bid[]} bids bids received for the auction run
+ * @property {Bid[]} lateBids bids received for the auction run
+ * @property {object} bidStatus object keyed by provider name
+ * @property {boolean} bidStatus.?providerName? provider name: completed true|false
+ * @example // bidStatus
+ * var run = pf.getAuctionRun(1),
+    *     aIsDone = run.bidStatus['bidderA'];
+ * @property {TargetingObject[]} targeting ad server targeting used in the auction run
+ */
+
+/**
  * @typedef {SlotConfig} SlotConfig
  * @property {string} name name of the slot/ad unit in [AuctionProvider]{@link pubfood#provider.AuctionProvider} system e.g. DFP /accountId/mpu-rt
  * @property {string} [elementId] DOM target element id
