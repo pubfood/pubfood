@@ -62,6 +62,13 @@ To limit the impact to production business intelligence reports it is advisable 
 
 ### 0. Example Code
 *The following snippets are implemented in the example file [ga-ex1.html](ga-ex1.html)*
+
+This Google Analytics example uses the [Measurement Protocol](https://developers.google.com/analytics/devguides/collection/protocol/v1/devguide#overview) to send batches of timing hits to Google Analytics. See the query parameter, `pfall=`, below to disable batch mode.
+
+ - **Useful Query Parameters**
+    - `pfdebug=1` : use this to prevent `collect` or `batch` events being actually sent to Google Analytics. Useful for stepping through hits being build without skewing analytics timing values.
+    - `pfall=1` : the example uses batch mode by default. Set this parameter to use the `collect` endpoint which sends a hit for each pubfood event we are tracking.
+
 ### 1. Define functions to build event data and send the GA `timing` hit
 
 See [ga-ex1.html](https://github.com/search?q=path%3Aexamples%2Fanalytics%2Fga+extension%3Ahtml+buildHit&ref=searchresults&type=Code "Google Analytics - Ex1")
@@ -72,6 +79,40 @@ See [ga-ex1.html](https://github.com/search?q=path%3Aexamples%2Fanalytics%2Fga+e
 ```
 See [ga-ex1.html](https://github.com/search?q=path%3Aexamples%2Fanalytics%2Fga+extension%3Ahtml+sendHit&ref=searchresults&type=Code "Google Analytics - Ex1")
 ```
+     function sendBatchHits(data) {
+         if (!data || typeof data !== 'object') return;
+
+         var payloadHits = [];
+         for (var idx in data) {
+             var hit = data[idx],
+                 hitParams = 'v=1' +
+                             '&t=timing' +
+                             '&tid=UA-69476533-3' +
+                             '&cid=' + UUID() +
+                             '&utc=' + hit.category +
+                             '&utv=' + hit.timingVar +
+                             '&utt=' + hit.timingValue +
+                             '&utl=' + hit.timingLabel;
+             payloadHits.push(hitParams);
+         }
+
+         var data_payload = payloadHits.join('\n'),
+             settings = {
+                 "async": true,
+                 "crossDomain": true,
+                 "url": "https://www.google-analytics.com/batch",
+                 "method": "POST",
+                 "data": data_payload
+             };
+
+         if (noSend) return;
+
+         console.log('Sending Google Analytics Batch');
+         $.ajax(settings).fail(function(jqXHR, status) {
+             console.log('Google Analytics POST failed: ' + status);
+         });
+     }
+
      function sendHit(hit) {
          ga('pftest.send', {
              hitType: 'timing',
@@ -91,7 +132,12 @@ See
      pf.observe('BID_PUSH_NEXT', function(ev) {
          var hit = buildHit(ev, pfTimeReference);
          if (hit) {
-             sendHit(hit);
+             console.log(JSON.stringify(hit));
+             if (doAll) {
+                 sendHit(hit);
+             } else {
+                 bidTimingHits.push(hit);
+             }
          };
      });
 ```
@@ -104,7 +150,11 @@ See [ga-ex1.html](https://github.com/search?q=path%3Aexamples%2Fanalytics%2Fga+e
          var hit = buildHit(ev, pfTimeReference);
          if (hit) {
              console.log(JSON.stringify(hit));
-             sendHit(hit);
+             if (doAll) {
+                 sendHit(hit);
+             } else {
+                 bidTimingHits.push(hit);
+             }
          };
      });
 ````
@@ -118,7 +168,11 @@ See
          var hit = buildHit(ev, pfTimeReference);
          if (hit) {
              console.log(JSON.stringify(hit));
-             sendHit(hit);
+             if (doAll){
+                 sendHit(hit);
+             } else {
+                 bidTimingHits.push(hit);
+             }
          };
      });
 ```
@@ -142,3 +196,12 @@ At each level, a [Secondary Dimension](https://support.google.com/analytics/answ
 can be added to the table view. The screenshots below show the addition of a Secondary Dimension of "Ad Unit" and "Device Category" respectively.
 
 Any Site Speed, User Timings report data can included into a Dashboard using the “Add to Dashboard” action at the top of the page. From the dashboard, thespecific presentation type, look and feel can be customized.
+
+## Google Analytics Measurement Protocol
+
+**Hit Builder**<br>
+Validate measurement protocol Url parameters.
+ - https://ga-dev-tools.appspot.com/hit-builder/
+
+**Batch Hits**
+ - https://developers.google.com/analytics/devguides/collection/protocol/v1/devguide#batch
