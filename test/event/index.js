@@ -17,13 +17,13 @@ describe('Event - Tests', function () {
 
     Event.on('hello', spy); // hello listener 1
     Event.emit('hello', 1); // call-1
-    sinon.assert.calledOnce(spy, 'listener should be called once');
+    sinon.assert.calledOnce(spy);
 
     Event.removeAllListeners();
 
     Event.on('hello', spy); // hello listener 1
     Event.emit('hello', 2); // call-2
-    sinon.assert.calledTwice(spy, 'listener should be called twice');
+    sinon.assert.calledTwice(spy);
 
     Event.on('hello', spy); // hello listener 2
     Event.emit('hello', 3); // call-3, call-4
@@ -36,27 +36,27 @@ describe('Event - Tests', function () {
 
     Event.on('hello', spy); // hello listener 1
     Event.emit('hello', 1); // call-1
-    sinon.assert.calledOnce(spy, 'listener should be called once');
+    sinon.assert.calledOnce(spy);
 
     Event.removeAllListeners('hello');
 
     Event.on('hello', spy); // hello listener 1
     Event.emit('hello', 2); // call-2
-    sinon.assert.calledTwice(spy, 'listener should be called twice');
+    sinon.assert.calledTwice(spy);
 
     Event.removeAllListeners(0);
 
     // Invert on/emit calls for immediate observer removal
     Event.emit('hello', 3); // call-3
     Event.on('hello', spy); // hello listener 1
-    sinon.assert.calledThrice(spy, 'listener should be called thrice');
+    sinon.assert.calledThrice(spy);
 
     var foo;
     Event.removeAllListeners(foo);
 
     Event.emit('hello', 3); // call-4
     Event.on('hello', spy); // hello listener 1
-    sinon.assert.called(spy, 4, 'listener should be called four times');
+    sinon.assert.callCount(spy, 4);
 
     done();
   });
@@ -65,17 +65,17 @@ describe('Event - Tests', function () {
 
     Event.emit('hello'); // call-1
     Event.on('hello', spy); // hello listener 1
-    sinon.assert.calledOnce(spy, 'listener should be called once');
+    sinon.assert.calledOnce(spy);
 
     Event.removeAllListeners();
 
     Event.emit('hello'); // call-2
     Event.on('hello', spy); // hello listener 1
-    sinon.assert.calledTwice(spy, 'listener should be called twice');
+    sinon.assert.calledTwice(spy);
 
     Event.emit('hello'); // call-3, call-4
     Event.on('hello', spy); // hello listener 2
-    sinon.assert.callCount(spy, 4, 'listener should be called four times');
+    sinon.assert.callCount(spy, 4);
 
     done();
   });
