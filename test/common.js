@@ -17,7 +17,9 @@ var fakeDom = {
   },
 };
 
-global.window = {};
+if (!global.window) {
+  global.window = {};
+}
 if (!global.document) {
   global.document = fakeDom;
   global.document.head = fakeDom;
