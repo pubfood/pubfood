@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>PulsePoint - PubFood Example page</title>
+  </head>
+  <body>
+    <script src="../../../../build/pubfood.js"></script>
+    <script>
+        var PulsepointPubFoodAdapter=function(e){function n(e,n,o,i){var r;for(r in n){var a=n[r],c=a.getParam(l);c.placementCode=a.name,c.elementId=a.elementId,t(c,o,i,e)}}function t(e,n,i,r,a){if(window.pp&&window.pp.Ad){var c=function(t){o(e,t,n,i,r)},d=new window.pp.Ad({cf:e.cf,cp:e.cp,ct:e.ct,cn:1,ca:window.pp.requestActions.BID,cu:s,adUnitId:e.placementCode,callback:c});d.display()}else a&&m*a>p&&o(e,null,n,i,r),setTimeout(function(){t(e,n,i,r,(a||0)+1)},50)}function o(e,n,t,o,r){n?(c[r][e.placementCode]={html:n.html,params:e},t({slot:e.placementCode,value:n.bidCpm,targeting:{hb_pp_bidder:l,hb_pp_bid:n.bidCpm.toFixed(2),hb_pp_adid:e.placementCode,hb_pp_sessionid:r}})):c[r][e.placementCode]=null,i(r)&&o()}function i(e){var n;for(n in d[e]){var t=d[e][n];if(!c[e].hasOwnProperty(t.name))return!1}return!0}function r(e,n,t){try{var o=c[t][n].html,i=c[t][n].params;if(o){for(var r=i.cf.toUpperCase().split("X"),d=r[1],l=r[0],p=e.getElementsByTagName("IFRAME"),m=0;m<p.length;m++)p[m].parentNode.removeChild(p[m]);var u=document.createElement("iframe");u.width=l,u.height=d,u.style.border="0px",u.scrolling="no",u.frameborder=0,u.allowtransparency=!0,e.body.appendChild(u),u.contentWindow.contents=o,u.src='javascript:window["contents"]',e.defaultView&&e.defaultView.frameElement&&(e.defaultView.frameElement.width=l,e.defaultView.frameElement.height=d);var s=u.contentWindow?u.contentWindow.document:u.contentDocument.document?u.contentDocument.document:u.contentDocument;s.body&&(s.body.style.margin="0")}}catch(f){a(f)}}function a(e){console&&(console.error?console.error(e):console.log&&console.log(e))}e=e||{};var c={},d={},l="pulsepoint",p=e.libTimeout||1e3,m=e.libCheckTimeout||50,u=e.libUri||window.location.protocol+"//ads.contextweb.com/getjs.static.js",s=e.bidUri||window.location.protocol+"//bid.contextweb.com/header/tag";window.ppRender=window.ppRender||function(e,n,t){r(e,n,t)},this.bidProvider=function(){var e=function(e,t,o){var i=Math.floor(1e7*Math.random());d[i]=e,c[i]={},n(i,e,t,o)};return{name:l,libUri:u,init:e,refresh:e}}};
+    </script>
+
+    <script type="text/javascript">
+     window.googletag = window.googletag || {};
+     googletag.cmd = googletag.cmd || [];
+     var ybotq = ybotq || [];
+     var pf = new pubfood();
+
+     pf.omitDefaultBidKey(true);
+     var batch = [];
+
+     // this reporter listens on all events and pushes the event data to a queue `batch`
+     pf.observe(function(event) {
+         batch.push(event);
+     });
+
+     // this reporter only listens on the `AUCTION_COMPLETE` event, then loops over and displays the event data
+     pf.observe('AUCTION_COMPLETE', function(event) {
+         console.log('---------------------------------------');
+         for (var i = 0; i < batch.length; i++) {
+             console.log('%c' + batch[i].type, 'padding-right:5px;font-weight:bold;display:block;', JSON.stringify(batch[i]));
+         }
+     });
+
+     var slot = pf.addSlot({
+         name: '/1066621/ExchangeTech_Prebid_AdUnit',
+         sizes: [
+             [300, 250]
+         ],
+         elementId: 'div-multi-size',
+         bidProviders: [
+             'pulsepoint'
+         ]
+     });
+     slot.setParam('pulsepoint', {
+         cp: 521732,
+         ct: 76835,
+         cf: '300X250'
+     });
+
+     slot = pf.addSlot({
+         name: '/1066621/ExchangeTech-PrebidTest',
+         sizes: [
+             [728, 90]
+         ],
+         elementId: 'div-leaderboard',
+         bidProviders: [
+             'pulsepoint'
+         ]
+     });
+     slot.setParam('pulsepoint', {
+         cp: 521732,
+         ct: 147007,
+         cf: '728X90'
+     });
+
+     var pulsepointProvider = pf.addBidProvider(new PulsepointPubFoodAdapter().bidProvider());
+
+     pf.setAuctionProvider({
+         name: 'Google',
+         libUri: '//www.googletagservices.com/tag/js/gpt.js',
+         init: function(targeting, done) {
+             googletag.cmd.push(function() {
+                 pf.getAuctionProvider().setParam('isRefresh', false);
+                 var slots = {};
+                 for (var i = 0; i < targeting.length; i++) {
+                     var tgtObject = targeting[i];
+
+                     var gptObject;
+                     if (tgtObject.name) {
+                         gptObject = googletag.defineSlot(tgtObject.name, tgtObject.sizes, tgtObject.elementId).addService(googletag.pubads());
+                         slots[tgtObject.name] = gptObject;
+
+                     } else {
+                         gptObject = googletag.pubads();
+                     }
+                     for (var p in tgtObject.targeting) {
+                         gptObject.setTargeting(p, tgtObject.targeting[p]);
+                     }
+                     pf.getAuctionProvider().setParam('slots', slots);
+
+                 }
+             });
+             googletag.cmd.push(function() {
+                 googletag.pubads().collapseEmptyDivs();
+                 googletag.pubads().enableSingleRequest();
+                 googletag.enableServices();
+                 done();
+             });
+         },
+         refresh: function(targeting, done) {
+             googletag.cmd.push(function() {
+                 googletag.pubads().clearTargeting();
+                 googletag.pubads().clear();
+             });
+
+             googletag.cmd.push(function() {
+                 pf.getAuctionProvider().setParam('isRefresh', true);
+                 var slots = pf.getAuctionProvider().getParam('slots'),
+                     refreshSlots = [];
+                 for (var i = 0; i < targeting.length; i++) {
+                     var tgtObject = targeting[i],
+                         gptObject = slots[tgtObject.name];
+
+                     gptObject = gptObject ? (refreshSlots.push(gptObject), gptObject) : googletag.pubads();
+                     for (var p in tgtObject.targeting) {
+                         gptObject.setTargeting(p, tgtObject.targeting[p]);
+                     }
+                 }
+                 if (refreshSlots.length > 0) {
+                     googletag.pubads().refresh(refreshSlots);
+                 } else {
+                     googletag.pubads().refresh();
+                 }
+                 done();
+             });
+         }
+     });
+
+     function augmentBids(bids, params) {
+       for (var i = 0; i < bids.length; i++) {
+         bids[i]['targeting'].code = (0 | Math.random() * 36).toString(36);
+         bids[i].baseValue = bids[i].value || 0;
+         bids[i].value = bids[i].value + 9;
+       }
+       return bids;
+     }
+
+     pf.addBidTransform(augmentBids);
+
+     pf.timeout(3000);
+     pf.start(Date.now(), function(hasErros, details) {
+       if (hasErros) {
+         console.log('HAS ERRORS', details);
+       }
+     });
+
+    </script>
+
+    <h2>PulsePoint Bid Provider - PubFood</h2>
+    <p>
+    <script>
+     function refreshAds(all) {
+         if (!all) {
+             pf.refresh(['/1066621/ExchangeTech_Prebid_AdUnit']);
+         } else {
+             pf.refresh();
+         }
+     }
+    </script>
+    <button id="refresh-one-btn" onclick="refreshAds()">Refresh 300x250 ad</button> - <em>or</em> -
+    <button id="refresh-all-btn" onclick="refreshAds(true)">Refresh All</button>
+    <p></p>
+    <h3>Leaderboard 728x90</h3>
+    <div id='div-leaderboard'>
+    </div>
+    <script>
+     pf.observe('AUCTION_POST_RUN', function() {
+         googletag.cmd.push(function() {
+             if (!pf.getAuctionProvider().getParam('isRefresh')) {
+                 googletag.display('div-leaderboard');
+             }
+         });
+     });
+    </script>
+    <h3>Medium Rectangle 300x250</h3>
+    <div id='div-multi-size'>
+    </div>
+    <script>
+     pf.observe('AUCTION_POST_RUN', function() {
+         googletag.cmd.push(function() {
+             if (!pf.getAuctionProvider().getParam('isRefresh')) {
+                 googletag.display('div-multi-size');
+             }
+         });
+     });
+    </script>
+  </body>
+</html>
