@@ -1,0 +1,127 @@
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Criteo</title>
+    <script src="http://localhost:8000/Documents/pubfood.js"></script>
+</head>
+<body>
+    <h2><em>Criteo Bid Provider - Example 1</em></h2>
+    <p></p>
+    This page illustrates one approach to implementing a Criteo bid provider.<b></b>
+    <p></p>
+    <!-- Ads appended here -->
+    <div id="div-gpt-ad-1420484321255-0"></div>
+    <div id="div-gpt-ad-1426856653109-0"></div>
+    <script>
+     window.googletag = window.googletag || {};
+     googletag.cmd = googletag.cmd || [];
+     window.ADTECH = window.ADTECH || {};
+
+     var pf = new pubfood();
+     pf.timeout(4000);
+     pf.omitDefaultBidKey(true)
+     pf.observe('AUCTION_POST_RUN', function() {
+         googletag.cmd.push(function() { googletag.display('div-gpt-ad-1420484321255-0'); });
+         googletag.cmd.push(function() { googletag.display('div-gpt-ad-1426856653109-0'); });
+     });
+    </script>
+
+    <script>
+    var slot = pf.addSlot({
+    name: '/58585122/LT_Gallery_Sidebar_300x600', // '/2476204/leaderboard',
+    sizes: [
+      [300, 600]
+    ],
+    elementId: 'div-gpt-ad-1420484321255-0',
+    bidProviders: ['criteo']
+  });
+  var slot2 = pf.addSlot({
+    name: '/58585122/LT_Gallery_Responsive_Rectangle_BTF_2', // '/2476204/medium-rectangle',
+    sizes: [
+      [300, 250]
+    ],
+    elementId: 'div-gpt-ad-1426856653109-0',
+    bidProviders: ['criteo']
+  });
+  pf.addBidProvider({
+    name: 'criteo',
+    init: function(slots, pushBid, done) {
+      var crtg_values = [];
+      var crtg_kv = {};
+      var crtg_netId = '4738'; // insert correct pub ID
+      var crtg_rnd = '&rnd=' + Math.floor(Math.random() * 99999999999);
+      var onCRTGLoad = function() {
+        crtg_KeyValue = crtg_content.split(';');
+        for (var i = 1; i < crtg_KeyValue.length; i++) {
+          crtg_values.push(crtg_KeyValue[i - 1].split('=')[1]);
+          crtg_keys = crtg_KeyValue[i - 1].split('=')[0];
+        }
+        pushBid({
+          targeting: {
+            [crtg_keys]: crtg_values
+          }
+        });
+        done();
+      };
+      (function crtg_loadUri(uri, sync) {
+        var doc = document;
+        var scriptSrc =
+          'http://rtax.criteo.com/delivery/rta/rta.js?varName=crtg_content&cookieName=crtg_rta&netId=' +
+          crtg_netId + crtg_rnd || '';
+        if (sync) {
+          if (doc.readyState === 'complete' || doc.readyState ===
+            'loaded') {} else {
+            try {
+              doc.write('<script src="' + scriptSrc + '"\/>');
+            } catch (e) {}
+          }
+        } else {
+          var scriptEl = document.createElement('script');
+          scriptEl.async = true;
+          scriptEl.src = scriptSrc;
+          scriptEl.onload = onCRTGLoad;
+          (doc.head || doc.body || doc.documentElement).appendChild(
+            scriptEl);
+        }
+      })();
+    },
+    refresh: function(slots, pushBid, done) {}
+  });
+  pf.setAuctionProvider({
+    name: 'Google',
+    libUri: 'http://www.googletagservices.com/tag/js/gpt.js',
+    init: function(targeting, done) {
+      googletag.cmd.push(function() {
+        var slots = {};
+        for (var i = 0; i < targeting.length; i++) {
+          var tgtObject = targeting[i];
+          var gptObject;
+          if (tgtObject.name) {
+            gptObject = googletag.defineSlot(tgtObject.name,
+              tgtObject.sizes, tgtObject.elementId).addService(
+              googletag.pubads());
+            slots[tgtObject.name] = gptObject;
+          } else {
+            gptObject = googletag.pubads();
+          }
+          for (var p in tgtObject.targeting) {
+            gptObject.setTargeting(p, tgtObject.targeting[p]);
+          }
+        }
+        pf.getAuctionProvider().setParam('slots', slots);
+      });
+      googletag.cmd.push(function() {
+        googletag.pubads().collapseEmptyDivs();
+        googletag.pubads().enableSingleRequest();
+        googletag.enableServices();
+        done();
+      });
+    },
+    refresh: function(targeting, done) {}
+  });
+  pf.start();
+    </script>
+</body>
+</html>
