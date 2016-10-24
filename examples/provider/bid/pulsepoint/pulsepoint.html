@@ -7,7 +7,204 @@
   <body>
     <script src="../../../../build/pubfood.js"></script>
     <script>
-        var PulsepointPubFoodAdapter=function(e){function n(e,n,o,i){var r;for(r in n){var a=n[r],c=a.getParam(l);c.placementCode=a.name,c.elementId=a.elementId,t(c,o,i,e)}}function t(e,n,i,r,a){if(window.pp&&window.pp.Ad){var c=function(t){o(e,t,n,i,r)},d=new window.pp.Ad({cf:e.cf,cp:e.cp,ct:e.ct,cn:1,ca:window.pp.requestActions.BID,cu:s,adUnitId:e.placementCode,callback:c});d.display()}else a&&m*a>p&&o(e,null,n,i,r),setTimeout(function(){t(e,n,i,r,(a||0)+1)},50)}function o(e,n,t,o,r){n?(c[r][e.placementCode]={html:n.html,params:e},t({slot:e.placementCode,value:n.bidCpm,targeting:{hb_pp_bidder:l,hb_pp_bid:n.bidCpm.toFixed(2),hb_pp_adid:e.placementCode,hb_pp_sessionid:r}})):c[r][e.placementCode]=null,i(r)&&o()}function i(e){var n;for(n in d[e]){var t=d[e][n];if(!c[e].hasOwnProperty(t.name))return!1}return!0}function r(e,n,t){try{var o=c[t][n].html,i=c[t][n].params;if(o){for(var r=i.cf.toUpperCase().split("X"),d=r[1],l=r[0],p=e.getElementsByTagName("IFRAME"),m=0;m<p.length;m++)p[m].parentNode.removeChild(p[m]);var u=document.createElement("iframe");u.width=l,u.height=d,u.style.border="0px",u.scrolling="no",u.frameborder=0,u.allowtransparency=!0,e.body.appendChild(u),u.contentWindow.contents=o,u.src='javascript:window["contents"]',e.defaultView&&e.defaultView.frameElement&&(e.defaultView.frameElement.width=l,e.defaultView.frameElement.height=d);var s=u.contentWindow?u.contentWindow.document:u.contentDocument.document?u.contentDocument.document:u.contentDocument;s.body&&(s.body.style.margin="0")}}catch(f){a(f)}}function a(e){console&&(console.error?console.error(e):console.log&&console.log(e))}e=e||{};var c={},d={},l="pulsepoint",p=e.libTimeout||1e3,m=e.libCheckTimeout||50,u=e.libUri||window.location.protocol+"//ads.contextweb.com/getjs.static.js",s=e.bidUri||window.location.protocol+"//bid.contextweb.com/header/tag";window.ppRender=window.ppRender||function(e,n,t){r(e,n,t)},this.bidProvider=function(){var e=function(e,t,o){var i=Math.floor(1e7*Math.random());d[i]=e,c[i]={},n(i,e,t,o)};return{name:l,libUri:u,init:e,refresh:e}}};
+           /**
+            * PulsePoint adapter for PubFood. To create a Bid Provider for PubFood, create an instance of PulsepointPubFoodAdapter
+            * and then invoke the bidProvider method
+            * (eg) new PulsepointPubFoodAdapter().bidProvider();
+            *
+            * @constructor
+            * @author avenkatraman
+            * @param {Object} options - Optional options for the adapter
+            * @param {String} options.libUri - Library Uri override.
+            * @param {String} options.bidUri - Bidding endpiont override.
+            */
+            var PulsepointPubFoodAdapter = function(options) {
+                options = options || {};
+                var ads = {};
+                var sessionSlots = {};
+                var name = 'pulsepoint';
+                var libTimeout = options.libTimeout || 1000;
+                var libCheckTimeout = options.libCheckTimeout || 50;
+                var libUri = (options.libUri || window.location.protocol + '//ads.contextweb.com/getjs.static.js');
+                var bidUri = options.bidUri || window.location.protocol + '//bid.contextweb.com/header/tag';
+                window.ppRender = window.ppRender || function(doc, id, sessionId) { ppRender(doc,id, sessionId); };
+
+                /**
+                * Helper function that will create a BidProvider according to the specifications of
+                * PubFood.
+                */
+                this.bidProvider = function() {
+                    var bidFunction = function(slots, pushBid, done) {
+                        var sessionId = Math.floor(Math.random() * 10000000);
+                        sessionSlots[sessionId] = slots;
+                        ads[sessionId] = {};
+                        requestBids(sessionId, slots, pushBid, done);
+                    };
+                    return {
+                        name: name,
+                        libUri: libUri,
+                        init: bidFunction,
+                        refresh: bidFunction
+                    };
+                };
+
+                /**
+                * Requests bids from PulsePoint bidder for the slots. Invokes
+                * the callback done is invoked when bids are available for all slots.
+                *
+                * @param sessionId session id for which the bids are requested for the slots
+                * @param slots ad slots that are requesting bids
+                * @param pushBid callback to invoke when bid is available for a slot.
+                * @param done callback to invoke when all processing is complete
+                */
+                function requestBids(sessionId, slots, pushBid, done) {
+                    var index;
+                    for (index in slots) {
+                        var slot = slots[index];
+                        var params = slot.getParam(name);
+                        params.placementCode = slot.name;
+                        params.elementId = slot.elementId;
+                        bid(params, pushBid, done, sessionId);
+                    }
+                }
+
+                /**
+                * Sends a bid request to pulsepoint bidder.
+                *
+                * @param sessionId session id for which the bids are requested for the slots
+                * @param params parameters for the ad slot
+                * @param pushBid callback to invoke when bid is available for a slot.
+                * @param done callback to invoke when all processing is complete
+                * @param count optional counter for the number of tries we waited for getting the getjs library.
+                */
+                function bid(params, pushBid, done, sessionId, count) {
+                    if(window.pp && window.pp.Ad) {
+                        var callback = function(bidResponse) { 
+                            bidResponseAvailable(params, bidResponse, pushBid, done, sessionId); 
+                        };
+                        var ppBidRequest = new window.pp.Ad({
+                            cf : params.cf,
+                            cp : params.cp,
+                            ct : params.ct,
+                            cn : 1,
+                            ca : window.pp.requestActions.BID,
+                            cu : bidUri,
+                            adUnitId: params.placementCode,
+                            callback: callback
+                        });
+                        ppBidRequest.display();
+                    } else {
+                        //did not download the lib within this timeout.
+                        if(count && (libCheckTimeout * count > libTimeout)) {
+                            bidResponseAvailable(params, null, pushBid, done, sessionId);
+                        }
+                        setTimeout(function() { bid(params, pushBid, done, sessionId, (count || 0) + 1); }, 50);
+                    }
+                }
+
+                /**
+                * Bid response available from PulsePoint. The pushBid callback is invoked for bids made.
+                * pushBid not invoked for passbacks. When all adslot bids are collected done callback is invoked.
+                *
+                * @param sessionId session id for which the bids are requested for the slots
+                * @param params parameters for the ad slot
+                * @param pushBid callback to invoke when bid is available for a slot.
+                * @param done callback to invoke when all processing is complete
+                */
+                function bidResponseAvailable(params, bidResponse, pushBid, done, sessionId) {
+                    if(bidResponse) {
+                        ads[sessionId][params.placementCode] = { 
+                            html: bidResponse.html,
+                            params: params
+                        };
+                        pushBid({
+                            slot: params.placementCode,
+                            value: bidResponse.bidCpm,
+                            targeting: {
+                                'hb_pp_bidder': name,
+                                'hb_pp_bid': bidResponse.bidCpm.toFixed(2),
+                                'hb_pp_adid': params.placementCode,
+                                'hb_pp_sessionid': sessionId
+                            }
+                        });
+                    } else {
+                        ads[sessionId][params.placementCode] = null;
+                    }
+                    if(allDone(sessionId)) {
+                        done();
+                    }
+                }
+
+                /**
+                * Checks if all bids have been processed for the session
+                *
+                * @param sessionId session id in question.
+                */
+                function allDone(sessionId) {
+                    var index;
+                    for(index in sessionSlots[sessionId]) {
+                        var slot = sessionSlots[sessionId][index];
+                        if(!ads[sessionId].hasOwnProperty(slot.name)) {
+                            return false;
+                        }
+                    }
+                    return true;
+                }
+
+                /**
+                * Renders the ad slot with the creative id.
+                * 
+                * @param doc document of the iframe (from dfp)
+                * @param id placement id
+                * @param sessionId session id in question.
+                */
+                function ppRender(doc, id, sessionId) {
+                    try {
+                        var creative = ads[sessionId][id].html;
+                        var params = ads[sessionId][id].params;
+                        if(creative) {
+                            var adSize = params.cf.toUpperCase().split('X');
+                            var height = adSize[1];
+                            var width = adSize[0];
+                            //remove all the existing iframes, to replace the creative in refresh mode.
+                            var existingFrames = doc.getElementsByTagName('IFRAME');
+                            for(var i=0; i < existingFrames.length; i++) {
+                                existingFrames[i].parentNode.removeChild(existingFrames[i]);
+                            }
+                            var ifr = document.createElement("iframe");
+                            ifr.width = width;
+                            ifr.height = height;
+                            ifr.style.border = "0px";
+                            ifr.scrolling = "no";
+                            ifr.frameborder = 0;
+                            ifr.allowtransparency = !0;
+                            doc.body.appendChild(ifr);
+                            ifr.contentWindow.contents = creative;
+                            ifr.src = 'javascript:window["contents"]'; //jshint ignore:line
+                            if (doc.defaultView && doc.defaultView.frameElement) {
+                                doc.defaultView.frameElement.width = width;
+                                doc.defaultView.frameElement.height = height;
+                            }
+                            var ifrDoc = (ifr.contentWindow) ? ifr.contentWindow.document : (ifr.contentDocument.document) ? ifr.contentDocument.document : ifr.contentDocument;
+                            if(ifrDoc.body) {
+                                ifrDoc.body.style.margin = '0';
+                            }
+                        }
+                    } catch(ex) {
+                        logError(ex);
+                    }
+                }
+
+                function logError(ex) {
+                    if(console) {
+                        if(console.error) {
+                            console.error(ex);    
+                        } else if(console.log) {
+                            console.log(ex);
+                        }
+                    }
+                }
+            };
     </script>
 
     <script type="text/javascript">
