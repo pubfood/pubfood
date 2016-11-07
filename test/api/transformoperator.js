@@ -15,6 +15,9 @@ require('../common');
 var pubfood = require('../../src/pubfood');
 
 describe('Transform operator', function() {
+  beforeEach(function() {
+    Event.removeAllListeners();
+  });
 
   it('should add bid data', function(done) {
     var pf = new pubfood();

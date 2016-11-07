@@ -255,7 +255,7 @@ describe('Provider done callback timeout', function() {
 
     pf.observe('AUCTION_COMPLETE', function(event) {
       clearTimeout(auctionTimeoutId);
-      assert.equal(event.annotations.forcedDone, 'timeout', 'auction complete event should be annotated as forcedDone');
+      assert.propertyVal(event.annotations.forcedDone, 'type', Event.ANNOTATION_TYPE.FORCED_DONE.TIMEOUT);
       assert.equal(auctionDone, false, 'pubfood supplied done callback timeout should be used');
       mochaDone();
     });
@@ -312,7 +312,7 @@ describe('Provider done callback timeout', function() {
     });
 
     pf.observe('BID_COMPLETE', function(event) {
-      assert.equal(event.annotations.forcedDone, 'timeout', 'bid complete event should be annotated as forcedDone');
+      assert.propertyVal(event.annotations.forcedDone, 'type', Event.ANNOTATION_TYPE.FORCED_DONE.TIMEOUT);
       assert.equal(auctionDone, false, 'auction timeout of 5ms should not be fired yet');
       bidDone = true;
     });
@@ -422,7 +422,7 @@ describe('Provider done callback timeout', function() {
 
     pf.observe('AUCTION_COMPLETE', function(event) {
       clearTimeout(auctionTimeoutId);
-      assert.equal(event.annotations.forcedDone, 'timeout', 'auction complete event should be annotated as forcedDone');
+      assert.propertyVal(event.annotations.forcedDone, 'type', Event.ANNOTATION_TYPE.FORCED_DONE.TIMEOUT);
       assert.equal(bidDone, false, 'auctionProvider.timeout(1) should fire before bid flag set');
       assert.equal(auctionDone, false, 'auctionProvider.timeout(1) should fire before bid flag set');
       mochaDone();
@@ -430,7 +430,7 @@ describe('Provider done callback timeout', function() {
 
     pf.observe('BID_COMPLETE', function(event) {
       clearTimeout(bidTimeoutId);
-      assert.equal(event.annotations.forcedDone, 'timeout', 'bid complete event should be annotated as forcedDone');
+      assert.propertyVal(event.annotations.forcedDone, 'type', Event.ANNOTATION_TYPE.FORCED_DONE.TIMEOUT);
       assert.equal(bidDone, false, 'auctionProvider.timeout(1) should fire before bid flag set');
       assert.equal(auctionDone, false, 'auctionProvider.timeout(1) should fire before bid flag set');
     });

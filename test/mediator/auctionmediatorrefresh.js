@@ -75,6 +75,7 @@ describe('Auction Refresh', function () {
     TEST_MEDIATOR.refresh(['/abc/123']);
     auctionIdx = TEST_MEDIATOR.getAuctionCount();
     assert.equal(auctionIdx, 2, 'expected auction count to be incremented');
+    assert.equal(TEST_MEDIATOR.getAuctionRunType(2), 'refresh', 'default auctionType should be \"refresh\"');
     done();
   });
 

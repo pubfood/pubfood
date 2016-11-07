@@ -74,6 +74,8 @@ describe('Pubfood AuctionMediator', function testPubfoodMediator() {
     assert.equal(util.asType(auctionRunBids), 'array', 'auction run bids should be an array');
     assert.equal(util.asType(auctionRunLateBids), 'array', 'auction run late bids should be an array');
     assert.equal(util.asType(auctionRunSlots), 'array', 'auction run slots should be an array');
+
+    assert.equal(TEST_MEDIATOR.getAuctionRunType(1), 'init', 'default auctionType should be \"init\"');
   });
 
   it('should have an initial auction count', function() {
@@ -83,12 +85,27 @@ describe('Pubfood AuctionMediator', function testPubfoodMediator() {
   });
 
   it('should set a timeout', function() {
-    var m = new AuctionMediator();
+    var m = TEST_MEDIATOR;
     m.timeout(1000);
     assert.isTrue(m.getTimeout() === 1000, 'timeout not set');
   });
 
-  it('should test bid providers done by status flag', function() {
+  it('should set throwErrors without providers set', function() {
+    var m = TEST_MEDIATOR;
+    m.throwErrors(true);
+    assert.isTrue(m.throwErrors(), 'throwErrors property should be true');
+  });
+
+  it('should set provider throwErrors', function() {
+    TEST_MEDIATOR.throwErrors(true);
+    assert.isTrue(TEST_MEDIATOR.auctionProvider.throwErrors(), 'AuctionProvider throwErrors property should be true');
+    for (var idx in TEST_MEDIATOR.bidProviders) {
+      var bidProvider = TEST_MEDIATOR.bidProviders[idx];
+      assert.isTrue(bidProvider.throwErrors(), 'BidProvider throwErrors property should be true');
+    }
+  });
+
+  it('should not be tracking done status for slot bidders not added', function() {
     var m1 = new AuctionMediator(),
       auctionSlots,
       auctionIdx,
@@ -117,8 +134,13 @@ describe('Pubfood AuctionMediator', function testPubfoodMediator() {
     assert.equal(m1.getBidStatus('b2', auctionIdx), -1, 'm1 should not track BidProvider b2');
     assert.equal(m1.getBidStatus('b3', auctionIdx), -1, 'm1 should not track BidProvider b3');
 
-    m1 = null;
-    m1 = new AuctionMediator();
+  });
+
+  it('should track done status for slot bidders added and not others', function() {
+    var m1 = new AuctionMediator(),
+      auctionSlots,
+      auctionIdx,
+      bidderSlots;
 
     m1.addSlot({
       name: '/0000000/multi-size',
@@ -155,8 +177,13 @@ describe('Pubfood AuctionMediator', function testPubfoodMediator() {
 
     assert.notEqual(m1.getBidStatus('b2', auctionIdx), -1, 'm1 should track BidProvider b2');
     assert.isFalse(m1.getBidStatus('b2', auctionIdx), 'BidProvider b2 should not have bid status complete');
+  });
 
-    var m2 = new AuctionMediator();
+  it('should track done status for slot bidders added and not others', function() {
+    var m2 = new AuctionMediator(),
+      auctionSlots,
+      auctionIdx,
+      bidderSlots;
 
     var m2provider = m2.addBidProvider({
       name: 'b2',
@@ -176,44 +203,13 @@ describe('Pubfood AuctionMediator', function testPubfoodMediator() {
 
     assert.isTrue(bidderSlots.length === 0, 'm2 should have zero BidProviders for requests');
     assert.equal(m2.getBidStatus('b2', auctionIdx), -1, 'm2 should not track BidProvider b2');
+  });
 
-    m2provider = null;
-    m2 = null;
-    m2 = new AuctionMediator();
-
-    m2provider = m2.addBidProvider({
-      name: 'b2',
-      libUri: 'someUri',
-      init: function(slots, pushBid, done) {
-
-      },
-      refresh: function(slots, pushBid, done) {
-      }
-    });
-
-    m2.addSlot({
-      name: '/0000000/multi-size',
-      sizes: [
-        [300, 250],
-        [300, 600]
-      ],
-      elementId: 'div-multi-size',
-      bidProviders: [
-        'b3'
-      ]
-    });
-
-    m2provider.enabled(false);
-    m2.newAuctionRun();
-    auctionIdx = m2.getAuctionCount();
-    auctionSlots = m2.getAuctionRunSlots(auctionIdx);
-    bidderSlots = m2.getBidderSlots(auctionSlots);
-
-    assert.isTrue(bidderSlots.length === 0, 'm2 should have zero BidProviders for requests');
-    assert.equal(m2.getBidStatus('b3', auctionIdx), -1, 'm2 should not track BidProvider b3');
-
-    m2 = null;
-    m2 = new AuctionMediator();
+  it('should track done status for bidders on multiple slots', function() {
+    var m2 = new AuctionMediator(),
+      auctionSlots,
+      auctionIdx,
+      bidderSlots;
 
     m2.addBidProvider({
       name: 'b2',
@@ -489,7 +485,7 @@ describe('Pubfood AuctionMediator', function testPubfoodMediator() {
     done();
   });
 
-  it('should handle push next', function() {
+  it('should handle push next', function(done) {
 
     var m = new AuctionMediator();
 
@@ -536,6 +532,7 @@ describe('Pubfood AuctionMediator', function testPubfoodMediator() {
       assert.isTrue(auctionRun.bids[0].value === '235', 'bidProvider p1 should pushNext value');
       assert.deepEqual(auctionRun.bids[0].targeting, { foo: 'bar' }, 'bidProvider p1 should pushNext targeting');
       assert.isTrue(event.data === 'b1', 'bidProvider b1 should be doneBid');
+      done();
     });
 
     m.start();
@@ -617,6 +614,56 @@ describe('Pubfood AuctionMediator', function testPubfoodMediator() {
     b.label = null;
     bidKey = m.getBidKey(b);
     assert.isTrue(bidKey === 'bid', 'should not have a prefix.');
+  });
+
+  it('BID_COMPLETE event should not have a forcedDone \"timeout\" annotation when bid provider calls done', function(done) {
+    var m = new AuctionMediator();
+
+    m.throwErrors(true);
+
+    m.addSlot({
+      name: '/abc/123',
+      sizes: [
+        [728, 90]
+      ],
+      elementId: 'div-leaderboard',
+      bidProviders: ['b1']
+    });
+
+    m.addBidProvider({
+      name: 'b1',
+      libUri: '../test/fixture/lib.js',
+      init: function(slots, pushBid, done) {
+        pushBid({
+          slot: '/abc/123',
+          value: '235',
+          sizes: [728, 90],
+          targeting: { foo: 'bar' }
+        });
+        done();
+      },
+      refresh: function(slots, pushBid, done) {
+        done();
+      }
+    });
+
+    m.setAuctionProvider({
+      name: 'provider1',
+      libUri: '../test/fixture/lib.js',
+      init: function(targeting, done) {
+        done();
+      },
+      refresh: function(targeting, done) {
+        done();
+      }
+    });
+
+    Event.on(Event.EVENT_TYPE.BID_COMPLETE, function(event) {
+      assert.isUndefined(event.annotations.forcedDone);
+      done();
+    });
+
+    m.start();
   });
 
   describe('Auction Triggers', function() {

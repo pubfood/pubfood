@@ -202,10 +202,27 @@ describe('Event - Tests', function () {
       done();
     });
   });
+  it('should create a new event annotation', function(done) {
+    var annotations = Event.newEventAnnotation('forcedDone', 'timeout', 'provided done was called due to timeout');
+    assert.equal(annotations.forcedDone.type, 'timeout', 'forcedDone annotation should be \"timeout\"');
+    assert.equal(annotations.forcedDone.message, 'provided done was called due to timeout', 'forcedDone \"timeout\" annotation message incorrect');
+    done();
+  });
+  it('should create a new event annotation and add to existing object', function(done) {
+    var annotations = {};
+    Event.newEventAnnotation('forcedDone', 'timeout', 'provided done was called due to timeout', annotations);
+    assert.equal(annotations.forcedDone.type, 'timeout', 'forcedDone annotation should be \"timeout\"');
+    assert.equal(annotations.forcedDone.message, 'provided done was called due to timeout', 'forcedDone \"timeout\" annotation message incorrect');
+    done();
+  });
   it('should publish event annotations', function(done) {
-    Event.publish('BID_COMPLETE', 'theBidder', {forcedDone: 'test'});
+    var annotations = {};
+    Event.newEventAnnotation('forcedDone', 'error', 'provided done was called due to error', annotations);
+
+    Event.publish('BID_COMPLETE', 'theBidder', annotations);
     Event.on('BID_COMPLETE', function(ev) {
-      assert.equal(ev.annotations.forcedDone, 'test', 'forcedDone annotation should be \"test\"');
+      assert.equal(ev.annotations.forcedDone.type, 'error', 'forcedDone annotation should be \"error\"');
+      assert.equal(ev.annotations.forcedDone.message, 'provided done was called due to error', 'forcedDone annotation message incorrect');
       done();
     });
   });

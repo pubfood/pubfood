@@ -7,7 +7,7 @@
 var util = require('../util');
 var BidDelegate = require('../interfaces').BidDelegate;
 var Event = require('../event');
-var PubfoodObject = require('../pubfoodobject');
+var PubfoodProvider = require('./pubfoodprovider');
 
 /**
  * BidProvider implements bidding partner requests.
@@ -16,6 +16,7 @@ var PubfoodObject = require('../pubfoodobject');
  * @param {BidDelegate} delegate the delegate object that implements [libUri()]{@link pubfood#provider.BidProvider#libUri}, [init()]{@link pubfood#provider.BidProvider#init} and [refresh()]{@link pubfood#provider.BidProvider#refresh}
  * @property {string} name the name of the provider
  * @augments PubfoodObject
+ * @augments PubfoodProvider
  * @memberof pubfood#provider
  */
 function BidProvider(bidDelegate) {
@@ -109,7 +110,12 @@ BidProvider.prototype.init = function(slots, pushBid, done) {
 BidProvider.prototype.refresh = function(slots, pushBid, done) {
   var refresh = (this.bidDelegate && this.bidDelegate.refresh) || null;
   if (!refresh) {
-    Event.publish(Event.EVENT_TYPE.WARN, 'BidProvider.bidDelegate.refresh not defined.');
+    var msg = 'BidProvider.bidDelegate.refresh not defined.';
+    Event.publish(Event.EVENT_TYPE.WARN, msg);
+    if (util.asType(done) === 'function') {
+      var errorAnnotation = Event.newEventAnnotation(Event.ANNOTATION_TYPE.FORCED_DONE.NAME, Event.ANNOTATION_TYPE.FORCED_DONE.ERROR, msg);
+      done(errorAnnotation);
+    }
     return;
   }
   refresh(slots, pushBid, done);
@@ -147,5 +153,5 @@ BidProvider.prototype.getTimeout = function() {
   return this.timeout_;
 };
 
-util.extends(BidProvider, PubfoodObject);
+util.extends(BidProvider, PubfoodProvider);
 module.exports = BidProvider;

@@ -395,12 +395,7 @@ var AuctionMediator = require('./mediator/auctionmediator');
     if(typeof startCb === 'function'){
       startCb(configStatus.hasError, configStatus.details);
     }
-
-    // only continue of there aren't any config errors
-    if (!configStatus.hasError) {
-      this.mediator.start(this.randomizeBidRequests_, startTimestamp);
-    }
-
+    this.mediator.start(this.randomizeBidRequests_, startTimestamp);
     return this;
   };
 
@@ -450,6 +445,19 @@ var AuctionMediator = require('./mediator/auctionmediator');
    */
   api.prototype.omitDefaultBidKey = function(defaultBidKeyOff) {
     this.mediator.omitDefaultBidKey(defaultBidKeyOff);
+    return this;
+  };
+
+  /**
+   * Re-throw caught delegate errors.
+   * Default: false<br><br>
+   * The [throwErrors]{@link PubfoodProvider#throwErrors} property for
+   * all [BidDelegate]{@link typeDefs.BidDelegate} and [AuctionDelegate]{@link typeDefs.AuctionDelegate} providers will be set.
+   * @param {boolean} [silent] if true: re-throw errors in [BidDelegate]{@link typeDefs.BidDelegate} and [AuctionDelegate]{@link typeDefs.AuctionDelegate} functions
+   * @return {pubfood}
+   */
+  api.prototype.throwErrors = function(silent) {
+    this.mediator.throwErrors(silent);
     return this;
   };
 
