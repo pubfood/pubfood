@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Catching Provider Errors</title>
+        <script src="../../../build/pubfood.js"></script>
+    </head>
+<body>
+    <h2><em>Catching Provider Errors Example</em></h2>
+    <script>
+     window.googletag = window.googletag || {};
+     googletag.cmd = googletag.cmd || [];
+     var pf = new pubfood();
+     pf.timeout(10000);
+
+     var slot = pf.addSlot({
+         name: '/6355419/Travel/Europe/France/Paris',
+         sizes: [
+             [300, 250]
+         ],
+         elementId: 'div-medrec',
+         bidProviders: [
+             'mock1','mock2'
+         ]
+     });
+
+     var mockProvider1 = pf.addBidProvider({
+         name: 'mock1',
+         init: function(slots, pushBid, done) {
+             throw new Error('TestError-mock1-BidProvider.init')
+             done();
+         },
+         refresh: function(slots, pushBid, done) {
+             throw new Error('TestError-mock1-BidProvider.refresh')
+             done();
+         }
+     });
+
+     pf.setAuctionProvider({
+         name: 'Google',
+         libUri: 'http://www.googletagservices.com/tag/js/gpt.js',
+         init: function(targeting, done) {
+             googletag.cmd.push(function() {
+                 for (var i = 0; i < targeting.length; i++) {
+                     var tgtObject = targeting[i];
+                     var gptObject;
+
+                     if (tgtObject.name) {
+                         gptObject = googletag.defineSlot(tgtObject.name, tgtObject.sizes, tgtObject.elementId)
+                                              .addService(googletag.pubads());
+                     } else {
+                         gptObject = googletag.pubads();
+                     }
+                     for (var p in tgtObject.targeting) {
+                         gptObject.setTargeting(p, tgtObject.targeting[p]);
+                     }
+                 }
+             });
+             googletag.cmd.push(function() {
+                 googletag.pubads().enableSingleRequest();
+                 googletag.enableServices();
+                 done();
+             });
+         },
+         refresh: function(targeting, done) {
+             throw new Error('TestError-Google-AuctionProvider');
+             done();
+         }
+     });
+
+    </script>
+
+    <!-- Ad appended here -->
+    <div id='div-medrec'></div>
+    <p></p>
+    <h4>Open the developer tools and view the console log.</h4>
+    <span>See <a href="./catchprovidererrors.md"><code>catchprovidererrors.md</code></a> for further details.</span>
+    <script type="text/javascript">
+     pf.observe('AUCTION_POST_RUN', function() {
+         googletag.cmd.push(function() {
+             googletag.display('div-medrec');
+         });
+     });
+
+     pf.observe('BID_COMPLETE', function(event) {
+       var forcedDoneAnnotation = event.annotations.forcedDone;
+       var auctionType = event.annotations.auctionType.type;
+       if (forcedDoneAnnotation) {
+         console.log('BID_COMPLETE, Forced done: ' + event.data + ' - ' + auctionType + ', ' + forcedDoneAnnotation.message);
+       }
+     });
+
+     pf.observe('AUCTION_COMPLETE', function(event) {
+       var forcedDoneAnnotation = event.annotations.forcedDone;
+       var auctionType = event.annotations.auctionType.type;
+       if (forcedDoneAnnotation) {
+         console.log('AUCTION_COMPLETE, Forced done: ' + event.data.name + ' - ' + auctionType + ', ' + forcedDoneAnnotation.message);
+         }
+     });
+
+     pf.observe('ERROR', function(event) {
+       console.log('ERROR, ', event.data);
+     });
+
+     pf.start(Date.now(), function(hasErrors, errors) {
+       if (hasErrors) {
+         for (var idx in errors) {
+           console.log('pubfood.start(), Error: ', errors[idx]);
+         }
+       }
+     });
+
+     pf.throwErrors(true);
+     try {
+         pf.refresh();
+     } catch (err) {
+         console.log('With pf.throwErrors(true), we Caught: ' + err.message);
+     }
+    </script>
+
+    </body>
+</html>

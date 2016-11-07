@@ -7,7 +7,7 @@
 var util = require('../util');
 var AuctionDelegate = require('../interfaces').AuctionDelegate;
 var Event = require('../event');
-var PubfoodObject = require('../pubfoodobject');
+var PubfoodProvider = require('./pubfoodprovider');
 
 /**
  * AuctionProvider decorates the {@link AuctionDelegate} to implement the publisher ad server requests.
@@ -85,12 +85,16 @@ AuctionProvider.prototype.init = function(targeting, done) {
  * @param {auctionDoneCallback} done a callback to execute on init complete
  */
 AuctionProvider.prototype.refresh = function(targeting, done) {
-  var refresh = (this.auctionDelegate && this.auctionDelegate.refresh) || null;
-  if (!refresh) {
-    Event.publish(Event.EVENT_TYPE.WARN, 'AuctionProvider.auctionDelegate.refresh not defined.');
+  if (!this.auctionDelegate || !this.auctionDelegate.refresh) {
+    var msg = 'AuctionProvider.auctionDelegate.refresh not defined.';
+    Event.publish(Event.EVENT_TYPE.WARN, msg);
+    if (util.asType(done) === 'function') {
+      var errorAnnotation = Event.newEventAnnotation(Event.ANNOTATION_TYPE.FORCED_DONE.NAME, Event.ANNOTATION_TYPE.FORCED_DONE.ERROR, msg);
+      done(errorAnnotation);
+    }
     return;
   }
-  refresh(targeting, done);
+  this.auctionDelegate.refresh(targeting, done);
 };
 
 /**
@@ -111,5 +115,5 @@ AuctionProvider.prototype.getTimeout = function() {
   return this.timeout_;
 };
 
-util.extends(AuctionProvider, PubfoodObject);
+util.extends(AuctionProvider, PubfoodProvider);
 module.exports = AuctionProvider;

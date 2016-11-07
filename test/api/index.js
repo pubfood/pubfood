@@ -14,4 +14,6 @@ describe('API - Tests', function () {
   require('./events');
   require('./transformoperator');
   require('./auctionrun');
+  require('./providererrors');
+  require('./timeoutforceddone');
 });

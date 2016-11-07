@@ -19,13 +19,13 @@ describe('Late bids', function () {
 
     TEST_MEDIATOR = null;
     TEST_MEDIATOR = new AuctionMediator();
-
+    TEST_MEDIATOR.throwErrors(true);
     TEST_MEDIATOR.addSlot();
   });
 
   it('should keep bids after auction timeout i.e. late bids', function(done) {
 
-    var m = new AuctionMediator();
+    var m = TEST_MEDIATOR;
 
     m.addSlot({
       name: '/abc/123',
@@ -56,7 +56,7 @@ describe('Late bids', function () {
     });
 
     m.setAuctionProvider({
-      name: 'provider1',
+      name: 'provider1.7',
       libUri: '../test/fixture/lib.js',
       init: function(targeting, done) {
         done();
@@ -66,7 +66,7 @@ describe('Late bids', function () {
       }
     });
 
-    Event.on(Event.EVENT_TYPE.BID_COMPLETE, function() {
+    Event.once(Event.EVENT_TYPE.BID_COMPLETE, function() {
       var lateBids = m.getAuctionRunLateBids(1);
       assert.equal(lateBids.length, 1, 'should be one late bid');
       var lateBid = lateBids[0];
@@ -80,7 +80,7 @@ describe('Late bids', function () {
 
   it('should emit a BID_PUSH_NEXT_LATE event', function(done) {
 
-    var m = new AuctionMediator();
+    var m = TEST_MEDIATOR;
 
     m.addSlot({
       name: '/abc/123',
@@ -111,7 +111,7 @@ describe('Late bids', function () {
     });
 
     m.setAuctionProvider({
-      name: 'provider1',
+      name: 'provider1.6',
       libUri: '../test/fixture/lib.js',
       init: function(targeting, done) {
         done();
@@ -121,7 +121,7 @@ describe('Late bids', function () {
       }
     });
 
-    Event.on(Event.EVENT_TYPE.BID_PUSH_NEXT_LATE, function() {
+    Event.once(Event.EVENT_TYPE.BID_PUSH_NEXT_LATE, function() {
       var lateBids = m.getAuctionRunLateBids(1);
       assert.equal(lateBids.length, 1, 'should be one late bid');
       var lateBid = lateBids[0];
@@ -135,7 +135,7 @@ describe('Late bids', function () {
 
   it('should keep timely bids separate from late bids', function(done) {
 
-    var m = new AuctionMediator();
+    var m = TEST_MEDIATOR;
 
     m.addSlot({
       name: '/abc/123',
@@ -182,7 +182,7 @@ describe('Late bids', function () {
     });
 
     m.setAuctionProvider({
-      name: 'provider1',
+      name: 'provider1.5',
       libUri: '../test/fixture/lib.js',
       init: function(targeting, done) {
         done();
@@ -220,7 +220,7 @@ describe('Late bids', function () {
 
   it('should annotate bid provider with forcedDone', function(done) {
 
-    var m = new AuctionMediator();
+    var m = TEST_MEDIATOR;
     m.doneCallbackOffset(0);
     m.timeout(1);
 
@@ -247,7 +247,7 @@ describe('Late bids', function () {
     });
 
     m.setAuctionProvider({
-      name: 'provider1',
+      name: 'provider1.4',
       libUri: '../test/fixture/lib.js',
       init: function(targeting, done) {
         done();
@@ -257,8 +257,8 @@ describe('Late bids', function () {
       }
     });
 
-    Event.on(Event.EVENT_TYPE.BID_COMPLETE, function(event) {
-      assert.equal(event.annotations.forcedDone, 'timeout', 'bid provider should have been forced done by timeout');
+    Event.once(Event.EVENT_TYPE.BID_COMPLETE, function(event) {
+      assert.propertyVal(event.annotations.forcedDone, 'type', Event.ANNOTATION_TYPE.FORCED_DONE.TIMEOUT);
       done();
     });
 
@@ -267,7 +267,7 @@ describe('Late bids', function () {
 
   it('if timely, should NOT annotate bid provider with forcedDone', function(done) {
 
-    var m = new AuctionMediator();
+    var m = TEST_MEDIATOR;
     m.doneCallbackOffset(0);
     m.timeout(5);
 
@@ -292,7 +292,7 @@ describe('Late bids', function () {
     });
 
     m.setAuctionProvider({
-      name: 'provider1',
+      name: 'provider1.3',
       libUri: '../test/fixture/lib.js',
       init: function(targeting, done) {
         setTimeout(function() {
@@ -304,8 +304,8 @@ describe('Late bids', function () {
       }
     });
 
-    Event.on(Event.EVENT_TYPE.BID_COMPLETE, function(event) {
-      assert.isUndefined(event.annotations.forcedDone, 'bid provider should NOT have been forced done');
+    Event.once(Event.EVENT_TYPE.BID_COMPLETE, function(event) {
+      assert.isUndefined(event.annotations.forcedDone);
       done();
     });
 
@@ -313,8 +313,7 @@ describe('Late bids', function () {
   });
 
   it('should annotate auction provider with forcedDone', function(done) {
-
-    var m = new AuctionMediator();
+    var m = TEST_MEDIATOR;
     m.doneCallbackOffset(0);
     m.timeout(1);
 
@@ -339,7 +338,7 @@ describe('Late bids', function () {
     });
 
     m.setAuctionProvider({
-      name: 'provider1',
+      name: 'provider1.2',
       libUri: '../test/fixture/lib.js',
       init: function(targeting, done) {
         setTimeout(function() {
@@ -351,17 +350,18 @@ describe('Late bids', function () {
       }
     });
 
-    Event.on(Event.EVENT_TYPE.AUCTION_COMPLETE, function(event) {
-      assert.equal(event.annotations.forcedDone, 'timeout', 'auction provider should have been forced done by timeout');
-      done();
+    Event.once(Event.EVENT_TYPE.AUCTION_COMPLETE, function(event) {
+      if (event.annotations.auctionType.type === Event.ANNOTATION_TYPE.AUCTION_TYPE.INIT) {
+        assert.propertyVal(event.annotations.forcedDone, 'type', Event.ANNOTATION_TYPE.FORCED_DONE.TIMEOUT);
+        done();
+      }
     });
 
     m.start();
   });
 
   it('if timely, should NOT annotate auction provider with forcedDone', function(done) {
-
-    var m = new AuctionMediator();
+    var m = TEST_MEDIATOR;
     m.doneCallbackOffset(0);
     m.timeout(5);
 
@@ -386,7 +386,7 @@ describe('Late bids', function () {
     });
 
     m.setAuctionProvider({
-      name: 'provider1',
+      name: 'provider1.1',
       libUri: '../test/fixture/lib.js',
       init: function(targeting, done) {
         done();
@@ -396,7 +396,7 @@ describe('Late bids', function () {
       }
     });
 
-    Event.on(Event.EVENT_TYPE.AUCTION_COMPLETE, function(event) {
+    Event.once(Event.EVENT_TYPE.AUCTION_COMPLETE, function(event) {
       assert.isUndefined(event.annotations.forcedDone, 'auction provider should NOT have been forced done');
       done();
     });

@@ -194,7 +194,9 @@ var bidObject = {
  * @property {string} ts the event timestamp
  * @property {PubfoodEvent#EVENT_TYPE} type the event type
  * @property {object|string} data the data payload for the [EVENT_TYPE]{@link PubfoodEvent#EVENT_TYPE}
- * @property {object} annotations event object metadata. See specific [EVENT_TYPE]{@link PubfoodEvent#EVENT_TYPE} for annotatoins
+ * @property {object} annotations event object metadata. See [PubfoodEvent.ANNOTATION_TYPE]{@link PubfoodEvent#ANNOTATION_TYPE} for spcific annotation properties
+ * @property {object} [annotations.auctionType] The auction type annotation, [PubfoodEventAnnotation]{@link typeDefs.PubfoodEventAnnotation}
+ * @property {object} [annotations.forcedDone] The forced done type  annotation, [PubfoodEventAnnotation]{@link typeDefs.PubfoodEventAnnotation}
  * @memberof typeDefs
  */
 
@@ -280,15 +282,22 @@ var PubfoodConfig = {
 };
 
 /**
- * @typedef {AuctionRun} AuctionRun - data pertaining to an init or refresh auction execution
+ * @typedef {AuctionRun} AuctionRun data pertaining to an init or refresh auction execution
  * @property {boolean} inAuction false if bidding still in process
  * @property {array.<Slot>} slots the slots to be filled for the auction
  * @property {array.<Bid>} bids the bids for the auction run
  * @property {array.<Bid>} lateBids bids that did not get pushed before the timeout to participate in the auction
  * @property {object.<string, boolean>} bidStatus flag to indicate if a bid provider is completed bidding
- * @property {array.<TargetingObject>} targeting the targeting objects used in the auction run 
+ * @property {array.<TargetingObject>} targeting the targeting objects used in the auction run
  * @memberof typeDefs
  * @private
+ */
+
+/**
+ * @typedef {PubfoodEventAnnotation} PubfoodEventAnnotation metadata object that is attached to a {@link PubfoodEvent} instance to provided additional contextual information.
+ * @property {string} type the annotation type, {@link PubfoodEvent#ANNOTATION_TYPE}
+ * @property {string} message the description of the annotation
+ * @memberof typeDefs
  */
 
 module.exports = {

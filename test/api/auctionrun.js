@@ -144,4 +144,61 @@ describe('Pubfood auction run api', function() {
     pf.start();
     pf.refresh();
   });
+
+  it('should return keep the auctionType', function(done) {
+
+    var pf = new pubfood(),
+      isRefresh = false;
+    pf.timeout(1);
+
+
+    pf.observe('AUCTION_COMPLETE', function(event) {
+      var auctionIdx = pf.getAuctionCount();
+      var auctionRun = pf.getAuctionRun(auctionIdx);
+      if (auctionRun.auctionType === 'refresh') {
+        var bidStatus = pf.getAuctionRun(auctionIdx).bidStatus;
+        assert.isTrue(bidStatus['bidderA'], 'bidderA should be complete with refresh auction');
+        done();
+      } else {
+        var bidStatus = pf.getAuctionRun(auctionIdx).bidStatus;
+        assert.isTrue(bidStatus['bidderA'], 'bidderA should be complete with init auction');
+      }
+    });
+
+    pf.addSlot({
+      name: '/00000000/medrec',
+      sizes: [
+        [300, 250]
+      ],
+      elementId: 'div-medrec',
+      bidProviders: [
+        'bidderA'
+      ]
+    });
+
+    pf.setAuctionProvider({
+      name: 'auctionProvider',
+      libUri: '../test/fixture/lib.js',
+      init: function(targeting, done) {
+        done();
+      },
+      refresh: function(targeting, done) {
+        done();
+      }
+    });
+
+    pf.addBidProvider({
+      name: 'bidderA',
+      libUri: '../test/fixture/lib.js',
+      init: function(slots, pushBid, done) {
+        done();
+      },
+      refresh: function(slots, pushBid, done) {
+        done();
+      }
+    });
+
+    pf.start();
+    pf.refresh();
+  });
 });

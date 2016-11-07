@@ -116,8 +116,9 @@ PubfoodEvent.prototype.EVENT_TYPE = {
    * Action is complete
    * @event PubfoodEvent.BID_COMPLETE
    * @property {string} data [BidProvider.name]{@link pubfood#provider.BidProvider}
-   * @property {object} annotations event metadata
-   * @property {string} [annotations.forcedDone] flag to indicate completion was forced
+   * @property {object<string, PubfoodEventAnnotation>} annotations event metadata
+   * @property {string} [annotations.forcedDone] flag to indicate completion was forced, [PubfoodEventAnnotation]{@link typeDefs.PubfoodEventAnnotation}
+   * @property {string} annotations.auctionType the type of auction, [PubfoodEventAnnotation]{@link typeDefs.PubfoodEventAnnotation}
    * @example
    * annotations.forcedDone && annotations.forcedDone === 'timeout'
    */
@@ -149,6 +150,8 @@ PubfoodEvent.prototype.EVENT_TYPE = {
    * Start the publisher auction
    * @event PubfoodEvent.AUCTION_GO
    * @property {string} data [AuctionProvider.name]{@link pubfood#provider.AuctionProvider}
+   * @property {object} [annotations] event metadata
+   * @property {string} annotations.auctionType the type of auction, [PubfoodEventAnnotation]{@link typeDefs.PubfoodEventAnnotation}
    */
   AUCTION_GO: 'AUCTION_GO',
   AUCTION_START: 'AUCTION_START',
@@ -172,6 +175,11 @@ PubfoodEvent.prototype.EVENT_TYPE = {
    * @property {object} data
    * @property {string} data.name the [AuctionProvider.name]{@link pubfood#provider.AuctionProvider} property value
    * @property {array.<TargetingObject>} data.targeting targeting data used in the auction
+   * @property {object} annotations event metadata
+   * @property {string} [annotations.forcedDone] flag to indicate completion was forced, [PubfoodEventAnnotation]{@link typeDefs.PubfoodEventAnnotation}
+   * @property {object} annotations.auctionType the type of auction, [PubfoodEventAnnotation]{@link typeDefs.PubfoodEventAnnotation}
+   * @example
+   * annotations.forcedDone && annotations.forcedDone === 'timeout'
    */
   AUCTION_COMPLETE: 'AUCTION_COMPLETE',
   /**
@@ -206,7 +214,7 @@ PubfoodEvent.prototype.EVENT_TYPE = {
  * publish an event
  * @param {string} eventType The event type
  * @param {*} data the event data
- * @param {object} annotations Contextual metadata for the event
+ * @param {object.<string,PubfoodEventAnnotation>} annotations Contextual metadata for the event
  * @return {boolean} Indication if we've emitted an event.
  */
 PubfoodEvent.prototype.publish = function(eventType, data, annotations) {
@@ -298,6 +306,72 @@ PubfoodEvent.prototype.removeAllListeners = function() {
   this.observeImmediate_ = {};
 
   return this;
+};
+
+/**
+ * @description Event annotation types<br>
+ * @type {object}
+ * @property {object} FORCED_DONE Annotation in [<code>annotations.forcedDone</code>]{@link typeDefs.EventObject} to indicate that a [BID_COMPLETE]{@link PubfoodEvent.event:BID_COMPLETE} or [AUCTION_COMPLETE]{@link PubfoodEvent.event:AUCTION_COMPLETE} event was forced by Pubfood.
+ * @property {('error')} FORCED_DONE.ERROR The value of [PubfoodEventAnnotation.type]{@link typeDefs.PubfoodEventAnnotation} in a [PubfoodEvent.publish]{@link PubfoodEvent#publish} <code>annotations</code> property value
+ * @property {('timeout')} FORCED_DONE.TIMEOUT The value of [PubfoodEventAnnotation.type]{@link typeDefs.PubfoodEventAnnotation} in a [PubfoodEvent.publish]{@link PubfoodEvent#publish} <code>annotations</code> property value
+ *
+ * @property {object} AUCTION_TYPE Annotation in [<code>annotations.auctionType</code>]{@link typeDefs.EventObject} to indicate that a [BID_COMPLETE]{@link PubfoodEvent.event:BID_COMPLETE} or [AUCTION_COMPLETE]{@link PubfoodEvent.event:AUCTION_COMPLETE} event was for a particular auction type.
+ * @property {('init')} AUCTION_TYPE.INIT A [PubfoodEventAnnotation.type]{@link typeDefs.PubfoodEventAnnotation} property value
+ * @property {('refresh')} AUCTION_TYPE.REFRESH A [PubfoodEventAnnotation.type]{@link typeDefs.PubfoodEventAnnotation} property value
+ *
+ * @example
+ pf.observe('BID_COMPLETE', function(event) {
+   var forcedDoneAnnotation = event.annotations.forcedDone;
+   var auctionType = event.annotations.auctionType.type;
+   if (forcedDoneAnnotation) {
+     console.log('BID_COMPLETE, Forced done (' + forcedDoneAnnotation.type + '): ' + event.data + '\n\t' + auctionType  + ', ' + forcedDoneAnnotation.message);
+   } else {
+     console.log('BID_COMPLETE, Success: ' + event.data + ' - ' + auctionType);
+   }
+ });
+ // BID_COMPLETE, Forced done (error): mock1
+ //     refresh, TestError-mock1-BidProvider
+ pf.observe('AUCTION_COMPLETE', function(event) {
+   var auctionTypeAnnotation = event.annotations.auctionType;
+   if (auctionTypeAnnotation && auctionTypeAnnotation.type === 'refresh' ) {
+     console.log('### Yes, this was a ' + auctionTypeAnnotation.type + ' AUCTION_COMPLETE ###');
+   }
+ });
+ // ### Yes, this was a refresh AUCTION_COMPLETE ###
+ * @see [PubfoodEventAnnotation]{@link typeDefs.PubfoodEventAnnotation}<br>
+ * @see {@link https://github.com/pubfood/pubfood/blob/master/examples/provider/general/forceddoneproviderevents.html}<br>
+ * @see {@link https://github.com/pubfood/pubfood/blob/master/examples/provider/general/catchprovidererrors.html}<br>
+ * @see [<em>note:</em> Linking to enum values with jsdoc]{@link https://github.com/jsdoc3/jsdoc/issues/937}
+ */
+PubfoodEvent.prototype.ANNOTATION_TYPE = {
+  FORCED_DONE: {
+    NAME: 'forcedDone',
+    ERROR: 'error',
+    TIMEOUT: 'timeout'
+  },
+  AUCTION_TYPE: {
+    NAME: 'auctionType',
+    INIT: 'init',
+    REFRESH: 'refresh'
+  }
+};
+
+/**
+ * Creates a new [PubfoodEventAnnotation]{@link typeDefs.PubfoodEventAnnotation} metadata object.<br>
+ * The annotation object can be provided  as an <code>annotations</code> when you [publish]{@link PubfoodEvent#publish} an event.
+ * @property {string} name The annotation name
+ * @property {string} type Annotation type or subtype name
+ * @property {string} message Annotation description and/or specifier
+ * @property {object} [eventAnnotations] an existing annotations object add the annotation to
+ * @return {object}
+ * @private
+ */
+PubfoodEvent.prototype.newEventAnnotation = function(name, type, message, eventAnnotations) {
+  var annotations = eventAnnotations || {};
+
+  annotations[name || 'undefined'] = {type: type || 'undefined', message: message || ''};
+
+  return annotations;
 };
 
 module.exports = new PubfoodEvent();
