@@ -153,5 +153,5 @@ BidProvider.prototype.getTimeout = function() {
   return this.timeout_;
 };
 
-util.extends(BidProvider, PubfoodProvider);
+util.extendsObject(BidProvider, PubfoodProvider);
 module.exports = BidProvider;

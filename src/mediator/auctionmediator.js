@@ -1026,5 +1026,5 @@ AuctionMediator.prototype.throwErrors = function(silent) {
   return this.throwErrors_;
 };
 
-util.extends(AuctionMediator, PubfoodObject);
+util.extendsObject(AuctionMediator, PubfoodObject);
 module.exports = AuctionMediator;

@@ -236,7 +236,7 @@ PubfoodEvent.prototype.publish = function(eventType, data, annotations) {
   return this.emit(eventType, event);
 };
 
-util.extends(PubfoodEvent, EventEmitter);
+util.extendsObject(PubfoodEvent, EventEmitter);
 
 /**
  * Emit event, but keep events without a registered listener.

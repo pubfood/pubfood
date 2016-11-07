@@ -99,5 +99,5 @@ Slot.prototype.addBidProvider = function(bidProvider) {
   return this;
 };
 
-util.extends(Slot, PubfoodObject);
+util.extendsObject(Slot, PubfoodObject);
 module.exports = Slot;

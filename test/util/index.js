@@ -167,4 +167,103 @@ describe('Util - Tests', function () {
     assert.isTrue(util.validate(BidObject, BID_SIZES_NOT_ARRAY), 'object with array property with object set should not be valid');
 
   });
+
+  it('should extend an object', function() {
+    var flag = false;
+    function Parent(name) {
+      this.name = name;
+      flag = true;
+    }
+
+    Parent.prototype.squared = function (value) {
+      return value * value;
+    };
+
+    function Child(name) {
+      this.name = name;
+      if (this.init_) {
+        this.init_(name);
+      }
+    }
+
+    Child.prototype.divide = function (numerator, denominator) {
+      return numerator / denominator;
+    };
+
+    util.extendsObject(Child, Parent);
+
+    var child = new Child('trivial');
+
+    assert.isTrue(child.squared(2) === 4, 'Child should inhearit the \"squared\" function');
+    assert.isTrue(child.divide(4, 2) === 2, 'Child should have \"divide\" function');
+    assert.isTrue(child.name === 'trivial', 'Child name should be \"trivial\"');
+    assert.isTrue(flag, 'flag should have been set in Parent constructor');
+  });
+
+  it('should extend a parent object with arguments to parent constructor', function() {
+    function Parent(name, country, state, city, town) {
+      this.parentName = name;
+      this.parentCity = city;
+    }
+
+    Parent.prototype.squared = function (value) {
+      return value * value;
+    };
+
+    function Child(name, country, state, city, town) {
+      this.childName = name;
+      if (this.init_) {
+        this.init_(name, country, state, city, town);
+      }
+    }
+
+    Child.prototype.divide = function (numerator, denominator) {
+      return numerator / denominator;
+    };
+
+    util.extendsObject(Child, Parent);
+
+    var child = new Child('trivial', 'Kasterborous', '', 'Gallifrey', '');
+
+    assert.isTrue(child.squared(2) === 4, 'Child should inhearit the \"squared\" function');
+    assert.isTrue(child.squared(2) === 4, 'Child should hav \"divide\" function');
+    assert.equal(child.childName, 'trivial', 'Child name should be \"trivial\"');
+    assert.equal(child.parentName, 'trivial', 'Parent name should be \"trivial\"');
+    assert.equal(child.parentCity, 'Gallifrey', 'Parent city should be \"Gallifrey\"');
+  });
+
+  it('should extend a parent and default to 5 child constructor args', function() {
+    function Parent(name, country, state, city, town, zip) {
+      this.parentName = name;
+      this.parentCity = city;
+      this.parentZip = zip;
+    }
+
+    Parent.prototype.squared = function (value) {
+      return value * value;
+    };
+
+    function Child(name, country, state, city, town, zip) {
+      this.childName = name;
+      if (this.init_) {
+        this.init_(name, country, state, city, town, zip);
+      }
+    }
+
+    Child.prototype.divide = function (numerator, denominator) {
+      return numerator / denominator;
+    };
+
+    util.extendsObject(Child, Parent);
+
+    var child = new Child('trivial', 'Kasterborous', '', 'Gallifrey', '', '1001100');
+
+    assert.isUndefined(child.parentZip, 'Parent zip should be undefined');
+    assert.isTrue(child.squared(2) === 4, 'Child should inhearit the \"squared\" function');
+    assert.isTrue(child.squared(2) === 4, 'Child should hav \"divide\" function');
+    assert.equal(child.childName, 'trivial', 'Child name should be \"trivial\"');
+    assert.equal(child.parentName, 'trivial', 'Parent name should be \"trivial\"');
+    assert.equal(child.parentCity, 'Gallifrey', 'Parent city should be \"Gallifrey\"');
+  });
+
 });

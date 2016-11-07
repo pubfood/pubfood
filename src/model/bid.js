@@ -79,5 +79,5 @@ Bid.prototype.addSize = function(w, h) {
   return this;
 };
 
-util.extends(Bid, PubfoodObject);
+util.extendsObject(Bid, PubfoodObject);
 module.exports = Bid;

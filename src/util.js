@@ -32,7 +32,7 @@ var util = {
    *
    * @todo refactor to use? - https://github.com/isaacs/inherits
    */
-  extends: function(child, parent) {
+  extendsObject: function(child, parent) {
 
     for (var k in parent.prototype) {
       child.prototype[k] = parent.prototype[k];
@@ -43,10 +43,18 @@ var util = {
       return parent;
     });
 
-    child.prototype.init_ = function() {
-      var parents = this.parents || [];
+    child.prototype.init_ = function(a1, a2, a3, a4, a5) {
+      var parents = this.parents || [],
+        len = arguments.length;
       for (var i = 0; i < parents.length; i++) {
-        parents[i]().call(this);
+        switch (len) {
+        case 0: parents[i]().call(this); break;
+        case 1: parents[i]().call(this, a1); break;
+        case 2: parents[i]().call(this, a1, a2); break;
+        case 3: parents[i]().call(this, a1, a2, a3); break;
+        case 4: parents[i]().call(this, a1, a2, a3, a4); break;
+        default: parents[i]().call(this, a1, a2, a3, a4, a5); break;
+        }
       }
     };
   },
