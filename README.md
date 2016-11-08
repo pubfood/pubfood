@@ -1,7 +1,7 @@
 # DRAFT: pubfood
 
-[![npm version](https://badge.fury.io/js/pubfood.svg)](https://badge.fury.io/js/pubfood)
-[![Build Status](https://travis-ci.org/pubfood/pubfood.svg?branch=master)](https://travis-ci.org/pubfood/pubfood)
+[![Release][release-image]][release-url] [![Build Status][travis-image]][travis-url]
+
 
 A browser client header bidding JavaScript library.
 
@@ -48,3 +48,10 @@ Some reasonable summaries if you're new to header bidding:
 
 Licensed under The MIT License (MIT)  
 For the full copyright and license information, please view the LICENSE.txt file.
+
+
+[release-url]: https://www.npmjs.com/package/pubfood
+[release-image]: https://badge.fury.io/js/pubfood.svg
+
+[travis-url]: https://travis-ci.org/pubfood/pubfood
+[travis-image]: https://travis-ci.org/pubfood/pubfood.svg?branch=master
