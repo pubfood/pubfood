@@ -3,7 +3,10 @@
 [![Release][release-image]][release-url] [![Build Status][travis-image]][travis-url]
 
 
-A browser client header bidding JavaScript library.
+A free and open source header bidding framework built by publishers for publishers.
+
+This repository contains the Pubfood JavaScript library. For more information
+about Pubfood and Header Bidding please see [Pubfood.org](http://pubfood.org/) 
 
 
 ### Architecture Overview
