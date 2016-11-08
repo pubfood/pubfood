@@ -33,15 +33,15 @@ npm test
 
 ### Release
 
-```bash
-npm run cut_deploy
-git push --tags origin master
-```
-
-- Check [Travis build](https://travis-ci.org/pubfood/pubfood)
-- Write a release [note](https://github.com/pubfood/pubfood/releases)
-- Confirm the `pubfood` package is updated on npm (`npm info pubfood version`)
-- Post a release announcement [here](https://pubfood.slack.com/messages/general/)
+1. Update [CHANGELOG.md](CHANGELOG.md)
+2. Update version in [package.json](https://github.com/pubfood/pubfood/blob/master/package.json#L3)
+    based on [semantic versioning](http://semver.org/)
+3. Run the release script; `npm run release`
+4. Confirm the release;
+  - Check [Travis build](https://travis-ci.org/pubfood/pubfood)
+  - Confirm the `pubfood` package is updated on npm; `npm info pubfood version`
+  - Write a release [note](https://github.com/pubfood/pubfood/releases)
+  - Post a release announcement [here](https://pubfood.slack.com/messages/general/)
 
 
 ### Resources and References
