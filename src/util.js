@@ -72,7 +72,7 @@ var util = {
       } else {
         /*eslint-disable no-empty */
         try {
-          doc.write('<script src="' + scriptSrc + '"></script>');
+          doc.write('<script src="' + scriptSrc + '">\x3C/script>');
         } catch (e) { }
         /*eslint-enable no-empty: */
       }
