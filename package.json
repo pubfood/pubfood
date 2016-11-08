@@ -1,12 +1,29 @@
 {
   "name": "pubfood",
-  "version": "0.2.1",
-  "description": "Header bidding library",
+  "version": "0.2.0",
+  "description": "A free and open source header bidding framework built by publishers for publishers",
+  "keywords": [
+    "header",
+    "bidding",
+    "auction",
+    "advertising",
+    "publisher",
+    "prebid"
+  ],
+  "homepage": "http://pubfood.org",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pubfood/pubfood.git"
+  },
+  "bugs": {
+    "url": "https://github.com/pubfood/pubfood/issues"
+  },
   "license": "MIT",
   "author": {
-    "name": "pubfood and other contributors",
-    "url": "https://github.com/pubfood/pubfood/blob/master/AUTHORS.txt"
+    "name": "Pubfood contributors",
+    "url": "https://github.com/pubfood/pubfood/graphs/contributors"
   },
+  "contributors": [],
   "main": "./dist/pubfood.js",
   "scripts": {
     "clean": "npm prune --production && rm -fr build",
@@ -14,29 +31,9 @@
     "lint": "gulp lint",
     "test": "gulp test",
     "build": "npm run prepare && npm run lint && gulp build && npm run test",
-    "copy_build_to_dist": "npm run build && cp build/pubfood.* dist",
-    "precut_deploy": "npm run copy_build_to_dist",
-    "cut_deploy": "git commit . -m 'copy build files to dist' && git tag v`node -e 'console.log(require(\"./package.json\").version)'`",
-    "postcut_deploy": "npm --no-git-tag-version version patch && git commit . -m 'version bump'",
-    "start": "npm run build"
+    "start": "npm run build",
+    "release": "PACKAGE_VER=`node -e 'console.log(require(\"./package.json\").version)'` && git commit -m \"v${PACKAGE_VER}\" && git tag -a v${PACKAGE_VER} -m \"v${PACKAGE_VER}\" && git push && git push --tags"
   },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/pubfood/pubfood.git"
-  },
-  "keywords": [
-    "prebid",
-    "header",
-    "bidding",
-    "auction",
-    "advertising",
-    "async",
-    "parallel"
-  ],
-  "bugs": {
-    "url": "https://github.com/pubfood/pubfood/issues"
-  },
-  "homepage": "http://pubfood.org",
   "browserify": {
     "standalone": "pubfood",
     "entries": [
