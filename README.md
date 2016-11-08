@@ -1,47 +1,51 @@
-# DRAFT: pubfood
+## Pubfood
 
 [![Release][release-image]][release-url] [![Build Status][travis-image]][travis-url]
 
 
 A browser client header bidding JavaScript library.
 
-# Architecture Overview
 
-![Architecture Overview - Requests](doc/pubfood-overview.png?raw=true "Architecture Overview")
+### Architecture Overview
 
-# Build Tasks
+![Architecture Overview](doc/pubfood-overview.png "Architecture Overview")
 
-## Build
 
-- `npm start`
+### Build
 
-## Test
+```bash
+npm start
 
-- `npm test`
+# Outputs
+# build/pubfood.js
+# build/pubfood.min.js
+```
 
-## Build Output
+### Test
 
-- `build/pubfood.js`
-- `build/pubfood.min.js`
+```bash
+npm test
+```
 
-## Deploy Process
 
-- `npm run cut_deploy`
-- `git push --tags origin master`
- - check the [travis build](https://travis-ci.org/pubfood/pubfood)
-- write a release note such as
- - https://github.com/pubfood/pubfood/releases/tag/v0.1.9
-- confirm the `pubfood` package is updated on npm
- - https://www.npmjs.com/package/pubfood
-- post a release announcement here
- - https://pubfood.slack.com/messages/general/
+### Release
 
-# References
-Some reasonable summaries if you're new to header bidding:
+```bash
+npm run cut_deploy
+git push --tags origin master
+```
 
-- http://adexchanger.com/publishers/the-rise-of-header-bidding-and-the-end-of-the-publisher-waterfall/
-- http://www.adopsinsider.com/ad-exchanges/diagramming-the-header-bidding-redirect-path/
-- https://www.yieldbot.com/blog/header-bidding/
+- Check [Travis build](https://travis-ci.org/pubfood/pubfood)
+- Write a release [note](https://github.com/pubfood/pubfood/releases)
+- Confirm the `pubfood` package is updated on npm (`npm info pubfood version`)
+- Post a release announcement [here](https://pubfood.slack.com/messages/general/)
+
+
+### Resources and References
+
+- [The Header Bidding Advantage](https://www.yieldbot.com/blog/header-bidding/)
+- [The Rise Of 'Header Bidding' And The End Of The Publisher Waterfall](http://adexchanger.com/publishers/the-rise-of-header-bidding-and-the-end-of-the-publisher-waterfall/)
+- [Header Bidding: Step-by-Step](http://www.adopsinsider.com/ad-exchanges/diagramming-the-header-bidding-redirect-path/)
 
 
 ### License
