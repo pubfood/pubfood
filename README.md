@@ -42,3 +42,9 @@ Some reasonable summaries if you're new to header bidding:
 - http://adexchanger.com/publishers/the-rise-of-header-bidding-and-the-end-of-the-publisher-waterfall/
 - http://www.adopsinsider.com/ad-exchanges/diagramming-the-header-bidding-redirect-path/
 - https://www.yieldbot.com/blog/header-bidding/
+
+
+### License
+
+Licensed under The MIT License (MIT)  
+For the full copyright and license information, please view the LICENSE.txt file.
