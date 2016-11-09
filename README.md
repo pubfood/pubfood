@@ -6,7 +6,7 @@
 A free and open source header bidding framework built by publishers for publishers.
 
 This repository contains the Pubfood JavaScript library. For more information
-about Pubfood and Header Bidding please see [Pubfood.org](http://pubfood.org/) 
+about Pubfood and header bidding please see [Pubfood.org](http://pubfood.org/) 
 
 
 ### Architecture Overview
