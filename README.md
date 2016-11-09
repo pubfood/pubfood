@@ -40,7 +40,6 @@ npm test
 4. Confirm the release;
   - Check [Travis build](https://travis-ci.org/pubfood/pubfood)
   - Confirm the `pubfood` package is updated on npm; `npm info pubfood version`
-  - Write a release [note](https://github.com/pubfood/pubfood/releases)
   - Post a release announcement [here](https://pubfood.slack.com/messages/general/)
 
 
