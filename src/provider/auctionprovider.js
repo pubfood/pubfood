@@ -115,5 +115,5 @@ AuctionProvider.prototype.getTimeout = function() {
   return this.timeout_;
 };
 
-util.extends(AuctionProvider, PubfoodProvider);
+util.extendsObject(AuctionProvider, PubfoodProvider);
 module.exports = AuctionProvider;

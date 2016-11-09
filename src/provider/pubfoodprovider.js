@@ -30,5 +30,5 @@ PubfoodProvider.prototype.throwErrors = function(silent) {
   return this.throwErrors_;
 };
 
-util.extends(PubfoodProvider, PubfoodObject);
+util.extendsObject(PubfoodProvider, PubfoodObject);
 module.exports = PubfoodProvider;
