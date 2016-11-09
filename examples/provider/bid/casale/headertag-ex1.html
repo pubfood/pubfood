@@ -28,6 +28,24 @@
         /* Replace with your tier 1 Casale Site ID */
         siteID: 999990
     };
+
+   /**
+    *   DFP lineItem creative tag will call index_render
+    *    e.g. window.top.index_render( document, '%%PATTERN:O%%' );
+    *      Where DFP ad request parameters look like:
+    *
+    *      prev_iu_szs:300x250,728x90
+    *      prev_scp:O=0_1000|O=1_1000
+    */
+    function index_render(doc, targetID) {
+      try {
+        var ad = _IndexRequestData.targetIDToBid[targetID].pop();
+        if (ad != null) {
+          doc.write(ad);
+        }
+      } catch (e) {};
+    }
+
     var cygnus_index_start = function () {
         function OpenRTBRequest() {
             this.initialized = false;
@@ -399,6 +417,17 @@ This page illustrates one approach to implementing a Casale / Index Exchange bid
     <li>The example uses their HeaderTag API.</li>
     <li>It overrides their parsing function by passing our own parsing function to "fn" in the headerTag query string.</li>
     <li>For this bid provider, <em><code>init</code></em> and <em><code>refresh</code></em> can share the same code</li>
+</ul>
+<h2>HowTo See a Test Ads</h2>
+IndexExchange provides a sandbox ad server for functional integration testing.
+<ul>
+  <li>The reference below describes how to setup browser client proxies for serving IndexExchange test ads i.e.
+    <pre>
+From as.casalemedia.com > To: sandbox.ht.indexexchange.com
+From as-sec.casalemedia.com > To: sandbox.ht.indexexchange.com
+    </pre>
+  </li>
+  <li><b>See</b> "<em>Testing the solution</em>" in this HeaderTag post: <a href="https://wiki.headertag.com/2016/01/11/how-mediation-works-with-prebid/">How Mediation Works...</a></li>
 </ul>
 <p></p>
 <p>
