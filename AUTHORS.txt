@@ -1,5 +1,0 @@
-Authors ordered by first contribution.
-
-John Ellis <jellis@yieldbot.com>
-Andrei McMillan <amcmillan@yieldbot.com>
-Erik Solen <esolen@yieldbot.com>
