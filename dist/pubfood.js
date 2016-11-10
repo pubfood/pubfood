@@ -1,6 +1,8 @@
-/*! pubfood v0.2.0 | (c) pubfood | http://pubfood.org/LICENSE.txt */
+/*! Pubfood v1.0.0 - Copyright (c) 2015 Pubfood (http://pubfood.org) */
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.pubfood = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 'use strict';
+
+var has = Object.prototype.hasOwnProperty;
 
 //
 // We store our EE objects in a plain object whose properties are event names.
@@ -17,7 +19,7 @@ var prefix = typeof Object.create !== 'function' ? '~' : false;
  *
  * @param {Function} fn Event handler to be called.
  * @param {Mixed} context Context for function execution.
- * @param {Boolean} once Only emit once
+ * @param {Boolean} [once=false] Only emit once
  * @api private
  */
 function EE(fn, context, once) {
@@ -36,12 +38,37 @@ function EE(fn, context, once) {
 function EventEmitter() { /* Nothing to set */ }
 
 /**
- * Holds the assigned EventEmitters by name.
+ * Hold the assigned EventEmitters by name.
  *
  * @type {Object}
  * @private
  */
 EventEmitter.prototype._events = undefined;
+
+/**
+ * Return an array listing the events for which the emitter has registered
+ * listeners.
+ *
+ * @returns {Array}
+ * @api public
+ */
+EventEmitter.prototype.eventNames = function eventNames() {
+  var events = this._events
+    , names = []
+    , name;
+
+  if (!events) return names;
+
+  for (name in events) {
+    if (has.call(events, name)) names.push(prefix ? name.slice(1) : name);
+  }
+
+  if (Object.getOwnPropertySymbols) {
+    return names.concat(Object.getOwnPropertySymbols(events));
+  }
+
+  return names;
+};
 
 /**
  * Return a list of assigned event listeners.
@@ -128,8 +155,8 @@ EventEmitter.prototype.emit = function emit(event, a1, a2, a3, a4, a5) {
  * Register a new EventListener for the given event.
  *
  * @param {String} event Name of the event.
- * @param {Functon} fn Callback function.
- * @param {Mixed} context The context of the function.
+ * @param {Function} fn Callback function.
+ * @param {Mixed} [context=this] The context of the function.
  * @api public
  */
 EventEmitter.prototype.on = function on(event, fn, context) {
@@ -153,7 +180,7 @@ EventEmitter.prototype.on = function on(event, fn, context) {
  *
  * @param {String} event Name of the event.
  * @param {Function} fn Callback function.
- * @param {Mixed} context The context of the function.
+ * @param {Mixed} [context=this] The context of the function.
  * @api public
  */
 EventEmitter.prototype.once = function once(event, fn, context) {
@@ -439,7 +466,7 @@ TransformOperator.prototype.process = function(bids, params) {
 
 module.exports = TransformOperator;
 
-},{"../errors":5,"../event":6,"../util":16}],5:[function(require,module,exports){
+},{"../errors":5,"../event":6,"../util":17}],5:[function(require,module,exports){
 /**
  * pubfood
  *
@@ -488,10 +515,9 @@ var EventEmitter = require('eventemitter3');
 /**
  * Pubfood event class
  * @class
- * @property {string} ts The timestamp of the event
- * @property {string} type The event type
- * @property {string} provider The type of provider. Defaults to <i>pubfood</i>
- * @property {object|string} data Data structure for each event type
+ * @property {string} auctionId The auction identifier
+ * @example AuctionId Format - <random string>:<auction count index>
+ * iis9xx46a6v2x58e1b:3
  * @return {PubfoodEvent}
  * @extends EventEmitter
  * @see https://github.com/primus/eventemitter3
@@ -592,6 +618,11 @@ PubfoodEvent.prototype.EVENT_TYPE = {
    * Action is complete
    * @event PubfoodEvent.BID_COMPLETE
    * @property {string} data [BidProvider.name]{@link pubfood#provider.BidProvider}
+   * @property {object<string, PubfoodEventAnnotation>} annotations event metadata
+   * @property {string} [annotations.forcedDone] flag to indicate completion was forced, [PubfoodEventAnnotation]{@link typeDefs.PubfoodEventAnnotation}
+   * @property {string} annotations.auctionType the type of auction, [PubfoodEventAnnotation]{@link typeDefs.PubfoodEventAnnotation}
+   * @example
+   * annotations.forcedDone && annotations.forcedDone === 'timeout'
    */
   BID_COMPLETE: 'BID_COMPLETE',
   /**
@@ -621,6 +652,8 @@ PubfoodEvent.prototype.EVENT_TYPE = {
    * Start the publisher auction
    * @event PubfoodEvent.AUCTION_GO
    * @property {string} data [AuctionProvider.name]{@link pubfood#provider.AuctionProvider}
+   * @property {object} [annotations] event metadata
+   * @property {string} annotations.auctionType the type of auction, [PubfoodEventAnnotation]{@link typeDefs.PubfoodEventAnnotation}
    */
   AUCTION_GO: 'AUCTION_GO',
   AUCTION_START: 'AUCTION_START',
@@ -644,6 +677,11 @@ PubfoodEvent.prototype.EVENT_TYPE = {
    * @property {object} data
    * @property {string} data.name the [AuctionProvider.name]{@link pubfood#provider.AuctionProvider} property value
    * @property {array.<TargetingObject>} data.targeting targeting data used in the auction
+   * @property {object} annotations event metadata
+   * @property {string} [annotations.forcedDone] flag to indicate completion was forced, [PubfoodEventAnnotation]{@link typeDefs.PubfoodEventAnnotation}
+   * @property {object} annotations.auctionType the type of auction, [PubfoodEventAnnotation]{@link typeDefs.PubfoodEventAnnotation}
+   * @example
+   * annotations.forcedDone && annotations.forcedDone === 'timeout'
    */
   AUCTION_COMPLETE: 'AUCTION_COMPLETE',
   /**
@@ -678,10 +716,10 @@ PubfoodEvent.prototype.EVENT_TYPE = {
  * publish an event
  * @param {string} eventType The event type
  * @param {*} data the event data
- * @param {string} eventContext The type of provider. ex: <i>bid</i>, <i>auction</i>
+ * @param {object.<string,PubfoodEventAnnotation>} annotations Contextual metadata for the event
  * @return {boolean} Indication if we've emitted an event.
  */
-PubfoodEvent.prototype.publish = function(eventType, data, eventContext) {
+PubfoodEvent.prototype.publish = function(eventType, data, annotations) {
   var ts = (+new Date());
 
   if (eventType === this.EVENT_TYPE.PUBFOOD_API_START && data) {
@@ -692,7 +730,7 @@ PubfoodEvent.prototype.publish = function(eventType, data, eventContext) {
     auctionId: this.auctionId,
     ts: ts,
     type: eventType,
-    eventContext: eventContext || 'pubfood',
+    annotations: annotations || {},
     data: data || ''
   };
   logger.logEvent(eventType, this.auctionId, event);
@@ -700,7 +738,7 @@ PubfoodEvent.prototype.publish = function(eventType, data, eventContext) {
   return this.emit(eventType, event);
 };
 
-util.extends(PubfoodEvent, EventEmitter);
+util.extendsObject(PubfoodEvent, EventEmitter);
 
 /**
  * Emit event, but keep events without a registered listener.
@@ -772,9 +810,75 @@ PubfoodEvent.prototype.removeAllListeners = function() {
   return this;
 };
 
+/**
+ * @description Event annotation types<br>
+ * @type {object}
+ * @property {object} FORCED_DONE Annotation in [<code>annotations.forcedDone</code>]{@link typeDefs.EventObject} to indicate that a [BID_COMPLETE]{@link PubfoodEvent.event:BID_COMPLETE} or [AUCTION_COMPLETE]{@link PubfoodEvent.event:AUCTION_COMPLETE} event was forced by Pubfood.
+ * @property {('error')} FORCED_DONE.ERROR The value of [PubfoodEventAnnotation.type]{@link typeDefs.PubfoodEventAnnotation} in a [PubfoodEvent.publish]{@link PubfoodEvent#publish} <code>annotations</code> property value
+ * @property {('timeout')} FORCED_DONE.TIMEOUT The value of [PubfoodEventAnnotation.type]{@link typeDefs.PubfoodEventAnnotation} in a [PubfoodEvent.publish]{@link PubfoodEvent#publish} <code>annotations</code> property value
+ *
+ * @property {object} AUCTION_TYPE Annotation in [<code>annotations.auctionType</code>]{@link typeDefs.EventObject} to indicate that a [BID_COMPLETE]{@link PubfoodEvent.event:BID_COMPLETE} or [AUCTION_COMPLETE]{@link PubfoodEvent.event:AUCTION_COMPLETE} event was for a particular auction type.
+ * @property {('init')} AUCTION_TYPE.INIT A [PubfoodEventAnnotation.type]{@link typeDefs.PubfoodEventAnnotation} property value
+ * @property {('refresh')} AUCTION_TYPE.REFRESH A [PubfoodEventAnnotation.type]{@link typeDefs.PubfoodEventAnnotation} property value
+ *
+ * @example
+ pf.observe('BID_COMPLETE', function(event) {
+   var forcedDoneAnnotation = event.annotations.forcedDone;
+   var auctionType = event.annotations.auctionType.type;
+   if (forcedDoneAnnotation) {
+     console.log('BID_COMPLETE, Forced done (' + forcedDoneAnnotation.type + '): ' + event.data + '\n\t' + auctionType  + ', ' + forcedDoneAnnotation.message);
+   } else {
+     console.log('BID_COMPLETE, Success: ' + event.data + ' - ' + auctionType);
+   }
+ });
+ // BID_COMPLETE, Forced done (error): mock1
+ //     refresh, TestError-mock1-BidProvider
+ pf.observe('AUCTION_COMPLETE', function(event) {
+   var auctionTypeAnnotation = event.annotations.auctionType;
+   if (auctionTypeAnnotation && auctionTypeAnnotation.type === 'refresh' ) {
+     console.log('### Yes, this was a ' + auctionTypeAnnotation.type + ' AUCTION_COMPLETE ###');
+   }
+ });
+ // ### Yes, this was a refresh AUCTION_COMPLETE ###
+ * @see [PubfoodEventAnnotation]{@link typeDefs.PubfoodEventAnnotation}<br>
+ * @see {@link https://github.com/pubfood/pubfood/blob/master/examples/provider/general/forceddoneproviderevents.html}<br>
+ * @see {@link https://github.com/pubfood/pubfood/blob/master/examples/provider/general/catchprovidererrors.html}<br>
+ * @see [<em>note:</em> Linking to enum values with jsdoc]{@link https://github.com/jsdoc3/jsdoc/issues/937}
+ */
+PubfoodEvent.prototype.ANNOTATION_TYPE = {
+  FORCED_DONE: {
+    NAME: 'forcedDone',
+    ERROR: 'error',
+    TIMEOUT: 'timeout'
+  },
+  AUCTION_TYPE: {
+    NAME: 'auctionType',
+    INIT: 'init',
+    REFRESH: 'refresh'
+  }
+};
+
+/**
+ * Creates a new [PubfoodEventAnnotation]{@link typeDefs.PubfoodEventAnnotation} metadata object.<br>
+ * The annotation object can be provided  as an <code>annotations</code> when you [publish]{@link PubfoodEvent#publish} an event.
+ * @property {string} name The annotation name
+ * @property {string} type Annotation type or subtype name
+ * @property {string} message Annotation description and/or specifier
+ * @property {object} [eventAnnotations] an existing annotations object add the annotation to
+ * @return {object}
+ * @private
+ */
+PubfoodEvent.prototype.newEventAnnotation = function(name, type, message, eventAnnotations) {
+  var annotations = eventAnnotations || {};
+
+  annotations[name || 'undefined'] = {type: type || 'undefined', message: message || ''};
+
+  return annotations;
+};
+
 module.exports = new PubfoodEvent();
 
-},{"./logger":8,"./util":16,"eventemitter3":1}],7:[function(require,module,exports){
+},{"./logger":8,"./util":17,"eventemitter3":1}],7:[function(require,module,exports){
 /**
  * pubfood
  */
@@ -962,6 +1066,38 @@ var bidObject = {
 };
 
 /**
+ * Event object structure for [observed]{@link pubfood#observe} events.
+ *
+ * @typedef {EventObject} EventObject
+ * @property {string} auctionId the auction identifier
+ * @example AuctionId Format - <random string>:<auction count index>
+ * iis9xx46a6v2x58e1b:3
+ * @property {string} ts the event timestamp
+ * @property {PubfoodEvent#EVENT_TYPE} type the event type
+ * @property {object|string} data the data payload for the [EVENT_TYPE]{@link PubfoodEvent#EVENT_TYPE}
+ * @property {object} annotations event object metadata. See [PubfoodEvent.ANNOTATION_TYPE]{@link PubfoodEvent#ANNOTATION_TYPE} for spcific annotation properties
+ * @property {object} [annotations.auctionType] The auction type annotation, [PubfoodEventAnnotation]{@link typeDefs.PubfoodEventAnnotation}
+ * @property {object} [annotations.forcedDone] The forced done type  annotation, [PubfoodEventAnnotation]{@link typeDefs.PubfoodEventAnnotation}
+ * @memberof typeDefs
+ */
+
+/**
+ * Auction run object structure.
+ *
+ * @typedef {AuctionRun} AuctionRun
+ * @property {string|boolean} inAuction in auction state of false, 'pending' or 'done'
+ * @property {Slot[]} slots slots defined for the auction run
+ * @property {Bid[]} bids bids received for the auction run
+ * @property {Bid[]} lateBids bids received for the auction run
+ * @property {object} bidStatus object keyed by provider name
+ * @property {boolean} bidStatus.?providerName? provider name: completed true|false
+ * @example // bidStatus
+ * var run = pf.getAuctionRun(1),
+    *     aIsDone = run.bidStatus['bidderA'];
+ * @property {TargetingObject[]} targeting ad server targeting used in the auction run
+ */
+
+/**
  * @typedef {SlotConfig} SlotConfig
  * @property {string} name name of the slot/ad unit in [AuctionProvider]{@link pubfood#provider.AuctionProvider} system e.g. DFP /accountId/mpu-rt
  * @property {string} [elementId] DOM target element id
@@ -1027,15 +1163,22 @@ var PubfoodConfig = {
 };
 
 /**
- * @typedef {AuctionRun} AuctionRun - data pertaining to an init or refresh auction execution
+ * @typedef {AuctionRun} AuctionRun data pertaining to an init or refresh auction execution
  * @property {boolean} inAuction false if bidding still in process
  * @property {array.<Slot>} slots the slots to be filled for the auction
  * @property {array.<Bid>} bids the bids for the auction run
  * @property {array.<Bid>} lateBids bids that did not get pushed before the timeout to participate in the auction
  * @property {object.<string, boolean>} bidStatus flag to indicate if a bid provider is completed bidding
- * @property {array.<TargetingObject>} targeting the targeting objects used in the auction run 
+ * @property {array.<TargetingObject>} targeting the targeting objects used in the auction run
  * @memberof typeDefs
  * @private
+ */
+
+/**
+ * @typedef {PubfoodEventAnnotation} PubfoodEventAnnotation metadata object that is attached to a {@link PubfoodEvent} instance to provided additional contextual information.
+ * @property {string} type the annotation type, {@link PubfoodEvent#ANNOTATION_TYPE}
+ * @property {string} message the description of the annotation
+ * @memberof typeDefs
  */
 
 module.exports = {
@@ -1153,11 +1296,12 @@ function AuctionMediator(config) {
   this.auctionIdx_ = 0;
   this.doneCallbackOffset_ = AuctionMediator.DEFAULT_DONE_CALLBACK_OFFSET;
   this.omitDefaultBidKey_ = false;
+  this.throwErrors_ = false;
   Event.setAuctionId(this.getAuctionId());
 }
 
 AuctionMediator.PAGE_BIDS = 'page';
-AuctionMediator.AUCTION_TYPE = { START: 'init', REFRESH: 'refresh'};
+AuctionMediator.AUCTION_TYPE = { START: Event.ANNOTATION_TYPE.AUCTION_TYPE.INIT, REFRESH: Event.ANNOTATION_TYPE.AUCTION_TYPE.REFRESH};
 AuctionMediator.IN_AUCTION = { FALSE: false, PENDING: 'pending', DONE: 'done'};
 AuctionMediator.NO_TIMEOUT = -1;
 AuctionMediator.DEFAULT_DONE_CALLBACK_OFFSET = 5000;
@@ -1233,7 +1377,7 @@ AuctionMediator.prototype.validate = function(isRefresh) {
  * @return {number} - the auction count index
  * @private
  */
-AuctionMediator.prototype.newAuctionRun = function(slotNames) {
+AuctionMediator.prototype.newAuctionRun = function(auctionType, slotNames) {
   var idx = ++this.auctionIdx_;
   var auctionSlots = [];
   if (util.isArray(slotNames) && slotNames.length > 0) {
@@ -1252,12 +1396,14 @@ AuctionMediator.prototype.newAuctionRun = function(slotNames) {
   }
 
   var auctionRun  = {
+    timeoutId: 0,
     inAuction: AuctionMediator.IN_AUCTION.FALSE,
     slots: auctionSlots,
     bids: [],
     lateBids: [],
     bidStatus: {},
-    targeting: []
+    targeting: [],
+    auctionType: auctionType || AuctionMediator.AUCTION_TYPE.START
   };
   // reset bidder status
   for (var k in this.bidProviders) {
@@ -1376,12 +1522,12 @@ AuctionMediator.prototype.setAuctionTrigger = function(triggerFn) {
  * Start the process to build and send publisher ad server auction request.
  * @private
  */
-AuctionMediator.prototype.startAuction_ = function(auctionIdx, auctionType) {
+AuctionMediator.prototype.startAuction_ = function(auctionIdx, auctionType, forcedDone) {
   Event.publish(Event.EVENT_TYPE.BID_ASSEMBLER, 'AuctionMediator');
   if (this.bidAssembler.operators.length > 0) {
-    this.bidAssembler.process(this.auctionRun[auctionIdx].bids);
+    this.auctionRun[auctionIdx].bids = this.bidAssembler.process(this.auctionRun[auctionIdx].bids);
   }
-  this.processTargeting_(auctionIdx, auctionType);
+  this.processTargeting_(auctionIdx, auctionType, forcedDone);
 };
 
 /**
@@ -1394,8 +1540,8 @@ AuctionMediator.prototype.startTimeout_ = function(auctionIdx, auctionType) {
     var idx = auctionIdx,
       type = auctionType,
       startFn = util.bind(this.startAuction_, this);;
-    setTimeout(function() {
-      startFn(idx, type);
+    this.auctionRun[auctionIdx].timeoutId = setTimeout(function() {
+      startFn(idx, type, true);
     }, this.timeout_);
   }
   return this;
@@ -1517,7 +1663,7 @@ AuctionMediator.prototype.buildTargeting_ = function(auctionIdx) {
     for (var j = 0; j < bidSet.length; j++) {
       var bid = bidSet[j];
       tgtObject.bids.push({
-        value: bid.value || '',
+        value: bid.value,
         provider: bid.provider,
         id: bid.id,
         targeting: bid.targeting || {}
@@ -1525,7 +1671,7 @@ AuctionMediator.prototype.buildTargeting_ = function(auctionIdx) {
 
       if (!this.omitDefaultBidKey()) {
         var bidKey = this.getBidKey(bid);
-        tgtObject.targeting[bidKey] = tgtObject.targeting[bidKey] || (bid.value || '');
+        tgtObject.targeting[bidKey] = tgtObject.targeting[bidKey] || bid.value;
       }
       this.mergeKeys(tgtObject.targeting, bid.targeting);
     }
@@ -1540,7 +1686,7 @@ AuctionMediator.prototype.buildTargeting_ = function(auctionIdx) {
     var bid = bidSet[k];
 
     pgTgtObject.bids.push({
-      value: bid.value || '',
+      value: bid.value,
       provider: bid.provider,
       id: bid.id,
       targeting: bid.targeting
@@ -1548,7 +1694,7 @@ AuctionMediator.prototype.buildTargeting_ = function(auctionIdx) {
 
     if (!this.omitDefaultBidKey()) {
       var bidKey = this.getBidKey(bid);
-      pgTgtObject.targeting[bidKey] = pgTgtObject.targeting[bidKey] || (bid.value || '');
+      pgTgtObject.targeting[bidKey] = pgTgtObject.targeting[bidKey] || bid.value;
     }
     this.mergeKeys(pgTgtObject.targeting, bid.targeting);
   }
@@ -1572,20 +1718,34 @@ AuctionMediator.prototype.processTargeting_ = function(auctionIdx, auctionType) 
   var name = self.auctionProvider.name;
   var idx = auctionIdx;
   var cbTimeout = self.auctionProvider.getTimeout();
+  var cbTimeoutId;
+  var auctionTimeoutId = this.auctionRun[auctionIdx].timeoutId;
 
-  var timeoutId;
-  var doneCb = function() {
+  var doneCb = function(annotations) {
+    var eventAnnotations = {};
+    Event.newEventAnnotation(Event.ANNOTATION_TYPE.AUCTION_TYPE.NAME, auctionType, 'Done auction type: ' + auctionType, eventAnnotations);
+
+    for (var annotationName in annotations) {
+      eventAnnotations[annotationName] = annotations[annotationName];
+    }
+
     if (!doneCalled) {
       doneCalled = true;
-      clearTimeout(timeoutId);
-      self.auctionDone(idx, name);
+      clearTimeout(cbTimeoutId);
+      self.auctionDone(idx, name, eventAnnotations);
     }
   };
 
-  timeoutId = setTimeout(function() {
+  cbTimeoutId = setTimeout(function() {
     if (!doneCalled) {
-      Event.publish(Event.EVENT_TYPE.WARN, 'Warning: The auction done callback for "' + name + '" hasn\'t been called within the allotted time (' + (cbTimeout / 1000) + 'sec)');
-      doneCb();
+      if (auctionTimeoutId) {
+        clearTimeout(auctionTimeoutId);
+      }
+      var msg = 'The auction done callback for "' + name + '" hasn\'t been called within the allotted time (' + (cbTimeout / 1000) + 'sec)';
+      var timeoutAnnotation = Event.newEventAnnotation(Event.ANNOTATION_TYPE.FORCED_DONE.NAME, Event.ANNOTATION_TYPE.FORCED_DONE.TIMEOUT, msg);
+      Event.publish(Event.EVENT_TYPE.WARN, 'Warning:' + msg);
+
+      doneCb(timeoutAnnotation);
     }
   }, cbTimeout);
 
@@ -1600,23 +1760,34 @@ AuctionMediator.prototype.processTargeting_ = function(auctionIdx, auctionType) 
   var targeting = self.buildTargeting_(idx);
   this.auctionRun[idx].targeting = targeting;
 
-  if (auctionType === AuctionMediator.AUCTION_TYPE.START) {
-    self.auctionProvider.init(targeting, doneCb);
-  } else {
-    self.auctionProvider.refresh(targeting, doneCb);
+  try {
+    if (auctionType === AuctionMediator.AUCTION_TYPE.START) {
+      self.auctionProvider.init(targeting, doneCb);
+    } else {
+      self.auctionProvider.refresh(targeting, doneCb);
+    }
+  } catch (err) {
+    Event.publish(Event.EVENT_TYPE.ERROR, err);
+    var errorAnnotation = Event.newEventAnnotation(Event.ANNOTATION_TYPE.FORCED_DONE.NAME, Event.ANNOTATION_TYPE.FORCED_DONE.ERROR, err.message);
+    doneCb(errorAnnotation);
+    if (self.auctionProvider.throwErrors()) {
+      throw err;
+    }
   }
 };
 
 /**
  * Notification of auction complete
  *
+ * @param {number} auctionIdx Index to the [AuctionRun]{@link typeDefs.AuctionRun} data object
  * @param {string} data The auction mediator's name
+ * @param {boolean} forcedDone Pubfood has initiated the auction if true
  * @fires AUCTION_COMPLETE
  */
-AuctionMediator.prototype.auctionDone = function(auctionIdx, data) {
+AuctionMediator.prototype.auctionDone = function(auctionIdx, data, annotations) {
   this.auctionRun[auctionIdx].inAuction = AuctionMediator.IN_AUCTION.DONE;
   var auctionTargeting = this.getAuctionRun(auctionIdx).targeting;
-  Event.publish(Event.EVENT_TYPE.AUCTION_COMPLETE, { name: data, targeting: auctionTargeting });
+  Event.publish(Event.EVENT_TYPE.AUCTION_COMPLETE, { name: data, targeting: auctionTargeting }, annotations);
   setTimeout(function() {
     // push this POST event onto the next tick of the event loop
     Event.publish(Event.EVENT_TYPE.AUCTION_POST_RUN, data);
@@ -1690,6 +1861,7 @@ AuctionMediator.prototype.addBidProvider = function(delegateConfig) {
     } else {
       var bidDoneTimeout = this.getBidProviderDoneTimeout_(delegateConfig);
       bidProvider.timeout(bidDoneTimeout);
+      bidProvider.throwErrors(this.throwErrors_);
       this.bidProviders[bidProvider.name] = bidProvider;
     }
   } else {
@@ -1716,6 +1888,7 @@ AuctionMediator.prototype.setAuctionProvider = function(delegateConfig) {
   if (auctionProvider) {
     var auctionDoneTimeout = this.getAuctionProviderDoneTimeout_(delegateConfig);
     auctionProvider.timeout(auctionDoneTimeout);
+    auctionProvider.throwErrors(this.throwErrors_);
     this.auctionProvider = auctionProvider;
   } else {
     var name = delegateConfig && delegateConfig.name ? delegateConfig.name : 'undefined';
@@ -1822,7 +1995,7 @@ AuctionMediator.prototype.start = function(randomizeBidRequests, startTimestamp)
     Event.publish(Event.EVENT_TYPE.WARN, 'Warning: auction provider is not defined.');
     return this;
   }
-  var auctionIdx = this.newAuctionRun();
+  var auctionIdx = this.newAuctionRun(AuctionMediator.AUCTION_TYPE.START);
   Event.setAuctionId(this.getAuctionId(auctionIdx));
   Event.publish(Event.EVENT_TYPE.PUBFOOD_API_START, startTimestamp);
 
@@ -1847,7 +2020,7 @@ AuctionMediator.prototype.refresh = function(slotNames) {
     Event.publish(Event.EVENT_TYPE.WARN, 'Warning: auction provider is not defined.');
     return this;
   }
-  var auctionIdx = this.newAuctionRun(slotNames);
+  var auctionIdx = this.newAuctionRun(AuctionMediator.AUCTION_TYPE.REFRESH, slotNames);
   Event.setAuctionId(this.getAuctionId(auctionIdx));
   Event.publish(Event.EVENT_TYPE.PUBFOOD_API_REFRESH);
 
@@ -1891,32 +2064,49 @@ AuctionMediator.prototype.getBids_ = function(auctionIdx, auctionType, provider,
   var doneCalled = false;
   var idx = auctionIdx;
   var cbTimeout = provider.getTimeout();
+
   var pushBidCb = function(bid){
     bid.auctionIdx = idx;
     self.pushBid(idx, bid, name);
   };
-
   var timeoutId;
-  var bidDoneCb = function(){
-    if(!doneCalled) {
+  var bidDoneCb = function(annotations) {
+    var eventAnnotations = {};
+    Event.newEventAnnotation(Event.ANNOTATION_TYPE.AUCTION_TYPE.NAME, auctionType, 'Done auction type: ' + auctionType, eventAnnotations);
+
+    for (var annotationName in annotations) {
+      eventAnnotations[annotationName] = annotations[annotationName];
+    }
+    if (!doneCalled) {
       doneCalled = true;
       clearTimeout(timeoutId);
-      self.doneBid(idx, auctionType, name);
+      self.doneBid(idx, auctionType, name, eventAnnotations);
     }
   };
 
   timeoutId = setTimeout(function(){
     if(!doneCalled) {
-      Event.publish(Event.EVENT_TYPE.WARN, 'Warning: The bid done callback for "'+name+'" hasn\'t been called within the allotted time (' + (cbTimeout/1000) + 'sec)');
-      bidDoneCb();
+      var msg = 'The bid done callback for "'+name+'" hasn\'t been called within the allotted time (' + (cbTimeout/1000) + 'sec)';
+      Event.publish(Event.EVENT_TYPE.WARN, 'Warning: ' + msg);
+      var timeoutAnnotation = Event.newEventAnnotation(Event.ANNOTATION_TYPE.FORCED_DONE.NAME, Event.ANNOTATION_TYPE.FORCED_DONE.TIMEOUT, msg);
+      bidDoneCb(timeoutAnnotation);
     }
   }, cbTimeout);
 
   Event.publish(Event.EVENT_TYPE.BID_START, name);
-  if (auctionType === AuctionMediator.AUCTION_TYPE.START) {
-    provider.init(slots, pushBidCb, bidDoneCb);
-  } else {
-    provider.refresh(slots, pushBidCb, bidDoneCb);
+  try {
+    if (auctionType === AuctionMediator.AUCTION_TYPE.START) {
+      provider.init(slots, pushBidCb, bidDoneCb);
+    } else {
+      provider.refresh(slots, pushBidCb, bidDoneCb);
+    }
+  } catch (err) {
+    Event.publish(Event.EVENT_TYPE.ERROR, err);
+    var errorAnnotation = Event.newEventAnnotation(Event.ANNOTATION_TYPE.FORCED_DONE.NAME, Event.ANNOTATION_TYPE.FORCED_DONE.ERROR, err.message);
+    bidDoneCb(errorAnnotation);
+    if (provider.throwErrors()) {
+      throw err;
+    }
   }
 };
 
@@ -1949,9 +2139,9 @@ AuctionMediator.prototype.pushBid = function(auctionIdx, bidObject, providerName
  * @param {string} bidProvider The [BidProvider]{@link pubfood#provider.BidProvider} name
  * @fires pubfood.PubfoodEvent.BID_COMPLETE
  */
-AuctionMediator.prototype.doneBid = function(auctionIdx, auctionType, bidProvider) {
+AuctionMediator.prototype.doneBid = function(auctionIdx, auctionType, bidProvider, annotations) {
   // TODO consider having useful bid data available upon completion like the bids
-  Event.publish(Event.EVENT_TYPE.BID_COMPLETE, bidProvider);
+  Event.publish(Event.EVENT_TYPE.BID_COMPLETE, bidProvider, annotations);
   this.auctionRun[auctionIdx].bidStatus[bidProvider] = true;
   this.checkBids_(auctionIdx, auctionType);
 };
@@ -2035,6 +2225,18 @@ AuctionMediator.prototype.getAuctionRunTargeting = function(auctionIdx) {
 };
 
 /**
+ * Get auction run type.<br>
+ * [ANNOTATION_TYPE.AUCTION_TYPE.INIT]{@link PubfoodEvent#ANNOTATION_TYPE}<br>
+ * [ANNOTATION_TYPE.AUCTION_TYPE.REFRESH]{@link PubfoodEvent#ANNOTATION_TYPE}
+ * @param {number} [auctionIdx] the auction count index
+ * @return {string}
+ * @private
+ */
+AuctionMediator.prototype.getAuctionRunType = function(auctionIdx) {
+  return this.auctionRun[auctionIdx].auctionType;
+};
+
+/**
  * Prefix the bid provider default targeting key with the provider name.
  * @param {boolean} usePrefix turn prefixing off if false. Default: true.
  * @private
@@ -2058,10 +2260,31 @@ AuctionMediator.prototype.omitDefaultBidKey = function(defaultBidKeyOff) {
   return this.omitDefaultBidKey_;
 };
 
-util.extends(AuctionMediator, PubfoodObject);
+/**
+ * Re-throw caught delegate errors.
+ * Default: false<br><br>
+ * The [throwErrors]{@link PubfoodProvider#throwErrors} property for
+ * all [BidDelegate]{@link typeDefs.BidDelegate} and [AuctionDelegate]{@link typeDefs.AuctionDelegate} providers will be set.
+ * @param {boolean} [silent] if true: re-throw errors in [BidDelegate]{@link typeDefs.BidDelegate} and [AuctionDelegate]{@link typeDefs.AuctionDelegate} functions
+ * @return {pubfood}
+ */
+AuctionMediator.prototype.throwErrors = function(silent) {
+  if (util.asType(silent) === 'boolean') {
+    this.throwErrors_ = silent;
+
+    this.throwErrors_ = this.auctionProvider ? this.auctionProvider.throwErrors(silent) : this.throwErrors_;
+    for (var idx in this.bidProviders) {
+      var bidProvider = this.bidProviders[idx];
+      this.throwErrors_ = bidProvider ? bidProvider.throwErrors(silent) : this.throwErrors_;
+    }
+  }
+  return this.throwErrors_;
+};
+
+util.extendsObject(AuctionMediator, PubfoodObject);
 module.exports = AuctionMediator;
 
-},{"../assembler/bidassembler":2,"../assembler/requestassembler":3,"../assembler/transformoperator":4,"../event":6,"../model/bid":10,"../model/slot":11,"../provider/auctionprovider":12,"../provider/bidprovider":13,"../pubfoodobject":15,"../util":16}],10:[function(require,module,exports){
+},{"../assembler/bidassembler":2,"../assembler/requestassembler":3,"../assembler/transformoperator":4,"../event":6,"../model/bid":10,"../model/slot":11,"../provider/auctionprovider":12,"../provider/bidprovider":13,"../pubfoodobject":16,"../util":17}],10:[function(require,module,exports){
 /**
  * pubfood
  */
@@ -2087,7 +2310,7 @@ function Bid(value) {
   /** @property {string} [slot] the slot name */
   this.slot;
   /** @property {string|number} value the bid value. Default: empty string */
-  this.value = value || 0;
+  this.value = util.asType(value) === 'undefined' ? '' : value;
   /** @property {string} type derived bid value type: from {@link util.asType}  */
   this.type = util.asType(this.value);
   /** @property {string} [label] optional label for adserver key targeting for bid value e.g. <code>label=2.00</code> */
@@ -2121,7 +2344,7 @@ Bid.fromObject = function(config) {
  * @return {pubfood#model.Bid}
  */
 Bid.prototype.setValue = function(v) {
-  this.value = v || '';
+  this.value = util.asType(v) === 'undefined' ? '' : v;
   this.type = util.asType(this.value);
   return this;
 };
@@ -2143,10 +2366,10 @@ Bid.prototype.addSize = function(w, h) {
   return this;
 };
 
-util.extends(Bid, PubfoodObject);
+util.extendsObject(Bid, PubfoodObject);
 module.exports = Bid;
 
-},{"../pubfoodobject":15,"../util":16}],11:[function(require,module,exports){
+},{"../pubfoodobject":16,"../util":17}],11:[function(require,module,exports){
 /**
  * pubfood
  */
@@ -2248,10 +2471,10 @@ Slot.prototype.addBidProvider = function(bidProvider) {
   return this;
 };
 
-util.extends(Slot, PubfoodObject);
+util.extendsObject(Slot, PubfoodObject);
 module.exports = Slot;
 
-},{"../interfaces":7,"../pubfoodobject":15,"../util":16}],12:[function(require,module,exports){
+},{"../interfaces":7,"../pubfoodobject":16,"../util":17}],12:[function(require,module,exports){
 /**
  * pubfood
  */
@@ -2261,7 +2484,7 @@ module.exports = Slot;
 var util = require('../util');
 var AuctionDelegate = require('../interfaces').AuctionDelegate;
 var Event = require('../event');
-var PubfoodObject = require('../pubfoodobject');
+var PubfoodProvider = require('./pubfoodprovider');
 
 /**
  * AuctionProvider decorates the {@link AuctionDelegate} to implement the publisher ad server requests.
@@ -2339,12 +2562,16 @@ AuctionProvider.prototype.init = function(targeting, done) {
  * @param {auctionDoneCallback} done a callback to execute on init complete
  */
 AuctionProvider.prototype.refresh = function(targeting, done) {
-  var refresh = (this.auctionDelegate && this.auctionDelegate.refresh) || null;
-  if (!refresh) {
-    Event.publish(Event.EVENT_TYPE.WARN, 'AuctionProvider.auctionDelegate.refresh not defined.');
+  if (!this.auctionDelegate || !this.auctionDelegate.refresh) {
+    var msg = 'AuctionProvider.auctionDelegate.refresh not defined.';
+    Event.publish(Event.EVENT_TYPE.WARN, msg);
+    if (util.asType(done) === 'function') {
+      var errorAnnotation = Event.newEventAnnotation(Event.ANNOTATION_TYPE.FORCED_DONE.NAME, Event.ANNOTATION_TYPE.FORCED_DONE.ERROR, msg);
+      done(errorAnnotation);
+    }
     return;
   }
-  refresh(targeting, done);
+  this.auctionDelegate.refresh(targeting, done);
 };
 
 /**
@@ -2365,10 +2592,10 @@ AuctionProvider.prototype.getTimeout = function() {
   return this.timeout_;
 };
 
-util.extends(AuctionProvider, PubfoodObject);
+util.extendsObject(AuctionProvider, PubfoodProvider);
 module.exports = AuctionProvider;
 
-},{"../event":6,"../interfaces":7,"../pubfoodobject":15,"../util":16}],13:[function(require,module,exports){
+},{"../event":6,"../interfaces":7,"../util":17,"./pubfoodprovider":14}],13:[function(require,module,exports){
 /**
  * pubfood
  */
@@ -2378,7 +2605,7 @@ module.exports = AuctionProvider;
 var util = require('../util');
 var BidDelegate = require('../interfaces').BidDelegate;
 var Event = require('../event');
-var PubfoodObject = require('../pubfoodobject');
+var PubfoodProvider = require('./pubfoodprovider');
 
 /**
  * BidProvider implements bidding partner requests.
@@ -2387,6 +2614,7 @@ var PubfoodObject = require('../pubfoodobject');
  * @param {BidDelegate} delegate the delegate object that implements [libUri()]{@link pubfood#provider.BidProvider#libUri}, [init()]{@link pubfood#provider.BidProvider#init} and [refresh()]{@link pubfood#provider.BidProvider#refresh}
  * @property {string} name the name of the provider
  * @augments PubfoodObject
+ * @augments PubfoodProvider
  * @memberof pubfood#provider
  */
 function BidProvider(bidDelegate) {
@@ -2480,7 +2708,12 @@ BidProvider.prototype.init = function(slots, pushBid, done) {
 BidProvider.prototype.refresh = function(slots, pushBid, done) {
   var refresh = (this.bidDelegate && this.bidDelegate.refresh) || null;
   if (!refresh) {
-    Event.publish(Event.EVENT_TYPE.WARN, 'BidProvider.bidDelegate.refresh not defined.');
+    var msg = 'BidProvider.bidDelegate.refresh not defined.';
+    Event.publish(Event.EVENT_TYPE.WARN, msg);
+    if (util.asType(done) === 'function') {
+      var errorAnnotation = Event.newEventAnnotation(Event.ANNOTATION_TYPE.FORCED_DONE.NAME, Event.ANNOTATION_TYPE.FORCED_DONE.ERROR, msg);
+      done(errorAnnotation);
+    }
     return;
   }
   refresh(slots, pushBid, done);
@@ -2518,10 +2751,46 @@ BidProvider.prototype.getTimeout = function() {
   return this.timeout_;
 };
 
-util.extends(BidProvider, PubfoodObject);
+util.extendsObject(BidProvider, PubfoodProvider);
 module.exports = BidProvider;
 
-},{"../event":6,"../interfaces":7,"../pubfoodobject":15,"../util":16}],14:[function(require,module,exports){
+},{"../event":6,"../interfaces":7,"../util":17,"./pubfoodprovider":14}],14:[function(require,module,exports){
+/**
+ * pubfood
+ */
+
+'use strict';
+
+var PubfoodObject = require('../pubfoodobject');
+var util = require('../util');
+
+/**
+ * Provider is a base type for pubfood provider types.
+ *
+ * @class
+ */
+function PubfoodProvider() {
+  this.throwErrors_ = false;
+}
+
+/**
+ * Re-throw caught delegate errors.
+ *
+ * Default: false
+ * @param {boolean} silent if true: re-throw errors in [BidDelegate]{@link typeDefs.BidDelegate} and [AuctionDelegate]{@link typeDefs.AuctionDelegate} functions
+ * @return {boolean}
+ */
+PubfoodProvider.prototype.throwErrors = function(silent) {
+  if (util.asType(silent) === 'boolean') {
+    this.throwErrors_ = silent;
+  }
+  return this.throwErrors_;
+};
+
+util.extendsObject(PubfoodProvider, PubfoodObject);
+module.exports = PubfoodProvider;
+
+},{"../pubfoodobject":16,"../util":17}],15:[function(require,module,exports){
  /**
  * pubfood
  *
@@ -2554,7 +2823,7 @@ var AuctionMediator = require('./mediator/auctionmediator');
   };
 
   pubfood.library = pubfood.prototype = {
-    version: '0.2.0',
+    version: '1.0.0',
     PubfoodError: require('./errors'),
     logger: logger
   };
@@ -2638,13 +2907,35 @@ var AuctionMediator = require('./mediator/auctionmediator');
   };
 
   /**
-   * Get the auction identifier.
+   * Get the auction identifier.<br>
    *
-   * Returns the <id>:<auction count>
+   * Returns the auction identifier key.
+   * @example Auction Id Format
+   * <id>:<auction count>
    * @return {string} the auctionId
    */
   api.prototype.getAuctionId = function() {
     return this.mediator.getAuctionId();
+  };
+
+  /**
+   * Get the auction count.<br>
+   * Returns the latest auction index.
+   * @return {number}
+   */
+  api.prototype.getAuctionCount = function() {
+    return this.mediator.getAuctionCount();
+  };
+
+  /**
+   * Get the auction run data structure.
+   *
+   * @param {number} idx the integer index of the auction run
+   * @return {AuctionRun}
+   * @see [getAuctionCount()]{@link pubfood#getAuctionCount}, for reference to auction run index
+   */
+  api.prototype.getAuctionRun = function(idx) {
+    return this.mediator.getAuctionRun(idx);
   };
 
   /**
@@ -2815,28 +3106,36 @@ var AuctionMediator = require('./mediator/auctionmediator');
   };
 
   /**
-   * Sets the time in which bid providers must supply bids.
+   * Gets or sets the time in which bid providers must supply bids.
    *
-   * @param {number} millis - milliseconds to set the timeout
+   * @param {number} [millis] - milliseconds to set the timeout
+   * @returns {number} the auction timeout
    */
   api.prototype.timeout = function(millis) {
     this.pushApiCall_('api.timeout', arguments);
-    this.mediator.timeout(millis);
-    return this;
+    if (util.asType(millis) === 'number') {
+      this.mediator.timeout(millis);
+    }
+    return this.mediator.getTimeout();
   };
 
   /**
-   * Sets the default done callback timeout offset. Default: <code>5000ms</code>
+   * Gets or sets the default done callback timeout offset. Default: <code>5000ms</code>
    * <p>
    * If a [BidProvider.timeout]{@link pubfood#provider.BidProvider#timeout} value is not set, specifies the additional time in which a provider gets to push late bids and call [done()]{@link typeDefs.bidDoneCallback}.
    * <p>Assists capturing late bid data for analytics and reporting by giving additional timeout "grace" period.
    * <p>Bid provider timeout calculated as the following if not otherwise set:
    * <li><code>timeout(millis) + doneCallbackOffset(millis)</code></li>
    * <p>If the timeout elapses, done() is called on behalf of the provider.
-   * @param {number} millis - milliseconds to set the timeout
+   * @param {number} [millis] - milliseconds to set the timeout
+   * @returns {number} the done callback offset
    */
   api.prototype.doneCallbackOffset = function(millis) {
-    this.mediator.doneCallbackOffset(millis);
+    this.pushApiCall_('api.doneCallbackOffset', arguments);
+    if (util.asType(millis) === 'number') {
+      this.mediator.doneCallbackOffset(millis);
+    }
+    return this.mediator.getDoneCallbackOffset();
   };
 
   /**
@@ -2889,12 +3188,7 @@ var AuctionMediator = require('./mediator/auctionmediator');
     if(typeof startCb === 'function'){
       startCb(configStatus.hasError, configStatus.details);
     }
-
-    // only continue of there aren't any config errors
-    if (!configStatus.hasError) {
-      this.mediator.start(this.randomizeBidRequests_, startTimestamp);
-    }
-
+    this.mediator.start(this.randomizeBidRequests_, startTimestamp);
     return this;
   };
 
@@ -2947,13 +3241,26 @@ var AuctionMediator = require('./mediator/auctionmediator');
     return this;
   };
 
+  /**
+   * Re-throw caught delegate errors.
+   * Default: false<br><br>
+   * The [throwErrors]{@link PubfoodProvider#throwErrors} property for
+   * all [BidDelegate]{@link typeDefs.BidDelegate} and [AuctionDelegate]{@link typeDefs.AuctionDelegate} providers will be set.
+   * @param {boolean} [silent] if true: re-throw errors in [BidDelegate]{@link typeDefs.BidDelegate} and [AuctionDelegate]{@link typeDefs.AuctionDelegate} functions
+   * @return {pubfood}
+   */
+  api.prototype.throwErrors = function(silent) {
+    this.mediator.throwErrors(silent);
+    return this;
+  };
+
   api.prototype.library = pubfood.library;
 
   global.pubfood = pubfood;
   return pubfood;
 }));
 
-},{"./errors":5,"./event":6,"./interfaces":7,"./logger":8,"./mediator/auctionmediator":9,"./util":16}],15:[function(require,module,exports){
+},{"./errors":5,"./event":6,"./interfaces":7,"./logger":8,"./mediator/auctionmediator":9,"./util":17}],16:[function(require,module,exports){
 /**
  * pubfood
  */
@@ -3012,7 +3319,7 @@ PubfoodObject.prototype.getParamKeys = function() {
 
 module.exports = PubfoodObject;
 
-},{"./util":16}],16:[function(require,module,exports){
+},{"./util":17}],17:[function(require,module,exports){
 /**
  * pubfood
  */
@@ -3047,7 +3354,7 @@ var util = {
    *
    * @todo refactor to use? - https://github.com/isaacs/inherits
    */
-  extends: function(child, parent) {
+  extendsObject: function(child, parent) {
 
     for (var k in parent.prototype) {
       child.prototype[k] = parent.prototype[k];
@@ -3058,10 +3365,18 @@ var util = {
       return parent;
     });
 
-    child.prototype.init_ = function() {
-      var parents = this.parents || [];
+    child.prototype.init_ = function(a1, a2, a3, a4, a5) {
+      var parents = this.parents || [],
+        len = arguments.length;
       for (var i = 0; i < parents.length; i++) {
-        parents[i]().call(this);
+        switch (len) {
+        case 0: parents[i]().call(this); break;
+        case 1: parents[i]().call(this, a1); break;
+        case 2: parents[i]().call(this, a1, a2); break;
+        case 3: parents[i]().call(this, a1, a2, a3); break;
+        case 4: parents[i]().call(this, a1, a2, a3, a4); break;
+        default: parents[i]().call(this, a1, a2, a3, a4, a5); break;
+        }
       }
     };
   },
@@ -3087,7 +3402,7 @@ var util = {
       } else {
         /*eslint-disable no-empty */
         try {
-          doc.write('<script src="' + scriptSrc + '"></script>');
+          doc.write('<script src="' + scriptSrc + '">\x3C/script>');
         } catch (e) { }
         /*eslint-enable no-empty: */
       }
@@ -3212,5 +3527,5 @@ util.randomize = function(array) {
 
 module.exports = util;
 
-},{}]},{},[14])(14)
+},{}]},{},[15])(15)
 });
