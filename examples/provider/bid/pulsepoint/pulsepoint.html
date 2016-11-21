@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>PulsePoint - PubFood Example page</title>
+  </head>
+  <body>
+    <script src="../../../../build/pubfood.js"></script>
+    <script>
+           /**
+            * PulsePoint adapter for PubFood. To create a Bid Provider for PubFood, create an instance of PulsepointPubFoodAdapter
+            * and then invoke the bidProvider method
+            * (eg) new PulsepointPubFoodAdapter().bidProvider();
+            *
+            * @constructor
+            * @author avenkatraman
+            * @param {Object} options - Optional options for the adapter
+            * @param {String} options.libUri - Library Uri override.
+            * @param {String} options.bidUri - Bidding endpiont override.
+            */
+            var PulsepointPubFoodAdapter = function(options) {
+                options = options || {};
+                var ads = {};
+                var sessionSlots = {};
+                var name = 'pulsepoint';
+                var libTimeout = options.libTimeout || 1000;
+                var libCheckTimeout = options.libCheckTimeout || 50;
+                var libUri = (options.libUri || window.location.protocol + '//ads.contextweb.com/getjs.static.js');
+                var bidUri = options.bidUri || window.location.protocol + '//bid.contextweb.com/header/tag';
+                window.ppRender = window.ppRender || function(doc, id, sessionId) { ppRender(doc,id, sessionId); };
+
+                /**
+                * Helper function that will create a BidProvider according to the specifications of
+                * PubFood.
+                */
+                this.bidProvider = function() {
+                    var bidFunction = function(slots, pushBid, done) {
+                        var sessionId = Math.floor(Math.random() * 10000000);
+                        sessionSlots[sessionId] = slots;
+                        ads[sessionId] = {};
+                        requestBids(sessionId, slots, pushBid, done);
+                    };
+                    return {
+                        name: name,
+                        libUri: libUri,
+                        init: bidFunction,
+                        refresh: bidFunction
+                    };
+                };
+
+                /**
+                * Requests bids from PulsePoint bidder for the slots. Invokes
+                * the callback done is invoked when bids are available for all slots.
+                *
+                * @param sessionId session id for which the bids are requested for the slots
+                * @param slots ad slots that are requesting bids
+                * @param pushBid callback to invoke when bid is available for a slot.
+                * @param done callback to invoke when all processing is complete
+                */
+                function requestBids(sessionId, slots, pushBid, done) {
+                    var index;
+                    for (index in slots) {
+                        var slot = slots[index];
+                        var params = slot.getParam(name);
+                        params.placementCode = slot.name;
+                        params.elementId = slot.elementId;
+                        bid(params, pushBid, done, sessionId);
+                    }
+                }
+
+                /**
+                * Sends a bid request to pulsepoint bidder.
+                *
+                * @param sessionId session id for which the bids are requested for the slots
+                * @param params parameters for the ad slot
+                * @param pushBid callback to invoke when bid is available for a slot.
+                * @param done callback to invoke when all processing is complete
+                * @param count optional counter for the number of tries we waited for getting the getjs library.
+                */
+                function bid(params, pushBid, done, sessionId, count) {
+                    if(window.pp && window.pp.Ad) {
+                        var callback = function(bidResponse) { 
+                            bidResponseAvailable(params, bidResponse, pushBid, done, sessionId); 
+                        };
+                        var ppBidRequest = new window.pp.Ad({
+                            cf : params.cf,
+                            cp : params.cp,
+                            ct : params.ct,
+                            cn : 1,
+                            ca : window.pp.requestActions.BID,
+                            cu : bidUri,
+                            adUnitId: params.placementCode,
+                            callback: callback
+                        });
+                        ppBidRequest.display();
+                    } else {
+                        //did not download the lib within this timeout.
+                        if(count && (libCheckTimeout * count > libTimeout)) {
+                            bidResponseAvailable(params, null, pushBid, done, sessionId);
+                        }
+                        setTimeout(function() { bid(params, pushBid, done, sessionId, (count || 0) + 1); }, 50);
+                    }
+                }
+
+                /**
+                * Bid response available from PulsePoint. The pushBid callback is invoked for bids made.
+                * pushBid not invoked for passbacks. When all adslot bids are collected done callback is invoked.
+                *
+                * @param sessionId session id for which the bids are requested for the slots
+                * @param params parameters for the ad slot
+                * @param pushBid callback to invoke when bid is available for a slot.
+                * @param done callback to invoke when all processing is complete
+                */
+                function bidResponseAvailable(params, bidResponse, pushBid, done, sessionId) {
+                    if(bidResponse) {
+                        ads[sessionId][params.placementCode] = { 
+                            html: bidResponse.html,
+                            params: params
+                        };
+                        pushBid({
+                            slot: params.placementCode,
+                            value: bidResponse.bidCpm,
+                            targeting: {
+                                'hb_pp_bidder': name,
+                                'hb_pp_bid': bidResponse.bidCpm.toFixed(2),
+                                'hb_pp_adid': params.placementCode,
+                                'hb_pp_sessionid': sessionId
+                            }
+                        });
+                    } else {
+                        ads[sessionId][params.placementCode] = null;
+                    }
+                    if(allDone(sessionId)) {
+                        done();
+                    }
+                }
+
+                /**
+                * Checks if all bids have been processed for the session
+                *
+                * @param sessionId session id in question.
+                */
+                function allDone(sessionId) {
+                    var index;
+                    for(index in sessionSlots[sessionId]) {
+                        var slot = sessionSlots[sessionId][index];
+                        if(!ads[sessionId].hasOwnProperty(slot.name)) {
+                            return false;
+                        }
+                    }
+                    return true;
+                }
+
+                /**
+                * Renders the ad slot with the creative id.
+                * 
+                * @param doc document of the iframe (from dfp)
+                * @param id placement id
+                * @param sessionId session id in question.
+                */
+                function ppRender(doc, id, sessionId) {
+                    try {
+                        var creative = ads[sessionId][id].html;
+                        var params = ads[sessionId][id].params;
+                        if(creative) {
+                            var adSize = params.cf.toUpperCase().split('X');
+                            var height = adSize[1];
+                            var width = adSize[0];
+                            //remove all the existing iframes, to replace the creative in refresh mode.
+                            var existingFrames = doc.getElementsByTagName('IFRAME');
+                            for(var i=0; i < existingFrames.length; i++) {
+                                existingFrames[i].parentNode.removeChild(existingFrames[i]);
+                            }
+                            var ifr = document.createElement("iframe");
+                            ifr.width = width;
+                            ifr.height = height;
+                            ifr.style.border = "0px";
+                            ifr.scrolling = "no";
+                            ifr.frameborder = 0;
+                            ifr.allowtransparency = !0;
+                            doc.body.appendChild(ifr);
+                            ifr.contentWindow.contents = creative;
+                            ifr.src = 'javascript:window["contents"]'; //jshint ignore:line
+                            if (doc.defaultView && doc.defaultView.frameElement) {
+                                doc.defaultView.frameElement.width = width;
+                                doc.defaultView.frameElement.height = height;
+                            }
+                            var ifrDoc = (ifr.contentWindow) ? ifr.contentWindow.document : (ifr.contentDocument.document) ? ifr.contentDocument.document : ifr.contentDocument;
+                            if(ifrDoc.body) {
+                                ifrDoc.body.style.margin = '0';
+                            }
+                        }
+                    } catch(ex) {
+                        logError(ex);
+                    }
+                }
+
+                function logError(ex) {
+                    if(console) {
+                        if(console.error) {
+                            console.error(ex);    
+                        } else if(console.log) {
+                            console.log(ex);
+                        }
+                    }
+                }
+            };
+    </script>
+
+    <script type="text/javascript">
+     window.googletag = window.googletag || {};
+     googletag.cmd = googletag.cmd || [];
+     var ybotq = ybotq || [];
+     var pf = new pubfood();
+
+     pf.omitDefaultBidKey(true);
+     var batch = [];
+
+     // this reporter listens on all events and pushes the event data to a queue `batch`
+     pf.observe(function(event) {
+         batch.push(event);
+     });
+
+     // this reporter only listens on the `AUCTION_COMPLETE` event, then loops over and displays the event data
+     pf.observe('AUCTION_COMPLETE', function(event) {
+         console.log('---------------------------------------');
+         for (var i = 0; i < batch.length; i++) {
+             console.log('%c' + batch[i].type, 'padding-right:5px;font-weight:bold;display:block;', JSON.stringify(batch[i]));
+         }
+     });
+
+     var slot = pf.addSlot({
+         name: '/1066621/ExchangeTech_Prebid_AdUnit',
+         sizes: [
+             [300, 250]
+         ],
+         elementId: 'div-multi-size',
+         bidProviders: [
+             'pulsepoint'
+         ]
+     });
+     slot.setParam('pulsepoint', {
+         cp: 521732,
+         ct: 76835,
+         cf: '300X250'
+     });
+
+     slot = pf.addSlot({
+         name: '/1066621/ExchangeTech-PrebidTest',
+         sizes: [
+             [728, 90]
+         ],
+         elementId: 'div-leaderboard',
+         bidProviders: [
+             'pulsepoint'
+         ]
+     });
+     slot.setParam('pulsepoint', {
+         cp: 521732,
+         ct: 147007,
+         cf: '728X90'
+     });
+
+     var pulsepointProvider = pf.addBidProvider(new PulsepointPubFoodAdapter().bidProvider());
+
+     pf.setAuctionProvider({
+         name: 'Google',
+         libUri: '//www.googletagservices.com/tag/js/gpt.js',
+         init: function(targeting, done) {
+             googletag.cmd.push(function() {
+                 pf.getAuctionProvider().setParam('isRefresh', false);
+                 var slots = {};
+                 for (var i = 0; i < targeting.length; i++) {
+                     var tgtObject = targeting[i];
+
+                     var gptObject;
+                     if (tgtObject.name) {
+                         gptObject = googletag.defineSlot(tgtObject.name, tgtObject.sizes, tgtObject.elementId).addService(googletag.pubads());
+                         slots[tgtObject.name] = gptObject;
+
+                     } else {
+                         gptObject = googletag.pubads();
+                     }
+                     for (var p in tgtObject.targeting) {
+                         gptObject.setTargeting(p, tgtObject.targeting[p]);
+                     }
+                     pf.getAuctionProvider().setParam('slots', slots);
+
+                 }
+             });
+             googletag.cmd.push(function() {
+                 googletag.pubads().collapseEmptyDivs();
+                 googletag.pubads().enableSingleRequest();
+                 googletag.enableServices();
+                 done();
+             });
+         },
+         refresh: function(targeting, done) {
+             googletag.cmd.push(function() {
+                 googletag.pubads().clearTargeting();
+                 googletag.pubads().clear();
+             });
+
+             googletag.cmd.push(function() {
+                 pf.getAuctionProvider().setParam('isRefresh', true);
+                 var slots = pf.getAuctionProvider().getParam('slots'),
+                     refreshSlots = [];
+                 for (var i = 0; i < targeting.length; i++) {
+                     var tgtObject = targeting[i],
+                         gptObject = slots[tgtObject.name];
+
+                     gptObject = gptObject ? (refreshSlots.push(gptObject), gptObject) : googletag.pubads();
+                     for (var p in tgtObject.targeting) {
+                         gptObject.setTargeting(p, tgtObject.targeting[p]);
+                     }
+                 }
+                 if (refreshSlots.length > 0) {
+                     googletag.pubads().refresh(refreshSlots);
+                 } else {
+                     googletag.pubads().refresh();
+                 }
+                 done();
+             });
+         }
+     });
+
+     function augmentBids(bids, params) {
+       for (var i = 0; i < bids.length; i++) {
+         bids[i]['targeting'].code = (0 | Math.random() * 36).toString(36);
+         bids[i].baseValue = bids[i].value || 0;
+         bids[i].value = bids[i].value + 9;
+       }
+       return bids;
+     }
+
+     pf.addBidTransform(augmentBids);
+
+     pf.timeout(3000);
+     pf.start(Date.now(), function(hasErros, details) {
+       if (hasErros) {
+         console.log('HAS ERRORS', details);
+       }
+     });
+
+    </script>
+
+    <h2>PulsePoint Bid Provider - PubFood</h2>
+    <p>
+    <script>
+     function refreshAds(all) {
+         if (!all) {
+             pf.refresh(['/1066621/ExchangeTech_Prebid_AdUnit']);
+         } else {
+             pf.refresh();
+         }
+     }
+    </script>
+    <button id="refresh-one-btn" onclick="refreshAds()">Refresh 300x250 ad</button> - <em>or</em> -
+    <button id="refresh-all-btn" onclick="refreshAds(true)">Refresh All</button>
+    <p></p>
+    <h3>Leaderboard 728x90</h3>
+    <div id='div-leaderboard'>
+    </div>
+    <script>
+     pf.observe('AUCTION_POST_RUN', function() {
+         googletag.cmd.push(function() {
+             if (!pf.getAuctionProvider().getParam('isRefresh')) {
+                 googletag.display('div-leaderboard');
+             }
+         });
+     });
+    </script>
+    <h3>Medium Rectangle 300x250</h3>
+    <div id='div-multi-size'>
+    </div>
+    <script>
+     pf.observe('AUCTION_POST_RUN', function() {
+         googletag.cmd.push(function() {
+             if (!pf.getAuctionProvider().getParam('isRefresh')) {
+                 googletag.display('div-multi-size');
+             }
+         });
+     });
+    </script>
+  </body>
+</html>
