@@ -55,7 +55,7 @@ Confirm the release;
 ### License
 
 Licensed under The MIT License (MIT)  
-For the full copyright and license information, please view the LICENSE.txt file.
+For the full copyright and license information, please view the [LICENSE.txt](LICENSE.txt) file.
 
 
 [release-url]: https://www.npmjs.com/package/pubfood
