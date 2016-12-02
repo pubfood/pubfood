@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>OpenX example for Pubfood - DFP</title>
+  </head>
+  <body>
+    <script src="../../../../build/pubfood.js"></script>
+
+    <h2>OpenX example for Pubfood - DFP</h2>
+
+    <h3>Ad Unit 300x250 or 300x600</h3>
+    <button onclick="pf.refresh();">Refresh</button>
+    <br><br>
+    <div id="ad-unit" style="width: 300px; border: 1px dotted #CCCCCC;"></div>
+
+    <script type="text/javascript">
+      // Initialize DFP
+      window.googletag = window.googletag || {};
+      googletag.cmd = googletag.cmd || [];
+
+      // Initialize OpenX
+      var OX_dfp_ads = OX_dfp_ads || [],
+          OX_dfp_options = {};
+
+      // Initialize Pubfood
+      var pf = new pubfood();
+      pf.omitDefaultBidKey(true);
+      var pfbatch = [];
+
+      // Listen all events and push the event data to a queue `pfbatch`
+      pf.observe(function(event) {
+        pfbatch.push(event);
+      });
+
+      // Add listener for 'AUCTION_COMPLETE' event
+      pf.observe('AUCTION_COMPLETE', function(/*event*/) {
+        for (var i = 0, len = pfbatch.length; i < len; i++) {
+          console.log(pfbatch[i].type, JSON.stringify(pfbatch[i]));
+        }
+      });
+
+      // Define slots
+      var slot = pf.addSlot({
+        name: 'SLOT_NAME', //TODO: replace it
+        sizes: [[300, 250], [300, 600]],
+        elementId: 'ad-unit',
+        bidProviders: ['openx']
+      });
+      //slot.setParam('foo', {slot: 'bar'}); // custom parameter
+
+      // Define bid providers
+      pf.addBidProvider({
+        name: 'openx',
+        libUri: 'ox-d.example.com/w/1.0/jstag?nc=NETWORKCODE', //TODO: replace it
+        init: function(slots, pushBid, done) {
+          // Iterate over slots and push into OpenX DFP ads
+          for(var i = 0, len = slots.length; i < len; i++) {
+            var slot = slots[i],
+                sizes = [];
+            for(var j = 0, lenj = slot.sizes.length; j < lenj; j++) {
+              sizes.push(slot.sizes[j][0] + "x" + slot.sizes[j][1]);
+            }
+            OX_dfp_ads.push([slot.name, sizes, slot.elementId]);
+          }
+
+          // Define OpenX DFP callback function
+          OX_dfp_options['callback'] = function() {
+            var slots = pf.getSlots(),
+                priceMap = OX.dfp_bidder.getPriceMap();
+
+            // Iterate over slots
+            for(var i = 0, len = slots.length; i < len; i++) {
+              var slot = slots[i],
+                  priceElm = priceMap[slot['elementId']],
+                  tKey = OX.dfp_bidder.getOxTargetingKey(slot['elementId']),
+                  tVal = OX.dfp_bidder.getOxTargetingValue(slot['elementId']);
+
+              if(priceElm) {
+                // Add bid
+                var bid = {
+                  slot: slot.name,
+                  sizes: [priceElm['size']],
+                  label: tKey,
+                  value: priceElm['price'],
+                  targeting: {}
+                };
+                // Set targeting
+                bid['targeting'][tKey] = tVal;
+                pushBid(bid);
+              }
+            }
+            done();
+          };
+        },
+        refresh: function(slots, pushBid, done) {
+          // Define refresh callback
+          var cb = function() {
+            var slots = pf.getSlots(),
+                priceMap = OX.dfp_bidder.getPriceMap();
+
+            // Iterate over slots
+            for(var i = 0, len = slots.length; i < len; i++) {
+              var slot = slots[i],
+                  priceElm = priceMap[slot['elementId']],
+                  tKey = OX.dfp_bidder.getOxTargetingKey(slot['elementId']),
+                  tVal = OX.dfp_bidder.getOxTargetingValue(slot['elementId']);
+
+              if(priceElm) {
+                // Add bid
+                var bid = {
+                  slot: slot.name,
+                  sizes: [priceElm['size']],
+                  label: tKey,
+                  value: priceElm['price'],
+                  targeting: {}
+                };
+                // Set targeting
+                bid['targeting'][tKey] = tVal;
+                pushBid(bid);
+              }
+            }
+            done();
+          };
+
+          // Refresh bid
+          var refreshSlots = [],
+              dfpSlots = googletag.pubads().getSlots();
+
+          // Iterate over slots and prepare slot list for refresh
+          for(var i = 0, len = slots.length; i < len; i++) {
+            var slot = slots[i];
+            // Iterate over DFP slots
+            for(var j = 0, lenj = dfpSlots.length; j < lenj; j++) {
+              if(slot.name == dfpSlots[j].getName()) {
+                refreshSlots.push(dfpSlots[j]);
+                break;
+              }
+            }
+          }
+
+          if(refreshSlots.length > 0) {
+            OX.dfp_bidder.refresh(cb, refreshSlots);
+          }
+        }
+      });
+
+      // Define auction providers
+      pf.setAuctionProvider({
+        name: 'Google',
+        libUri: '//www.googletagservices.com/tag/js/gpt.js',
+        init: function(targeting, done) {
+          googletag.cmd.push(function() {
+            pf.getAuctionProvider().setParam('isRefresh', false);
+            var slots = {};
+            for(var i = 0, len = targeting.length; i < len; i++) {
+              var tgtObject = targeting[i],
+                  gptObject;
+
+              if(tgtObject.name) {
+                 gptObject = googletag.defineSlot(tgtObject.name, tgtObject.sizes, tgtObject.elementId).addService(googletag.pubads());
+                 slots[tgtObject.name] = gptObject;
+              } else {
+                 gptObject = googletag.pubads();
+              }
+
+              for(var p in tgtObject.targeting) {
+                 gptObject.setTargeting(p, tgtObject.targeting[p]);
+              }
+
+              pf.getAuctionProvider().setParam('slots', slots);
+            }
+          });
+          googletag.cmd.push(function() {
+            googletag.pubads().collapseEmptyDivs();
+            googletag.pubads().enableSingleRequest();
+            googletag.enableServices();
+            done();
+          });
+        },
+        refresh: function(targeting, done) {
+          googletag.cmd.push(function() {
+            googletag.pubads().clearTargeting();
+            googletag.pubads().clear();
+          });
+
+          googletag.cmd.push(function() {
+            pf.getAuctionProvider().setParam('isRefresh', true);
+
+            var slots = pf.getAuctionProvider().getParam('slots'),
+                refreshSlots = [];
+
+            for(var i = 0; i < targeting.length; i++) {
+              var tgtObject = targeting[i],
+                  gptObject = slots[tgtObject.name];
+
+              gptObject = gptObject ? (refreshSlots.push(gptObject), gptObject) : googletag.pubads();
+              for(var p in tgtObject.targeting) {
+                gptObject.setTargeting(p, tgtObject.targeting[p]);
+              }
+            }
+
+            if(refreshSlots.length > 0) {
+              googletag.pubads().refresh(refreshSlots);
+            } else {
+              googletag.pubads().refresh();
+            }
+            done();
+          });
+        }
+      });
+
+      // Start bidding
+      pf.timeout(5000);
+      pf.start(Date.now(), function(hasErros, errors) {
+        if(hasErros) {
+          console.log('HAS ERRORS', errors);
+        }
+      });
+    </script>
+
+    <script type="text/javascript">
+      pf.observe('AUCTION_POST_RUN', function() {
+        googletag.cmd.push(function() {
+          if(!pf.getAuctionProvider().getParam('isRefresh')) {
+            googletag.display('ad-unit');
+          }
+        });
+      });
+    </script>
+  </body>
+</html>
