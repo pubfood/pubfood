@@ -9,10 +9,10 @@
 
     <h2>OpenX example for Pubfood - DFP</h2>
 
-    <h3>Ad Unit 300x250 or 300x600</h3>
+    <h3>Ad Unit</h3>
     <button onclick="pf.refresh();">Refresh</button>
     <br><br>
-    <div id="ad-unit" style="width: 300px; border: 1px dotted #CCCCCC;"></div>
+    <div id="ad-unit"></div>
 
     <script type="text/javascript">
       // Initialize DFP
@@ -36,23 +36,25 @@
       // Add listener for 'AUCTION_COMPLETE' event
       pf.observe('AUCTION_COMPLETE', function(/*event*/) {
         for (var i = 0, len = pfbatch.length; i < len; i++) {
-          console.log(pfbatch[i].type, JSON.stringify(pfbatch[i]));
+          console.log(pfbatch[i].type, '\n', JSON.stringify(pfbatch[i]));
         }
+        pfbatch = [];
       });
 
       // Define slots
-      var slot = pf.addSlot({
-        name: 'SLOT_NAME', //TODO: replace it
-        sizes: [[300, 250], [300, 600]],
+      pf.addSlot({
+        //TODO: replace the `name` value with your DFP slot name
+        name: '/90577858/aus_7641',
+        sizes: [[728, 90], [300, 250]],
         elementId: 'ad-unit',
         bidProviders: ['openx']
       });
-      //slot.setParam('foo', {slot: 'bar'}); // custom parameter
 
       // Define bid providers
       pf.addBidProvider({
         name: 'openx',
-        libUri: 'ox-d.example.com/w/1.0/jstag?nc=NETWORKCODE', //TODO: replace it
+        //TODO: replace the `libUri` value with your OpenX domain and network code
+        libUri: '//sademo-d.openx.net/w/1.0/jstag?nc=90577858-BidderTest',
         init: function(slots, pushBid, done) {
           // Iterate over slots and push into OpenX DFP ads
           for(var i = 0, len = slots.length; i < len; i++) {
@@ -72,21 +74,19 @@
             // Iterate over slots
             for(var i = 0, len = slots.length; i < len; i++) {
               var slot = slots[i],
-                  priceElm = priceMap[slot['elementId']],
-                  tKey = OX.dfp_bidder.getOxTargetingKey(slot['elementId']),
-                  tVal = OX.dfp_bidder.getOxTargetingValue(slot['elementId']);
+                  priceElm = priceMap[slot['elementId']];
 
               if(priceElm) {
                 // Add bid
                 var bid = {
                   slot: slot.name,
                   sizes: [priceElm['size']],
-                  label: tKey,
+                  label: 'oxb',
                   value: priceElm['price'],
                   targeting: {}
                 };
                 // Set targeting
-                bid['targeting'][tKey] = tVal;
+                bid['targeting']['oxb'] = priceElm['size'] + '_' + priceElm['price'] + ',hb-bid-' + (priceElm['bid_id'] || '');
                 pushBid(bid);
               }
             }
@@ -102,21 +102,19 @@
             // Iterate over slots
             for(var i = 0, len = slots.length; i < len; i++) {
               var slot = slots[i],
-                  priceElm = priceMap[slot['elementId']],
-                  tKey = OX.dfp_bidder.getOxTargetingKey(slot['elementId']),
-                  tVal = OX.dfp_bidder.getOxTargetingValue(slot['elementId']);
+                  priceElm = priceMap[slot['elementId']];
 
               if(priceElm) {
                 // Add bid
                 var bid = {
                   slot: slot.name,
                   sizes: [priceElm['size']],
-                  label: tKey,
+                  label: 'oxb',
                   value: priceElm['price'],
                   targeting: {}
                 };
                 // Set targeting
-                bid['targeting'][tKey] = tVal;
+                bid['targeting']['oxb'] = priceElm['size'] + '_' + priceElm['price'] + ',hb-bid-' + (priceElm['bid_id'] || '');
                 pushBid(bid);
               }
             }
@@ -217,9 +215,7 @@
           console.log('HAS ERRORS', errors);
         }
       });
-    </script>
 
-    <script type="text/javascript">
       pf.observe('AUCTION_POST_RUN', function() {
         googletag.cmd.push(function() {
           if(!pf.getAuctionProvider().getParam('isRefresh')) {
@@ -228,5 +224,29 @@
         });
       });
     </script>
+    <p></p>
+    <h3>Configuration</h3>
+    <ul>
+      <li>
+      <h4>DFP slot name</h4>
+      <pre>
+pf.addSlot({
+  name: 'DFP_SLOT_NAME',
+  sizes: [[728, 90], [300, 250]],
+  elementId: 'ad-unit',
+  bidProviders: ['openx']
+});
+      </pre>
+      </li>
+      <li>
+      <h4>OpenX JavaScript tag location</h4>
+      <pre>
+pf.addBidProvider({
+  name: 'openx',
+  libUri: '//OPENX_DELIVERY_DOMAIN/w/1.0/jstag?nc=NETWORK_CODE-SITE_NAME',
+  ...
+      </pre>
+      </li>
+    </ul>
   </body>
 </html>
