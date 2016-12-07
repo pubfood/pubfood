@@ -19,7 +19,17 @@
             'ix'
         ]
     });
-    multisize_slot.setParam('ix', [{ id: '1', siteID: 999981, width: 300, height: 250 },{ id: '2', siteID: 999982, width: 728, height: 90 }]);
+    multisize_slot.setParam('ix', [{
+        id: '1',
+        siteID: 999981,
+        width: 300,
+        height: 250
+    }, {
+        id: '2',
+        siteID: 999982,
+        width: 728,
+        height: 90
+    }]);
 
     var deal_slot = pf.addSlot({
         name: '/62650033/pubfood_test_line_2',
@@ -31,8 +41,16 @@
             'ix'
         ]
     });
-    deal_slot.setParam('ix', [{ id: '3', siteID: 999984, width: 300, height: 250 }]);
+    deal_slot.setParam('ix', [{
+        id: '3',
+        siteID: 999984,
+        width: 300,
+        height: 250
+    }]);
 
+    /*
+        indexExchange Pubfood API reference:
+    */
     pf.addBidProvider({
         name: 'ix',
         libUri: '//js-sec.indexww.com/ht/indexapi_pubfood.js',
@@ -40,34 +58,87 @@
             window.indexapi = window.indexapi || {};
             indexapi.cmd = indexapi.cmd || [];
             indexapi.cmd.push(function() {
-                // initialize indexAPI variables
+                /*
+                    1. initialize index API 
+                        * indexapi.init( slots, pushBid, done, indexConfig )
+                          +-------------+--------------+------------+------------------------------------------------------+
+                          | Name        | Value Type   | Attributes | Description                                          |
+                          +-------------+--------------+------------+------------------------------------------------------+
+                          | slots       | Array.<Slot> | Required   | Pubfood provided slots                               |
+                          +-------------+--------------+------------+------------------------------------------------------+
+                          | pushBid     | function     | Required   | Pubfood provided callback function to push back bids |
+                          +-------------+--------------+------------+------------------------------------------------------+
+                          | done        | function     | Required   | Pubfood provided done callback function              |
+                          +-------------+--------------+------------+------------------------------------------------------+
+                */
                 indexapi.init( slots, pushBid, done );
 
-                // Convert pubfood slot into index slot
+                /*
+                    2. Convert pubfood slot configuration into indexExchange slot configuration.
+                */
                 for (var i = 0; i < slots.length; i++) {
                     var indexParam = slots[i].getParam('ix');
+                    // look for ix bid configurations
                     if (typeof indexParam == 'undefined'){
                         continue
                     }
                     for ( var j = 0; j < indexParam.length; j++){
                         var indexSlot = indexParam[j];
+                        /*
+                            2.1. Create mapping between indexExchange slotID to pubfood slot name
+                               indexapi.add_slot_to_name(slotID, slotName) properties:
+                              +-------------+------------+-----------+---------------------------------------------------+
+                              | Name        | Value Type | Attribute | Description                                       |
+                              +-------------+------------+-----------+---------------------------------------------------+
+                              | SlotID      | String     | Required  | A slot-unique string which identifies the slot.   |
+                              |             |            |           | This id value is provided by the Index Exchange.  |
+                              +-------------+------------+------------+--------------------------------------------------+
+                              | slotName    | String     | Required  | Pubfood slot name                                 |
+                              +--------------+------------+-----------+--------------------------------------------------+
+                        */
                         indexapi.add_slot_to_name(indexSlot.id, slots[i].name);
+                        /*
+                            2.2. Push indexExchange slots into `indexapi.cygnus_args.slots` array.
+                              Index slot object properties:
+                              +-------------+------------+------------+--------------------------------------------------+
+                              | Name        | Value Type | Attributes | Description                                      |
+                              +-------------+------------+------------+--------------------------------------------------+
+                              | id          | String     | Required   | A slot-unique string which identifies the slot.  |
+                              |             |            |            | This id value is provided by the Index Exchange. |
+                              |             |            |            | This must match with SlotID field in step 2.1.   |
+                              +-------------+------------+------------+--------------------------------------------------+
+                              | siteID      | Integer    | Required   | The slot-unique ID assigned to the slot which    |
+                              |             |            |            | specifies the slot configurations. This siteID   |
+                              |             |            |            | value is provided by the Index Exchange.         |
+                              +-------------+------------+------------+--------------------------------------------------+
+                              | width       | Integer    | Required   | Ad Width                                         |
+                              +-------------+------------+------------+--------------------------------------------------+
+                              | height      | Integer    | Required   | Ad Height                                        |
+                              +-------------+------------+------------+--------------------------------------------------+
+                              | bidfloor    | Float      | Optional   | Minimum bid for this impression expressed in CPM.|
+                              +-------------+------------+------------+--------------------------------------------------+
+                              | bidfloorcur | String     | Optional   | Bid Floor Currency specified using ISO-4217      |
+                              |             |            |            | alpha codes                                      |
+                              +-------------+------------+------------+--------------------------------------------------+
+                        */
                         indexapi.cygnus_args.slots.push(indexSlot);
                     }
                 }
 
-                // send index demand request
+                /*
+                    3. send indexexchange demand request
+                */
                 indexapi.cygnus_start();
             })
         },
+        /*
+            For refresh, the same function calls in the init function should be used.
+        */
         refresh: function(slots, pushBid, done) {
             window.indexapi = window.indexapi || {};
             indexapi.cmd = indexapi.cmd || [];
             indexapi.cmd.push(function() {
-                // initialize indexAPI variables
                 indexapi.init( slots, pushBid, done );
-
-                // Convert pubfood slot into index slot
                 for (var i = 0; i < slots.length; i++) {
                     var indexParam = slots[i].getParam('ix');
                     if (typeof indexParam == 'undefined'){
@@ -79,8 +150,6 @@
                         indexapi.cygnus_args.slots.push(indexSlot);
                     }
                 }
-
-                // send index demand request
                 indexapi.cygnus_start();
             })
         }
