@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title> IX (Index Exchange) -- Example</title>
+<script src="../../../../build/pubfood.js"></script>
+<script type="text/javascript">
+    window.googletag = window.googletag || {};
+    googletag.cmd = googletag.cmd || [];
+    var pf = new pubfood();
+    
+    var multisize_slot = pf.addSlot({
+        name: '/62650033/pubfood_test_line_1',
+        elementId: 'div-gpt-ad-1470238898773-1',
+        sizes: [
+            [300, 250],
+            [728, 90]
+        ],
+        bidProviders: [
+            'ix'
+        ]
+    });
+    multisize_slot.setParam('ix', [{
+        id: '1',
+        siteID: 999981,
+        width: 300,
+        height: 250
+    }, {
+        id: '2',
+        siteID: 999982,
+        width: 728,
+        height: 90
+    }]);
+
+    var deal_slot = pf.addSlot({
+        name: '/62650033/pubfood_test_line_2',
+        elementId: 'div-gpt-ad-1470238898773-2',
+        sizes: [
+            [300, 250]
+        ],
+        bidProviders: [
+            'ix'
+        ]
+    });
+    deal_slot.setParam('ix', [{
+        id: '3',
+        siteID: 999984,
+        width: 300,
+        height: 250
+    }]);
+
+    /*
+        indexExchange Pubfood API reference:
+    */
+    pf.addBidProvider({
+        name: 'ix',
+        libUri: '//js-sec.indexww.com/ht/indexapi_pubfood.js',
+        init: function(slots, pushBid, done) {
+            window.indexapi = window.indexapi || {};
+            indexapi.cmd = indexapi.cmd || [];
+            indexapi.cmd.push(function() {
+                /*
+                    1. initialize index API 
+                        * indexapi.init( slots, pushBid, done, indexConfig )
+                          +-------------+--------------+------------+------------------------------------------------------+
+                          | Name        | Value Type   | Attributes | Description                                          |
+                          +-------------+--------------+------------+------------------------------------------------------+
+                          | slots       | Array.<Slot> | Required   | Pubfood provided slots                               |
+                          +-------------+--------------+------------+------------------------------------------------------+
+                          | pushBid     | function     | Required   | Pubfood provided callback function to push back bids |
+                          +-------------+--------------+------------+------------------------------------------------------+
+                          | done        | function     | Required   | Pubfood provided done callback function              |
+                          +-------------+--------------+------------+------------------------------------------------------+
+                */
+                indexapi.init( slots, pushBid, done );
+
+                /*
+                    2. Convert pubfood slot configuration into indexExchange slot configuration.
+                */
+                for (var i = 0; i < slots.length; i++) {
+                    var indexParam = slots[i].getParam('ix');
+                    // look for ix bid configurations
+                    if (typeof indexParam == 'undefined'){
+                        continue
+                    }
+                    for ( var j = 0; j < indexParam.length; j++){
+                        var indexSlot = indexParam[j];
+                        /*
+                            2.1. Create mapping between indexExchange slotID to pubfood slot name
+                               indexapi.add_slot_to_name(slotID, slotName) properties:
+                              +-------------+------------+-----------+---------------------------------------------------+
+                              | Name        | Value Type | Attribute | Description                                       |
+                              +-------------+------------+-----------+---------------------------------------------------+
+                              | SlotID      | String     | Required  | A slot-unique string which identifies the slot.   |
+                              |             |            |           | This id value is provided by the Index Exchange.  |
+                              +-------------+------------+------------+--------------------------------------------------+
+                              | slotName    | String     | Required  | Pubfood slot name                                 |
+                              +--------------+------------+-----------+--------------------------------------------------+
+                        */
+                        indexapi.add_slot_to_name(indexSlot.id, slots[i].name);
+                        /*
+                            2.2. Push indexExchange slots into `indexapi.cygnus_args.slots` array.
+                              Index slot object properties:
+                              +-------------+------------+------------+--------------------------------------------------+
+                              | Name        | Value Type | Attributes | Description                                      |
+                              +-------------+------------+------------+--------------------------------------------------+
+                              | id          | String     | Required   | A slot-unique string which identifies the slot.  |
+                              |             |            |            | This id value is provided by the Index Exchange. |
+                              |             |            |            | This must match with SlotID field in step 2.1.   |
+                              +-------------+------------+------------+--------------------------------------------------+
+                              | siteID      | Integer    | Required   | The slot-unique ID assigned to the slot which    |
+                              |             |            |            | specifies the slot configurations. This siteID   |
+                              |             |            |            | value is provided by the Index Exchange.         |
+                              +-------------+------------+------------+--------------------------------------------------+
+                              | width       | Integer    | Required   | Ad Width                                         |
+                              +-------------+------------+------------+--------------------------------------------------+
+                              | height      | Integer    | Required   | Ad Height                                        |
+                              +-------------+------------+------------+--------------------------------------------------+
+                              | bidfloor    | Float      | Optional   | Minimum bid for this impression expressed in CPM.|
+                              +-------------+------------+------------+--------------------------------------------------+
+                              | bidfloorcur | String     | Optional   | Bid Floor Currency specified using ISO-4217      |
+                              |             |            |            | alpha codes                                      |
+                              +-------------+------------+------------+--------------------------------------------------+
+                        */
+                        indexapi.cygnus_args.slots.push(indexSlot);
+                    }
+                }
+
+                /*
+                    3. send indexexchange demand request
+                */
+                indexapi.cygnus_start();
+            })
+        },
+        /*
+            For refresh, the same function calls in the init function should be used.
+        */
+        refresh: function(slots, pushBid, done) {
+            window.indexapi = window.indexapi || {};
+            indexapi.cmd = indexapi.cmd || [];
+            indexapi.cmd.push(function() {
+                indexapi.init( slots, pushBid, done );
+                for (var i = 0; i < slots.length; i++) {
+                    var indexParam = slots[i].getParam('ix');
+                    if (typeof indexParam == 'undefined'){
+                        continue
+                    }
+                    for ( var j = 0; j < indexParam.length; j++){
+                        var indexSlot = indexParam[j];
+                        indexapi.add_slot_to_name(indexSlot.id, slots[i].name);
+                        indexapi.cygnus_args.slots.push(indexSlot);
+                    }
+                }
+                indexapi.cygnus_start();
+            })
+        }
+    });
+
+    pf.setAuctionProvider({
+        name: 'Google',
+        libUri: '//www.googletagservices.com/tag/js/gpt.js',
+        init: function(targeting, done) {
+            googletag.cmd.push(function() {
+                pf.getAuctionProvider().setParam('isRefresh', false);
+                var slots = {};
+                for (var i = 0; i < targeting.length; i++) {
+                    var tgtObject = targeting[i];
+                    var gptObject;
+                    if (tgtObject.name) {
+                        gptObject = googletag.defineSlot(tgtObject.name, tgtObject.sizes, tgtObject.elementId).addService(googletag.pubads());
+                        slots[tgtObject.name] = gptObject;
+                    } else {
+                        gptObject = googletag.pubads();
+                    }
+                    for (var p in tgtObject.targeting) {
+                        gptObject.setTargeting(p, tgtObject.targeting[p]);
+                    }
+                    pf.getAuctionProvider().setParam('slots', slots);
+                }
+            });
+            googletag.cmd.push(function() {
+                googletag.pubads().collapseEmptyDivs();
+                googletag.pubads().enableSingleRequest();
+                googletag.enableServices();
+                done();
+            });
+        },
+        refresh: function(targeting, done) {
+            googletag.cmd.push(function() {
+                
+                pf.getAuctionProvider().setParam('isRefresh', true);
+                var slots = pf.getAuctionProvider().getParam('slots');
+                var refreshSlots = [];
+                for (var i = 0; i < targeting.length; i++) {
+                    var tgtObject = targeting[i];
+                    var gptObject = slots[tgtObject.name];
+                    gptObject = gptObject ? (refreshSlots.push(gptObject), gptObject) : googletag.pubads();
+                    for (var p in tgtObject.targeting) {
+                        gptObject.setTargeting(p, tgtObject.targeting[p]);
+                    }
+                }
+                if (refreshSlots.length > 0) {
+                    googletag.pubads().refresh(refreshSlots);
+                } else {
+                    googletag.pubads().refresh();
+                }
+                done();
+            });
+        }
+    });
+    pf.timeout(3000);
+    pf.start();
+</script>
+</head>
+<body>
+
+<h2>IX (Index Exchange) Bid Provider - Example</h2>
+<p>This page illustrates one approach to implementing an Index Exchange bid provider.</p>
+<p>Redirect 'as.casalemedia.com' and 'as-sec.casalemedia.com' hosts to 'sandbox.ht.indexexchange.com' in order to get demo responses from indexExchange.</p>
+<script>
+    function refreshAds(slot) {
+        if (slot) {
+            pf.refresh(slot);
+        } else {
+            pf.refresh();
+        }
+    }
+</script>
+<button id="refresh-one-btn" onclick="refreshAds(['/62650033/pubfood_test_line_1'])">Refresh 'div-gpt-ad-1470238898773-1'</button> - <em>or</em> -
+<button id="refresh-one-btn" onclick="refreshAds(['/62650033/pubfood_test_line_2'])">Refresh 'div-gpt-ad-1470238898773-2'</button> - <em>or</em> -
+<button id="refresh-all-btn" onclick="refreshAds()">Refresh All</button>
+<h3>'div-gpt-ad-1470238898773-1' non-Deal Example: 300x250, 728x90</h3>
+<div id='div-gpt-ad-1470238898773-1'>
+</div>
+<script>
+    pf.observe('AUCTION_POST_RUN', function() {
+        googletag.cmd.push(function() {
+            if (!pf.getAuctionProvider().getParam('isRefresh')) {
+                googletag.display('div-gpt-ad-1470238898773-1');
+            }
+        });
+    });
+</script>
+<h3>'div-gpt-ad-1470238898773-2' Deal Example: 300x250</h3>
+<div id='div-gpt-ad-1470238898773-2'>
+</div>
+<script>
+    pf.observe('AUCTION_POST_RUN', function() {
+        googletag.cmd.push(function() {
+            if (!pf.getAuctionProvider().getParam('isRefresh')) {
+                googletag.display('div-gpt-ad-1470238898773-2');
+            }
+        });
+    });
+</script>
+<br><br><br>
+<h2>Creative Examples</h2>
+<h3>Open Market Creative Example</h3>
+<div style="border-style: solid;">
+    &lt;script&gt<br>
+    window.top.headertag_render( document, "%%PATTERN:IOM%%", "&lt;IX_SLOT_ID_HERE&gt;" );<br>
+    &lt;/script&gt;
+</div>
+<h3>Private Market Creative Example</h3>
+<div style="border-style: solid;">
+    &lt;script&gt<br>
+    window.top.headertag_render( document, "%%PATTERN:IPM%%", "&lt;IX_SLOT_ID_HERE&gt;" );<br>
+    &lt;/script&gt;
+</div>
+</body>
+</html>
