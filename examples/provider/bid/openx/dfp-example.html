@@ -8,7 +8,20 @@
     <script src="../../../../build/pubfood.js"></script>
 
     <h2>OpenX example for Pubfood - DFP</h2>
-
+    This example illustrates integration with OpenX for publishers specifically using DFP as their own adserver.
+    <p>
+      You will notice references in the code for this example to some well known OpenX objects for DFP integration, i.e.:
+      <ul>
+        <li><code>OX_dfp_ads</code> </li>
+        <li><code>OX_dfp_options</code> </li>
+        <li><code>OX.dfp_bidder</code> </li>
+      </ul>
+      This example uses <code>sademo-d</code> OpenX account referenced in the <a href="https://github.com/ampproject/amphtml/blob/master/examples/openx.amp.html#L17">openx.amp.html</a> AMPHtml OpenX example.
+      For further information regarding the OpenX APIs refer to:
+      <ul>
+        <li><a href="https://docs.openx.com/Content/developers/ad_request_api/adtagguide.html">OpenX developers guide</a></li>
+      </ul>
+    </p>
     <h3>Ad Unit</h3>
     <button onclick="pf.refresh();">Refresh</button>
     <br><br>
@@ -86,7 +99,9 @@
                   targeting: {}
                 };
                 // Set targeting
-                bid['targeting']['oxb'] = priceElm['size'] + '_' + priceElm['price'] + ',hb-bid-' + (priceElm['bid_id'] || '');
+                var targetingStr = priceElm['size'] && priceElm['price'] ? priceElm['size'] + '_' + priceElm['price'] : '';
+                targetingStr = targetingStr + (priceElm['bid_id'] ? ',hb-bid-' + priceElm['bid_id'] : '');
+                bid['targeting']['oxb'] = targetingStr;
                 pushBid(bid);
               }
             }
@@ -114,7 +129,9 @@
                   targeting: {}
                 };
                 // Set targeting
-                bid['targeting']['oxb'] = priceElm['size'] + '_' + priceElm['price'] + ',hb-bid-' + (priceElm['bid_id'] || '');
+                var targetingStr = priceElm['size'] && priceElm['price'] ? priceElm['size'] + '_' + priceElm['price'] : '';
+                targetingStr = targetingStr + (priceElm['bid_id'] ? ',hb-bid-' + priceElm['bid_id'] : '');
+                bid['targeting']['oxb'] = targetingStr;
                 pushBid(bid);
               }
             }
@@ -226,27 +243,27 @@
     </script>
     <p></p>
     <h3>Configuration</h3>
+    To modify this example for your own OpenX account, update the following to your own values for 1). <a href="#dfp-slot">DFP slot name</a> and 2). <a href="#dfp-slot">OpenX JavaScript tag location</a>:
     <ul>
-      <li>
-      <h4>DFP slot name</h4>
-      <pre>
+      <li><code>DFP_SLOT_NAME</code></li>
+      <li><code>OPENX_DELIVERY_DOMAIN</code></li>
+      <li><code>NETWORK_CODE-SITE_NAME</code></li>
+    </ul>
+    <h4 id="dfp-slot">DFP slot name</h4>
+    <pre>
 pf.addSlot({
   name: 'DFP_SLOT_NAME',
   sizes: [[728, 90], [300, 250]],
   elementId: 'ad-unit',
   bidProviders: ['openx']
 });
-      </pre>
-      </li>
-      <li>
-      <h4>OpenX JavaScript tag location</h4>
-      <pre>
+    </pre>
+    <h4 id="jstag">OpenX JavaScript tag location</h4>
+    <pre>
 pf.addBidProvider({
   name: 'openx',
   libUri: '//OPENX_DELIVERY_DOMAIN/w/1.0/jstag?nc=NETWORK_CODE-SITE_NAME',
   ...
-      </pre>
-      </li>
-    </ul>
+    </pre>
   </body>
 </html>
