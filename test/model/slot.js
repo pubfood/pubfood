@@ -127,10 +127,10 @@ describe('Slot', function testSlotBuilder() {
         .setParam('p5', 6)
         .setParam('p6', 8);
 
-      var keys = slot.getParamKeys();
+      var values = slot.getParams();
 
       var sum = 0;
-      keys.map(function(v) {
+      values.map(function(v) {
         sum += v;
       });
       assert.isTrue(sum === 21, 'key iteration should produce value of 21');
@@ -143,6 +143,7 @@ describe('Slot', function testSlotBuilder() {
       slot.setParam(foo, 0).
         setParam('p1', 1);
       assert.isTrue(slot.getParamKeys().length === 1, 'should only have 1 key');
+      assert.isTrue(slot.getParamKeys()[0] === 'p1', 'should only key of \"p1\"');
       assert.isTrue(slot.getParam('p1') === 1, 'parameter \"p1\" should have value of 1');
     });
 

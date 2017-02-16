@@ -96,10 +96,10 @@ describe('Pubfood AuctionProvider', function() {
         .setParam('p5', 6)
         .setParam('p6', 8);
 
-      var keys = auctionProvider.getParamKeys();
+      var values = auctionProvider.getParams();
 
       var sum = 0;
-      keys.map(function(v) {
+      values.map(function(v) {
         sum += v;
       });
       assert.isTrue(sum === 21, 'key iteration should produce value of 21');
@@ -112,6 +112,7 @@ describe('Pubfood AuctionProvider', function() {
       auctionProvider.setParam(foo, 0).
         setParam('p1', 1);
       assert.isTrue(auctionProvider.getParamKeys().length === 1, 'should only have 1 key');
+      assert.isTrue(auctionProvider.getParamKeys()[0] === 'p1', 'should have key of \"p1\"');
       assert.isTrue(auctionProvider.getParam('p1') === 1, 'parameter \"p1\" should have value of 1');
     });
 

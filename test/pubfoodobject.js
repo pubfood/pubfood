@@ -50,10 +50,10 @@ describe('PubfoodObject', function testPubfoodObject() {
       .setParam('p5', 6)
       .setParam('p6', 8);
 
-    var keys = pubfoodObject.getParamKeys();
+    var values = pubfoodObject.getParams();
 
     var sum = 0;
-    keys.map(function(v) {
+    values.map(function(v) {
       sum += v;
     });
     assert.isTrue(sum === 21, 'key iteration should produce value of 21');
@@ -66,6 +66,7 @@ describe('PubfoodObject', function testPubfoodObject() {
     pubfoodObject.setParam(foo, 0).
       setParam('p1', 1);
     assert.isTrue(pubfoodObject.getParamKeys().length === 1, 'should only have 1 key');
+    assert.isTrue(pubfoodObject.getParamKeys()[0] === 'p1', 'should key of \"p1\"');
     assert.isTrue(pubfoodObject.getParam('p1') === 1, 'parameter \"p1\" should have value of 1');
   });
 

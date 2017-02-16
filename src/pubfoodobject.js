@@ -42,6 +42,19 @@ PubfoodObject.prototype.getParam = function(name) {
 };
 
 /**
+ * Get all parameters.
+ *
+ * @return {string[]} this parameter array
+ */
+PubfoodObject.prototype.getParams = function() {
+  var ret = [];
+  for (var i in this.params_) {
+    ret.push(this.params_[i]);
+  }
+  return ret;
+};
+
+/**
  * Get all parameter keys.
  *
  * @return {string[]} this parameter key array
@@ -49,7 +62,7 @@ PubfoodObject.prototype.getParam = function(name) {
 PubfoodObject.prototype.getParamKeys = function() {
   var ret = [];
   for (var i in this.params_) {
-    ret.push(this.params_[i]);
+    ret.push(i);
   }
   return ret;
 };
