@@ -143,7 +143,7 @@ describe('Slot', function testSlotBuilder() {
       slot.setParam(foo, 0).
         setParam('p1', 1);
       assert.isTrue(slot.getParamKeys().length === 1, 'should only have 1 key');
-      assert.isTrue(slot.getParamKeys()[0] === 'p1', 'should only key of \"p1\"');
+      assert.isTrue(slot.getParamKeys()[0] === 'p1', 'should have key of \"p1\"');
       assert.isTrue(slot.getParam('p1') === 1, 'parameter \"p1\" should have value of 1');
     });
 
@@ -160,6 +160,16 @@ describe('Slot', function testSlotBuilder() {
         .setParam(true, 8);
 
       assert.isTrue(slot.getParamKeys().length === 5, 'should only have 5 keys');
+      assert.isTrue(slot.getParamKeys()[0] === '0', 'should have first key of \"0\"');
+      assert.isTrue(slot.getParamKeys()[1] === '1.01', 'should have second key of \"1.01\"');
+      assert.isTrue(slot.getParamKeys()[2] === 'p4', 'should have third key of \"p4\"');
+      assert.isTrue(slot.getParamKeys()[3] === '', 'should have fourth key of \"\"');
+      assert.isTrue(slot.getParamKeys()[4] === 'true', 'should have fifth key of \"true\"');
+      assert.isTrue(slot.getParam('0') === 2, 'parameter \"0\" should have value of 2');
+      assert.isTrue(slot.getParam('1.01') === 2.1, 'parameter \"1.01\" should have value of 2.1');
+      assert.isTrue(slot.getParam('p4') === 4, 'parameter \"p4\" should have value of 4');
+      assert.isTrue(slot.getParam('') === 4.1, 'parameter \"\" should have value of 4.1');
+      assert.isTrue(slot.getParam('true') === 8, 'parameter \"true\" should have value of 8');
     });
   });
 });

@@ -187,6 +187,16 @@ describe('Pubfood BidProvider', function() {
         .setParam(true, 8);
 
       assert.isTrue(bidProvider.getParams().length === 5, 'should only have 5 keys');
+      assert.isTrue(bidProvider.getParamKeys()[0] === '0', 'should have first key of \"0\"');
+      assert.isTrue(bidProvider.getParamKeys()[1] === '1.01', 'should have second key of \"1.01\"');
+      assert.isTrue(bidProvider.getParamKeys()[2] === 'p4', 'should have third key of \"p4\"');
+      assert.isTrue(bidProvider.getParamKeys()[3] === '', 'should have fourth key of \"\"');
+      assert.isTrue(bidProvider.getParamKeys()[4] === 'true', 'should have fifth key of \"true\"');
+      assert.isTrue(bidProvider.getParam('0') === 2, 'parameter \"0\" should have value of 2');
+      assert.isTrue(bidProvider.getParam('1.01') === 2.1, 'parameter \"1.01\" should have value of 2.1');
+      assert.isTrue(bidProvider.getParam('p4') === 4, 'parameter \"p4\" should have value of 4');
+      assert.isTrue(bidProvider.getParam('') === 4.1, 'parameter \"\" should have value of 4.1');
+      assert.isTrue(bidProvider.getParam('true') === 8, 'parameter \"true\" should have value of 8');
     });
   });
 

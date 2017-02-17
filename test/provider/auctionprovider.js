@@ -129,6 +129,16 @@ describe('Pubfood AuctionProvider', function() {
         .setParam(true, 8);
 
       assert.isTrue(auctionProvider.getParamKeys().length === 5, 'should only have 5 keys');
+      assert.isTrue(auctionProvider.getParamKeys()[0] === '0', 'should have first key of \"0\"');
+      assert.isTrue(auctionProvider.getParamKeys()[1] === '1.01', 'should have second key of \"1.01\"');
+      assert.isTrue(auctionProvider.getParamKeys()[2] === 'p4', 'should have third key of \"p4\"');
+      assert.isTrue(auctionProvider.getParamKeys()[3] === '', 'should have fourth key of \"\"');
+      assert.isTrue(auctionProvider.getParamKeys()[4] === 'true', 'should have fifth key of \"true\"');
+      assert.isTrue(auctionProvider.getParam('0') === 2, 'parameter \"0\" should have value of 2');
+      assert.isTrue(auctionProvider.getParam('1.01') === 2.1, 'parameter \"1.01\" should have value of 2.1');
+      assert.isTrue(auctionProvider.getParam('p4') === 4, 'parameter \"p4\" should have value of 4');
+      assert.isTrue(auctionProvider.getParam('') === 4.1, 'parameter \"\" should have value of 4.1');
+      assert.isTrue(auctionProvider.getParam('true') === 8, 'parameter \"true\" should have value of 8');
     });
   });
 
