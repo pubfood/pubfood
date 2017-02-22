@@ -158,7 +158,7 @@ describe('Pubfood BidProvider', function() {
 
       var sum = 0;
       values.map(function(v) {
-        sum += v;
+        sum += v.value;
       });
       assert.isTrue(sum === 21, 'key iteration should produce value of 21');
 

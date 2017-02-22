@@ -44,12 +44,12 @@ PubfoodObject.prototype.getParam = function(name) {
 /**
  * Get all parameters.
  *
- * @return {string[]} this parameter array
+ * @return {object[]} this parameter array
  */
 PubfoodObject.prototype.getParams = function() {
   var ret = [];
   for (var i in this.params_) {
-    ret.push(this.params_[i]);
+    ret.push({key: i, value: this.params_[i]});
   }
   return ret;
 };
