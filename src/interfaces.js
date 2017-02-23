@@ -214,6 +214,7 @@ var bidObject = {
  * var run = pf.getAuctionRun(1),
     *     aIsDone = run.bidStatus['bidderA'];
  * @property {TargetingObject[]} targeting ad server targeting used in the auction run
+ * @property {number} timeoutId id of bid timeout
  */
 
 /**
