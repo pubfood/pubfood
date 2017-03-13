@@ -325,4 +325,121 @@ describe('Transform operator', function() {
     });
     pf.start();
   });
+
+  it('should only be called once on getting bids within timeout', function(done) {
+    var pf = new pubfood();
+    var slot = pf.addSlot({
+      name: 'slot1',
+      elementId: 'div1',
+      sizes: [[728, 90]],
+      bidProviders: ['bp1', 'bp2']
+    });
+
+    var bidProvider = pf.addBidProvider({
+      name: 'bp1',
+      init: function(slots, pushBid, pfDone) {
+        var bid = {
+          slot: 'slot1',
+          value: 'goobleplex',
+          sizes: [[728, 90]],
+          label: 'price'
+        };
+        pushBid(bid);
+
+        pfDone();
+      }
+    });
+
+    bidProvider = pf.addBidProvider({
+      name: 'bp2',
+      init: function(slots, pushBid, pfDone) {
+        var bid = {
+          slot: 'slot1',
+          value: 'goobleplex',
+          sizes: [[728, 90]],
+          label: 'price'
+        };
+        pushBid(bid);
+
+        pfDone();
+      }
+    });
+
+    var auctionProvider = pf.setAuctionProvider({
+      name: 'ap1',
+      libUri: 'http://noop.com/file.js',
+      init: function(targeting, pfDone) {
+        pfDone();
+      }
+    });
+
+    var transformCallCount = 0;
+    pf.addBidTransform(function(bids, params) {
+      transformCallCount += 1;
+      return [bids[0]];
+    });
+    pf.timeout(30);
+    pf.start();
+    setTimeout(function() {
+      assert.equal(transformCallCount, 1, 'delegate should be called only once');
+      done();
+    }, 50);
+
+  });
+
+  it('should only be called once on timeout', function(done) {
+    var pf = new pubfood();
+
+    pf.throwErrors(true);
+    pf.timeout(30);
+
+    pf.addSlot({
+      name: 'slot1',
+      sizes: [
+        [300, 250],
+        [300, 600]
+      ],
+      elementId: 'div-multi-size',
+      bidProviders: [
+        'bp1'
+      ]
+    });
+
+    pf.setAuctionProvider({
+      name: 'auctionProvider',
+      libUri: '../test/fixture/lib.js',
+      init: function(targeting, done) {
+        done();
+      },
+      refresh: function(targeting, done) {
+        done();
+      }
+    });
+
+    var bidProvider = pf.addBidProvider({
+      name: 'bp1',
+      init: function(slots, pushBid, done) {
+        setTimeout(function() {
+          done();
+        }, 40);
+      },
+      refresh: function(slots, pushBid, done) {
+        setTimeout(function() {
+          done();
+        }, 40);
+      }
+    });
+    bidProvider.timeout(30);
+    var transformCallCount = 0;
+    pf.addBidTransform(function(bids, params) {
+      transformCallCount += 1;
+      return bids;
+    });
+    pf.start();
+    setTimeout(function() {
+      assert.equal(transformCallCount, 1, 'delegate should be called only once');
+      done();
+    }, 50);
+  });
+
 });

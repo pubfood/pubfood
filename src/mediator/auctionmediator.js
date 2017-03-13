@@ -268,6 +268,8 @@ AuctionMediator.prototype.setAuctionTrigger = function(triggerFn) {
  * @private
  */
 AuctionMediator.prototype.startAuction_ = function(auctionIdx, auctionType, forcedDone) {
+  clearTimeout(this.auctionRun[auctionIdx].timeoutId);
+  this.auctionRun[auctionIdx].timeoutId = 0;
   Event.publish(Event.EVENT_TYPE.BID_ASSEMBLER, 'AuctionMediator');
   if (this.bidAssembler.operators.length > 0) {
     this.auctionRun[auctionIdx].bids = this.bidAssembler.process(this.auctionRun[auctionIdx].bids);
