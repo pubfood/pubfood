@@ -50,12 +50,12 @@ describe('PubfoodObject', function testPubfoodObject() {
       .setParam('p5', 6)
       .setParam('p6', 8);
 
-    var values = pubfoodObject.getParams();
+    var paramsObject = pubfoodObject.getParams();
 
     var sum = 0;
-    values.map(function(v) {
-      sum += v.value;
-    });
+    for (var key in paramsObject) {
+      sum += paramsObject[key];
+    }
     assert.isTrue(sum === 21, 'key iteration should produce value of 21');
 
   });
@@ -93,5 +93,25 @@ describe('PubfoodObject', function testPubfoodObject() {
     assert.isTrue(pubfoodObject.getParam('p4') === 4, 'parameter \"p4\" should have value of 4');
     assert.isTrue(pubfoodObject.getParam('') === 4.1, 'parameter \"\" should have value of 4.1');
     assert.isTrue(pubfoodObject.getParam('true') === 8, 'parameter \"true\" should have value of 8');
+  });
+
+  it('should iterate parameter keys and values', function () {
+    var pubfoodObject = new PubfoodObject();
+
+    pubfoodObject.setParam('p0', 0)
+      .setParam('p1', 1)
+      .setParam('p2', 2)
+      .setParam('p3', 3)
+      .setParam('p4', 4);
+
+    var pKeys = pubfoodObject.getParamKeys();
+    var pCount = 0;
+    for (var idx = 0; idx < pKeys.length; idx++) {
+      var pKey = pKeys[idx];
+      var pVal = pubfoodObject.getParam(pKey);
+      pCount += pVal;
+    }
+
+    assert.isTrue(pCount === 10, 'param value count not equal');
   });
 });
