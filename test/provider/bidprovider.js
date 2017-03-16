@@ -43,7 +43,7 @@ describe('Pubfood BidProvider', function() {
     ],
     invalid: [
       {
-        name: 'bidder5',
+        name: 'bidder5'
       },
       {
         name: 'bidder6',
@@ -154,12 +154,12 @@ describe('Pubfood BidProvider', function() {
         .setParam('p5', 6)
         .setParam('p6', 8);
 
-      var paramsObject = bidProvider.getParams();
+      var keys = bidProvider.getParamKeys();
 
       var sum = 0;
-      for (var key in paramsObject) {
-        sum += paramsObject[key];
-      }
+      keys.forEach(function(v) {
+        sum += bidProvider.getParam(v);
+      });
       assert.isTrue(sum === 21, 'key iteration should produce value of 21');
 
     });
@@ -187,12 +187,6 @@ describe('Pubfood BidProvider', function() {
         .setParam(true, 8);
 
       assert.isTrue(bidProvider.getParamKeys().length === 5, 'should only have 5 keys');
-      var pCount = 0;
-      for (var key in bidProvider.getParams()) {
-        pCount++;
-      }
-      assert.isTrue(pCount === 5, 'parameter value count should be \"5\"');
-
       assert.isTrue(bidProvider.getParamKeys()[0] === '0', 'should have first key of \"0\"');
       assert.isTrue(bidProvider.getParamKeys()[1] === '1.01', 'should have second key of \"1.01\"');
       assert.isTrue(bidProvider.getParamKeys()[2] === 'p4', 'should have third key of \"p4\"');

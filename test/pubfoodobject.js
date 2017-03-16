@@ -50,12 +50,12 @@ describe('PubfoodObject', function testPubfoodObject() {
       .setParam('p5', 6)
       .setParam('p6', 8);
 
-    var paramsObject = pubfoodObject.getParams();
+    var keys = pubfoodObject.getParamKeys();
 
     var sum = 0;
-    for (var key in paramsObject) {
-      sum += paramsObject[key];
-    }
+    keys.forEach(function(v) {
+      sum += pubfoodObject.getParam(v);
+    });
     assert.isTrue(sum === 21, 'key iteration should produce value of 21');
 
   });

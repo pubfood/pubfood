@@ -127,12 +127,12 @@ describe('Slot', function testSlotBuilder() {
         .setParam('p5', 6)
         .setParam('p6', 8);
 
-      var paramsObject = slot.getParams();
+      var keys = slot.getParamKeys();
 
       var sum = 0;
-      for (var key in paramsObject) {
-        sum += paramsObject[key];
-      }
+      keys.forEach(function(v) {
+        sum += slot.getParam(v);
+      });
       assert.isTrue(sum === 21, 'key iteration should produce value of 21');
 
     });

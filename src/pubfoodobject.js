@@ -42,15 +42,6 @@ PubfoodObject.prototype.getParam = function(name) {
 };
 
 /**
- * Get all parameters.
- *
- * @return {object} this parameters object
- */
-PubfoodObject.prototype.getParams = function() {
-  return this.params_ || {};
-};
-
-/**
  * Get all parameter keys.
  *
  * @return {string[]} this parameter key array
