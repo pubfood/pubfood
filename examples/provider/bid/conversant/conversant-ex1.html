@@ -12,21 +12,29 @@
       //gpt would then call renderAd below to render the ad
       /*
       try {
-        w.pbjs.renderAd(document, '%%PATTERN:hb_adid%%');
+        window.renderAd(document, '%%PATTERN:hb_adid%%');
       } catch (e) {
       }
       */
+      /**
+       * Check if parent iframe of passed document supports content rendering via 'srcdoc' property
+       * @param {HTMLDocument} doc document to check support of 'srcdoc'
+       */
+      function isSrcdocSupported(doc) {
+        //Firefox is excluded due to https://bugzilla.mozilla.org/show_bug.cgi?id=1265961
+        return !!doc.defaultView && 'srcdoc' in doc.defaultView.frameElement && !/firefox/i.test(navigator.userAgent);
+      }
       //use similar logic to render ad. dfp would call with document and id
       window.renderAd = function (doc, id) {
         if (doc && id) {
           try {
             //lookup ad by ad Id
-            var adObject = savedBids[id];
+            var adObject = savedBids.find(function(bid) {return bid.id === id;});
             if (adObject) {
               var ad = adObject.ad;
 
               if (doc === document) {
-                console.log(`Error trying to write ad. Ad render call ad id ${id} was prevented from writing to the main document.`);
+                console.log('Error trying to write ad. Ad render call ad id ' + id + ' was prevented from writing to the main document.');
               } else if (ad) {
                 if (isSrcdocSupported(doc)) {
                   doc.defaultView.frameElement.srcdoc = ad;
@@ -35,6 +43,7 @@
                   doc.close();
                 }
               } else {
+                //handle providers that return url here
                 console.log('Error trying to write ad. No ad for bid response id: ' + id);
               }
 
@@ -51,14 +60,8 @@
 
       };
 
-      var ConversantBidderAdapter = function(options) {
-        var self = this;
-        self.pf = options.pf;
-        self.bidderConfigs = options.bidderConfigs;
-        self.name = 'conversant';
-        window.ConversantBidder = self;
-      };
-      var savedBids = {};
+
+      var savedBids = [];
 
       // SSAPI returns JSONP with window.pbjs.conversantResponse as the cb
       var appendScript = function (code) {
@@ -85,6 +88,15 @@
         xmlHttp.withCredentials = true;
         xmlHttp.send(data);
       };
+
+      var ConversantBidderAdapter = function(options) {
+        var self = this;
+        self.pf = options.pf;
+        self.bidderConfigs = options.bidderConfigs;
+        self.name = 'conversant';
+        window.ConversantBidder = self;
+      };
+
       ConversantBidderAdapter.prototype = {
         bids : [],
         bidderPrefix : 'cn',
@@ -109,43 +121,42 @@
             }
           });
         },
+
         _getDNT : function() {
           return navigator.doNotTrack === '1' || window.doNotTrack === '1' || navigator.msDoNotTrack === '1' || window.doNotTrack === 'yes';
         },
+
         _requestBids : function(slots, pushBid, done){
           var self = this;
           if (slots.length > 0){
             var bidRequest = {};
             bidRequest.id = '100001';
             bidRequest.site = {
-              id : '87293',//This is just an example, replace with site ID from Conversant.
-              mobile : 1,//1 for mobile and 0 otherwise
+              id : '74740',//This is just an example, replace with site ID from Conversant.
+              mobile : 1, //1 for mobile and 0 otherwise
               page : window.location.href,
-              privacypolicy : 0//indicates if site has a privacy policy
+              privacypolicy : 1//indicates if site has a privacy policy
             };
             bidRequest.device = {
-              h: screen.height,
-              w: screen.width,
+              h: 667,//screen.height,
+              w: 375,//screen.width,
               dnt: self._getDNT() ? 1 : 0,
-              make: navigator.vendor ? navigator.vendor : '',
-              ua: navigator.userAgent
+              make: 'Google Inc.', //navigator.vendor ? navigator.vendor : '',
+              ua: 'Mozilla/5.0 (iPhone; CPU iPhone OS 9_1 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Mobile/13B143 Safari/601.1'
             };
             bidRequest.imp = [];
-            for (var i=0, slot; slot = slots[i]; i++){
+            slots.forEach(function(slot) {
               var slotConfig = self.bidderConfigs[slot.name].conversant;
-
-              for (var j=0, banner; banner = slotConfig.banner[j]; j++){
+              slotConfig.banner.forEach(function(banner) {
                 var impid = self._generateImpId(slot.name, [banner.w, banner.h]);
                 bidRequest.imp.push({
                   id : impid,
                   banner : banner,
                   displaymanager: 'Pubfood.js',
-                  displaymanagerver: '1.0.0',
-                  bidfloor: 0.01,//your bid floor
-                  bidfloorcur: 'USD'
+                  displaymanagerver: '1.0.0'
                 });
-              }
-            }
+              });
+            });
             self.log('Requesting Bids',bidRequest);
             window.conversantResponse = self._callbackFactory(slots,pushBid, done);
             var url = 'http://media.msg.dotomi.com/s2s/header?callback=conversantResponse';
@@ -153,35 +164,36 @@
             httpPOSTAsync(url, JSON.stringify(bidRequest));
           }
         },
+
         _generateImpId : function(slotName , size){
           return slotName+'_'+size[0]+'x'+size[1];
         },
+
         _parseImpId : function(impid){
           return {
             slotName : impid.substring(0,impid.lastIndexOf('_')),
             size : impid.substring(impid.lastIndexOf('_')+1,impid.length).split('x')
-          }
+          };
         },
+
         _getNextUniqueId: function() {
           var self = this;
           self.lastId += 1;
           return self.lastId;
         },
+
         _callbackFactory : function(slots,pushBid,done){
           var self = this;
           return function(rsp){
-            self.log('Recieved Conversant Bid Response',rsp);
-            var seatBids = rsp.seatbid;
             var slotBids = {};
-            if (seatBids.length > 0){
-              for (var i=0, seatBid; seatBid = seatBids[i];i++){
-                // seatbid  is an array of bids by slot
+            rsp.seatbid.forEach(function(seatBid) {
+              // seatbid  is an array of bids by slot
                 if (seatBid.bid && seatBid.bid.length > 0){
                   var bids = seatBid.bid;
-                  bids.sort(function( a, b){
+                  bids.sort(function(a, b){
                     return b.price - a.price;
                   });
-                  for(var j=0,bidResponse;bidResponse = bids[j];j++){
+                  bids.forEach(function(bidResponse) {
                     self.log('Parsing Conversant Bid',bidResponse);
                     if (bidResponse.price > 0 && bidResponse.adm){
 
@@ -199,7 +211,7 @@
                           width: size[0],
                           nurl : decodeURIComponent(bidResponse.nurl),
                           ad: decodeURIComponent(bidResponse.adm)
-                        }
+                        };
 
                         var adId = self.bidderPrefix+'_'+ self._getNextUniqueId();//generate unique identifier here
                         var bidTarget =  self.bidderPrefix + '_' + adObject.width + 'x' + adObject.height;
@@ -208,32 +220,31 @@
                         slotTargeting[bidTarget] = adObject.cpm;
                         slotTargeting[adIdTarget] = adId;
                         //adm already has the creative, so save it here, to be used if it wins
-                        savedBids[adId] = bidResponse.adm;
+                        savedBids.push({id: adId, slotId: slot.elementId, ad: bidResponse.adm, size: size});
 
                         var bidObject = {
                           slot : slot.name,
                           value : adObject.cpm,
-                          sizes : adObject['width']+'x'+adObject['height'],
+                          sizes : adObject.width + 'x' + adObject.height,
                           targeting : slotTargeting,
                           ad: decodeURIComponent(bidResponse.adm)
                         };
                         self.log('Pushing Bid', bidObject);
-                        pushBid(bidObject)
+                        pushBid(bidObject);
                         slotBids[slot.name] = bidObject;
                         self.bids.push(bidObject);
                       }
                       else {
-                        self.log('Ignoring bid due to higher value bid recieved',{currentBidResponse :bidResponse, existingBid:slotBids[slot.name] })
+                        self.log('Ignoring bid due to higher value bid recieved',{currentBidResponse :bidResponse, existingBid:slotBids[slot.name] });
                       }
                     }
                     else {
                       self.log('Empty Bid Response', bidResponse);
                     }
-                  }
-                }
+                  });
 
-              }
-            }
+                }
+            });
             done();
           };
         }
@@ -250,12 +261,33 @@
         batch.push(event);
       });
 
+      //ATTENTION: do not copy this code, dfp should do this for you!!
+      var fakeGoogleTagCallback = function () {
+        savedBids.forEach(function(bid) {
+          var element = document.getElementById(window.googletag.pubads().getSlots().find(function(slot) {
+            return slot.getSlotElementId() === bid.slotId;
+          }).getSlotElementId());
+          var iframe = element.querySelector('iframe');
+          if (!iframe) {
+            iframe = document.createElement('iframe');
+            iframe.width = bid.size[0];
+            iframe.height = bid.size[1];
+            iframe.setAttribute('style', 'margin: 0; border: 0;');
+            iframe.setAttribute('frameborder', '0');
+            iframe.setAttribute('scrolling', 'no');
+            element.appendChild(iframe);
+            iframe.contentWindow.document.querySelector('body').style.margin = 0;
+          }
+          window.renderAd(iframe.contentWindow.document, bid.id);
+        });
+      };
       // this reporter only listens on the `AUCTION_COMPLETE` event, then loops over and displays the event data
       pf.observe('AUCTION_COMPLETE', function(event) {
         console.log('---------------------------------------');
         for (var i = 0; i < batch.length; i++) {
           console.log('%c' + batch[i].type, 'padding-right:5px;font-weight:bold;display:block;', JSON.stringify(batch[i]));
         }
+        fakeGoogleTagCallback();
       });
 
       var slot = pf.addSlot({
@@ -322,7 +354,7 @@
             }
           });
           googletag.cmd.push(function() {
-            googletag.pubads().collapseEmptyDivs();
+            //googletag.pubads().collapseEmptyDivs();
             googletag.pubads().enableSingleRequest();
             googletag.enableServices();
             done();
@@ -414,4 +446,9 @@
       });
     </script>
   </body>
+  <script>try {
+    w.pbjs.renderAd(document, '%%PATTERN:hb_adid%%');
+  } catch (e) {
+  }
+  </script>
 </html>
