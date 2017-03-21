@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Conversant - PubFood Example page</title>
+  </head>
+  <body>
+    <script src="../../../../build/pubfood.js"></script>
+    <script>
+
+      //add the following lines to 'Code Snippet' box of DFP third party creative
+      //gpt would then call renderAd below to render the ad
+      /*
+      try {
+        w.pbjs.renderAd(document, '%%PATTERN:hb_adid%%');
+      } catch (e) {
+      }
+      */
+      //use similar logic to render ad. dfp would call with document and id
+      window.renderAd = function (doc, id) {
+        if (doc && id) {
+          try {
+            //lookup ad by ad Id
+            var adObject = savedBids[id];
+            if (adObject) {
+              var ad = adObject.ad;
+
+              if (doc === document) {
+                console.log(`Error trying to write ad. Ad render call ad id ${id} was prevented from writing to the main document.`);
+              } else if (ad) {
+                if (isSrcdocSupported(doc)) {
+                  doc.defaultView.frameElement.srcdoc = ad;
+                } else {
+                  doc.write(ad);
+                  doc.close();
+                }
+              } else {
+                console.log('Error trying to write ad. No ad for bid response id: ' + id);
+              }
+
+            } else {
+              console.log('Error trying to write ad. Cannot find ad by given id : ' + id);
+            }
+
+          } catch (e) {
+            console.log('Error trying to write ad Id :' + id + ' to the page:' + e.message);
+          }
+        } else {
+          console.log('Error trying to write ad Id :' + id + ' to the page. Missing document or adId');
+        }
+
+      };
+
+      var ConversantBidderAdapter = function(options) {
+        var self = this;
+        self.pf = options.pf;
+        self.bidderConfigs = options.bidderConfigs;
+        self.name = 'conversant';
+        window.ConversantBidder = self;
+      };
+      var savedBids = {};
+
+      // SSAPI returns JSONP with window.pbjs.conversantResponse as the cb
+      var appendScript = function (code) {
+        var script = document.createElement('script');
+        script.type = 'text/javascript';
+        script.className = 'cnvr-response';
+
+        try {
+          script.appendChild(document.createTextNode(code));
+          document.getElementsByTagName('head')[0].appendChild(script);
+        } catch (e) {
+          script.text = code;
+          document.getElementsByTagName('head')[0].appendChild(script);
+        }
+      };
+
+      var httpPOSTAsync = function (url, data) {
+        var xmlHttp = new window.XMLHttpRequest();
+
+        xmlHttp.onload = function () {
+          appendScript(xmlHttp.responseText);
+        };
+        xmlHttp.open('POST', url, true); // true for asynchronous
+        xmlHttp.withCredentials = true;
+        xmlHttp.send(data);
+      };
+      ConversantBidderAdapter.prototype = {
+        bids : [],
+        bidderPrefix : 'cn',
+        lastId: 1,
+        log: function (message){
+          var self=this;
+          var args = Array.from(arguments);
+          args.splice(0,0,self);
+          console.log(message, self, args);
+        },
+        register: function(){
+          var self = this;
+          self.log('Adding Bidder to Pubfood');
+
+          self.pf.addBidProvider({
+            name : self.name,
+            init : function(slots,pushBid,done){
+              self._requestBids(slots,pushBid,done);
+            },
+            refresh : function(slots, pushBid, done){
+              self._requestBids(slots,pushBid,done);
+            }
+          });
+        },
+        _getDNT : function() {
+          return navigator.doNotTrack === '1' || window.doNotTrack === '1' || navigator.msDoNotTrack === '1' || window.doNotTrack === 'yes';
+        },
+        _requestBids : function(slots, pushBid, done){
+          var self = this;
+          if (slots.length > 0){
+            var bidRequest = {};
+            bidRequest.id = '100001';
+            bidRequest.site = {
+              id : '87293',//This is just an example, replace with site ID from Conversant.
+              mobile : 1,//1 for mobile and 0 otherwise
+              page : window.location.href,
+              privacypolicy : 0//indicates if site has a privacy policy
+            };
+            bidRequest.device = {
+              h: screen.height,
+              w: screen.width,
+              dnt: self._getDNT() ? 1 : 0,
+              make: navigator.vendor ? navigator.vendor : '',
+              ua: navigator.userAgent
+            };
+            bidRequest.imp = [];
+            for (var i=0, slot; slot = slots[i]; i++){
+              var slotConfig = self.bidderConfigs[slot.name].conversant;
+
+              for (var j=0, banner; banner = slotConfig.banner[j]; j++){
+                var impid = self._generateImpId(slot.name, [banner.w, banner.h]);
+                bidRequest.imp.push({
+                  id : impid,
+                  banner : banner,
+                  displaymanager: 'Pubfood.js',
+                  displaymanagerver: '1.0.0',
+                  bidfloor: 0.01,//your bid floor
+                  bidfloorcur: 'USD'
+                });
+              }
+            }
+            self.log('Requesting Bids',bidRequest);
+            window.conversantResponse = self._callbackFactory(slots,pushBid, done);
+            var url = 'http://media.msg.dotomi.com/s2s/header?callback=conversantResponse';
+
+            httpPOSTAsync(url, JSON.stringify(bidRequest));
+          }
+        },
+        _generateImpId : function(slotName , size){
+          return slotName+'_'+size[0]+'x'+size[1];
+        },
+        _parseImpId : function(impid){
+          return {
+            slotName : impid.substring(0,impid.lastIndexOf('_')),
+            size : impid.substring(impid.lastIndexOf('_')+1,impid.length).split('x')
+          }
+        },
+        _getNextUniqueId: function() {
+          var self = this;
+          self.lastId += 1;
+          return self.lastId;
+        },
+        _callbackFactory : function(slots,pushBid,done){
+          var self = this;
+          return function(rsp){
+            self.log('Recieved Conversant Bid Response',rsp);
+            var seatBids = rsp.seatbid;
+            var slotBids = {};
+            if (seatBids.length > 0){
+              for (var i=0, seatBid; seatBid = seatBids[i];i++){
+                // seatbid  is an array of bids by slot
+                if (seatBid.bid && seatBid.bid.length > 0){
+                  var bids = seatBid.bid;
+                  bids.sort(function( a, b){
+                    return b.price - a.price;
+                  });
+                  for(var j=0,bidResponse;bidResponse = bids[j];j++){
+                    self.log('Parsing Conversant Bid',bidResponse);
+                    if (bidResponse.price > 0 && bidResponse.adm){
+
+                      var slotName = self._parseImpId(bidResponse.impid).slotName;
+                      var size = self._parseImpId(bidResponse.impid).size;
+                      var slot = self.pf.getSlot(slotName);
+                      // if we have a bid for the slot already then ignore it
+                      if (!slotBids[slot.name]){
+                        var adObject = {
+                          bidder : self.name,
+                          slot : slot.name,
+                          cpm : '0.01',
+                          originalCPM: bidResponse.price,
+                          height: size[1],
+                          width: size[0],
+                          nurl : decodeURIComponent(bidResponse.nurl),
+                          ad: decodeURIComponent(bidResponse.adm)
+                        }
+
+                        var adId = self.bidderPrefix+'_'+ self._getNextUniqueId();//generate unique identifier here
+                        var bidTarget =  self.bidderPrefix + '_' + adObject.width + 'x' + adObject.height;
+                        var adIdTarget = self.bidderPrefix + adObject.width + 'x' + adObject.height + 'adId';
+                        var slotTargeting = {};
+                        slotTargeting[bidTarget] = adObject.cpm;
+                        slotTargeting[adIdTarget] = adId;
+                        //adm already has the creative, so save it here, to be used if it wins
+                        savedBids[adId] = bidResponse.adm;
+
+                        var bidObject = {
+                          slot : slot.name,
+                          value : adObject.cpm,
+                          sizes : adObject['width']+'x'+adObject['height'],
+                          targeting : slotTargeting,
+                          ad: decodeURIComponent(bidResponse.adm)
+                        };
+                        self.log('Pushing Bid', bidObject);
+                        pushBid(bidObject)
+                        slotBids[slot.name] = bidObject;
+                        self.bids.push(bidObject);
+                      }
+                      else {
+                        self.log('Ignoring bid due to higher value bid recieved',{currentBidResponse :bidResponse, existingBid:slotBids[slot.name] })
+                      }
+                    }
+                    else {
+                      self.log('Empty Bid Response', bidResponse);
+                    }
+                  }
+                }
+
+              }
+            }
+            done();
+          };
+        }
+      };
+
+      window.googletag = window.googletag || {};
+      googletag.cmd = googletag.cmd || [];
+      var pf = new pubfood();
+      pf.omitDefaultBidKey(true);
+      var batch = [];
+
+      // this reporter listens on all events and pushes the event data to a queue `batch`
+      pf.observe(function(event) {
+        batch.push(event);
+      });
+
+      // this reporter only listens on the `AUCTION_COMPLETE` event, then loops over and displays the event data
+      pf.observe('AUCTION_COMPLETE', function(event) {
+        console.log('---------------------------------------');
+        for (var i = 0; i < batch.length; i++) {
+          console.log('%c' + batch[i].type, 'padding-right:5px;font-weight:bold;display:block;', JSON.stringify(batch[i]));
+        }
+      });
+
+      var slot = pf.addSlot({
+        name: '/2476204/multi-size',
+        sizes: [
+          [300, 250],
+          [300, 600]
+        ],
+        elementId: 'div-multi-size',
+        bidProviders: [
+          'conversant'
+        ]
+      });
+      slot.setParam('conversant', {
+        slot: 'medrec'
+      });
+
+      slot = pf.addSlot({
+        name: '/2476204/leaderboard',
+        sizes: [
+          [728, 90]
+        ],
+        elementId: 'div-leaderboard',
+        bidProviders: [
+          'conversant'
+        ]
+      });
+      slot.setParam('conversant', {
+        slot: 'leaderboard'
+      });
+
+      var bidder = new ConversantBidderAdapter({
+        pf: pf,
+        bidderConfigs: {
+            '/2476204/multi-size' : {conversant: {banner: [{w: 300, h: 250}]}},
+            '/2476204/leaderboard' : {conversant: {banner: [{w: 728, h: 90}]}}
+        }
+      });
+      bidder.register();
+
+      pf.setAuctionProvider({
+        name: 'Google',
+        libUri: '//www.googletagservices.com/tag/js/gpt.js',
+        init: function(targeting, done) {
+          googletag.cmd.push(function() {
+            pf.getAuctionProvider().setParam('isRefresh', false);
+            var slots = {};
+            for (var i = 0; i < targeting.length; i++) {
+              var tgtObject = targeting[i];
+
+              var gptObject;
+              if (tgtObject.name) {
+                gptObject = googletag.defineSlot(tgtObject.name, tgtObject.sizes, tgtObject.elementId).addService(googletag.pubads());
+                slots[tgtObject.name] = gptObject;
+
+              } else {
+                gptObject = googletag.pubads();
+              }
+              for (var p in tgtObject.targeting) {
+                gptObject.setTargeting(p, tgtObject.targeting[p]);
+              }
+              pf.getAuctionProvider().setParam('slots', slots);
+
+            }
+          });
+          googletag.cmd.push(function() {
+            googletag.pubads().collapseEmptyDivs();
+            googletag.pubads().enableSingleRequest();
+            googletag.enableServices();
+            done();
+          });
+        },
+        refresh: function(targeting, done) {
+          googletag.cmd.push(function() {
+            googletag.pubads().clearTargeting();
+            googletag.pubads().clear();
+          });
+
+          googletag.cmd.push(function() {
+            pf.getAuctionProvider().setParam('isRefresh', true);
+            var slots = pf.getAuctionProvider().getParam('slots'),
+              refreshSlots = [];
+            for (var i = 0; i < targeting.length; i++) {
+              var tgtObject = targeting[i],
+                gptObject = slots[tgtObject.name];
+
+              gptObject = gptObject ? (refreshSlots.push(gptObject), gptObject) : googletag.pubads();
+              for (var p in tgtObject.targeting) {
+                gptObject.setTargeting(p, tgtObject.targeting[p]);
+              }
+            }
+            if (refreshSlots.length > 0) {
+              googletag.pubads().refresh(refreshSlots);
+            } else {
+              googletag.pubads().refresh();
+            }
+            done();
+          });
+        }
+      });
+
+      function augmentBids(bids, params) {
+        for (var i = 0; i < bids.length; i++) {
+          bids[i]['targeting'].code = (0 | Math.random() * 36).toString(36);
+          bids[i].baseValue = bids[i].value || 0;
+          bids[i].value += 9;
+        }
+        return bids;
+      }
+
+      pf.addBidTransform(augmentBids);
+
+      pf.timeout(3000);
+      pf.start(Date.now(), function(hasErros, details) {
+        if (hasErros) {
+          console.log('HAS ERRORS', details);
+        }
+      });
+
+
+      function refreshAds(all) {
+        if (!all) {
+          pf.refresh(['/2476204/multi-size']);
+        } else {
+          pf.refresh();
+        }
+      }
+    </script>
+    <h2>Conversant Bid Provider - PubFood</h2>
+    <p>
+      <button id="refresh-one-btn" onclick="refreshAds()">Refresh 300x250 ad</button> - <em>or</em> -
+      <button id="refresh-all-btn" onclick="refreshAds(true)">Refresh All</button>
+    </p>
+    <h3>Leaderboard 728x90</h3>
+    <div id='div-leaderboard'>
+    </div>
+    <script>
+      pf.observe('AUCTION_POST_RUN', function() {
+        googletag.cmd.push(function() {
+          if (!pf.getAuctionProvider().getParam('isRefresh')) {
+            googletag.display('div-leaderboard');
+          }
+        });
+      });
+    </script>
+    <h3>Medium Rectangle 300x250</h3>
+    <div id='div-multi-size'>
+    </div>
+    <script>
+      pf.observe('AUCTION_POST_RUN', function() {
+        googletag.cmd.push(function() {
+          if (!pf.getAuctionProvider().getParam('isRefresh')) {
+            googletag.display('div-multi-size');
+          }
+        });
+      });
+    </script>
+  </body>
+</html>
