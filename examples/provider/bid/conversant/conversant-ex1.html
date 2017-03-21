@@ -16,6 +16,20 @@
       } catch (e) {
       }
       */
+
+      //ATTENTION: do not copy window.fakeGoogleTagCallback, dfp should do this for you!!
+      window.fakeGoogleTagCallback = function () {
+        savedBids.forEach(function(bid) {
+          var element = document.getElementById(window.googletag.pubads().getSlots().find(function(slot) {
+            return slot.getSlotElementId() === bid.slotId;
+          }).getSlotElementId());
+          var iframe = element.querySelector('iframe');
+          if (iframe) {
+            window.renderAd(iframe.contentWindow.document, bid.id);
+          }
+        });
+      };
+
       /**
        * Check if parent iframe of passed document supports content rendering via 'srcdoc' property
        * @param {HTMLDocument} doc document to check support of 'srcdoc'
@@ -262,18 +276,6 @@
         batch.push(event);
       });
 
-      //ATTENTION: do not copy this code, dfp should do this for you!!
-      window.fakeGoogleTagCallback = function () {
-        savedBids.forEach(function(bid) {
-          var element = document.getElementById(window.googletag.pubads().getSlots().find(function(slot) {
-            return slot.getSlotElementId() === bid.slotId;
-          }).getSlotElementId());
-          var iframe = element.querySelector('iframe');
-          if (iframe) {
-            window.renderAd(iframe.contentWindow.document, bid.id);
-          }
-        });
-      };
       // this reporter only listens on the `AUCTION_COMPLETE` event, then loops over and displays the event data
       pf.observe('AUCTION_COMPLETE', function(event) {
         console.log('---------------------------------------');
@@ -434,6 +436,7 @@
             googletag.display('div-multi-size');
           }
         });
+        //ATTENTION: do NOT copy the following line, for demo only
         window.fakeGoogleTagCallback();
       });
     </script>
