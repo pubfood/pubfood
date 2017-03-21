@@ -138,11 +138,12 @@
               privacypolicy : 1//indicates if site has a privacy policy
             };
             bidRequest.device = {
-              h: 667,//screen.height,
-              w: 375,//screen.width,
+              h: screen.height,
+              w: screen.width,
               dnt: self._getDNT() ? 1 : 0,
-              make: 'Google Inc.', //navigator.vendor ? navigator.vendor : '',
-              ua: 'Mozilla/5.0 (iPhone; CPU iPhone OS 9_1 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Mobile/13B143 Safari/601.1'
+              make: navigator.vendor ? navigator.vendor : '',
+              ua:  'Mozilla/5.0 (iPhone; CPU iPhone OS 9_1 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Mobile/13B143 Safari/601.1'
+              //ua should be navigator.userAgent, hard coding to fake mobile for demo
             };
             bidRequest.imp = [];
             slots.forEach(function(slot) {
@@ -165,14 +166,14 @@
           }
         },
 
-        _generateImpId : function(slotName , size){
-          return slotName+'_'+size[0]+'x'+size[1];
+        _generateImpId : function(slotName , size) {
+          return slotName + '_' + size[0] + 'x' + size[1];
         },
 
         _parseImpId : function(impid){
           return {
-            slotName : impid.substring(0,impid.lastIndexOf('_')),
-            size : impid.substring(impid.lastIndexOf('_')+1,impid.length).split('x')
+            slotName: impid.substring(0, impid.lastIndexOf('_')),
+            size: impid.substring(impid.lastIndexOf('_') + 1, impid.length).split('x')
           };
         },
 
@@ -262,23 +263,15 @@
       });
 
       //ATTENTION: do not copy this code, dfp should do this for you!!
-      var fakeGoogleTagCallback = function () {
+      window.fakeGoogleTagCallback = function () {
         savedBids.forEach(function(bid) {
           var element = document.getElementById(window.googletag.pubads().getSlots().find(function(slot) {
             return slot.getSlotElementId() === bid.slotId;
           }).getSlotElementId());
           var iframe = element.querySelector('iframe');
-          if (!iframe) {
-            iframe = document.createElement('iframe');
-            iframe.width = bid.size[0];
-            iframe.height = bid.size[1];
-            iframe.setAttribute('style', 'margin: 0; border: 0;');
-            iframe.setAttribute('frameborder', '0');
-            iframe.setAttribute('scrolling', 'no');
-            element.appendChild(iframe);
-            iframe.contentWindow.document.querySelector('body').style.margin = 0;
+          if (iframe) {
+            window.renderAd(iframe.contentWindow.document, bid.id);
           }
-          window.renderAd(iframe.contentWindow.document, bid.id);
         });
       };
       // this reporter only listens on the `AUCTION_COMPLETE` event, then loops over and displays the event data
@@ -287,7 +280,6 @@
         for (var i = 0; i < batch.length; i++) {
           console.log('%c' + batch[i].type, 'padding-right:5px;font-weight:bold;display:block;', JSON.stringify(batch[i]));
         }
-        fakeGoogleTagCallback();
       });
 
       var slot = pf.addSlot({
@@ -370,15 +362,14 @@
             pf.getAuctionProvider().setParam('isRefresh', true);
             var slots = pf.getAuctionProvider().getParam('slots'),
               refreshSlots = [];
-            for (var i = 0; i < targeting.length; i++) {
-              var tgtObject = targeting[i],
-                gptObject = slots[tgtObject.name];
-
+            targeting.forEach(function (tgtObject) {
+              var gptObject = slots[tgtObject.name];
               gptObject = gptObject ? (refreshSlots.push(gptObject), gptObject) : googletag.pubads();
               for (var p in tgtObject.targeting) {
                 gptObject.setTargeting(p, tgtObject.targeting[p]);
               }
-            }
+            });
+
             if (refreshSlots.length > 0) {
               googletag.pubads().refresh(refreshSlots);
             } else {
@@ -443,6 +434,7 @@
             googletag.display('div-multi-size');
           }
         });
+        window.fakeGoogleTagCallback();
       });
     </script>
   </body>
