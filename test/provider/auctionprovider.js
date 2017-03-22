@@ -99,8 +99,8 @@ describe('Pubfood AuctionProvider', function() {
       var keys = auctionProvider.getParamKeys();
 
       var sum = 0;
-      keys.map(function(v) {
-        sum += v;
+      keys.forEach(function(v) {
+        sum += auctionProvider.getParam(v);
       });
       assert.isTrue(sum === 21, 'key iteration should produce value of 21');
 
@@ -112,6 +112,7 @@ describe('Pubfood AuctionProvider', function() {
       auctionProvider.setParam(foo, 0).
         setParam('p1', 1);
       assert.isTrue(auctionProvider.getParamKeys().length === 1, 'should only have 1 key');
+      assert.isTrue(auctionProvider.getParamKeys()[0] === 'p1', 'should have key of \"p1\"');
       assert.isTrue(auctionProvider.getParam('p1') === 1, 'parameter \"p1\" should have value of 1');
     });
 
@@ -128,6 +129,16 @@ describe('Pubfood AuctionProvider', function() {
         .setParam(true, 8);
 
       assert.isTrue(auctionProvider.getParamKeys().length === 5, 'should only have 5 keys');
+      assert.isTrue(auctionProvider.getParamKeys()[0] === '0', 'should have first key of \"0\"');
+      assert.isTrue(auctionProvider.getParamKeys()[1] === '1.01', 'should have second key of \"1.01\"');
+      assert.isTrue(auctionProvider.getParamKeys()[2] === 'p4', 'should have third key of \"p4\"');
+      assert.isTrue(auctionProvider.getParamKeys()[3] === '', 'should have fourth key of \"\"');
+      assert.isTrue(auctionProvider.getParamKeys()[4] === 'true', 'should have fifth key of \"true\"');
+      assert.isTrue(auctionProvider.getParam('0') === 2, 'parameter \"0\" should have value of 2');
+      assert.isTrue(auctionProvider.getParam('1.01') === 2.1, 'parameter \"1.01\" should have value of 2.1');
+      assert.isTrue(auctionProvider.getParam('p4') === 4, 'parameter \"p4\" should have value of 4');
+      assert.isTrue(auctionProvider.getParam('') === 4.1, 'parameter \"\" should have value of 4.1');
+      assert.isTrue(auctionProvider.getParam('true') === 8, 'parameter \"true\" should have value of 8');
     });
   });
 

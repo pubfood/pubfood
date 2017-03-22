@@ -43,7 +43,7 @@ describe('Pubfood BidProvider', function() {
     ],
     invalid: [
       {
-        name: 'bidder5',
+        name: 'bidder5'
       },
       {
         name: 'bidder6',
@@ -157,8 +157,8 @@ describe('Pubfood BidProvider', function() {
       var keys = bidProvider.getParamKeys();
 
       var sum = 0;
-      keys.map(function(v) {
-        sum += v;
+      keys.forEach(function(v) {
+        sum += bidProvider.getParam(v);
       });
       assert.isTrue(sum === 21, 'key iteration should produce value of 21');
 
@@ -170,6 +170,7 @@ describe('Pubfood BidProvider', function() {
       bidProvider.setParam(foo, 0).
         setParam('p1', 1);
       assert.isTrue(bidProvider.getParamKeys().length === 1, 'should only have 1 key');
+      assert.isTrue(bidProvider.getParamKeys()[0] === 'p1', 'should have key of \"p1\"');
       assert.isTrue(bidProvider.getParam('p1') === 1, 'parameter \"p1\" should have value of 1');
     });
 
@@ -186,6 +187,16 @@ describe('Pubfood BidProvider', function() {
         .setParam(true, 8);
 
       assert.isTrue(bidProvider.getParamKeys().length === 5, 'should only have 5 keys');
+      assert.isTrue(bidProvider.getParamKeys()[0] === '0', 'should have first key of \"0\"');
+      assert.isTrue(bidProvider.getParamKeys()[1] === '1.01', 'should have second key of \"1.01\"');
+      assert.isTrue(bidProvider.getParamKeys()[2] === 'p4', 'should have third key of \"p4\"');
+      assert.isTrue(bidProvider.getParamKeys()[3] === '', 'should have fourth key of \"\"');
+      assert.isTrue(bidProvider.getParamKeys()[4] === 'true', 'should have fifth key of \"true\"');
+      assert.isTrue(bidProvider.getParam('0') === 2, 'parameter \"0\" should have value of 2');
+      assert.isTrue(bidProvider.getParam('1.01') === 2.1, 'parameter \"1.01\" should have value of 2.1');
+      assert.isTrue(bidProvider.getParam('p4') === 4, 'parameter \"p4\" should have value of 4');
+      assert.isTrue(bidProvider.getParam('') === 4.1, 'parameter \"\" should have value of 4.1');
+      assert.isTrue(bidProvider.getParam('true') === 8, 'parameter \"true\" should have value of 8');
     });
   });
 

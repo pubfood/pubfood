@@ -49,7 +49,7 @@ PubfoodObject.prototype.getParam = function(name) {
 PubfoodObject.prototype.getParamKeys = function() {
   var ret = [];
   for (var i in this.params_) {
-    ret.push(this.params_[i]);
+    ret.push(i);
   }
   return ret;
 };
