@@ -21,14 +21,6 @@
         } catch(e) {continue;}
       }
      */
-      /**
-       * Check if parent iframe of passed document supports content rendering via 'srcdoc' property
-       * @param {HTMLDocument} doc document to check support of 'srcdoc'
-       */
-      function isSrcdocSupported(doc) {
-        //Firefox is excluded due to https://bugzilla.mozilla.org/show_bug.cgi?id=1265961
-        return !!doc.defaultView && 'srcdoc' in doc.defaultView.frameElement && !/firefox/i.test(navigator.userAgent);
-      }
       //use similar logic to render ad. dfp would call with document and id
       window.renderAd = function (doc, id) {
         if (doc && id) {
@@ -40,15 +32,11 @@
 
               if (doc === document) {
                 console.log('Error trying to write ad. Ad render call ad id ' + id + ' was prevented from writing to the main document.');
-              } else if (ad) {
-                if (isSrcdocSupported(doc)) {
-                  doc.defaultView.frameElement.srcdoc = ad;
-                  doc.defaultView.frameElement.width = adObject.size[0] + 'px';
-                  doc.defaultView.frameElement.height = adObject.size[1] + 'px';
-                } else {
-                  doc.write(ad);
-                  doc.close();
-                }
+              } else if (ad && ad.indexOf('<script') >= 0) {
+                doc.write(ad);
+                doc.close();
+                doc.defaultView.frameElement.width = adObject.size[0] + 'px';
+                doc.defaultView.frameElement.height = adObject.size[1] + 'px';
               } else {
                 //handle providers that return url here
                 console.log('Error trying to write ad. No ad for bid response id: ' + id);
