@@ -84,168 +84,6 @@
         xmlHttp.send(data);
       };
 
-      var ConversantBidderAdapter = function(options) {
-        var self = this;
-        self.pf = options.pf;
-        self.bidderConfigs = options.bidderConfigs;
-        self.name = 'conversant';
-        window.ConversantBidder = self;
-      };
-
-      ConversantBidderAdapter.prototype = {
-        bids : [],
-        bidderPrefix : 'cn',
-        lastId: 1,
-        log: function (message){
-          var self=this;
-          var args = Array.from(arguments);
-          args.splice(0,0,self);
-          console.log(message, self, args);
-        },
-        register: function(){
-          var self = this;
-          self.log('Adding Bidder to Pubfood');
-
-          self.pf.addBidProvider({
-            name : self.name,
-            init : function(slots,pushBid,done){
-              self._requestBids(slots,pushBid,done);
-            },
-            refresh : function(slots, pushBid, done){
-              self._requestBids(slots,pushBid,done);
-            }
-          });
-        },
-
-        _getDNT : function() {
-          return navigator.doNotTrack === '1' || window.doNotTrack === '1' || navigator.msDoNotTrack === '1' || window.doNotTrack === 'yes';
-        },
-
-        _requestBids : function(slots, pushBid, done){
-          var self = this;
-          if (slots.length > 0){
-            var bidRequest = {};
-            bidRequest.id = '100001';
-            bidRequest.site = {
-              id : '74740',//This is just an example, replace with site ID from Conversant.
-              mobile : 1, //1 for mobile and 0 otherwise
-              page : window.location.href,
-              privacypolicy : 1//indicates if site has a privacy policy
-            };
-            bidRequest.device = {
-              h: screen.height,
-              w: screen.width,
-              dnt: self._getDNT() ? 1 : 0,
-              make: navigator.vendor ? navigator.vendor : '',
-              ua:  'Mozilla/5.0 (iPhone; CPU iPhone OS 9_1 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Mobile/13B143 Safari/601.1'
-              //ua should be navigator.userAgent, hard coding to fake mobile for demo
-            };
-            bidRequest.imp = [];
-            slots.forEach(function(slot) {
-              var slotConfig = self.bidderConfigs[slot.name].conversant;
-              slotConfig.banner.forEach(function(banner) {
-                var impid = self._generateImpId(slot.name, [banner.w, banner.h]);
-                bidRequest.imp.push({
-                  id : impid,
-                  banner : banner,
-                  displaymanager: 'Pubfood.js',
-                  displaymanagerver: '1.0.0'
-                });
-              });
-            });
-            self.log('Requesting Bids',bidRequest);
-            window.conversantResponse = self._callbackFactory(slots,pushBid, done);
-            var url = 'http://media.msg.dotomi.com/s2s/header?callback=conversantResponse';
-
-            httpPOSTAsync(url, JSON.stringify(bidRequest));
-          }
-        },
-
-        _generateImpId : function(slotName , size) {
-          return slotName + '_' + size[0] + 'x' + size[1];
-        },
-
-        _parseImpId : function(impid){
-          return {
-            slotName: impid.substring(0, impid.lastIndexOf('_')),
-            size: impid.substring(impid.lastIndexOf('_') + 1, impid.length).split('x')
-          };
-        },
-
-        _getNextUniqueId: function() {
-          var self = this;
-          self.lastId += 1;
-          return self.lastId;
-        },
-
-        _callbackFactory : function(slots,pushBid,done){
-          var self = this;
-          return function(rsp){
-            var slotBids = {};
-            rsp.seatbid.forEach(function(seatBid) {
-              // seatbid  is an array of bids by slot
-                if (seatBid.bid && seatBid.bid.length > 0){
-                  var bids = seatBid.bid;
-                  bids.sort(function(a, b){
-                    return b.price - a.price;
-                  });
-                  bids.forEach(function(bidResponse) {
-                    self.log('Parsing Conversant Bid',bidResponse);
-                    if (bidResponse.price > 0 && bidResponse.adm){
-
-                      var slotName = self._parseImpId(bidResponse.impid).slotName;
-                      var size = self._parseImpId(bidResponse.impid).size;
-                      var slot = self.pf.getSlot(slotName);
-                      // if we have a bid for the slot already then ignore it
-                      if (!slotBids[slot.name]){
-                        var adObject = {
-                          bidder : self.name,
-                          slot : slot.name,
-                          cpm : '0.01',
-                          originalCPM: bidResponse.price,
-                          height: size[1],
-                          width: size[0],
-                          nurl : decodeURIComponent(bidResponse.nurl),
-                          ad: decodeURIComponent(bidResponse.adm)
-                        };
-
-                        var adId = self.bidderPrefix+'_'+ self._getNextUniqueId();//generate unique identifier here
-                        var bidTarget =  self.bidderPrefix + '_' + adObject.width + 'x' + adObject.height;
-                        var adIdTarget = self.bidderPrefix + adObject.width + 'x' + adObject.height + 'adId';
-                        var slotTargeting = {};
-                        slotTargeting[bidTarget] = adObject.cpm;
-                        slotTargeting[adIdTarget] = adId;
-                        //adm already has the creative, so save it here, to be used if it wins
-                        savedBids.push({id: adId, slotId: slot.elementId, ad: bidResponse.adm, size: size});
-
-                        var bidObject = {
-                          slot : slot.name,
-                          value : adObject.cpm,
-                          sizes : adObject.width + 'x' + adObject.height,
-                          targeting : slotTargeting,
-                          ad: decodeURIComponent(bidResponse.adm)
-                        };
-                        self.log('Pushing Bid', bidObject);
-                        pushBid(bidObject);
-                        slotBids[slot.name] = bidObject;
-                        self.bids.push(bidObject);
-                      }
-                      else {
-                        self.log('Ignoring bid due to higher value bid recieved',{currentBidResponse :bidResponse, existingBid:slotBids[slot.name] });
-                      }
-                    }
-                    else {
-                      self.log('Empty Bid Response', bidResponse);
-                    }
-                  });
-
-                }
-            });
-            done();
-          };
-        }
-      };
-
       window.googletag = window.googletag || {};
       googletag.cmd = googletag.cmd || [];
       var pf = new pubfood();
@@ -265,7 +103,7 @@
         }
       });
 
-      var slot = pf.addSlot({
+      var slotDetails = [{
         name: '/2476204/cn-multi-size',
         sizes: [
           [300, 250],
@@ -275,12 +113,7 @@
         bidProviders: [
           'conversant'
         ]
-      });
-      slot.setParam('conversant', {
-        slot: 'medrec'
-      });
-
-      slot = pf.addSlot({
+      }, {
         name: '/2476204/cn-leaderboard',
         sizes: [
           [728, 90]
@@ -289,19 +122,144 @@
         bidProviders: [
           'conversant'
         ]
+      }];
+      var slot = pf.addSlot(slotDetails[0]);
+      slot.setParam('conversant', {
+        slot: 'medrec'
       });
+
+      slot = pf.addSlot(slotDetails[1]);
       slot.setParam('conversant', {
         slot: 'leaderboard'
       });
 
-      var bidder = new ConversantBidderAdapter({
-        pf: pf,
-        bidderConfigs: {
-            '/2476204/cn-multi-size' : {conversant: {banner: [{w: 300, h: 250}]}},
-            '/2476204/cn-leaderboard' : {conversant: {banner: [{w: 728, h: 90}]}}
+      var conversantProvider = pf.addBidProvider({
+        name: 'conversant',
+        init: function(slots, pushBid, done) {
+          conversantProvider.requestBids(slots, pushBid, done);
+        },
+        refresh: function(slots, pushBid, done) {
+          conversantProvider.requestBids(slots, pushBid, done);
         }
       });
-      bidder.register();
+      conversantProvider.bids = [];
+      conversantProvider.bidderPrefix = 'cn';
+      conversantProvider.lastId = 1;
+
+      conversantProvider._getDNT = function() {
+        return navigator.doNotTrack === '1' || window.doNotTrack === '1' || navigator.msDoNotTrack === '1' || window.doNotTrack === 'yes';
+      };
+
+      conversantProvider._generateImpId = function(slotName , size) {
+        return slotName + '_' + size[0] + 'x' + size[1];
+      };
+
+      conversantProvider._parseImpId = function(impid) {
+        return {
+          slotName: impid.substring(0, impid.lastIndexOf('_')),
+          size: impid.substring(impid.lastIndexOf('_') + 1, impid.length).split('x')
+        };
+      };
+
+      conversantProvider._getNextUniqueId = function() {
+        conversantProvider.lastId += 1;
+        return conversantProvider.lastId;
+      };
+
+      conversantProvider._callbackFactory = function(slots,pushBid,done){
+        return function(rsp) {
+          rsp.seatbid.forEach(function(seatBid) {
+            // seatbid  is an array of bids by slot
+            if (seatBid.bid && seatBid.bid.length > 0) {
+              var bids = seatBid.bid;
+              bids.sort(function(a, b) {
+                return b.price - a.price;
+              });
+              bids.forEach(function(bidResponse) {
+                if (bidResponse.price > 0 && bidResponse.adm) {
+
+                  var slotName = conversantProvider._parseImpId(bidResponse.impid).slotName;
+                  var size = conversantProvider._parseImpId(bidResponse.impid).size;
+                  var slot = pf.getSlot(slotName);
+                  var adObject = {
+                    bidder: 'conversant',
+                    slot: slot.name,
+                    cpm: '0.01',
+                    originalCPM: bidResponse.price,
+                    height: size[1],
+                    width: size[0],
+                    nurl: decodeURIComponent(bidResponse.nurl),
+                    ad: decodeURIComponent(bidResponse.adm)
+                  };
+
+                  var adId = conversantProvider.bidderPrefix + '_' + conversantProvider._getNextUniqueId();//generate unique identifier here
+                  var bidTarget = conversantProvider.bidderPrefix + '_' + adObject.width + 'x' + adObject.height;
+                  var adIdTarget = conversantProvider.bidderPrefix + adObject.width + 'x' + adObject.height + 'adId';
+                  var slotTargeting = {};
+                  slotTargeting[bidTarget] = adObject.cpm;
+                  slotTargeting[adIdTarget] = adId;
+                  //adm already has the creative, so save it here, to be used if it wins
+                  savedBids.push({id: adId, slotId: slot.elementId, ad: bidResponse.adm, size: size});
+
+                  var bidObject = {
+                    slot: slot.name,
+                    value: adObject.cpm,
+                    sizes: adObject.width + 'x' + adObject.height,
+                    targeting: slotTargeting,
+                    ad: decodeURIComponent(bidResponse.adm)
+                  };
+                  pushBid(bidObject);
+                }
+              });
+
+            }
+          });
+          done();
+        };
+      };
+
+
+      conversantProvider.requestBids = function(slots, pushBid, done){
+        var self = this;
+        if (slots.length > 0){
+          var bidRequest = {};
+          bidRequest.id = '100001';
+          bidRequest.site = {
+            id : '74740',//This is just an example, replace with site ID from Conversant.
+            mobile : 1, //1 for mobile and 0 otherwise
+            page : window.location.href,
+            privacypolicy : 1//indicates if site has a privacy policy
+          };
+          bidRequest.device = {
+            h: screen.height,
+            w: screen.width,
+            dnt: conversantProvider._getDNT() ? 1 : 0,
+            make: navigator.vendor ? navigator.vendor : '',
+            ua:  'Mozilla/5.0 (iPhone; CPU iPhone OS 9_1 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Mobile/13B143 Safari/601.1'
+            //ua should be navigator.userAgent, hard coding to fake mobile for demo
+          };
+          bidRequest.imp = [];
+          slots.forEach(function(slot) {
+            var slotConfig = slotDetails.find(function(s) {
+              return s.name === slot.name;
+            });
+
+            slotConfig.sizes.forEach(function(size) {
+              var impid = conversantProvider._generateImpId(slot.name, [size[0], size[1]]);
+              bidRequest.imp.push({
+                id : impid,
+                banner : {w: size[0], h: size[1]},
+                displaymanager: 'Pubfood.js',
+                displaymanagerver: '1.0.0'
+              });
+            });
+          });
+          window.conversantResponse = self._callbackFactory(slots,pushBid, done);
+          var url = 'http://media.msg.dotomi.com/s2s/header?callback=conversantResponse';
+
+          httpPOSTAsync(url, JSON.stringify(bidRequest));
+        }
+      };
 
       pf.setAuctionProvider({
         name: 'Google',
