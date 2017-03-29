@@ -21,6 +21,11 @@
         } catch(e) {continue;}
       }
      */
+
+      //rudimentary html validation, use stricter validation if needed
+      var validateHTML = function (snippet) {
+        return (snippet && snippet.startsWith('<') && snippet.endsWith('>'));
+      };
       //use similar logic to render ad. dfp would call with document and id
       window.renderAd = function (doc, id) {
         if (doc && id) {
@@ -32,7 +37,7 @@
 
               if (doc === document) {
                 console.log('Error trying to write ad. Ad render call ad id ' + id + ' was prevented from writing to the main document.');
-              } else if (ad && ad.indexOf('<script') >= 0) {
+              } else if (ad && validateHTML(ad)) {
                 doc.write(ad);
                 doc.close();
                 doc.defaultView.frameElement.width = adObject.size[0] + 'px';
@@ -103,7 +108,7 @@
         }
       });
 
-      var slotDetails = [{
+      var slot = pf.addSlot({
         name: '/2476204/cn-multi-size',
         sizes: [
           [300, 250],
@@ -113,7 +118,12 @@
         bidProviders: [
           'conversant'
         ]
-      }, {
+      });
+      slot.setParam('conversant', {
+        slot: 'medrec'
+      });
+
+      slot = pf.addSlot({
         name: '/2476204/cn-leaderboard',
         sizes: [
           [728, 90]
@@ -122,13 +132,7 @@
         bidProviders: [
           'conversant'
         ]
-      }];
-      var slot = pf.addSlot(slotDetails[0]);
-      slot.setParam('conversant', {
-        slot: 'medrec'
       });
-
-      slot = pf.addSlot(slotDetails[1]);
       slot.setParam('conversant', {
         slot: 'leaderboard'
       });
@@ -218,9 +222,7 @@
         };
       };
 
-
       conversantProvider.requestBids = function(slots, pushBid, done){
-        var self = this;
         if (slots.length > 0){
           var bidRequest = {};
           bidRequest.id = '100001';
@@ -240,11 +242,7 @@
           };
           bidRequest.imp = [];
           slots.forEach(function(slot) {
-            var slotConfig = slotDetails.find(function(s) {
-              return s.name === slot.name;
-            });
-
-            slotConfig.sizes.forEach(function(size) {
+            slot.sizes.forEach(function(size) {
               var impid = conversantProvider._generateImpId(slot.name, [size[0], size[1]]);
               bidRequest.imp.push({
                 id : impid,
@@ -254,7 +252,7 @@
               });
             });
           });
-          window.conversantResponse = self._callbackFactory(slots,pushBid, done);
+          window.conversantResponse = conversantProvider._callbackFactory(slots,pushBid, done);
           var url = 'http://media.msg.dotomi.com/s2s/header?callback=conversantResponse';
 
           httpPOSTAsync(url, JSON.stringify(bidRequest));
@@ -323,7 +321,7 @@
 
       function augmentBids(bids, params) {
         for (var i = 0; i < bids.length; i++) {
-          bids[i]['targeting'].code = (0 | Math.random() * 36).toString(36);
+          bids[i].targeting.code = (0 | Math.random() * 36).toString(36);
           bids[i].baseValue = bids[i].value || 0;
           bids[i].value += 9;
         }
