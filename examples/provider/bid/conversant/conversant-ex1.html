@@ -386,5 +386,42 @@
         });
       });
     </script>
+    <br><br><br>
+    <h3>
+      Conversion BidProvider Delegate confirms to <a href="https://www.iab.net/media/file/OpenRTB-API-Specification-Version-2-3.pdf#page=13">OpenRTB 2.3</a>
+    </h3>
+    <h2>Creative Examples</h2>
+    <h3>Leaderboard Creative Example</h3>
+    <div style="border-style: solid;">
+      &lt;script&gt<br>
+      var w = window;<br>
+      &nbsp;for (i = 0; i < 10; i++) {<br>
+      &nbsp;&nbsp;w = w.parent;<br>
+      &nbsp;&nbsp;try {<br>
+      &nbsp;&nbsp;&nbsp;if (w.pubfood) {<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;w.pubfood.renderAd(document, '%%PATTERN:cn728x90adId%%');<br>
+      &nbsp;&nbsp;&nbsp;}<br>
+      &nbsp;&nbsp;&nbsp;break;<br>
+      &nbsp;&nbsp;} catch(e) {continue;}<br>
+      &nbsp;}
+      <br>
+      &lt;/script&gt;
+    </div>
+    <h3>Medium Rectangle Creative Example</h3>
+    <div style="border-style: solid;">
+      &lt;script&gt<br>
+      var w = window;<br>
+      &nbsp;for (i = 0; i < 10; i++) {<br>
+      &nbsp;&nbsp;w = w.parent;<br>
+      &nbsp;&nbsp;try {<br>
+      &nbsp;&nbsp;&nbsp;if (w.pubfood) {<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;w.pubfood.renderAd(document, '%%PATTERN:cn300x250adId%%');<br>
+      &nbsp;&nbsp;&nbsp;}<br>
+      &nbsp;&nbsp;&nbsp;break;<br>
+      &nbsp;&nbsp;} catch(e) {continue;}<br>
+      &nbsp;}
+      <br>
+      &lt;/script&gt;
+    </div>
   </body>
 </html>
