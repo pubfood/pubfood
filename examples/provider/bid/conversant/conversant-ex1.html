@@ -24,10 +24,6 @@
       }
      */
 
-      //rudimentary html validation, use stricter validation if needed
-      var validateHTML = function (snippet) {
-        return (snippet && snippet.startsWith('<') && snippet.endsWith('>'));
-      };
       //use similar logic to render ad. dfp would call with document and id
       window.pubfood.renderAd = function (doc, id) {
         if (doc && id) {
@@ -45,11 +41,13 @@
 
               if (doc === document) {
                 console.log('Error trying to write ad. Ad render call ad id ' + id + ' was prevented from writing to the main document.');
-              } else if (ad && validateHTML(ad)) {
-                doc.write(ad);
-                doc.close();
-                doc.defaultView.frameElement.width = adObject.size[0] + 'px';
-                doc.defaultView.frameElement.height = adObject.size[1] + 'px';
+              } else if (ad) {
+                try {
+                  doc.write(ad);
+                  doc.close();
+                  doc.defaultView.frameElement.width = adObject.size[0] + 'px';
+                  doc.defaultView.frameElement.height = adObject.size[1] + 'px';
+                } catch(e) {}
               } else {
                 //handle providers that return url here
                 console.log('Error trying to write ad. No ad for bid response id: ' + id);
