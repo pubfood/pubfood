@@ -16,7 +16,9 @@
       for (i = 0; i < 10; i++) {
         w = w.parent;
         try {
-          w.renderAd(document, '%%PATTERN:cn728x90adId%%');
+          if (w.pubfood) {
+            w.pubfood.renderAd(document, '%%PATTERN:cn728x90adId%%');
+          }
           break;
         } catch(e) {continue;}
       }
@@ -27,11 +29,17 @@
         return (snippet && snippet.startsWith('<') && snippet.endsWith('>'));
       };
       //use similar logic to render ad. dfp would call with document and id
-      window.renderAd = function (doc, id) {
+      window.pubfood.renderAd = function (doc, id) {
         if (doc && id) {
           try {
             //lookup ad by ad Id
-            var adObject = savedBids.find(function(bid) {return bid.id === id;});
+            var adObject;
+            for (var i = 0; i < savedBids.length; i++) {
+              if (savedBids[i].id === id) {
+                adObject = savedBids[i];
+                break;
+              }
+            }
             if (adObject) {
               var ad = adObject.ad;
 
@@ -172,14 +180,16 @@
 
       conversantProvider._callbackFactory = function(slots,pushBid,done){
         return function(rsp) {
-          rsp.seatbid.forEach(function(seatBid) {
+          for (var i = 0; i< rsp.seatbid.length; i++) {
+            var seatBid = rsp.seatbid[i];
             // seatbid  is an array of bids by slot
             if (seatBid.bid && seatBid.bid.length > 0) {
               var bids = seatBid.bid;
               bids.sort(function(a, b) {
                 return b.price - a.price;
               });
-              bids.forEach(function(bidResponse) {
+              for (var j = 0; j < bids.length; j++) {
+                var bidResponse = bids[j];
                 if (bidResponse.price > 0 && bidResponse.adm) {
 
                   var slotName = conversantProvider._parseImpId(bidResponse.impid).slotName;
@@ -214,10 +224,10 @@
                   };
                   pushBid(bidObject);
                 }
-              });
+              }
 
             }
-          });
+          }
           done();
         };
       };
@@ -241,8 +251,10 @@
             //ua should be navigator.userAgent, hard coding to fake mobile for demo
           };
           bidRequest.imp = [];
-          slots.forEach(function(slot) {
-            slot.sizes.forEach(function(size) {
+          for (var i = 0; i< slots.length; i++) {
+            var slot = slots[i];
+            for (var j = 0; j < slot.sizes.length; j++) {
+              var size = slot.sizes[j];
               var impid = conversantProvider._generateImpId(slot.name, [size[0], size[1]]);
               bidRequest.imp.push({
                 id : impid,
@@ -250,8 +262,8 @@
                 displaymanager: 'Pubfood.js',
                 displaymanagerver: '1.0.0'
               });
-            });
-          });
+            }
+          }
           window.conversantResponse = conversantProvider._callbackFactory(slots,pushBid, done);
           var url = 'http://media.msg.dotomi.com/s2s/header?callback=conversantResponse';
 
@@ -301,13 +313,14 @@
             pf.getAuctionProvider().setParam('isRefresh', true);
             var slots = pf.getAuctionProvider().getParam('slots'),
               refreshSlots = [];
-            targeting.forEach(function (tgtObject) {
+            for (var i = 0; i< targeting.length; i++) {
+              var tgtObject = targeting[i];
               var gptObject = slots[tgtObject.name];
               gptObject = gptObject ? (refreshSlots.push(gptObject), gptObject) : googletag.pubads();
               for (var p in tgtObject.targeting) {
                 gptObject.setTargeting(p, tgtObject.targeting[p]);
               }
-            });
+            }
 
             if (refreshSlots.length > 0) {
               googletag.pubads().refresh(refreshSlots);
