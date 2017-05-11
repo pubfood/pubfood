@@ -1,0 +1,32 @@
+{
+  "name": "audience-network-bid-delegate",
+  "version": "1.0.0",
+  "description": "Audience Network BidDelegate for Pubfood",
+  "private": true,
+  "scripts": {
+    "build": "browserify src/${npm_package_name}.js -s audienceNetworkBidDelegate -o ${npm_package_name}.min.js -t [ babelify --presets [ es2015 ] ] -g uglifyify",
+    "test": "karma start",
+    "test:headless": "CHROME_BIN=chromium-browser xvfb-run npm test"
+  },
+  "author": "Lovell Fuller <npm@lovell.info>",
+  "license": "MIT",
+  "devDependencies": {
+    "babel-plugin-istanbul": "^4.1.3",
+    "babel-preset-es2015": "^6.24.0",
+    "babelify": "^7.3.0",
+    "browserify": "^14.1.0",
+    "chai": "^3.5.0",
+    "check-chai": "0.0.1",
+    "fetch-mock": "^5.9.4",
+    "karma": "^1.7.0",
+    "karma-browserify": "^5.1.1",
+    "karma-chrome-launcher": "^2.1.1",
+    "karma-coverage": "^1.1.1",
+    "karma-mocha": "^1.3.0",
+    "karma-sinon": "^1.0.5",
+    "mocha": "^3.3.0",
+    "sinon": "^2.2.0",
+    "uglifyify": "^3.0.4",
+    "whatwg-fetch": "^2.0.3"
+  }
+}
