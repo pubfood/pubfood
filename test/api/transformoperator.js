@@ -407,7 +407,7 @@ describe('Transform operator', function() {
 
     pf.setAuctionProvider({
       name: 'auctionProvider',
-      libUri: '../test/fixture/lib.js',
+      libUri: '../fixture/lib.js',
       init: function(targeting, done) {
         done();
       },
@@ -440,6 +440,68 @@ describe('Transform operator', function() {
       assert.equal(transformCallCount, 1, 'delegate should be called only once');
       done();
     }, 50);
+  });
+
+  it('should be called only once each for timeout of init and refresh', function(done) {
+    var pf = new pubfood();
+
+    pf.throwErrors(true);
+    pf.timeout(5);
+
+    pf.addSlot({
+      name: 'slot1',
+      sizes: [
+        [300, 250],
+        [300, 600]
+      ],
+      elementId: 'div-multi-size',
+      bidProviders: [
+        'bp1'
+      ]
+    });
+
+    pf.setAuctionProvider({
+      name: 'auctionProvider',
+      libUri: '../fixture/lib.js',
+      init: function(targeting, done) {
+        done();
+      },
+      refresh: function(targeting, done) {
+        done();
+      }
+    });
+
+    var bidProvider = pf.addBidProvider({
+      name: 'bp1',
+      init: function(slots, pushBid, done) {
+        done();
+      },
+      refresh: function(slots, pushBid, done) {
+        done();
+      }
+    });
+
+    var transformCallCount = 0;
+    var hasRefreshed = false;
+    pf.addBidTransform(function(bids, params) {
+      transformCallCount += 1;
+      return bids;
+    });
+
+    pf.observe('AUCTION_REFRESH', function(event) {
+      hasRefreshed = true;
+    });
+
+    pf.start();
+    pf.refresh();
+    pf.refresh();
+
+    setTimeout(function() {
+      if (hasRefreshed) {
+        assert.equal(transformCallCount, 3, 'delegate should be called thrice');
+        done();
+      }
+    }, 10);
   });
 
 });
