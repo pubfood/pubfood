@@ -339,9 +339,9 @@ PubfoodEvent.prototype.removeAllListeners = function() {
  });
  // ### Yes, this was a refresh AUCTION_COMPLETE ###
  * @see [PubfoodEventAnnotation]{@link typeDefs.PubfoodEventAnnotation}<br>
- * @see {@link https://github.com/pubfood/pubfood/blob/master/examples/provider/general/forceddoneproviderevents.html}<br>
- * @see {@link https://github.com/pubfood/pubfood/blob/master/examples/provider/general/catchprovidererrors.html}<br>
- * @see [<em>note:</em> Linking to enum values with jsdoc]{@link https://github.com/jsdoc3/jsdoc/issues/937}
+ * @see [<em>note:</em> Linking to enum values with jsdoc]{@link https://github.com/jsdoc3/jsdoc/issues/937}<br>
+ * @see {@link https://github.com/pubfood/pubfood/blob/master/examples/provider/general/forceddoneproviderevents&#046html}<br>
+ * @see {@link https://github.com/pubfood/pubfood/blob/master/examples/provider/general/catchprovidererrors&#046html}
  */
 PubfoodEvent.prototype.ANNOTATION_TYPE = {
   FORCED_DONE: {
