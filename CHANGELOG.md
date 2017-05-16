@@ -1,6 +1,6 @@
 # Changelog
 
-## v1.1.0 [2017-04-12]
+## v1.1.0 [2017-05-15]
 
 ### Breaking Changes
 * `PubfoodObject.getParamKeys()` returns parameter keys ([f6efb27](https://github.com/pubfood/pubfood/commit/f6efb27191cd1ce40ba844161fba69870cef5853), [#71](https://github.com/pubfood/pubfood/issues/71))
