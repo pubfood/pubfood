@@ -1,5 +1,19 @@
 # Changelog
 
+## v1.1.0 [2017-04-12]
+
+### Breaking Changes
+* `PubfoodObject.getParamKeys()` returns parameter keys ([f6efb27](https://github.com/pubfood/pubfood/commit/f6efb27191cd1ce40ba844161fba69870cef5853), [#71](https://github.com/pubfood/pubfood/issues/71))
+
+### Features
+* PulsePoint example ([c6d0fe6](https://github.com/pubfood/pubfood/commit/c6d0fe6682d4061f2724fb2e828bf7361cfc6b1f), [#57](https://github.com/pubfood/pubfood/pull/57))
+* OpenX example ([ede6e88](https://github.com/pubfood/pubfood/commit/ede6e88a75317ea60e012c918e7652a2dbc7527c), [#70](https://github.com/pubfood/pubfood/pull/70))
+* Conversant example ([c9670bb](https://github.com/pubfood/pubfood/commit/c9670bbb918840092f9cc3cc21c467a78ef9f733), [#74](https://github.com/pubfood/pubfood/pull/74))
+* Facebook Audience Network ([65534e2](https://github.com/pubfood/pubfood/commit/65534e29a49554bd9c77ed336ce708c78f695ec5), [#75](https://github.com/pubfood/pubfood/pull/75))
+
+### Fixes
+* TransformOperator called twice ([8b82a69](https://github.com/pubfood/pubfood/commit/8b82a693d6f437ffabab651eaf16b2cfa6e8c1ca), [#69](https://github.com/pubfood/pubfood/issues/69))
+
 ## v1.0.0 [2016-11-10]
 
 ### Breaking Changes

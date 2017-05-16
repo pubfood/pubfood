@@ -1,4 +1,4 @@
-/*! Pubfood v1.0.0 - Copyright (c) 2015 Pubfood (http://pubfood.org) */
+/*! Pubfood v1.1.0 - Copyright (c) 2015 Pubfood (http://pubfood.org) */
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.pubfood = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 'use strict';
 
@@ -841,9 +841,9 @@ PubfoodEvent.prototype.removeAllListeners = function() {
  });
  // ### Yes, this was a refresh AUCTION_COMPLETE ###
  * @see [PubfoodEventAnnotation]{@link typeDefs.PubfoodEventAnnotation}<br>
- * @see {@link https://github.com/pubfood/pubfood/blob/master/examples/provider/general/forceddoneproviderevents.html}<br>
- * @see {@link https://github.com/pubfood/pubfood/blob/master/examples/provider/general/catchprovidererrors.html}<br>
- * @see [<em>note:</em> Linking to enum values with jsdoc]{@link https://github.com/jsdoc3/jsdoc/issues/937}
+ * @see [<em>note:</em> Linking to enum values with jsdoc]{@link https://github.com/jsdoc3/jsdoc/issues/937}<br>
+ * @see {@link https://github.com/pubfood/pubfood/blob/master/examples/provider/general/forceddoneproviderevents&#046html}<br>
+ * @see {@link https://github.com/pubfood/pubfood/blob/master/examples/provider/general/catchprovidererrors&#046html}
  */
 PubfoodEvent.prototype.ANNOTATION_TYPE = {
   FORCED_DONE: {
@@ -1095,6 +1095,7 @@ var bidObject = {
  * var run = pf.getAuctionRun(1),
     *     aIsDone = run.bidStatus['bidderA'];
  * @property {TargetingObject[]} targeting ad server targeting used in the auction run
+ * @property {number} timeoutId id of bid timeout
  */
 
 /**
@@ -1523,6 +1524,8 @@ AuctionMediator.prototype.setAuctionTrigger = function(triggerFn) {
  * @private
  */
 AuctionMediator.prototype.startAuction_ = function(auctionIdx, auctionType, forcedDone) {
+  clearTimeout(this.auctionRun[auctionIdx].timeoutId);
+  this.auctionRun[auctionIdx].timeoutId = 0;
   Event.publish(Event.EVENT_TYPE.BID_ASSEMBLER, 'AuctionMediator');
   if (this.bidAssembler.operators.length > 0) {
     this.auctionRun[auctionIdx].bids = this.bidAssembler.process(this.auctionRun[auctionIdx].bids);
@@ -2823,7 +2826,7 @@ var AuctionMediator = require('./mediator/auctionmediator');
   };
 
   pubfood.library = pubfood.prototype = {
-    version: '1.0.0',
+    version: '1.1.0',
     PubfoodError: require('./errors'),
     logger: logger
   };
@@ -3312,7 +3315,7 @@ PubfoodObject.prototype.getParam = function(name) {
 PubfoodObject.prototype.getParamKeys = function() {
   var ret = [];
   for (var i in this.params_) {
-    ret.push(this.params_[i]);
+    ret.push(i);
   }
   return ret;
 };
