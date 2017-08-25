@@ -461,6 +461,34 @@ var AuctionMediator = require('./mediator/auctionmediator');
     return this;
   };
 
+  /**
+   * Get the <code>pubfood</code> event emitter instance.
+   * @returns {PubfoodEvent} event emitter reference
+   */
+  api.prototype.getEventEmitter = function() {
+    return Event;
+  };
+
+  /**
+   * Remove observers of all [PubfoodEvent.EVENT_TYPE]{@link PubfoodEvent.event:AUCTION_COMPLETE} names
+   * @param {string} [eventName] [PubfoodEvent.EVENT_TYPE]{@link PubfoodEvent.event:AUCTION_COMPLETE} name
+   * <br>If not specified, all observers of all [PubfoodEvent.EVENT_TYPE]{@link PubfoodEvent.event:AUCTION_COMPLETE} names will are removed.
+   * @returns {PubfoodEvent} the event emitter
+   */
+  api.prototype.removeAllListeners = function(eventName) {
+    return Event.removeAllListeners(eventName);
+  };
+
+  /**
+   * Remove the specified observer of the [PubfoodEvent.EVENT_TYPE]{@link PubfoodEvent.event:AUCTION_COMPLETE} type
+   * @param {string} eventName [PubfoodEvent.EVENT_TYPE]{@link PubfoodEvent.event:AUCTION_COMPLETE} name
+   * @param {function} listener the observer function
+   * @returns {PubfoodEvent} the event emitter
+   */
+  api.prototype.removeListener = function(eventName, listener) {
+    return Event.removeListener(eventName, listener);
+  };
+
   api.prototype.library = pubfood.library;
 
   global.pubfood = pubfood;

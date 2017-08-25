@@ -257,8 +257,7 @@ PubfoodEvent.prototype.emit = function(event) {
 
   if (!ret || this.EVENT_TYPE.AUCTION_POST_RUN === event) {
     ret = true;
-    this.observeImmediate_[event] = this.observeImmediate_[event] || [];
-    this.observeImmediate_[event].push(Array.prototype.slice.call(arguments, 1));
+    this.observeImmediate_[event] = Array.prototype.slice.call(arguments, 1);
   }
   return ret;
 };
@@ -266,7 +265,7 @@ PubfoodEvent.prototype.emit = function(event) {
 /**
  * Register an event listener.
  *
- * Registeres a listener for the event type. If events for the specified type
+ * Registere a listener for the event type. If events for the specified type
  * have already been emitted, the registered handler function is invoked immediately.
  *
  * @see https://github.com/primus/eventemitter3
@@ -278,18 +277,23 @@ PubfoodEvent.prototype.emit = function(event) {
  * @private
  */
 PubfoodEvent.prototype.on = function(event, fn) {
+  var emitterFn = EventEmitter.prototype.on;
+  if (event === this.EVENT_TYPE.AUCTION_POST_RUN) {
+    emitterFn = EventEmitter.prototype.once;
+  }
+
   var emitted = this.observeImmediate_[event] || null;
   if (emitted) {
-    for (var i = 0; i < emitted.length; i++) {
-      fn.apply(this, emitted[i]);
-    }
+    fn.apply(this, emitted);
+    emitterFn.apply(this, arguments);
     return this;
   }
-  return EventEmitter.prototype.on.apply(this, arguments);
+  return emitterFn.apply(this, arguments);
 };
 
 /**
  * Remove all event listeners.
+ * @param {string} [eventName] name of event
  *
  * Removes both extended EventEmitter listeners and internal
  * {@link pubfood#PubfoodEvent.emit} immediate listeners.
@@ -300,11 +304,32 @@ PubfoodEvent.prototype.on = function(event, fn) {
  * @extends EventEmitter
  * @private
  */
-PubfoodEvent.prototype.removeAllListeners = function() {
-  EventEmitter.prototype.removeAllListeners.call(this);
+PubfoodEvent.prototype.removeAllListeners = function(eventName) {
+  EventEmitter.prototype.removeAllListeners.call(this, eventName);
+  if (this.observeImmediate_[eventName]) {
+    delete this.observeImmediate_[eventName];
+  } else {
+    this.observeImmediate_ = {};
+  }
+  return this;
+};
 
-  this.observeImmediate_ = {};
-
+/**
+ * Remove the specified event listener.
+ * @param {string} eventName name of event
+ * @param {function} listener the observer function
+ *
+ * Removes both extended EventEmitter listeners and internal
+ * {@link pubfood#PubfoodEvent.emit} immediate listeners.
+ *
+ * @see https://github.com/primus/eventemitter3
+ *
+ * @return {PubfoodEvent} - this
+ * @extends EventEmitter
+ * @private
+ */
+PubfoodEvent.prototype.removeListener = function(eventName, listener) {
+  EventEmitter.prototype.removeListener.call(this, eventName, listener);
   return this;
 };
 
