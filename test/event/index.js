@@ -251,11 +251,10 @@ describe('Event - Tests', function () {
     setTimeout(function() {
       sinon.assert.calledWithExactly(firstListener.getCall(0), 5);
       sinon.assert.calledWithExactly(firstListener.getCall(1), 6);
-      sinon.assert.calledWithExactly(firstListener.getCall(2), 7);
       sinon.assert.calledWithExactly(secondListener.getCall(0), 6);
       sinon.assert.calledWithExactly(secondListener.getCall(1), 7);
       sinon.assert.calledWithExactly(thirdListener.getCall(0), 7);
-      sinon.assert.calledThrice(firstListener);
+      sinon.assert.calledTwice(firstListener);
       sinon.assert.calledTwice(secondListener);
       sinon.assert.calledOnce(thirdListener);
       done();
