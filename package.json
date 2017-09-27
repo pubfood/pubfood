@@ -27,10 +27,10 @@
   "main": "./dist/pubfood.js",
   "scripts": {
     "clean": "npm prune --production && rm -fr build",
-    "prepare": "npm install && mkdir -p build",
+    "prepare": "mkdir -p build",
     "lint": "gulp lint",
     "test": "gulp test",
-    "build": "npm run prepare && npm run lint && gulp build && npm run test",
+    "build": "npm install && npm run prepare && npm run lint && gulp build && npm run test",
     "start": "npm run build",
     "release": "PACKAGE_VER=`node -e 'console.log(require(\"./package.json\").version)'` && git commit -m \"v${PACKAGE_VER}\" && git tag -a v${PACKAGE_VER} -m \"v${PACKAGE_VER}\" && git push && git push --tags"
   },
