@@ -11,8 +11,9 @@ var logger = require('./logger');
 var EventEmitter = require('eventemitter3');
 
 /**
- * Pubfood event class
+ * @classdesc Pubfood event emitter
  * @class
+ * @hideconstructor
  * @property {string} auctionId The auction identifier
  * @example AuctionId Format - <random string>:<auction count index>
  * iis9xx46a6v2x58e1b:3
