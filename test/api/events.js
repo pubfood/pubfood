@@ -209,6 +209,56 @@ describe('Pubfood Events', function() {
     });
   });
 
+  it('should allow AUCTION_POST_RUN observers to listen more than once', function(done) {
+    var pf = new pubfood();
+    pf.removeAllListeners('AUCTION_POST_RUN');
+    pf.addBidProvider({
+      name: 'bp1',
+      libUri: 'http://',
+      init: function(slots, pushBid, done) {
+        done();
+      },
+      refresh: function(slots, pushBid, done) {
+        done();
+      }
+    });
+    pf.setAuctionProvider({
+      name: 'ap1',
+      libUri: 'http://',
+      init: function(targeting, done) {
+        done();
+      },
+      refresh: function(targeting, done) {
+        done();
+      }
+    });
+    pf.addSlot({
+      name: 'slot1',
+      elementId: 'div1',
+      sizes: [[1, 1]],
+      bidProviders: ['bp1']
+    });
+
+    pf.start();
+
+    var initIsDone = false;
+    pf.observe('AUCTION_POST_RUN', function(event) {
+      initIsDone = true;
+    });
+
+    pf.refresh();
+
+    var observerCallCount = 0;
+    pf.observe('AUCTION_POST_RUN', function(event) {
+      observerCallCount++;
+      if (initIsDone && observerCallCount === 2) {
+        assert.equal(initIsDone, true, 'initIsDone is expected to be true');
+        assert.equal(observerCallCount, 2, 'observer expected to be triggered for init and refresh');
+        done();
+      }
+    }, -1);
+  });
+
   it('should remove all event observers', function(done) {
     var pf = new pubfood();
     pf.addBidProvider({

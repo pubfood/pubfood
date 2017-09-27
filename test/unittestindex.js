@@ -12,3 +12,4 @@ require('./mediator');
 require('./model');
 require('./provider');
 require('./util');
+require('./api/index.js');

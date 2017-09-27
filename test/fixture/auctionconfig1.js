@@ -246,7 +246,7 @@ var pubfoodContrib = {
     },
     {
       name: 'carsales',
-      libUri: '../test/fixture/lib.js',
+      libUri: 'fixture/lib.js',
       init: function(slots, pushBid, done) {
         done();
       },
@@ -256,7 +256,7 @@ var pubfoodContrib = {
     },
     {
       name: 'walkathon',
-      libUri: '../test/fixture/lib.js',
+      libUri: 'fixture/lib.js',
       init: function(slots, pushBid, done) {
         done();
       },

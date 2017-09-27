@@ -31,7 +31,7 @@ describe('Auction Refresh', function () {
 
     TEST_MEDIATOR.addBidProvider({
       name: 'b1',
-      libUri: '../test/fixture/lib.js',
+      libUri: 'fixture/lib.js',
       init: function(slots, pushBid, done) {
         pushBid({
           slot: '/abc/123',
@@ -54,7 +54,7 @@ describe('Auction Refresh', function () {
 
     TEST_MEDIATOR.setAuctionProvider({
       name: 'provider1',
-      libUri: '../test/fixture/lib.js',
+      libUri: 'fixture/lib.js',
       init: function(targeting, done) {
         done();
       },
@@ -82,7 +82,7 @@ describe('Auction Refresh', function () {
   it('should keep track bids per auction', function(done) {
     TEST_MEDIATOR.setAuctionProvider({
       name: 'provider1',
-      libUri: '../test/fixture/lib.js',
+      libUri: 'fixture/lib.js',
       init: function(targeting, done) {
         done();
       },
@@ -109,7 +109,7 @@ describe('Auction Refresh', function () {
     // Add another bid provider
     TEST_MEDIATOR.addBidProvider({
       name: 'b2',
-      libUri: '../test/fixture/lib.js',
+      libUri: 'fixture/lib.js',
       init: function(slots, pushBid, done) {
         pushBid({
           slot: '/abc/123',
@@ -146,7 +146,7 @@ describe('Auction Refresh', function () {
   it('should allow optional slot names array argument to refresh', function(done) {
     TEST_MEDIATOR.setAuctionProvider({
       name: 'provider1',
-      libUri: '../test/fixture/lib.js',
+      libUri: 'fixture/lib.js',
       init: function(targeting, done) {
         done();
       },
@@ -172,7 +172,7 @@ describe('Auction Refresh', function () {
     // Redefine the auction provider
     TEST_MEDIATOR.setAuctionProvider({
       name: 'provider1',
-      libUri: '../test/fixture/lib.js',
+      libUri: 'fixture/lib.js',
       init: function(targeting, done) {
         auctionTargeting.init.push(targeting);
         done();
@@ -186,7 +186,7 @@ describe('Auction Refresh', function () {
     // Add another bid provider
     TEST_MEDIATOR.addBidProvider({
       name: 'b2',
-      libUri: '../test/fixture/lib.js',
+      libUri: 'fixture/lib.js',
       init: function(slots, pushBid, done) {
         pushBid({
           slot: '/abc/123',
@@ -272,7 +272,7 @@ describe('Auction Refresh', function () {
     // Add more bid providers
     TEST_MEDIATOR.addBidProvider({
       name: 'b2',
-      libUri: '../test/fixture/lib.js',
+      libUri: 'fixture/lib.js',
       init: function(slots, pushBid, done) {
         var argPushBid = pushBid;
         setTimeout(function() {
@@ -299,7 +299,7 @@ describe('Auction Refresh', function () {
 
     TEST_MEDIATOR.addBidProvider({
       name: 'b3',
-      libUri: '../test/fixture/lib.js',
+      libUri: 'fixture/lib.js',
       init: function(slots, pushBid, done) {
         var argPushBid = pushBid;
         setTimeout(function() {
@@ -362,7 +362,7 @@ describe('Auction Refresh', function () {
     // Add more bid providers
     TEST_MEDIATOR.addBidProvider({
       name: 'b2',
-      libUri: '../test/fixture/lib.js',
+      libUri: 'fixture/lib.js',
       init: function(slots, pushBid, done) {
         done();
       },
@@ -373,7 +373,7 @@ describe('Auction Refresh', function () {
 
     TEST_MEDIATOR.addBidProvider({
       name: 'b3',
-      libUri: '../test/fixture/lib.js',
+      libUri: 'fixture/lib.js',
       init: function(slots, pushBid, done) {
         done();
       },

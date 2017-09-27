@@ -112,7 +112,7 @@ describe('Callbacks', function() {
     // set the auction provider
     pf.setAuctionProvider({
       name: 'auctionProvider',
-      libUri: '../test/fixture/lib.js',
+      libUri: 'fixture/lib.js',
       init: function(targeting, done) {
         done();
       },
@@ -130,7 +130,7 @@ describe('Callbacks', function() {
     var bidProviders = [
       {
         name: 'bidderAvg',
-        libUri: '../test/fixture/lib.js',
+        libUri: 'fixture/lib.js',
         init: function(slots, pushBid, done) {
           done();
         },
@@ -140,7 +140,7 @@ describe('Callbacks', function() {
       },
       {
         name: 'bidderFast',
-        libUri: '../test/fixture/lib.js',
+        libUri: 'fixture/lib.js',
         init: function(slots, pushBid, done) {
           done();
         },
@@ -150,7 +150,7 @@ describe('Callbacks', function() {
       },
       {
         name: 'bidderSlow',
-        libUri: '../test/fixture/lib.js',
+        libUri: 'fixture/lib.js',
         init: function(slots, pushBid, done) {
           done();
         },

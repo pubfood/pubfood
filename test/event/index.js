@@ -104,7 +104,7 @@ describe('Event - Tests', function () {
     sinon.assert.calledTwice(spy);
 
     Event.emit('hello');
-    Event.on('hello', spy);
+    Event.on('hello', spy, Event.OBSERVE_TYPE.ONCE);
     sinon.assert.calledThrice(spy);
 
     done();
@@ -185,7 +185,7 @@ describe('Event - Tests', function () {
     Event.on('foo', spy2);
     Event.on('foo', spy3);
 
-    setTimeout(function(event) {
+    setTimeout(function() {
       sinon.assert.calledThrice(spy1);
       sinon.assert.calledThrice(spy2);
       sinon.assert.calledThrice(spy3);
@@ -211,7 +211,7 @@ describe('Event - Tests', function () {
 
     Event.on('foo', spy3);
 
-    setTimeout(function(event) {
+    setTimeout(function() {
       sinon.assert.calledTwice(spy1);
       sinon.assert.calledTwice(spy2);
       sinon.assert.calledTwice(spy3);
@@ -221,6 +221,46 @@ describe('Event - Tests', function () {
   it('should invoke the done callback', function(done) {
     Event.on('hello', done);
     Event.emit('hello');
+  });
+  it('should listen once', function(done) {
+    var spy1 = sinon.spy();
+
+    Event.on('hello', spy1, Event.OBSERVE_TYPE.ONCE);
+    Event.emit('hello');
+    Event.emit('hello');
+    Event.emit('hello');
+    Event.emit('hello');
+    sinon.assert.calledOnce(spy1);
+    done();
+  });
+  it('should listen once on immediate observers', function(done) {
+    var spy1 = sinon.spy();
+
+    Event.emit('hello');
+    Event.on('hello', spy1, Event.OBSERVE_TYPE.ONCE);
+    Event.emit('hello');
+    Event.emit('hello');
+    Event.emit('hello');
+    sinon.assert.calledOnce(spy1);
+    done();
+  });
+  it('should allow listen once and listen many observers', function(done) {
+    var spy1 = sinon.spy();
+    var spy2 = sinon.spy();
+    var spy3 = sinon.spy();
+
+    Event.on('hello', spy2);
+    Event.on('hello', spy3, Event.OBSERVE_TYPE.ALL);
+    Event.emit('hello');
+    Event.on('hello', spy1, Event.OBSERVE_TYPE.ONCE);
+    Event.emit('hello');
+    Event.emit('hello');
+    Event.removeListener('hello', spy3);
+    Event.emit('hello');
+    sinon.assert.calledOnce(spy1);
+    sinon.assert.callCount(spy2, 4);
+    sinon.assert.calledThrice(spy3);
+    done();
   });
   it('should invoke the done callback even if the emit happens first', function(done) {
     Event.emit('hello');
@@ -238,7 +278,7 @@ describe('Event - Tests', function () {
       done();
     }, 0);
   });
-  it('should speak to current AUCTION_POST_RUN behavior', function(done) {
+  it('should default AUCTION_POST_RUN observers to PubfoodEvent.OBSERVE_TYPE.ONCE', function(done) {
     var firstListener = sinon.spy();
     var secondListener = sinon.spy();
     var thirdListener = sinon.spy();
@@ -249,14 +289,12 @@ describe('Event - Tests', function () {
     Event.emit('AUCTION_POST_RUN', 7);
     Event.on('AUCTION_POST_RUN', thirdListener);
     setTimeout(function() {
-      sinon.assert.calledWithExactly(firstListener.getCall(0), 5);
-      sinon.assert.calledWithExactly(firstListener.getCall(1), 6);
-      sinon.assert.calledWithExactly(secondListener.getCall(0), 6);
-      sinon.assert.calledWithExactly(secondListener.getCall(1), 7);
-      sinon.assert.calledWithExactly(thirdListener.getCall(0), 7);
-      sinon.assert.calledTwice(firstListener);
-      sinon.assert.calledTwice(secondListener);
+      sinon.assert.calledOnce(firstListener);
+      sinon.assert.calledOnce(secondListener);
       sinon.assert.calledOnce(thirdListener);
+      sinon.assert.calledWithExactly(firstListener.getCall(0), 5);
+      sinon.assert.calledWithExactly(secondListener.getCall(0), 6);
+      sinon.assert.calledWithExactly(thirdListener.getCall(0), 7);
       done();
     }, 0);
   });

@@ -2,17 +2,18 @@
 <html>
     <head>
         <meta charset="utf-8">
-        <link rel="stylesheet" href="https://cdn.rawgit.com/mochajs/mocha/v2.5.3/mocha.css" />
-        <title>Pubfood Unite Tests</title>
+        <link rel="stylesheet" href="../node_modules/mocha/mocha.css" />
+        <title>Pubfood Unit Tests</title>
     </head>
     <body>
 
         <div id="mocha"></div>
 
-        <script src="https://cdn.rawgit.com/mochajs/mocha/v2.5.3/mocha.js"></script>
+        <script src="../node_modules/mocha/mocha.js"></script>
 
         <script type="text/javascript">
          mocha.ui('bdd');
+         mocha.timeout(60000);
         </script>
 
         <script src="../test/unittests.js"></script>

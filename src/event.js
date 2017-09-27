@@ -183,7 +183,16 @@ PubfoodEvent.prototype.EVENT_TYPE = {
    */
   AUCTION_COMPLETE: 'AUCTION_COMPLETE',
   /**
-   * Functions dependent on the completed auction can be called
+   * Indicates observer functions dependent on the completed auction can be called
+   * <br><br>
+   * The [AUCTION_POST_RUN]{@link PubfoodEvent.event:AUCTION_POST_RUN} defaults
+   * to run once when registered (<em>[pubfood.observe]{@link pubfood#observe}</em>). The
+   * <code>AUCTION_POST_RUN</code> event is a special case to allow triggering of functions
+   * or events that invoke downstream processes.
+   * <br>
+   * An example of this is the [googletag.display]{@link https://developers.google.com/doubleclick-gpt/reference#googletag.display}
+   * operation that must be invoked once for a target container per pageview or refresh.
+   *
    * @event PubfoodEvent.AUCTION_POST_RUN
    * @property {string} data [AuctionProvider.name]{@link pubfood#provider.AuctionProvider}
    */
@@ -257,35 +266,55 @@ PubfoodEvent.prototype.emit = function(event) {
 
   if (!ret || this.EVENT_TYPE.AUCTION_POST_RUN === event) {
     ret = true;
-    this.observeImmediate_[event] = Array.prototype.slice.call(arguments, 1);
+    this.observeImmediate_[event] = this.observeImmediate_[event] || [];
+    this.observeImmediate_[event].push(Array.prototype.slice.call(arguments, 1));
   }
   return ret;
 };
 
 /**
  * Register an event listener.
- *
- * Registere a listener for the event type. If events for the specified type
+ * <br>
+ * Registers a listener for the event type. If events for the specified type
  * have already been emitted, the registered handler function is invoked immediately.
  *
  * @see https://github.com/primus/eventemitter3
  *
  * @param {string} event the event type
  * @param {function} fn the event handler function
+ * @param {PubfoodEvent.OBSERVE_TYPE} [observeType] execute the listener function once or each emitted event.
+ * <br>
+ * Default: false
+ * <br>
+ * All {@link PubfoodEvent} types, with exception:
+ * <br>
+ * - [AUCTION_POST_RUN]{@link PubfoodEvent.event:AUCTION_POST_RUN}, Default: true.
  * @return {PubfoodEvent} - this
  * @extends EventEmitter
  * @private
  */
-PubfoodEvent.prototype.on = function(event, fn) {
+PubfoodEvent.prototype.on = function(event, fn, observeType) {
+  var observe = !observeType && event === this.EVENT_TYPE.AUCTION_POST_RUN
+        ? this.OBSERVE_TYPE.ONCE
+        : observeType || this.OBSERVE_TYPE.ALL;
   var emitterFn = EventEmitter.prototype.on;
-  if (event === this.EVENT_TYPE.AUCTION_POST_RUN) {
+
+  if (observe === this.OBSERVE_TYPE.ONCE) {
     emitterFn = EventEmitter.prototype.once;
   }
 
   var emitted = this.observeImmediate_[event] || null;
   if (emitted) {
-    fn.apply(this, emitted);
-    emitterFn.apply(this, arguments);
+    var startLen =
+          event === this.EVENT_TYPE.AUCTION_POST_RUN ||
+          observe === this.OBSERVE_TYPE.ONCE
+          ? emitted.length - 1 : 0;
+    for (var i = startLen; i < emitted.length; i++) {
+      fn.apply(this, emitted[i]);
+    }
+    if (observe === this.OBSERVE_TYPE.ALL) {
+      emitterFn.apply(this, arguments);
+    }
     return this;
   }
   return emitterFn.apply(this, arguments);
@@ -295,9 +324,6 @@ PubfoodEvent.prototype.on = function(event, fn) {
  * Remove all event listeners.
  * @param {string} [eventName] name of event
  *
- * Removes both extended EventEmitter listeners and internal
- * {@link pubfood#PubfoodEvent.emit} immediate listeners.
- *
  * @see https://github.com/primus/eventemitter3
  *
  * @return {PubfoodEvent} - this
@@ -305,12 +331,12 @@ PubfoodEvent.prototype.on = function(event, fn) {
  * @private
  */
 PubfoodEvent.prototype.removeAllListeners = function(eventName) {
-  EventEmitter.prototype.removeAllListeners.call(this, eventName);
   if (this.observeImmediate_[eventName]) {
     delete this.observeImmediate_[eventName];
   } else {
     this.observeImmediate_ = {};
   }
+  EventEmitter.prototype.removeAllListeners.call(this, eventName);
   return this;
 };
 
@@ -381,6 +407,16 @@ PubfoodEvent.prototype.ANNOTATION_TYPE = {
   }
 };
 
+/**
+ * @description Event annotation types<br>
+ * @type {object}
+  * @property {number} ONCE <b><code>1</code></b> : observer will execute at most once
+  * @property {number} ALL  <b><code>-1</code></b> : observer will execute for each of the emitted events for specified event name
+ */
+PubfoodEvent.prototype.OBSERVE_TYPE = {
+  ONCE: 1,
+  ALL: -1
+};
 /**
  * Creates a new [PubfoodEventAnnotation]{@link typeDefs.PubfoodEventAnnotation} metadata object.<br>
  * The annotation object can be provided  as an <code>annotations</code> when you [publish]{@link PubfoodEvent#publish} an event.

@@ -286,6 +286,7 @@ var AuctionMediator = require('./mediator/auctionmediator');
    * Add a custom reporter
    * @param {string} [eventType] the event to bind this reporter to
    * @param {reporter} reporter Custom reporter
+   * @param {ObserveType} observeType the number of times to execute the observer per emmitted event
    * @return {pubfood}
    * @example
    var pf = new pubfood();
@@ -294,16 +295,18 @@ var AuctionMediator = require('./mediator/auctionmediator');
    };
    pf.observe(reporter);
    */
-  api.prototype.observe = function(eventType, reporter) {
+  api.prototype.observe = function(eventType, reporter, observeType) {
+    var evtpStr = util.asType(eventType);
+    var observer = evtpStr === 'string' ? reporter : eventType;
     this.pushApiCall_('api.observe', arguments);
-    if (typeof eventType === 'function') {
+    if (evtpStr === 'function') {
       // subscribe the reported to all the available events
       for (var e in Event.EVENT_TYPE) {
-        Event.on(Event.EVENT_TYPE[e], util.bind(eventType, this));
+        Event.on(Event.EVENT_TYPE[e], util.bind(observer, this), observeType);
       }
-    } else if (typeof eventType === 'string') {
+    } else if (evtpStr === 'string') {
       if (Event.EVENT_TYPE[eventType]) {
-        Event.on(Event.EVENT_TYPE[eventType], util.bind(reporter, this));
+        Event.on(Event.EVENT_TYPE[eventType], util.bind(observer, this), observeType);
       } else {
         Event.publish(Event.EVENT_TYPE.WARN, 'Warning: Invalid event type "' + eventType + '"');
       }
@@ -459,14 +462,6 @@ var AuctionMediator = require('./mediator/auctionmediator');
   api.prototype.throwErrors = function(silent) {
     this.mediator.throwErrors(silent);
     return this;
-  };
-
-  /**
-   * Get the <code>pubfood</code> event emitter instance.
-   * @returns {PubfoodEvent} event emitter reference
-   */
-  api.prototype.getEventEmitter = function() {
-    return Event;
   };
 
   /**
