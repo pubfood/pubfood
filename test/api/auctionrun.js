@@ -63,7 +63,7 @@ describe('Pubfood auction run api', function() {
 
     pf.setAuctionProvider({
       name: 'auctionProvider',
-      libUri: '../test/fixture/lib.js',
+      libUri: 'fixture/lib.js',
       init: function(targeting, done) {
         done();
       },
@@ -74,7 +74,7 @@ describe('Pubfood auction run api', function() {
 
     pf.addBidProvider({
       name: 'bidderA',
-      libUri: '../test/fixture/lib.js',
+      libUri: 'fixture/lib.js',
       init: function(slots, pushBid, done) {
         done();
       },
@@ -121,7 +121,7 @@ describe('Pubfood auction run api', function() {
 
     pf.setAuctionProvider({
       name: 'auctionProvider',
-      libUri: '../test/fixture/lib.js',
+      libUri: 'fixture/lib.js',
       init: function(targeting, done) {
         done();
       },
@@ -132,7 +132,7 @@ describe('Pubfood auction run api', function() {
 
     pf.addBidProvider({
       name: 'bidderA',
-      libUri: '../test/fixture/lib.js',
+      libUri: 'fixture/lib.js',
       init: function(slots, pushBid, done) {
         done();
       },
@@ -178,7 +178,7 @@ describe('Pubfood auction run api', function() {
 
     pf.setAuctionProvider({
       name: 'auctionProvider',
-      libUri: '../test/fixture/lib.js',
+      libUri: 'fixture/lib.js',
       init: function(targeting, done) {
         done();
       },
@@ -189,7 +189,7 @@ describe('Pubfood auction run api', function() {
 
     pf.addBidProvider({
       name: 'bidderA',
-      libUri: '../test/fixture/lib.js',
+      libUri: 'fixture/lib.js',
       init: function(slots, pushBid, done) {
         done();
       },

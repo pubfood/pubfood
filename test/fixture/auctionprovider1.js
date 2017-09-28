@@ -11,7 +11,7 @@ module.exports = {
   valid: [
     {
       name: 'provider1',
-      libUri: '../test/fixture/lib.js',
+      libUri: 'fixture/lib.js',
       init: function(slots, bids, done) {
       },
       refresh: function(slots, targeting, done) {
@@ -24,7 +24,7 @@ module.exports = {
     },
     {
       name: 'provider1',
-      libUri: '../test/fixture/lib.js',
+      libUri: 'fixture/lib.js',
       init: function(slots, bids, done) {
       },
       trigger: function(done) {
@@ -37,7 +37,7 @@ module.exports = {
   invalid: [
     {
       name: 'provider2',
-      libUri: '../test/fixture/lib.js',
+      libUri: 'fixture/lib.js',
       refresh: function(slots, targeting, done) {
       },
       trigger: function(done) {
@@ -47,7 +47,7 @@ module.exports = {
       }
     },
     {
-      libUri: '../test/fixture/lib.js',
+      libUri: 'fixture/lib.js',
       init: function(slots, bids, done) {
       },
       refresh: function(slots, targeting, done) {
@@ -71,7 +71,7 @@ module.exports = {
       }
     },
     {
-      libUri: '../test/fixture/lib.js',
+      libUri: 'fixture/lib.js',
       init: function(slots, bids, done) {
       },
       trigger: function(done) {

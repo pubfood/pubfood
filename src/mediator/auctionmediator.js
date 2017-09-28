@@ -537,7 +537,7 @@ AuctionMediator.prototype.auctionDone = function(auctionIdx, data, annotations) 
   Event.publish(Event.EVENT_TYPE.AUCTION_COMPLETE, { name: data, targeting: auctionTargeting }, annotations);
   setTimeout(function() {
     // push this POST event onto the next tick of the event loop
-    Event.publish(Event.EVENT_TYPE.AUCTION_POST_RUN, data);
+    Event.publish(Event.EVENT_TYPE.AUCTION_POST_RUN, data, annotations);
     // TODO consider if delay should be zero or another default
     // TODO consider if delay should be tweakable
   }, 0);
@@ -1026,6 +1026,17 @@ AuctionMediator.prototype.throwErrors = function(silent) {
     }
   }
   return this.throwErrors_;
+};
+
+/**
+ * Get the [AuctionMediator]{@link pubfood#mediator.AuctionMediator} event emitter instance.
+ * <br><br>  The singleton {@link PubfoodEvent} emitter reference is shared among
+ * {@link pubfood} objects.
+ * @returns {PubfoodEvent} the {@link pubfood} emitter singleton reference
+ * @private
+ */
+AuctionMediator.prototype.getEventEmitter = function() {
+  return Event;
 };
 
 util.extendsObject(AuctionMediator, PubfoodObject);

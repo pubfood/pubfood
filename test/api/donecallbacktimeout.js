@@ -18,20 +18,24 @@ var expect = require('chai').expect;
 var Event = require('../../src/event');
 
 describe('Provider done callback timeout', function() {
+  var pf;
   beforeEach(function() {
+    pf = new pubfood();
+    Event.removeAllListeners();
+  });
+  afterEach(function() {
+    pf = null;
     Event.removeAllListeners();
   });
 
   describe('get / set auction and done callback timeouts', function() {
     it('should set and return the same timeout() value set', function(done) {
-      var pf = new pubfood();
       pf.timeout(1000);
       assert.equal(pf.timeout(), 1000, 'the timeout() value should be the same');
       done();
     });
 
     it('should set and return the same doneCallbackOffset() value set', function(done) {
-      var pf = new pubfood();
       pf.doneCallbackOffset(1000);
       assert.equal(pf.doneCallbackOffset(), 1000, 'the doneCallbackOffset() value should be the same');
       done();
@@ -46,7 +50,7 @@ describe('Provider done callback timeout', function() {
       pf.timeout(1000);
       var bidProvider = pf.addBidProvider({
         name: 'bidderAvg',
-        libUri: '../test/fixture/lib.js',
+        libUri: 'fixture/lib.js',
         init: function(slots, pushBid, done) {
           done();
         }
@@ -62,7 +66,7 @@ describe('Provider done callback timeout', function() {
       pf.timeout(1000);
       var bidProvider = pf.addBidProvider({
         name: 'bidderAvg',
-        libUri: '../test/fixture/lib.js',
+        libUri: 'fixture/lib.js',
         init: function(slots, pushBid, done) {
           done();
         }
@@ -72,11 +76,10 @@ describe('Provider done callback timeout', function() {
     });
 
     it('should use the auction mediator default callback timeout offset if config not supplied to pubfood ctor', function(done) {
-      var pf = new pubfood();
       pf.timeout(1000);
       var bidProvider = pf.addBidProvider({
         name: 'bidderAvg',
-        libUri: '../test/fixture/lib.js',
+        libUri: 'fixture/lib.js',
         init: function(slots, pushBid, done) {
           done();
         }
@@ -98,11 +101,7 @@ describe('Provider done callback timeout', function() {
         bidTimeoutId,
         bidNotDone = true;
 
-      pf.observe('BID_COMPLETE', function(event) {
-      });
-
       pf.observe('AUCTION_COMPLETE', function(event) {
-        clearTimeout(bidTimeoutId);
         if (bidNotDone) {
           mochaDone();
         }
@@ -122,7 +121,7 @@ describe('Provider done callback timeout', function() {
 
       pf.setAuctionProvider({
         name: 'auctionProvider',
-        libUri: '../test/fixture/lib.js',
+        libUri: 'fixture/lib.js',
         init: function(targeting, done) {
           done();
         }
@@ -130,7 +129,7 @@ describe('Provider done callback timeout', function() {
 
       pf.addBidProvider({
         name: 'bidderAvg',
-        libUri: '../test/fixture/lib.js',
+        libUri: 'fixture/lib.js',
         init: function(slots, pushBid, done) {
           bidTimeoutId = setTimeout(function() {
             bidNotDone = false;
@@ -155,7 +154,6 @@ describe('Provider done callback timeout', function() {
         auctionTimeoutId;
 
       pf.observe('AUCTION_COMPLETE', function(event) {
-        clearTimeout(auctionTimeoutId);
         assert.equal(auctionDone, false, 'the done callback timeout should complete the auction before flag is set');
         mochaDone();
       });
@@ -174,7 +172,7 @@ describe('Provider done callback timeout', function() {
 
       pf.setAuctionProvider({
         name: 'auctionProvider',
-        libUri: '../test/fixture/lib.js',
+        libUri: 'fixture/lib.js',
         init: function(targeting, done) {
           auctionTimeoutId = setTimeout(function() {
             auctionDone = true;
@@ -185,7 +183,7 @@ describe('Provider done callback timeout', function() {
 
       pf.addBidProvider(      {
         name: 'bidderAvg',
-        libUri: '../test/fixture/lib.js',
+        libUri: 'fixture/lib.js',
         init: function(slots, pushBid, done) {
           done();
         }
@@ -196,7 +194,6 @@ describe('Provider done callback timeout', function() {
   });
 
   it('should use the auction mediator default callback timeout offset', function(done) {
-    var pf = new pubfood();
 
     pf.timeout(50);
 
@@ -205,7 +202,6 @@ describe('Provider done callback timeout', function() {
       auctionDone = false;
 
     pf.observe('AUCTION_COMPLETE', function(event) {
-      clearTimeout(auctionTimeoutId);
       assert.equal(auctionDone, true, 'auction mediator default callback timeout offset should be used');
       mochaDone();
     });
@@ -224,7 +220,7 @@ describe('Provider done callback timeout', function() {
 
     pf.setAuctionProvider({
       name: 'auctionProvider',
-      libUri: '../test/fixture/lib.js',
+      libUri: 'fixture/lib.js',
       init: function(targeting, done) {
         auctionTimeoutId = setTimeout(function() {
           auctionDone = true;
@@ -235,7 +231,7 @@ describe('Provider done callback timeout', function() {
 
     pf.addBidProvider(      {
       name: 'bidderAvg',
-      libUri: '../test/fixture/lib.js',
+      libUri: 'fixture/lib.js',
       init: function(slots, pushBid, done) {
         done();
       }
@@ -245,7 +241,6 @@ describe('Provider done callback timeout', function() {
   });
 
   it('should force complete auction processing for auction in 10ms with: bidProvider.timeout(5) and pubfood.doneCallbackOffset(1)', function(done) {
-    var pf = new pubfood();
 
     pf.timeout(5);
     pf.doneCallbackOffset(1);
@@ -254,7 +249,6 @@ describe('Provider done callback timeout', function() {
       auctionDone = false;
 
     pf.observe('AUCTION_COMPLETE', function(event) {
-      clearTimeout(auctionTimeoutId);
       assert.propertyVal(event.annotations.forcedDone, 'type', Event.ANNOTATION_TYPE.FORCED_DONE.TIMEOUT);
       assert.equal(auctionDone, false, 'pubfood supplied done callback timeout should be used');
       mochaDone();
@@ -274,7 +268,7 @@ describe('Provider done callback timeout', function() {
 
     pf.setAuctionProvider({
       name: 'auctionProvider',
-      libUri: '../test/fixture/lib.js',
+      libUri: 'fixture/lib.js',
       init: function(targeting, done) {
         auctionTimeoutId = setTimeout(function() {
           auctionDone = true;
@@ -285,7 +279,7 @@ describe('Provider done callback timeout', function() {
 
     pf.addBidProvider(      {
       name: 'bidderAvg',
-      libUri: '../test/fixture/lib.js',
+      libUri: 'fixture/lib.js',
       init: function(slots, pushBid, done) {
         done();
       }
@@ -295,7 +289,6 @@ describe('Provider done callback timeout', function() {
   });
 
   it('should force complete bid processing for bid in 20ms with: bidProvider.timeout(1) and pubfood.timeout(5)', function(done) {
-    var pf = new pubfood();
 
     pf.timeout(5);
 
@@ -305,11 +298,10 @@ describe('Provider done callback timeout', function() {
       bidDone = false;
 
     pf.observe('AUCTION_COMPLETE', function(event) {
-      clearTimeout(bidTimeoutId);
       assert.isUndefined(event.annotations.forcedDone, 'auction complete event should NOT be annotated as forcedDone');
       assert.equal(bidDone, true, 'bid timeout of 1ms should have already fired');
       mochaDone();
-    });
+    }, null, this);
 
     pf.observe('BID_COMPLETE', function(event) {
       assert.propertyVal(event.annotations.forcedDone, 'type', Event.ANNOTATION_TYPE.FORCED_DONE.TIMEOUT);
@@ -331,15 +323,17 @@ describe('Provider done callback timeout', function() {
 
     pf.setAuctionProvider({
       name: 'auctionProvider',
-      libUri: '../test/fixture/lib.js',
+      libUri: 'fixture/lib.js',
       init: function(targeting, done) {
-        done();
+        setTimeout(function() {
+          done();
+        }, 1);
       }
     });
 
     var bidderAvg = pf.addBidProvider({
       name: 'bidderAvg',
-      libUri: '../test/fixture/lib.js',
+      libUri: 'fixture/lib.js',
       init: function(slots, pushBid, done) {
         bidTimeoutId = setTimeout(function() {
           done();
@@ -352,7 +346,6 @@ describe('Provider done callback timeout', function() {
   });
 
   it('should force complete bid processing for bid in 20ms with: bidProvider.timeout(5) and pubfood.timeout(1)', function(done) {
-    var pf = new pubfood();
 
     pf.timeout(1);
 
@@ -362,7 +355,6 @@ describe('Provider done callback timeout', function() {
       bidDone = false;
 
     pf.observe('AUCTION_COMPLETE', function(event) {
-      clearTimeout(bidTimeoutId);
       assert.isUndefined(event.annotations.forcedDone, 'auction complete event should NOT be annotated as forcedDone');
       assert.equal(bidDone, false, 'bid timeout of 5ms should not have fired');
       auctionDone = true;
@@ -370,7 +362,7 @@ describe('Provider done callback timeout', function() {
     });
 
     pf.observe('BID_COMPLETE', function(event) {
-      assert.equal(event.annotations.forcedDone, 'timeout', 'bid complete event should be annotated as forcedDone');
+      assert.equal(event.annotations.forcedDone.type, 'timeout', 'bid complete event should be annotated as forcedDone');
       assert.equal(auctionDone, true, 'auction timeout of 1ms should have already fired');
       bidDone = true;
     });
@@ -389,7 +381,7 @@ describe('Provider done callback timeout', function() {
 
     var auctionProvider = pf.setAuctionProvider({
       name: 'auctionProvider',
-      libUri: '../test/fixture/lib.js',
+      libUri: 'fixture/lib.js',
       init: function(targeting, done) {
         done();
       }
@@ -397,7 +389,7 @@ describe('Provider done callback timeout', function() {
 
     var bidderAvg = pf.addBidProvider({
       name: 'bidderAvg',
-      libUri: '../test/fixture/lib.js',
+      libUri: 'fixture/lib.js',
       init: function(slots, pushBid, done) {
         bidTimeoutId = setTimeout(function() {
           done();
@@ -410,7 +402,6 @@ describe('Provider done callback timeout', function() {
   });
 
   it('should force complete bid(20ms) and auction(20ms) processing with: pubfood.timeout(5) + auctionProvider.timeout(1)', function(done) {
-    var pf = new pubfood();
 
     pf.timeout(5);
 
@@ -421,7 +412,6 @@ describe('Provider done callback timeout', function() {
       auctionTimeoutId;
 
     pf.observe('AUCTION_COMPLETE', function(event) {
-      clearTimeout(auctionTimeoutId);
       assert.propertyVal(event.annotations.forcedDone, 'type', Event.ANNOTATION_TYPE.FORCED_DONE.TIMEOUT);
       assert.equal(bidDone, false, 'auctionProvider.timeout(1) should fire before bid flag set');
       assert.equal(auctionDone, false, 'auctionProvider.timeout(1) should fire before bid flag set');
@@ -429,10 +419,12 @@ describe('Provider done callback timeout', function() {
     });
 
     pf.observe('BID_COMPLETE', function(event) {
-      clearTimeout(bidTimeoutId);
-      assert.propertyVal(event.annotations.forcedDone, 'type', Event.ANNOTATION_TYPE.FORCED_DONE.TIMEOUT);
-      assert.equal(bidDone, false, 'auctionProvider.timeout(1) should fire before bid flag set');
-      assert.equal(auctionDone, false, 'auctionProvider.timeout(1) should fire before bid flag set');
+
+      if (pf.getAuctionId() === event.auctionId) {
+        assert.propertyVal(event.annotations.forcedDone, 'type', Event.ANNOTATION_TYPE.FORCED_DONE.TIMEOUT);
+        assert.equal(bidDone, false, 'auctionProvider.timeout(1) should fire before bid flag set');
+        assert.equal(auctionDone, false, 'auctionProvider.timeout(1) should fire before bid flag set');
+      }
     });
 
     pf.addSlot({
@@ -449,7 +441,7 @@ describe('Provider done callback timeout', function() {
 
     var auctionProvider = pf.setAuctionProvider({
       name: 'auctionProvider',
-      libUri: '../test/fixture/lib.js',
+      libUri: 'fixture/lib.js',
       init: function(targeting, done) {
         auctionTimeoutId = setTimeout(function() {
           auctionDone = true;
@@ -461,7 +453,7 @@ describe('Provider done callback timeout', function() {
 
     var bidderAvg = pf.addBidProvider({
       name: 'bidderAvg',
-      libUri: '../test/fixture/lib.js',
+      libUri: 'fixture/lib.js',
       init: function(slots, pushBid, done) {
         bidTimeoutId = setTimeout(function() {
           bidDone = true;
@@ -469,32 +461,30 @@ describe('Provider done callback timeout', function() {
         }, 20);
       }
     });
-
+    bidderAvg.timeout(1);
     pf.start();
   });
 
   it('should complete bid(2ms) and auction(2ms) processing with: pubfood.timeout(1) + auctionProvider.timeout(5)', function(done) {
-    var pf = new pubfood();
 
     pf.timeout(1);
 
-    var mochaDone = done,
-      auctionDone = false,
-      bidDone = false,
-      bidTimeoutId,
-      auctionTimeoutId;
+    var testState = {
+      mochaDone: done,
+      auctionDone: false,
+      bidDone: false,
+      bidTimeoutId: '',
+      auctionTimeoutId: ''};
 
     pf.observe('AUCTION_COMPLETE', function(event) {
-      clearTimeout(auctionTimeoutId);
-      assert.equal(bidDone, true, 'bidderAvg.init should complete before auctionProvider.timeout(10)');
-      assert.equal(auctionDone, true, 'auctionProvider.init should complete before auctionProvider.timeout(10)');
-      mochaDone();
+      assert.equal(testState.bidDone, true, 'bidderAvg.init should complete before auctionProvider.timeout(5)');
+      assert.equal(testState.auctionDone, true, 'auctionProvider.init should complete before auctionProvider.timeout(5)');
+      done();
     });
 
     pf.observe('BID_COMPLETE', function(event) {
-      clearTimeout(bidTimeoutId);
-      assert.equal(bidDone, true, 'bidderAvg.init should set the bidDone flag');
-      assert.equal(auctionDone, false, 'auctionProvider.init should complete after after bidDone flag set');
+      assert.equal(testState.bidDone, true, 'bidderAvg.init should set the bidDone flag');
+      assert.equal(testState.auctionDone, false, 'auctionProvider.init should complete after after bidDone flag set');
     });
 
     pf.addSlot({
@@ -509,35 +499,34 @@ describe('Provider done callback timeout', function() {
       ]
     });
 
+    var bidderAvg = pf.addBidProvider({
+      name: 'bidderAvg',
+      libUri: 'fixture/lib.js',
+      init: function(slots, pushBid, done) {
+        testState.bidTimeoutId = setTimeout(function() {
+          testState.bidDone = true;
+          done();
+        }, 2);
+      }
+    });
+
     var auctionProvider = pf.setAuctionProvider({
       name: 'auctionProvider',
-      libUri: '../test/fixture/lib.js',
+      libUri: 'fixture/lib.js',
       init: function(targeting, done) {
-        auctionTimeoutId = setTimeout(function() {
-          auctionDone = true;
+        testState.auctionTimeoutId = setTimeout(function() {
+          testState.auctionDone = true;
           done();
         }, 2);
       }
     });
     auctionProvider.timeout(5);
 
-    var bidderAvg = pf.addBidProvider({
-      name: 'bidderAvg',
-      libUri: '../test/fixture/lib.js',
-      init: function(slots, pushBid, done) {
-        bidTimeoutId = setTimeout(function() {
-          bidDone = true;
-          done();
-        }, 2);
-      }
-    });
-
     pf.start();
   });
 
   it('should wait for all bidder done callbacks if pf.timeout() not called: no timeout for the auction', function(done) {
 
-    var pf = new pubfood();
 
     var mochaDone = done,
       auctionTimeoutId,
@@ -547,8 +536,6 @@ describe('Provider done callback timeout', function() {
       bidFastDone = false;
 
     pf.observe('AUCTION_COMPLETE', function(event) {
-      clearTimeout(auctionTimeoutId);
-      clearTimeout(bidTimeoutId);
       assert.equal(auctionDone, true, 'the auction done flag should be set');
       assert.equal(bidAvgDone, true, 'bidderAvg should have set the done flag');
       assert.equal(bidFastDone, true, 'bidderFast should have set the done flag');
@@ -569,7 +556,7 @@ describe('Provider done callback timeout', function() {
 
     pf.setAuctionProvider({
       name: 'auctionProvider',
-      libUri: '../test/fixture/lib.js',
+      libUri: 'fixture/lib.js',
       init: function(targeting, done) {
         auctionTimeoutId = setTimeout(function() {
           auctionDone = true;
@@ -580,7 +567,7 @@ describe('Provider done callback timeout', function() {
 
     pf.addBidProvider(      {
       name: 'bidderAvg',
-      libUri: '../test/fixture/lib.js',
+      libUri: 'fixture/lib.js',
       init: function(slots, pushBid, done) {
         bidTimeoutId = setTimeout(function() {
           bidAvgDone = true;
@@ -591,7 +578,7 @@ describe('Provider done callback timeout', function() {
 
     pf.addBidProvider(      {
       name: 'bidderFast',
-      libUri: '../test/fixture/lib.js',
+      libUri: 'fixture/lib.js',
       init: function(slots, pushBid, done) {
         bidFastDone = true;
         done();

@@ -57,7 +57,7 @@ describe('Provider Error Handlers', function() {
 
       pf.setAuctionProvider({
         name: 'auctionProvider',
-        libUri: '../test/fixture/lib.js',
+        libUri: 'fixture/lib.js',
         init: function(targeting, done) {
           throw new Error('Test - auctionProvider error');
           done();
@@ -128,7 +128,7 @@ describe('Provider Error Handlers', function() {
 
       pf.setAuctionProvider({
         name: 'auctionProvider',
-        libUri: '../test/fixture/lib.js',
+        libUri: 'fixture/lib.js',
         init: function(targeting, done) {
           done();
         },
@@ -205,7 +205,7 @@ describe('Provider Error Handlers', function() {
 
       pf.setAuctionProvider({
         name: 'auctionProvider',
-        libUri: '../test/fixture/lib.js',
+        libUri: 'fixture/lib.js',
         init: function(targeting, done) {
           done();
         },
@@ -274,7 +274,7 @@ describe('Provider Error Handlers', function() {
 
       pf.setAuctionProvider({
         name: 'auctionProvider',
-        libUri: '../test/fixture/lib.js',
+        libUri: 'fixture/lib.js',
         init: function(targeting, done) {
           done();
         },
@@ -353,7 +353,7 @@ describe('Provider Error Handlers', function() {
 
       pf.setAuctionProvider({
         name: 'auctionProvider',
-        libUri: '../test/fixture/lib.js',
+        libUri: 'fixture/lib.js',
         init: function(targeting, done) {
           done();
         },
@@ -429,7 +429,7 @@ describe('Provider Error Handlers', function() {
 
     pf.setAuctionProvider({
       name: 'auctionProvider',
-      libUri: '../test/fixture/lib.js',
+      libUri: 'fixture/lib.js',
       init: function(targeting, done) {
         done();
       },
@@ -495,7 +495,7 @@ describe('Provider Error Handlers', function() {
 
     pf.setAuctionProvider({
       name: 'auctionProvider',
-      libUri: '../test/fixture/lib.js',
+      libUri: 'fixture/lib.js',
       init: function(targeting, done) {
         throw new Error('Test - auctionProvider error');
         done();
@@ -562,7 +562,7 @@ describe('Provider Error Handlers', function() {
 
       pf.setAuctionProvider({
         name: 'auctionProvider',
-        libUri: '../test/fixture/lib.js',
+        libUri: 'fixture/lib.js',
         init: function(targeting, done) {
           done();
         },
@@ -641,7 +641,7 @@ describe('Provider Error Handlers', function() {
 
       pf.setAuctionProvider({
         name: 'auctionProvider',
-        libUri: '../test/fixture/lib.js',
+        libUri: 'fixture/lib.js',
         init: function(targeting, done) {
           done();
         },

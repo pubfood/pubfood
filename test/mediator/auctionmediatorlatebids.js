@@ -38,7 +38,7 @@ describe('Late bids', function () {
 
     m.addBidProvider({
       name: 'b1',
-      libUri: '../test/fixture/lib.js',
+      libUri: 'fixture/lib.js',
       init: function(slots, pushBid, done) {
         var argPushBid = pushBid;
         setTimeout(function() {
@@ -57,7 +57,7 @@ describe('Late bids', function () {
 
     m.setAuctionProvider({
       name: 'provider1.7',
-      libUri: '../test/fixture/lib.js',
+      libUri: 'fixture/lib.js',
       init: function(targeting, done) {
         done();
       },
@@ -93,7 +93,7 @@ describe('Late bids', function () {
 
     m.addBidProvider({
       name: 'b1',
-      libUri: '../test/fixture/lib.js',
+      libUri: 'fixture/lib.js',
       init: function(slots, pushBid, done) {
         var argPushBid = pushBid;
         setTimeout(function() {
@@ -112,7 +112,7 @@ describe('Late bids', function () {
 
     m.setAuctionProvider({
       name: 'provider1.6',
-      libUri: '../test/fixture/lib.js',
+      libUri: 'fixture/lib.js',
       init: function(targeting, done) {
         done();
       },
@@ -148,7 +148,7 @@ describe('Late bids', function () {
 
     m.addBidProvider({
       name: 'b1',
-      libUri: '../test/fixture/lib.js',
+      libUri: 'fixture/lib.js',
       init: function(slots, pushBid, done) {
         var argPushBid = pushBid;
         setTimeout(function() { // should be late bid
@@ -167,7 +167,7 @@ describe('Late bids', function () {
 
     m.addBidProvider({
       name: 'b2',
-      libUri: '../test/fixture/lib.js',
+      libUri: 'fixture/lib.js',
       init: function(slots, pushBid, done) {
         pushBid({              // should be timely bid
           slot: '/abc/123',
@@ -183,7 +183,7 @@ describe('Late bids', function () {
 
     m.setAuctionProvider({
       name: 'provider1.5',
-      libUri: '../test/fixture/lib.js',
+      libUri: 'fixture/lib.js',
       init: function(targeting, done) {
         done();
       },
@@ -235,7 +235,7 @@ describe('Late bids', function () {
 
     m.addBidProvider({
       name: 'b1',
-      libUri: '../test/fixture/lib.js',
+      libUri: 'fixture/lib.js',
       init: function(slots, pushBid, done) {
         setTimeout(function() {
           done();
@@ -248,7 +248,7 @@ describe('Late bids', function () {
 
     m.setAuctionProvider({
       name: 'provider1.4',
-      libUri: '../test/fixture/lib.js',
+      libUri: 'fixture/lib.js',
       init: function(targeting, done) {
         done();
       },
@@ -282,7 +282,7 @@ describe('Late bids', function () {
 
     m.addBidProvider({
       name: 'b1',
-      libUri: '../test/fixture/lib.js',
+      libUri: 'fixture/lib.js',
       init: function(slots, pushBid, done) {
         done();
       },
@@ -293,7 +293,7 @@ describe('Late bids', function () {
 
     m.setAuctionProvider({
       name: 'provider1.3',
-      libUri: '../test/fixture/lib.js',
+      libUri: 'fixture/lib.js',
       init: function(targeting, done) {
         setTimeout(function() {
           done();
@@ -328,7 +328,7 @@ describe('Late bids', function () {
 
     m.addBidProvider({
       name: 'b1',
-      libUri: '../test/fixture/lib.js',
+      libUri: 'fixture/lib.js',
       init: function(slots, pushBid, done) {
         done();
       },
@@ -339,7 +339,7 @@ describe('Late bids', function () {
 
     m.setAuctionProvider({
       name: 'provider1.2',
-      libUri: '../test/fixture/lib.js',
+      libUri: 'fixture/lib.js',
       init: function(targeting, done) {
         setTimeout(function() {
           done();
@@ -376,7 +376,7 @@ describe('Late bids', function () {
 
     m.addBidProvider({
       name: 'b1',
-      libUri: '../test/fixture/lib.js',
+      libUri: 'fixture/lib.js',
       init: function(slots, pushBid, done) {
         done();
       },
@@ -387,7 +387,7 @@ describe('Late bids', function () {
 
     m.setAuctionProvider({
       name: 'provider1.1',
-      libUri: '../test/fixture/lib.js',
+      libUri: 'fixture/lib.js',
       init: function(targeting, done) {
         done();
       },

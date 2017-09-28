@@ -33,7 +33,7 @@ describe('Pubfood AuctionMediator', function testPubfoodMediator() {
 
     TEST_MEDIATOR.addBidProvider({
       name: 'b1',
-      libUri: '../test/fixture/lib.js',
+      libUri: 'fixture/lib.js',
       init: function(slots, pushBid, done) {
         pushBid({
           slot: '/abc/123',
@@ -51,7 +51,7 @@ describe('Pubfood AuctionMediator', function testPubfoodMediator() {
 
     TEST_MEDIATOR.setAuctionProvider({
       name: 'provider1',
-      libUri: '../test/fixture/lib.js',
+      libUri: 'fixture/lib.js',
       init: function(targeting, done) {
         done();
       },
@@ -158,7 +158,7 @@ describe('Pubfood AuctionMediator', function testPubfoodMediator() {
 
     m1.addBidProvider({
       name: 'b2',
-      libUri: 'someUri',
+      libUri: 'http://',
       init: function(slots, pushBid, done) {
 
       },
@@ -187,7 +187,7 @@ describe('Pubfood AuctionMediator', function testPubfoodMediator() {
 
     var m2provider = m2.addBidProvider({
       name: 'b2',
-      libUri: 'someUri',
+      libUri: 'http://',
       init: function(slots, pushBid, done) {
 
       },
@@ -213,7 +213,7 @@ describe('Pubfood AuctionMediator', function testPubfoodMediator() {
 
     m2.addBidProvider({
       name: 'b2',
-      libUri: 'someUri',
+      libUri: 'http://',
       init: function(slots, pushBid, done) {
 
       },
@@ -258,7 +258,7 @@ describe('Pubfood AuctionMediator', function testPubfoodMediator() {
     var m = new AuctionMediator();
     m.addBidProvider({
       name: 'b1',
-      libUri: 'someUri',
+      libUri: 'http://',
       init: function(slots, pushBid, done) {
         done();
       },
@@ -281,7 +281,7 @@ describe('Pubfood AuctionMediator', function testPubfoodMediator() {
 
     m.setAuctionProvider({
       name: 'p1',
-      libUri: '../test/fixture/lib.js',
+      libUri: 'fixture/lib.js',
       init: function(targeting, done) {
         done();
       },
@@ -324,7 +324,7 @@ describe('Pubfood AuctionMediator', function testPubfoodMediator() {
     var m = new AuctionMediator();
     m.setAuctionProvider({
       name: 'provider1',
-      libUri: '../test/fixture/lib.js',
+      libUri: 'fixture/lib.js',
       init: function(targeting, done) {
         done();
       },
@@ -360,7 +360,7 @@ describe('Pubfood AuctionMediator', function testPubfoodMediator() {
     var m = new AuctionMediator();
     m.setAuctionProvider({
       name: 'provider1',
-      libUri: '../test/fixture/lib.js',
+      libUri: 'fixture/lib.js',
       init: function(targeting, done) {
         done();
       },
@@ -387,7 +387,7 @@ describe('Pubfood AuctionMediator', function testPubfoodMediator() {
     var m = new AuctionMediator();
     m.setAuctionProvider({
       name: 'provider1',
-      libUri: '../test/fixture/lib.js',
+      libUri: 'fixture/lib.js',
       init: function(targeting, done) {
         done();
       },
@@ -404,7 +404,7 @@ describe('Pubfood AuctionMediator', function testPubfoodMediator() {
 
     var providerDelegate = {
       name: 'provider1',
-      libUri: '../test/fixture/lib.js',
+      libUri: 'fixture/lib.js',
       init: function(targeting, done) {
         done();
       },
@@ -444,7 +444,7 @@ describe('Pubfood AuctionMediator', function testPubfoodMediator() {
 
     m.addBidProvider({
       name: 'p1',
-      libUri: 'someUri',
+      libUri: 'http://',
       init: function(slots, pushBid, done) {
         done();
       },
@@ -454,7 +454,7 @@ describe('Pubfood AuctionMediator', function testPubfoodMediator() {
     });
     m.addBidProvider({
       name: 'p2',
-      libUri: 'someUri',
+      libUri: 'http://',
       init: function(slots, pushBid, done) {
         done();
       },
@@ -465,7 +465,7 @@ describe('Pubfood AuctionMediator', function testPubfoodMediator() {
 
     m.setAuctionProvider({
       name: 'provider1',
-      libUri: '../test/fixture/lib.js',
+      libUri: 'fixture/lib.js',
       init: function(targeting, done) {
         done();
       },
@@ -500,7 +500,7 @@ describe('Pubfood AuctionMediator', function testPubfoodMediator() {
 
     m.addBidProvider({
       name: 'b1',
-      libUri: '../test/fixture/lib.js',
+      libUri: 'fixture/lib.js',
       init: function(slots, pushBid, done) {
         pushBid({
           slot: '/abc/123',
@@ -517,7 +517,7 @@ describe('Pubfood AuctionMediator', function testPubfoodMediator() {
 
     m.setAuctionProvider({
       name: 'provider1',
-      libUri: '../test/fixture/lib.js',
+      libUri: 'fixture/lib.js',
       init: function(targeting, done) {
         done();
       },
@@ -553,7 +553,7 @@ describe('Pubfood AuctionMediator', function testPubfoodMediator() {
 
     m.addBidProvider({
       name: 'b1',
-      libUri: '../test/fixture/lib.js',
+      libUri: 'fixture/lib.js',
       init: function(slots, pushBid, done) {
         pushBid({
           slot: '/abc/123',
@@ -571,7 +571,7 @@ describe('Pubfood AuctionMediator', function testPubfoodMediator() {
 
     m.setAuctionProvider({
       name: 'provider1',
-      libUri: '../test/fixture/lib.js',
+      libUri: 'fixture/lib.js',
       init: function(targeting, done) {
         done();
       },
@@ -632,7 +632,7 @@ describe('Pubfood AuctionMediator', function testPubfoodMediator() {
 
     m.addBidProvider({
       name: 'b1',
-      libUri: '../test/fixture/lib.js',
+      libUri: 'fixture/lib.js',
       init: function(slots, pushBid, done) {
         pushBid({
           slot: '/abc/123',
@@ -649,7 +649,7 @@ describe('Pubfood AuctionMediator', function testPubfoodMediator() {
 
     m.setAuctionProvider({
       name: 'provider1',
-      libUri: '../test/fixture/lib.js',
+      libUri: 'fixture/lib.js',
       init: function(targeting, done) {
         done();
       },

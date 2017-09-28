@@ -15,12 +15,17 @@ require('../common');
 var pubfood = require('../../src/pubfood');
 
 describe('Transform operator', function() {
+  var pf;
   beforeEach(function() {
+    pf = new pubfood();
+    Event.removeAllListeners();
+  });
+  afterEach(function() {
+    pf = null;
     Event.removeAllListeners();
   });
 
   it('should add bid data', function(done) {
-    var pf = new pubfood();
     var slot = pf.addSlot({
       name: 'slot1',
       elementId: 'div1',
@@ -45,7 +50,7 @@ describe('Transform operator', function() {
 
     var auctionProvider = pf.setAuctionProvider({
       name: 'ap1',
-      libUri: 'http://noop.com/file.js',
+      libUri: 'http://',
       init: function(targeting, pfDone) {
         assert.equal(targeting[0].bids.length, 1, 'there shoud be one bid processed');
         for (var i in targeting) {
@@ -70,7 +75,6 @@ describe('Transform operator', function() {
 
   it('should modify bid data', function(done) {
 
-    var pf = new pubfood();
     var slot = pf.addSlot({
       name: 'slot1',
       elementId: 'div1',
@@ -95,7 +99,7 @@ describe('Transform operator', function() {
 
     var auctionProvider = pf.setAuctionProvider({
       name: 'ap1',
-      libUri: 'http://noop.com/file.js',
+      libUri: 'http://',
       init: function(targeting, pfDone) {
         assert.equal(targeting[0].bids.length, 1, 'there shoud be one bid processed');
         for (var i in targeting) {
@@ -119,7 +123,6 @@ describe('Transform operator', function() {
   });
 
   it('should remove a bid object', function(done) {
-    var pf = new pubfood();
     var slot = pf.addSlot({
       name: 'slot1',
       elementId: 'div1',
@@ -159,7 +162,7 @@ describe('Transform operator', function() {
 
     var auctionProvider = pf.setAuctionProvider({
       name: 'ap1',
-      libUri: 'http://noop.com/file.js',
+      libUri: 'http://',
       init: function(targeting, pfDone) {
         var isSlot2Tested = false;
         for (var k = 0; k < targeting.length; k++) {
@@ -191,7 +194,6 @@ describe('Transform operator', function() {
   });
 
   it('should add a bid object', function(done) {
-    var pf = new pubfood();
     var slot = pf.addSlot({
       name: 'slot1',
       elementId: 'div1',
@@ -215,7 +217,7 @@ describe('Transform operator', function() {
 
     var auctionProvider = pf.setAuctionProvider({
       name: 'ap1',
-      libUri: 'http://noop.com/file.js',
+      libUri: 'http://',
       init: function(targeting, pfDone) {
         var isSlot2Tested = false;
         for (var k = 0; k < targeting.length; k++) {
@@ -249,7 +251,6 @@ describe('Transform operator', function() {
   });
 
   it('should use the returned bid array to add or remove a bid', function(done) {
-    var pf = new pubfood();
     var slot = pf.addSlot({
       name: 'slot1',
       elementId: 'div1',
@@ -288,7 +289,7 @@ describe('Transform operator', function() {
 
     var auctionProvider = pf.setAuctionProvider({
       name: 'ap1',
-      libUri: 'http://noop.com/file.js',
+      libUri: 'http://',
       init: function(targeting, pfDone) {
         var isSlot2Tested = false;
         for (var k = 0; k < targeting.length; k++) {
@@ -327,7 +328,6 @@ describe('Transform operator', function() {
   });
 
   it('should only be called once on getting bids within timeout', function(done) {
-    var pf = new pubfood();
     var slot = pf.addSlot({
       name: 'slot1',
       elementId: 'div1',
@@ -367,7 +367,7 @@ describe('Transform operator', function() {
 
     var auctionProvider = pf.setAuctionProvider({
       name: 'ap1',
-      libUri: 'http://noop.com/file.js',
+      libUri: 'http://',
       init: function(targeting, pfDone) {
         pfDone();
       }
@@ -379,19 +379,20 @@ describe('Transform operator', function() {
       return [bids[0]];
     });
     pf.timeout(30);
-    pf.start();
-    setTimeout(function() {
+
+    pf.observe('AUCTION_COMPLETE', function(event) {
       assert.equal(transformCallCount, 1, 'delegate should be called only once');
       done();
-    }, 50);
+    });
 
+    pf.start();
   });
 
   it('should only be called once on timeout', function(done) {
-    var pf = new pubfood();
 
     pf.throwErrors(true);
-    pf.timeout(30);
+    pf.doneCallbackOffset(1);
+    pf.timeout(3);
 
     pf.addSlot({
       name: 'slot1',
@@ -407,7 +408,7 @@ describe('Transform operator', function() {
 
     pf.setAuctionProvider({
       name: 'auctionProvider',
-      libUri: '../fixture/lib.js',
+      libUri: 'fixture/lib.js',
       init: function(targeting, done) {
         done();
       },
@@ -421,12 +422,12 @@ describe('Transform operator', function() {
       init: function(slots, pushBid, done) {
         setTimeout(function() {
           done();
-        }, 40);
+        }, 4);
       },
       refresh: function(slots, pushBid, done) {
         setTimeout(function() {
           done();
-        }, 40);
+        }, 4);
       }
     });
     bidProvider.timeout(30);
@@ -435,15 +436,16 @@ describe('Transform operator', function() {
       transformCallCount += 1;
       return bids;
     });
-    pf.start();
-    setTimeout(function() {
+
+    pf.observe('AUCTION_COMPLETE', function(event) {
       assert.equal(transformCallCount, 1, 'delegate should be called only once');
       done();
-    }, 50);
+    });
+
+    pf.start();
   });
 
   it('should be called only once each for timeout of init and refresh', function(done) {
-    var pf = new pubfood();
 
     pf.throwErrors(true);
     pf.timeout(5);
@@ -462,7 +464,7 @@ describe('Transform operator', function() {
 
     pf.setAuctionProvider({
       name: 'auctionProvider',
-      libUri: '../fixture/lib.js',
+      libUri: 'fixture/lib.js',
       init: function(targeting, done) {
         done();
       },
@@ -492,16 +494,15 @@ describe('Transform operator', function() {
       hasRefreshed = true;
     });
 
+    pf.observe('AUCTION_COMPLETE', function(event) {
+      if (transformCallCount === 3) {
+        done();
+      }
+    });
+
     pf.start();
     pf.refresh();
     pf.refresh();
-
-    setTimeout(function() {
-      if (hasRefreshed) {
-        assert.equal(transformCallCount, 3, 'delegate should be called thrice');
-        done();
-      }
-    }, 10);
   });
 
 });

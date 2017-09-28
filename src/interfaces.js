@@ -215,6 +215,7 @@ var bidObject = {
     *     aIsDone = run.bidStatus['bidderA'];
  * @property {TargetingObject[]} targeting ad server targeting used in the auction run
  * @property {number} timeoutId id of bid timeout
+ * @memberof typeDefs
  */
 
 /**
@@ -298,6 +299,15 @@ var PubfoodConfig = {
  * @typedef {PubfoodEventAnnotation} PubfoodEventAnnotation metadata object that is attached to a {@link PubfoodEvent} instance to provided additional contextual information.
  * @property {string} type the annotation type, {@link PubfoodEvent#ANNOTATION_TYPE}
  * @property {string} message the description of the annotation
+ * @memberof typeDefs
+ */
+
+/**
+ * @typedef {ObserveType} ObserveType The number of times an event observer should execute for respective event name.
+ * <br>
+ * [PubfoodEvent.OBSERVE_TYPE]{@link PubfoodEvent#OBSERVE_TYPE}
+ * @property {number} ONCE <b><code>1</code></b> : execute the observer once per emitted event
+ * @property {number} ALL  <b><code>-1</code></b> : execute the observer on each emitted event
  * @memberof typeDefs
  */
 
